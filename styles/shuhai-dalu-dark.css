@@ -1,0 +1,655 @@
+/* ========================================
+   书海大陆 FVTT 系统样式 - 暗黑风格
+   ======================================== */
+
+/* === 全局样式 === */
+.shuhai-dalu.dark-theme {
+  font-family: "Signika", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  color: #e0e0e0;
+}
+
+.shuhai-dalu.dark-theme .window-content {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* === 角色信息面板 === */
+.shuhai-dalu.dark-theme .character-panel {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 20px;
+  padding: 20px;
+  min-height: 600px;
+}
+
+/* === 左侧区域 === */
+.shuhai-dalu.dark-theme .left-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 角色图像容器 */
+.shuhai-dalu.dark-theme .profile-container {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  margin: 0 auto;
+}
+
+.shuhai-dalu.dark-theme .profile-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 4px solid #0f4c75;
+  box-shadow: 0 0 30px rgba(15, 76, 117, 0.5);
+  object-fit: cover;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.shuhai-dalu.dark-theme .profile-img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 40px rgba(15, 76, 117, 0.8);
+}
+
+.shuhai-dalu.dark-theme .level-badge {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.5);
+}
+
+/* 角色信息 */
+.shuhai-dalu.dark-theme .character-info {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.shuhai-dalu.dark-theme .charname {
+  margin: 0 0 15px 0;
+  text-align: center;
+}
+
+.shuhai-dalu.dark-theme .charname input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid #667eea;
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  padding: 5px;
+  transition: all 0.3s ease;
+}
+
+.shuhai-dalu.dark-theme .charname input:focus {
+  outline: none;
+  border-bottom-color: #764ba2;
+  box-shadow: 0 2px 10px rgba(118, 75, 162, 0.3);
+}
+
+.shuhai-dalu.dark-theme .info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.shuhai-dalu.dark-theme .info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.shuhai-dalu.dark-theme .info-item.full-width {
+  grid-column: span 2;
+}
+
+.shuhai-dalu.dark-theme .info-label {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.shuhai-dalu.dark-theme .info-item input {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #e0e0e0;
+  padding: 6px 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.shuhai-dalu.dark-theme .info-item input:focus {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: #667eea;
+  outline: none;
+}
+
+/* 经验条 */
+.shuhai-dalu.dark-theme .exp-bar {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.shuhai-dalu.dark-theme .exp-bar input {
+  width: 80px;
+  margin-right: 5px;
+}
+
+.shuhai-dalu.dark-theme .exp-max {
+  color: #888;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.shuhai-dalu.dark-theme .exp-progress {
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.shuhai-dalu.dark-theme .exp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.3s ease;
+}
+
+/* 派生属性卡片 */
+.shuhai-dalu.dark-theme .derived-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.shuhai-dalu.dark-theme .stat-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.shuhai-dalu.dark-theme .stat-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateX(5px);
+}
+
+.shuhai-dalu.dark-theme .stat-card.hp {
+  border-left: 3px solid #e74c3c;
+}
+
+.shuhai-dalu.dark-theme .stat-card.corruption {
+  border-left: 3px solid #9b59b6;
+}
+
+.shuhai-dalu.dark-theme .stat-card.starlight {
+  border-left: 3px solid #f1c40f;
+}
+
+.shuhai-dalu.dark-theme .stat-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.shuhai-dalu.dark-theme .stat-icon {
+  font-size: 20px;
+}
+
+.shuhai-dalu.dark-theme .stat-name {
+  font-size: 14px;
+  color: #b0b0b0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.shuhai-dalu.dark-theme .stat-values {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.shuhai-dalu.dark-theme .stat-values input {
+  width: 60px;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  padding: 0;
+}
+
+.shuhai-dalu.dark-theme .stat-values input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.shuhai-dalu.dark-theme .divider {
+  color: #666;
+  margin: 0 5px;
+}
+
+.shuhai-dalu.dark-theme .stat-max {
+  color: #888;
+}
+
+.shuhai-dalu.dark-theme .stat-current {
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.shuhai-dalu.dark-theme .stat-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.shuhai-dalu.dark-theme .bar-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.shuhai-dalu.dark-theme .hp-fill {
+  background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
+}
+
+.shuhai-dalu.dark-theme .corruption-fill {
+  background: linear-gradient(90deg, #9b59b6 0%, #8e44ad 100%);
+}
+
+.shuhai-dalu.dark-theme .stat-detail {
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+  margin-top: 4px;
+}
+
+/* 迷你属性 */
+.shuhai-dalu.dark-theme .mini-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.shuhai-dalu.dark-theme .mini-stat {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.shuhai-dalu.dark-theme .mini-icon {
+  font-size: 24px;
+  margin-bottom: 5px;
+}
+
+.shuhai-dalu.dark-theme .mini-label {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 3px;
+}
+
+.shuhai-dalu.dark-theme .mini-value {
+  font-size: 20px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+/* === 右侧区域 === */
+.shuhai-dalu.dark-theme .right-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 章节标题 */
+.shuhai-dalu.dark-theme .section-title {
+  margin: 0 0 15px 0;
+  font-size: 18px;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid rgba(102, 126, 234, 0.5);
+}
+
+/* 属性容器 */
+.shuhai-dalu.dark-theme .attributes-container {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.shuhai-dalu.dark-theme .attributes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.shuhai-dalu.dark-theme .attribute-card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.shuhai-dalu.dark-theme .attribute-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.shuhai-dalu.dark-theme .attribute-card:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(102, 126, 234, 0.5);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+}
+
+.shuhai-dalu.dark-theme .attribute-card:hover::before {
+  opacity: 1;
+}
+
+.shuhai-dalu.dark-theme .attribute-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.shuhai-dalu.dark-theme .attribute-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.shuhai-dalu.dark-theme .attribute-label {
+  font-size: 14px;
+  color: #b0b0b0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.shuhai-dalu.dark-theme .attribute-value-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.shuhai-dalu.dark-theme .attribute-value {
+  width: 50px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  padding: 5px 0;
+  transition: all 0.2s ease;
+}
+
+.shuhai-dalu.dark-theme .attribute-value:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #667eea;
+  outline: none;
+}
+
+.shuhai-dalu.dark-theme .attribute-modifier {
+  width: 45px;
+  height: 45px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #e0e0e0;
+}
+
+.shuhai-dalu.dark-theme .attribute-roll {
+  width: 100%;
+  padding: 8px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  border-radius: 6px;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 16px;
+}
+
+.shuhai-dalu.dark-theme .attribute-roll:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+  transform: scale(1.05);
+  box-shadow: 0 3px 15px rgba(102, 126, 234, 0.5);
+}
+
+/* 资源容器 */
+.shuhai-dalu.dark-theme .resources-container {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.shuhai-dalu.dark-theme .resources-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.shuhai-dalu.dark-theme .resource-item {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.shuhai-dalu.dark-theme .resource-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(102, 126, 234, 0.3);
+}
+
+.shuhai-dalu.dark-theme .resource-icon {
+  font-size: 24px;
+}
+
+.shuhai-dalu.dark-theme .resource-label {
+  flex: 1;
+  font-size: 13px;
+  color: #b0b0b0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.shuhai-dalu.dark-theme .resource-item input {
+  width: 80px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  padding: 5px;
+  transition: all 0.2s ease;
+}
+
+.shuhai-dalu.dark-theme .resource-item input:focus {
+  background: rgba(0, 0, 0, 0.5);
+  border-color: #667eea;
+  outline: none;
+}
+
+/* 动作按钮 */
+.shuhai-dalu.dark-theme .action-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.shuhai-dalu.dark-theme .action-btn {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.shuhai-dalu.dark-theme .action-btn:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+}
+
+.shuhai-dalu.dark-theme .action-btn i {
+  font-size: 20px;
+}
+
+.shuhai-dalu.dark-theme .action-btn span {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* === 标签页导航 === */
+.shuhai-dalu.dark-theme .sheet-tabs {
+  margin-top: 20px;
+  padding: 0 20px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  gap: 5px;
+}
+
+.shuhai-dalu.dark-theme .sheet-tabs .item {
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #888;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.shuhai-dalu.dark-theme .sheet-tabs .item:hover {
+  color: #b0b0b0;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.shuhai-dalu.dark-theme .sheet-tabs .item.active {
+  color: #ffffff;
+  border-bottom-color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+}
+
+/* === 表单主体 === */
+.shuhai-dalu.dark-theme .sheet-body {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #667eea #1a1a2e;
+}
+
+.shuhai-dalu.dark-theme .sheet-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.shuhai-dalu.dark-theme .sheet-body::-webkit-scrollbar-track {
+  background: #1a1a2e;
+}
+
+.shuhai-dalu.dark-theme .sheet-body::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 4px;
+}
+
+.shuhai-dalu.dark-theme .sheet-body::-webkit-scrollbar-thumb:hover {
+  background: #764ba2;
+}
+
+/* === 响应式设计 === */
+@media (max-width: 1200px) {
+  .shuhai-dalu.dark-theme .character-panel {
+    grid-template-columns: 1fr;
+  }
+  
+  .shuhai-dalu.dark-theme .left-section {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+  }
+  
+  .shuhai-dalu.dark-theme .attributes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
