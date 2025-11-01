@@ -26,8 +26,7 @@ export default class ShuhaiActorSheet extends ActorSheet {
 
   /** @override */
   get template() {
-    // 使用新的重新设计的模板
-    return `systems/shuhai-dalu/templates/actor/actor-${this.actor.type}-sheet-redesign.hbs`;
+    return `systems/shuhai-dalu/templates/actor/actor-${this.actor.type}-sheet.hbs`;
   }
 
   /* -------------------------------------------- */
@@ -116,53 +115,34 @@ export default class ShuhaiActorSheet extends ActorSheet {
   /** @override */
   activateListeners(html) {
     super.activateListeners(html);
-
+    
     // 只在拥有权限时添加监听器
     if (!this.isEditable) return;
-
+    
     // === 属性相关 ===
     html.find('.attr-roll').click(this._onAttributeRoll.bind(this));
-    html.find('.attr-check-btn').click(this._onAttributeRoll.bind(this));
     html.find('.corruption-check').click(this._onCorruptionCheck.bind(this));
-    html.find('.corruption-check-btn').click(this._onCorruptionCheck.bind(this));
     html.find('.long-rest').click(this._onLongRest.bind(this));
-    html.find('.long-rest-btn').click(this._onLongRest.bind(this));
     html.find('.roll-speed').click(this._onRollSpeed.bind(this));
-    html.find('.roll-speed-btn').click(this._onRollSpeed.bind(this));
-
+    
     // === 技能相关 ===
     html.find('.skill-increase').click(this._onSkillIncrease.bind(this));
     html.find('.skill-decrease').click(this._onSkillDecrease.bind(this));
     html.find('.skill-roll').click(this._onSkillRoll.bind(this));
-    html.find('.skill-check-btn').click(this._onSkillRoll.bind(this));
-
+    
     // === 装备相关 ===
     html.find('.unequip-btn').click(this._onUnequip.bind(this));
     html.find('.use-dice-btn').click(this._onUseDice.bind(this));
-
+    
     // === 物品相关 ===
     html.find('.create-item-btn').click(this._onItemCreate.bind(this));
-    html.find('.create-new-item-btn').click(this._onCreateNewItem.bind(this));
     html.find('.item-edit').click(this._onItemEdit.bind(this));
-    html.find('.item-edit-btn').click(this._onItemEdit.bind(this));
     html.find('.item-delete').click(this._onItemDelete.bind(this));
-    html.find('.item-delete-btn').click(this._onItemDelete.bind(this));
     html.find('.item-use').click(this._onItemUse.bind(this));
-
-    // === 物品图片点击显示详情 ===
-    html.find('.item-img').click(this._onItemImageClick.bind(this));
-
-    // === 搜索功能 ===
-    html.find('#item-search').on('input', this._onSearchItems.bind(this));
-    html.find('.quick-filter-btn').click(this._onQuickFilter.bind(this));
-
+    
     // === 拖放 ===
     const dragHandler = ev => this._onDragStart(ev);
     html.find('.item-row').each((i, li) => {
-      li.setAttribute("draggable", true);
-      li.addEventListener("dragstart", dragHandler, false);
-    });
-    html.find('.inventory-item').each((i, li) => {
       li.setAttribute("draggable", true);
       li.addEventListener("dragstart", dragHandler, false);
     });
@@ -478,170 +458,26 @@ export default class ShuhaiActorSheet extends ActorSheet {
   async _onDropItem(event, data) {
     const item = await Item.implementation.fromDropData(data);
     const itemData = item.toObject();
-
+    
     // 检查是否是从其他角色拖过来的
     if (item.parent && item.parent.id !== this.actor.id) {
       // 从其他角色拖过来，创建副本
       delete itemData._id;
       return this.actor.createEmbeddedDocuments("Item", [itemData]);
     }
-
+    
     // 检查拖放目标
     const dropTarget = event.target.closest('.slot-content');
     if (!dropTarget) {
       return super._onDropItem(event, data);
     }
-
-    const slotType = dropTarget.dataset.slotType || dropTarget.dataset.slot;
+    
+    const slotType = dropTarget.dataset.slot;
     const slotIndex = dropTarget.dataset.slotIndex !== undefined ? parseInt(dropTarget.dataset.slotIndex) : null;
-
+    
     // 装备物品到槽位
     await game.shuhai.equipItem(this.actor, item, slotType, slotIndex);
-
+    
     return false;
-  }
-
-  /* -------------------------------------------- */
-  /*  新增事件处理                                  */
-  /* -------------------------------------------- */
-
-  /**
-   * 创建新物品（带对话框）
-   */
-  async _onCreateNewItem(event) {
-    event.preventDefault();
-
-    const content = await renderTemplate("systems/shuhai-dalu/templates/dialog/create-item-dialog.hbs", {});
-
-    new Dialog({
-      title: "创建新物品",
-      content: content,
-      buttons: {
-        create: {
-          icon: '<i class="fas fa-check"></i>',
-          label: "创建",
-          callback: async html => {
-            const formData = {
-              name: html.find('[name="name"]').val(),
-              type: html.find('[name="type"]').val(),
-              img: "icons/svg/item-bag.svg"
-            };
-
-            const systemData = {
-              category: html.find('[name="category"]').val(),
-              diceFormula: html.find('[name="diceFormula"]').val(),
-              cost: parseInt(html.find('[name="cost"]').val()) || 0,
-              quantity: parseInt(html.find('[name="quantity"]').val()) || 1,
-              starlightCost: parseInt(html.find('[name="starlightCost"]').val()) || 0,
-              resistance: html.find('[name="resistance"]').val(),
-              tags: html.find('[name="tags"]').val(),
-              description: html.find('[name="description"]').val(),
-              properties: html.find('[name="properties"]').val()
-            };
-
-            const itemData = {
-              ...formData,
-              system: systemData
-            };
-
-            const cls = getDocumentClass("Item");
-            await cls.create(itemData, { parent: this.actor });
-            ui.notifications.info(`物品 "${formData.name}" 已创建`);
-          }
-        },
-        cancel: {
-          icon: '<i class="fas fa-times"></i>',
-          label: "取消"
-        }
-      },
-      default: "create"
-    }).render(true);
-  }
-
-  /**
-   * 点击物品图片显示详情
-   */
-  async _onItemImageClick(event) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    const itemId = event.currentTarget.dataset.itemId;
-    const item = this.actor.items.get(itemId);
-
-    if (!item) {
-      ui.notifications.error("找不到物品");
-      return;
-    }
-
-    const content = await renderTemplate("systems/shuhai-dalu/templates/dialog/item-detail-dialog.hbs", {
-      item: item.toObject()
-    });
-
-    new Dialog({
-      title: item.name,
-      content: content,
-      buttons: {
-        edit: {
-          icon: '<i class="fas fa-edit"></i>',
-          label: "编辑",
-          callback: () => {
-            item.sheet.render(true);
-          }
-        },
-        close: {
-          icon: '<i class="fas fa-times"></i>',
-          label: "关闭"
-        }
-      },
-      default: "close"
-    }, {
-      width: 520
-    }).render(true);
-  }
-
-  /**
-   * 搜索物品
-   */
-  _onSearchItems(event) {
-    const searchTerm = event.target.value.toLowerCase();
-    const inventoryList = event.target.closest('form').querySelector('#inventory-list');
-    const items = inventoryList.querySelectorAll('.inventory-item');
-
-    items.forEach(item => {
-      const itemName = item.querySelector('.item-name').textContent.toLowerCase();
-      const itemType = item.querySelector('.item-type').textContent.toLowerCase();
-
-      if (itemName.includes(searchTerm) || itemType.includes(searchTerm)) {
-        item.style.display = '';
-      } else {
-        item.style.display = 'none';
-      }
-    });
-  }
-
-  /**
-   * 快速过滤
-   */
-  _onQuickFilter(event) {
-    event.preventDefault();
-    const button = event.currentTarget;
-    const filter = button.dataset.filter;
-    const searchInput = event.target.closest('form').querySelector('#item-search');
-
-    // 切换按钮激活状态
-    const allButtons = event.target.closest('.search-section').querySelectorAll('.quick-filter-btn');
-    allButtons.forEach(btn => btn.classList.remove('active'));
-
-    if (searchInput.value === filter) {
-      // 如果已经是当前过滤，则清除
-      searchInput.value = '';
-    } else {
-      // 设置新的过滤
-      searchInput.value = filter;
-      button.classList.add('active');
-    }
-
-    // 触发搜索
-    searchInput.dispatchEvent(new Event('input'));
   }
 }

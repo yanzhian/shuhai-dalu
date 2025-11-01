@@ -182,17 +182,6 @@ Hooks.once('init', function() {
   Handlebars.registerHelper('hasItem', function(itemId) {
     return itemId && itemId !== '';
   });
-
-  // 分割字符串
-  Handlebars.registerHelper('split', function(str, separator) {
-    if (!str) return [];
-    return str.split(separator || ',');
-  });
-
-  // 去除首尾空格
-  Handlebars.registerHelper('trim', function(str) {
-    return str ? str.trim() : '';
-  });
 });
 
 /* -------------------------------------------- */
