@@ -17,7 +17,7 @@
     "module/shuhai-dalu.mjs"
   ],
   "styles": [
-    "styles/shuhai-dalu-dark.css"
+    "styles/shuhai-dalu-redesign.css"
   ],
   "documentTypes": {
     "Actor": {
