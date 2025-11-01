@@ -1,0 +1,189 @@
+<div class="item-detail-dialog">
+  <div class="item-header">
+    <img src="{{item.img}}" class="item-image" alt="{{item.name}}"/>
+    <div class="item-title">
+      <h2>{{item.name}}</h2>
+      <div class="item-type-badge">{{item.type}}</div>
+    </div>
+  </div>
+
+  <div class="item-stats">
+    {{#if item.system.category}}
+    <div class="stat-item">
+      <span class="stat-label">分类:</span>
+      <span class="stat-value">{{item.system.category}}</span>
+    </div>
+    {{/if}}
+
+    {{#if item.system.diceFormula}}
+    <div class="stat-item">
+      <span class="stat-label">骰数:</span>
+      <span class="stat-value">{{item.system.diceFormula}}</span>
+    </div>
+    {{/if}}
+
+    {{#if item.system.cost}}
+    <div class="stat-item">
+      <span class="stat-label">费用:</span>
+      <span class="stat-value">{{item.system.cost}}</span>
+    </div>
+    {{/if}}
+
+    {{#if item.system.quantity}}
+    <div class="stat-item">
+      <span class="stat-label">数量:</span>
+      <span class="stat-value">{{item.system.quantity}}</span>
+    </div>
+    {{/if}}
+
+    {{#if item.system.starlightCost}}
+    <div class="stat-item">
+      <span class="stat-label">星光消耗:</span>
+      <span class="stat-value">{{item.system.starlightCost}}</span>
+    </div>
+    {{/if}}
+
+    {{#if item.system.resistance}}
+    <div class="stat-item">
+      <span class="stat-label">防具抗性:</span>
+      <span class="stat-value">{{item.system.resistance}}</span>
+    </div>
+    {{/if}}
+  </div>
+
+  {{#if item.system.tags}}
+  <div class="item-tags">
+    <h3>标签</h3>
+    <div class="tags-container">
+      {{#each (split item.system.tags ",") as |tag|}}
+      <span class="tag">{{trim tag}}</span>
+      {{/each}}
+    </div>
+  </div>
+  {{/if}}
+
+  {{#if item.system.description}}
+  <div class="item-description">
+    <h3>描述</h3>
+    <div class="description-content">
+      {{item.system.description}}
+    </div>
+  </div>
+  {{/if}}
+
+  {{#if item.system.properties}}
+  <div class="item-properties">
+    <h3>额外属性/特性</h3>
+    <div class="properties-content">
+      {{item.system.properties}}
+    </div>
+  </div>
+  {{/if}}
+</div>
+
+<style>
+.item-detail-dialog {
+  padding: 1rem;
+  max-width: 500px;
+}
+
+.item-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.item-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  border: 2px solid #cbd5e0;
+  object-fit: cover;
+}
+
+.item-title h2 {
+  margin: 0 0 0.5rem 0;
+  color: #2d3748;
+}
+
+.item-type-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.item-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-item {
+  background: #f7fafc;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #718096;
+  margin-bottom: 0.25rem;
+}
+
+.stat-value {
+  font-weight: bold;
+  color: #2d3748;
+  font-size: 1rem;
+}
+
+.item-tags,
+.item-description,
+.item-properties {
+  margin-bottom: 1.5rem;
+}
+
+.item-tags h3,
+.item-description h3,
+.item-properties h3 {
+  margin: 0 0 0.75rem 0;
+  color: #2d3748;
+  font-size: 1rem;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: #bee3f8;
+  color: #2c5282;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.description-content,
+.properties-content {
+  background: #f7fafc;
+  padding: 1rem;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  color: #4a5568;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+</style>
