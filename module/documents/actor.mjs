@@ -83,14 +83,18 @@ export default class ShuhaiActor extends Actor {
     const hopeRoll = new Roll("1d12");
     const corruptRoll = new Roll("1d12");
     
-    // 评估骰子
-    await hopeRoll.evaluate();
-    await corruptRoll.evaluate();
+    // 同时评估两个骰子
+    await Promise.all([
+      hopeRoll.evaluate(),
+      corruptRoll.evaluate()
+    ]);
     
-    // 显示 3D 骰子动画
+    // 同时显示 3D 骰子动画
     if (game.dice3d) {
-      await game.dice3d.showForRoll(hopeRoll, game.user, true, null, false);
-      await game.dice3d.showForRoll(corruptRoll, game.user, true, null, false);
+      await Promise.all([
+        game.dice3d.showForRoll(hopeRoll, game.user, true, null, false),
+        game.dice3d.showForRoll(corruptRoll, game.user, true, null, false)
+      ]);
     }
     
     const hopeDice = hopeRoll.total;
