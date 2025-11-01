@@ -1,0 +1,287 @@
+<form class="{{cssClass}} dark-theme flexcol" autocomplete="off">
+  {{!-- 整合的角色信息面板 --}}
+  <div class="character-panel">
+    {{!-- 左侧：角色图像和基础信息 --}}
+    <div class="left-section">
+      <div class="profile-container">
+        <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}"/>
+        <div class="level-badge">Lv.{{system.level}}</div>
+      </div>
+      
+      <div class="character-info">
+        <h1 class="charname">
+          <input name="name" type="text" value="{{actor.name}}" placeholder="角色名称"/>
+        </h1>
+        
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">种族</span>
+            <input type="text" name="system.info.race" value="{{system.info.race}}" placeholder="人类"/>
+          </div>
+          <div class="info-item">
+            <span class="info-label">性别</span>
+            <input type="text" name="system.info.gender" value="{{system.info.gender}}" placeholder="未知"/>
+          </div>
+          <div class="info-item">
+            <span class="info-label">势力</span>
+            <input type="text" name="system.info.faction" value="{{system.info.faction}}" placeholder="无"/>
+          </div>
+          <div class="info-item full-width">
+            <span class="info-label">经验值</span>
+            <div class="exp-bar">
+              <input type="number" name="system.info.experience" value="{{system.info.experience}}" min="0"/>
+              <span class="exp-max">/2700</span>
+              <div class="exp-progress">
+                <div class="exp-fill" style="width: {{multiply (divide system.info.experience 2700) 100}}%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {{!-- 派生属性卡片 --}}
+      <div class="derived-stats">
+        <div class="stat-card hp">
+          <div class="stat-header">
+            <span class="stat-icon">❤️</span>
+            <span class="stat-name">生命值</span>
+          </div>
+          <div class="stat-values">
+            <input type="number" name="system.derived.hp.value" value="{{system.derived.hp.value}}" min="0"/>
+            <span class="divider">/</span>
+            <span class="stat-max">{{system.derived.hp.max}}</span>
+          </div>
+          <div class="stat-bar">
+            <div class="bar-fill hp-fill" style="width: {{multiply (divide system.derived.hp.value system.derived.hp.max) 100}}%"></div>
+          </div>
+        </div>
+        
+        <div class="stat-card corruption">
+          <div class="stat-header">
+            <span class="stat-icon">💀</span>
+            <span class="stat-name">侵蚀度</span>
+          </div>
+          <div class="stat-values">
+            <input type="number" name="system.derived.corruption.value" value="{{system.derived.corruption.value}}" min="0"/>
+            <span class="divider">/</span>
+            <span class="stat-max">{{system.derived.corruption.max}}</span>
+          </div>
+          <div class="stat-bar">
+            <div class="bar-fill corruption-fill" style="width: {{multiply (divide system.derived.corruption.value system.derived.corruption.max) 100}}%"></div>
+          </div>
+        </div>
+        
+        <div class="stat-card starlight">
+          <div class="stat-header">
+            <span class="stat-icon">⭐</span>
+            <span class="stat-name">星光</span>
+          </div>
+          <div class="stat-values">
+            <span class="stat-current">{{system.derived.starlight}}</span>
+            <span class="divider">/</span>
+            <span class="stat-max">{{add 10 (multiply system.level 2)}}</span>
+          </div>
+          <div class="stat-detail">已用: {{system.derived.starlightUsed}}</div>
+        </div>
+        
+        <div class="mini-stats">
+          <div class="mini-stat">
+            <span class="mini-icon">⚡</span>
+            <span class="mini-label">混乱条</span>
+            <span class="mini-value">{{system.derived.chaos}}</span>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-icon">🏃</span>
+            <span class="mini-label">速度值</span>
+            <span class="mini-value">{{system.derived.speed}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    {{!-- 右侧：属性和资源 --}}
+    <div class="right-section">
+      {{!-- 六维属性 --}}
+      <div class="attributes-container">
+        <h2 class="section-title">基础属性</h2>
+        <div class="attributes-grid">
+          <div class="attribute-card" data-attribute="strength">
+            <div class="attribute-header">
+              <div class="attribute-icon">STR</div>
+              <div class="attribute-label">力量</div>
+            </div>
+            <div class="attribute-value-container">
+              <input type="number" class="attribute-value" name="system.attributes.strength" value="{{system.attributes.strength}}" min="1" max="30"/>
+              <div class="attribute-modifier">
+                <span class="modifier-sign">{{#if (gt (floor (divide (subtract system.attributes.strength 10) 2)) -1)}}+{{/if}}</span>
+                <span class="modifier-value">{{floor (divide (subtract system.attributes.strength 10) 2)}}</span>
+              </div>
+            </div>
+            <button class="attribute-roll" data-attribute="strength" title="力量检定">
+              <i class="fas fa-dice-d20"></i>
+            </button>
+          </div>
+          
+          <div class="attribute-card" data-attribute="constitution">
+            <div class="attribute-header">
+              <div class="attribute-icon">CON</div>
+              <div class="attribute-label">体质</div>
+            </div>
+            <div class="attribute-value-container">
+              <input type="number" class="attribute-value" name="system.attributes.constitution" value="{{system.attributes.constitution}}" min="1" max="30"/>
+              <div class="attribute-modifier">
+                <span class="modifier-sign">{{#if (gt (floor (divide (subtract system.attributes.constitution 10) 2)) -1)}}+{{/if}}</span>
+                <span class="modifier-value">{{floor (divide (subtract system.attributes.constitution 10) 2)}}</span>
+              </div>
+            </div>
+            <button class="attribute-roll" data-attribute="constitution" title="体质检定">
+              <i class="fas fa-dice-d20"></i>
+            </button>
+          </div>
+          
+          <div class="attribute-card" data-attribute="dexterity">
+            <div class="attribute-header">
+              <div class="attribute-icon">DEX</div>
+              <div class="attribute-label">敏捷</div>
+            </div>
+            <div class="attribute-value-container">
+              <input type="number" class="attribute-value" name="system.attributes.dexterity" value="{{system.attributes.dexterity}}" min="1" max="30"/>
+              <div class="attribute-modifier">
+                <span class="modifier-sign">{{#if (gt (floor (divide (subtract system.attributes.dexterity 10) 2)) -1)}}+{{/if}}</span>
+                <span class="modifier-value">{{floor (divide (subtract system.attributes.dexterity 10) 2)}}</span>
+              </div>
+            </div>
+            <button class="attribute-roll" data-attribute="dexterity" title="敏捷检定">
+              <i class="fas fa-dice-d20"></i>
+            </button>
+          </div>
+          
+          <div class="attribute-card" data-attribute="perception">
+            <div class="attribute-header">
+              <div class="attribute-icon">WIS</div>
+              <div class="attribute-label">感知</div>
+            </div>
+            <div class="attribute-value-container">
+              <input type="number" class="attribute-value" name="system.attributes.perception" value="{{system.attributes.perception}}" min="1" max="30"/>
+              <div class="attribute-modifier">
+                <span class="modifier-sign">{{#if (gt (floor (divide (subtract system.attributes.perception 10) 2)) -1)}}+{{/if}}</span>
+                <span class="modifier-value">{{floor (divide (subtract system.attributes.perception 10) 2)}}</span>
+              </div>
+            </div>
+            <button class="attribute-roll" data-attribute="perception" title="感知检定">
+              <i class="fas fa-dice-d20"></i>
+            </button>
+          </div>
+          
+          <div class="attribute-card" data-attribute="intelligence">
+            <div class="attribute-header">
+              <div class="attribute-icon">INT</div>
+              <div class="attribute-label">智力</div>
+            </div>
+            <div class="attribute-value-container">
+              <input type="number" class="attribute-value" name="system.attributes.intelligence" value="{{system.attributes.intelligence}}" min="1" max="30"/>
+              <div class="attribute-modifier">
+                <span class="modifier-sign">{{#if (gt (floor (divide (subtract system.attributes.intelligence 10) 2)) -1)}}+{{/if}}</span>
+                <span class="modifier-value">{{floor (divide (subtract system.attributes.intelligence 10) 2)}}</span>
+              </div>
+            </div>
+            <button class="attribute-roll" data-attribute="intelligence" title="智力检定">
+              <i class="fas fa-dice-d20"></i>
+            </button>
+          </div>
+          
+          <div class="attribute-card" data-attribute="charisma">
+            <div class="attribute-header">
+              <div class="attribute-icon">CHA</div>
+              <div class="attribute-label">魅力</div>
+            </div>
+            <div class="attribute-value-container">
+              <input type="number" class="attribute-value" name="system.attributes.charisma" value="{{system.attributes.charisma}}" min="1" max="30"/>
+              <div class="attribute-modifier">
+                <span class="modifier-sign">{{#if (gt (floor (divide (subtract system.attributes.charisma 10) 2)) -1)}}+{{/if}}</span>
+                <span class="modifier-value">{{floor (divide (subtract system.attributes.charisma 10) 2)}}</span>
+              </div>
+            </div>
+            <button class="attribute-roll" data-attribute="charisma" title="魅力检定">
+              <i class="fas fa-dice-d20"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      {{!-- 资源面板 --}}
+      <div class="resources-container">
+        <h2 class="section-title">资源</h2>
+        <div class="resources-grid">
+          <div class="resource-item">
+            <span class="resource-icon">💰</span>
+            <span class="resource-label">货币</span>
+            <input type="number" name="system.resources.currency" value="{{system.resources.currency}}" min="0"/>
+          </div>
+          <div class="resource-item">
+            <span class="resource-icon">🎲</span>
+            <span class="resource-label">奇遇点</span>
+            <input type="number" name="system.resources.encounterPoints" value="{{system.resources.encounterPoints}}" min="0"/>
+          </div>
+          <div class="resource-item">
+            <span class="resource-icon">✨</span>
+            <span class="resource-label">奇迹点</span>
+            <input type="number" name="system.resources.miraclePoints" value="{{system.resources.miraclePoints}}" min="0"/>
+          </div>
+          <div class="resource-item">
+            <span class="resource-icon">🔮</span>
+            <span class="resource-label">复制核心</span>
+            <input type="number" name="system.resources.replicaCore" value="{{system.resources.replicaCore}}" min="0"/>
+          </div>
+        </div>
+      </div>
+      
+      {{!-- 动作按钮 --}}
+      <div class="action-buttons">
+        <button class="action-btn corruption-check">
+          <i class="fas fa-skull"></i>
+          <span>侵蚀检定</span>
+        </button>
+        <button class="action-btn long-rest">
+          <i class="fas fa-bed"></i>
+          <span>长期休息</span>
+        </button>
+        <button class="action-btn roll-speed">
+          <i class="fas fa-running"></i>
+          <span>投掷速度</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {{!-- Sheet Tab Navigation --}}
+  <nav class="sheet-tabs tabs" data-group="primary">
+    <a class="item active" data-tab="skills">技能</a>
+    <a class="item" data-tab="equipment">装备</a>
+    <a class="item" data-tab="inventory">物品栏</a>
+    <a class="item" data-tab="biography">背景</a>
+  </nav>
+
+  {{!-- Sheet Body --}}
+  <section class="sheet-body">
+    {{!-- Skills Tab --}}
+    <div class="tab skills active" data-group="primary" data-tab="skills">
+      {{> "systems/shuhai-dalu/templates/actor/parts/actor-skills.hbs"}}
+    </div>
+    
+    {{!-- Equipment Tab --}}
+    <div class="tab equipment" data-group="primary" data-tab="equipment">
+      {{> "systems/shuhai-dalu/templates/actor/parts/actor-equipment.hbs"}}
+    </div>
+    
+    {{!-- Inventory Tab --}}
+    <div class="tab inventory" data-group="primary" data-tab="inventory">
+      {{> "systems/shuhai-dalu/templates/actor/parts/actor-inventory.hbs"}}
+    </div>
+    
+    {{!-- Biography Tab --}}
+    <div class="tab biography" data-group="primary" data-tab="biography">
+      {{editor enrichedBiography target="system.biography" button=true owner=owner editable=editable}}
+    </div>
+  </section>
+</form>
