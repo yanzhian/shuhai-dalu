@@ -30,10 +30,18 @@
         <div class="bar-fill chaos" style="width: {{multiply (divide system.derived.chaos 15) 100}}%"></div>
         <span class="bar-text">{{system.derived.chaos}}/15</span>
       </div>
+      
+      {{!-- 长休和侵蚀鉴定按钮 --}}
+      <div class="check-buttons-row">
+        <button class="long-rest-btn" type="button">长休</button>
+        <button class="corruption-check-btn" type="button">侵蚀鉴定</button>
+      </div>
     </div>
+
 
     {{!-- 右侧：名字、种族、性别、势力、经验、等级、鉴定、属性、技能鉴定 --}}
     <div class="info-right">
+      {{!-- <div class="skills-check-header">角色信息</div> --}}
       {{!-- 顶部基础信息行 --}}
       <div class="basic-info-row">
         <div class="info-field name-field">
@@ -67,12 +75,7 @@
         </button>
       </div>
 
-      {{!-- 长休和侵蚀鉴定按钮 --}}
-      <div class="check-buttons-row">
-        <button class="long-rest-btn" type="button">长休</button>
-        <button class="corruption-check-btn" type="button">侵蚀鉴定</button>
-      </div>
-
+    <div class="skills-check-header">属性鉴定</div>
       {{!-- 属性鉴定 --}}
       <div class="attributes-row">
         {{#each attributes as |attr key|}}

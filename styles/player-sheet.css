@@ -42,8 +42,8 @@ button:disabled:hover {
   background: #1e1e1e;
   border-bottom: 2px solid #3a3a3a;
   flex-shrink: 0;
-  min-height: 250px;
-  max-height: 350px;
+  min-height: 380px;
+  max-height: 400px;
 }
 
 /* === 左侧面板：头像和状态栏 === */
@@ -259,9 +259,8 @@ button:disabled:hover {
 
 /* 战斗区域切换按钮 */
 .switch-combat-btn {
-  position: absolute;
-  top: 0;
-  right: 0;
+  width: 50px;
+  height: 36px;
   padding: 0.5rem 1rem;
   background: #34495e;
   border: 1px solid #4a4a4a;
@@ -285,7 +284,7 @@ button:disabled:hover {
 }
 
 .check-buttons-row button {
-  padding: 0.5rem 1rem;
+  /* padding: 0.5rem 1rem; */
   background: #2c3e50;
   border: 1px solid #4a4a4a;
   border-radius: 4px;
@@ -303,9 +302,10 @@ button:disabled:hover {
 
 /* 属性行 */
 .attributes-row {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+    display: flex;
+    gap: 3.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .attr-block {
@@ -358,7 +358,6 @@ button:disabled:hover {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  overflow-y: auto;
 }
 
 .skills-check-header {
@@ -452,20 +451,23 @@ button:disabled:hover {
    第二部分: 搜索检索栏
    ======================================== */
 .search-filter-bar {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background: #1e1e1e;
-  border-bottom: 2px solid #3a3a3a;
-  flex-shrink: 0;
-  height: 50px;
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #1e1e1e;
+    border-bottom: 2px solid #3a3a3a;
+    flex-shrink: 0;
+    height: 30px;
+    min-height: 20px;
+    max-height: 60px;
+    flex-wrap: nowrap;
+    flex-direction: row;
 }
 
 .search-box {
   position: relative;
   flex: 1;
-  max-width: 400px;
+  max-width: 2400px;
 }
 
 .search-box input {
