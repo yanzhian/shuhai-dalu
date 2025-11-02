@@ -1,32 +1,25 @@
 /**
- * 书海大陆角色表单 - 完整版
+ * 书海大陆 Player 角色表单 - 深色主题UI
  */
-export default class ShuhaiActorSheet extends ActorSheet {
+export default class ShuhaiPlayerSheet extends ActorSheet {
   
   /** @override */
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ["shuhai-dalu", "sheet", "actor"],
-      width: 900,
-      height: 850,
-      tabs: [{ 
-        navSelector: ".sheet-tabs", 
-        contentSelector: ".sheet-body", 
-        initial: "attributes" 
-      }],
+      classes: ["shuhai-dalu", "sheet", "actor", "player-sheet"],
+      width: 1200,
+      height: 900,
+      tabs: [],
       dragDrop: [
-        { dragSelector: ".item-row", dropSelector: ".equipment-slots" },
-        { dragSelector: ".item-row", dropSelector: ".dice-slots" },
-        { dragSelector: ".item-row", dropSelector: ".special-slots" },
-        { dragSelector: ".item-row", dropSelector: ".passive-slots" }
+        { dragSelector: ".inventory-table tbody tr", dropSelector: ".equipment-slot" }
       ],
-      scrollY: [".biography", ".inventory-list", ".skills", ".equipment"]
+      scrollY: [".left-content", ".inventory-list"]
     });
   }
 
   /** @override */
   get template() {
-    return `systems/shuhai-dalu/templates/actor/actor-${this.actor.type}-sheet.hbs`;
+    return `systems/shuhai-dalu/templates/actor/actor-player-sheet.hbs`;
   }
 
   /* -------------------------------------------- */
@@ -38,8 +31,6 @@ export default class ShuhaiActorSheet extends ActorSheet {
     
     context.system = actorData.system;
     context.flags = actorData.flags;
-    
-    // 添加 Roll 数据
     context.rollData = this.actor.getRollData();
     
     // 准备角色数据
@@ -47,12 +38,6 @@ export default class ShuhaiActorSheet extends ActorSheet {
     
     // 准备物品数据
     this._prepareItems(context);
-    
-    // 添加富文本编辑器
-    context.enrichedBiography = await TextEditor.enrichHTML(
-      this.actor.system.biography, 
-      { async: true }
-    );
     
     return context;
   }
@@ -63,12 +48,12 @@ export default class ShuhaiActorSheet extends ActorSheet {
   _prepareCharacterData(context) {
     // 属性列表
     context.attributes = {
-      strength: { key: 'strength', label: '力量', value: context.system.attributes.strength },
-      constitution: { key: 'constitution', label: '体质', value: context.system.attributes.constitution },
-      dexterity: { key: 'dexterity', label: '敏捷', value: context.system.attributes.dexterity },
-      perception: { key: 'perception', label: '感知', value: context.system.attributes.perception },
-      intelligence: { key: 'intelligence', label: '智力', value: context.system.attributes.intelligence },
-      charisma: { key: 'charisma', label: '魅力', value: context.system.attributes.charisma }
+      strength: { key: 'strength', label: 'Str', value: context.system.attributes.strength },
+      dexterity: { key: 'dexterity', label: 'Dex', value: context.system.attributes.dexterity },
+      constitution: { key: 'constitution', label: 'Con', value: context.system.attributes.constitution },
+      intelligence: { key: 'intelligence', label: 'Int', value: context.system.attributes.intelligence },
+      perception: { key: 'perception', label: 'Wis', value: context.system.attributes.perception },
+      charisma: { key: 'charisma', label: 'Cha', value: context.system.attributes.charisma }
     };
     
     // 技能分组
@@ -106,7 +91,6 @@ export default class ShuhaiActorSheet extends ActorSheet {
    * 准备物品数据
    */
   _prepareItems(context) {
-    // 按类型分类所有物品
     context.items = context.actor.items.contents;
   }
 
@@ -116,40 +100,48 @@ export default class ShuhaiActorSheet extends ActorSheet {
   activateListeners(html) {
     super.activateListeners(html);
     
-    // 只在拥有权限时添加监听器
     if (!this.isEditable) return;
     
-    // === 属性相关 ===
-    html.find('.attr-roll').click(this._onAttributeRoll.bind(this));
-    html.find('.corruption-check').click(this._onCorruptionCheck.bind(this));
-    html.find('.long-rest').click(this._onLongRest.bind(this));
-    html.find('.roll-speed').click(this._onRollSpeed.bind(this));
+    // === 属性检定 ===
+    html.find('.check-btn[data-attribute]').click(this._onAttributeRoll.bind(this));
     
     // === 技能相关 ===
-    html.find('.skill-increase').click(this._onSkillIncrease.bind(this));
-    html.find('.skill-decrease').click(this._onSkillDecrease.bind(this));
-    html.find('.skill-roll').click(this._onSkillRoll.bind(this));
+    html.find('.skill-plus').click(this._onSkillIncrease.bind(this));
+    html.find('.skill-minus').click(this._onSkillDecrease.bind(this));
+    html.find('.check-btn[data-skill]').click(this._onSkillRoll.bind(this));
+    
+    // === 状态按钮 ===
+    html.find('.corruption-check-btn').click(this._onCorruptionCheck.bind(this));
+    html.find('.long-rest-btn').click(this._onLongRest.bind(this));
+    html.find('.roll-speed-btn').click(this._onRollSpeed.bind(this));
     
     // === 装备相关 ===
     html.find('.unequip-btn').click(this._onUnequip.bind(this));
-    html.find('.use-dice-btn').click(this._onUseDice.bind(this));
+    html.find('.use-btn').click(this._onUseDice.bind(this));
     
     // === 物品相关 ===
     html.find('.create-item-btn').click(this._onItemCreate.bind(this));
-    html.find('.item-edit').click(this._onItemEdit.bind(this));
-    html.find('.item-delete').click(this._onItemDelete.bind(this));
-    html.find('.item-use').click(this._onItemUse.bind(this));
+    html.find('.use-item-btn').click(this._onItemUse.bind(this));
+    html.find('.edit-item-btn').click(this._onItemEdit.bind(this));
+    html.find('.delete-item-btn').click(this._onItemDelete.bind(this));
+    
+    // === 物品图标点击显示详情 ===
+    html.find('.item-icon').click(this._onItemIconClick.bind(this));
+    
+    // === 搜索和过滤 ===
+    html.find('.item-search').on('input', this._onSearchItems.bind(this));
+    html.find('.filter-btn').click(this._onFilterItems.bind(this));
     
     // === 拖放 ===
     const dragHandler = ev => this._onDragStart(ev);
-    html.find('.item-row').each((i, li) => {
-      li.setAttribute("draggable", true);
-      li.addEventListener("dragstart", dragHandler, false);
+    html.find('.inventory-table tbody tr').each((i, tr) => {
+      tr.setAttribute("draggable", true);
+      tr.addEventListener("dragstart", dragHandler, false);
     });
   }
 
   /* -------------------------------------------- */
-  /*  事件处理 - 属性                               */
+  /*  事件处理                                      */
   /* -------------------------------------------- */
 
   /**
@@ -157,8 +149,7 @@ export default class ShuhaiActorSheet extends ActorSheet {
    */
   async _onAttributeRoll(event) {
     event.preventDefault();
-    const element = event.currentTarget;
-    const attributeKey = element.dataset.attribute;
+    const attributeKey = event.currentTarget.dataset.attribute;
     
     const content = await renderTemplate("systems/shuhai-dalu/templates/dialog/check-dialog.hbs", {
       attribute: attributeKey
@@ -187,105 +178,11 @@ export default class ShuhaiActorSheet extends ActorSheet {
   }
 
   /**
-   * 侵蚀检定
-   */
-  _onCorruptionCheck(event) {
-    event.preventDefault();
-    game.shuhai.rollCorruptionCheck(this.actor);
-  }
-
-  /**
-   * 长休
-   */
-  async _onLongRest(event) {
-    event.preventDefault();
-    await this.actor.longRest();
-  }
-
-  /**
-   * 投掷速度
-   */
-  async _onRollSpeed(event) {
-    event.preventDefault();
-    
-    const dex = this.actor.system.attributes.dexterity;
-    const roll = new Roll("1d6");
-    await roll.evaluate();
-    
-    // 显示 3D 骰子动画
-    if (game.dice3d) {
-      await game.dice3d.showForRoll(roll, game.user, true);
-    }
-    
-    const speed = roll.total + Math.floor(dex / 3);
-    
-    await this.actor.update({ 'system.derived.speed': speed });
-    
-    ChatMessage.create({
-      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      flavor: "速度值投掷",
-      content: `
-        <div class="shuhai-speed-roll">
-          <p>${this.actor.name} 的速度值:</p>
-          <p>${roll.total}[1d6] + ${Math.floor(dex / 3)}[敏捷/3] = <strong>${speed}</strong></p>
-        </div>
-      `,
-      sound: CONFIG.sounds.dice,
-      rolls: [roll]
-    });
-  }
-
-  /* -------------------------------------------- */
-  /*  事件处理 - 技能                               */
-  /* -------------------------------------------- */
-
-  /**
-   * 增加技能点
-   */
-  async _onSkillIncrease(event) {
-    event.preventDefault();
-    const element = event.currentTarget;
-    const skillKey = element.dataset.skill;
-    const category = element.dataset.category;
-    
-    const currentValue = this.actor.system.skills[skillKey];
-    if (currentValue >= 25) {
-      ui.notifications.warn("技能已达到上限(25)");
-      return;
-    }
-    
-    const available = this.actor.system.getAvailableSkillPoints(category);
-    if (available <= 0) {
-      ui.notifications.warn("技能点不足");
-      return;
-    }
-    
-    await this.actor.update({ [`system.skills.${skillKey}`]: currentValue + 1 });
-  }
-
-  /**
-   * 减少技能点
-   */
-  async _onSkillDecrease(event) {
-    event.preventDefault();
-    const element = event.currentTarget;
-    const skillKey = element.dataset.skill;
-    
-    const currentValue = this.actor.system.skills[skillKey];
-    if (currentValue <= 0) {
-      return;
-    }
-    
-    await this.actor.update({ [`system.skills.${skillKey}`]: currentValue - 1 });
-  }
-
-  /**
    * 技能检定
    */
   async _onSkillRoll(event) {
     event.preventDefault();
-    const element = event.currentTarget;
-    const skillKey = element.dataset.skill;
+    const skillKey = event.currentTarget.dataset.skill;
     
     const content = await renderTemplate("systems/shuhai-dalu/templates/dialog/check-dialog.hbs", {
       skill: skillKey
@@ -313,18 +210,98 @@ export default class ShuhaiActorSheet extends ActorSheet {
     }).render(true);
   }
 
-  /* -------------------------------------------- */
-  /*  事件处理 - 装备                               */
-  /* -------------------------------------------- */
+  /**
+   * 增加技能点
+   */
+  async _onSkillIncrease(event) {
+    event.preventDefault();
+    const skillKey = event.currentTarget.dataset.skill;
+    const category = event.currentTarget.dataset.category;
+    
+    const currentValue = this.actor.system.skills[skillKey];
+    if (currentValue >= 25) {
+      ui.notifications.warn("技能已达到上限(25)");
+      return;
+    }
+    
+    const available = this.actor.system.getAvailableSkillPoints(category);
+    if (available <= 0) {
+      ui.notifications.warn("技能点不足");
+      return;
+    }
+    
+    await this.actor.update({ [`system.skills.${skillKey}`]: currentValue + 1 });
+  }
+
+  /**
+   * 减少技能点
+   */
+  async _onSkillDecrease(event) {
+    event.preventDefault();
+    const skillKey = event.currentTarget.dataset.skill;
+    
+    const currentValue = this.actor.system.skills[skillKey];
+    if (currentValue <= 0) return;
+    
+    await this.actor.update({ [`system.skills.${skillKey}`]: currentValue - 1 });
+  }
+
+  /**
+   * 侵蚀检定
+   */
+  _onCorruptionCheck(event) {
+    event.preventDefault();
+    game.shuhai.rollCorruptionCheck(this.actor);
+  }
+
+  /**
+   * 长休
+   */
+  async _onLongRest(event) {
+    event.preventDefault();
+    await this.actor.longRest();
+  }
+
+  /**
+   * 投掷速度
+   */
+  async _onRollSpeed(event) {
+    event.preventDefault();
+    
+    const dex = this.actor.system.attributes.dexterity;
+    const roll = new Roll("1d6");
+    await roll.evaluate();
+    
+    if (game.dice3d) {
+      await game.dice3d.showForRoll(roll, game.user, true);
+    }
+    
+    const speed = roll.total + Math.floor(dex / 3);
+    
+    await this.actor.update({ 'system.derived.speed': speed });
+    
+    ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      flavor: "速度值投掷",
+      content: `
+        <div class="shuhai-speed-roll">
+          <p>${this.actor.name} 的速度值:</p>
+          <p>${roll.total}[1d6] + ${Math.floor(dex / 3)}[敏捷/3] = <strong>${speed}</strong></p>
+        </div>
+      `,
+      sound: CONFIG.sounds.dice,
+      rolls: [roll]
+    });
+  }
 
   /**
    * 卸下装备
    */
   async _onUnequip(event) {
     event.preventDefault();
-    const element = event.currentTarget;
-    const slotType = element.dataset.slotType;
-    const slotIndex = element.dataset.slotIndex !== undefined ? parseInt(element.dataset.slotIndex) : null;
+    const slotType = event.currentTarget.dataset.slotType;
+    const slotIndex = event.currentTarget.dataset.slotIndex !== undefined ? 
+      parseInt(event.currentTarget.dataset.slotIndex) : null;
     
     await game.shuhai.unequipItem(this.actor, slotType, slotIndex);
   }
@@ -334,29 +311,20 @@ export default class ShuhaiActorSheet extends ActorSheet {
    */
   async _onUseDice(event) {
     event.preventDefault();
-    const element = event.currentTarget;
-    const itemId = element.dataset.itemId;
-    
+    const itemId = event.currentTarget.dataset.itemId;
     const item = this.actor.items.get(itemId);
-    if (!item) {
-      ui.notifications.error("找不到物品");
-      return;
-    }
     
-    await item.use();
+    if (item) {
+      await item.use();
+    }
   }
-
-  /* -------------------------------------------- */
-  /*  事件处理 - 物品                               */
-  /* -------------------------------------------- */
 
   /**
    * 创建物品
    */
   async _onItemCreate(event) {
     event.preventDefault();
-    const button = event.currentTarget;
-    const type = button.dataset.type;
+    const type = event.currentTarget.dataset.type;
     
     const itemData = {
       name: `新${this._getTypeName(type)}`,
@@ -365,12 +333,14 @@ export default class ShuhaiActorSheet extends ActorSheet {
     };
     
     const cls = getDocumentClass("Item");
-    await cls.create(itemData, { parent: this.actor });
+    const item = await cls.create(itemData, { parent: this.actor });
+    
+    // 立即打开编辑窗口
+    if (item) {
+      item.sheet.render(true);
+    }
   }
 
-  /**
-   * 获取类型中文名
-   */
   _getTypeName(type) {
     const typeNames = {
       combatDice: '攻击骰',
@@ -387,12 +357,24 @@ export default class ShuhaiActorSheet extends ActorSheet {
   }
 
   /**
+   * 使用物品
+   */
+  async _onItemUse(event) {
+    event.preventDefault();
+    const itemId = event.currentTarget.dataset.itemId;
+    const item = this.actor.items.get(itemId);
+    
+    if (item) {
+      await item.use();
+    }
+  }
+
+  /**
    * 编辑物品
    */
   _onItemEdit(event) {
     event.preventDefault();
-    const button = event.currentTarget;
-    const itemId = button.dataset.itemId;
+    const itemId = event.currentTarget.dataset.itemId;
     const item = this.actor.items.get(itemId);
     
     if (item) {
@@ -405,8 +387,7 @@ export default class ShuhaiActorSheet extends ActorSheet {
    */
   async _onItemDelete(event) {
     event.preventDefault();
-    const button = event.currentTarget;
-    const itemId = button.dataset.itemId;
+    const itemId = event.currentTarget.dataset.itemId;
     const item = this.actor.items.get(itemId);
     
     if (!item) return;
@@ -422,17 +403,81 @@ export default class ShuhaiActorSheet extends ActorSheet {
   }
 
   /**
-   * 使用物品
+   * 点击物品图标显示详情
    */
-  async _onItemUse(event) {
+  _onItemIconClick(event) {
     event.preventDefault();
-    const button = event.currentTarget;
-    const itemId = button.dataset.itemId;
+    const itemId = event.currentTarget.dataset.itemId;
     const item = this.actor.items.get(itemId);
     
-    if (item) {
-      await item.use();
-    }
+    if (!item) return;
+    
+    // 显示物品详情对话框
+    const content = `
+      <div class="item-details-dialog">
+        <h3>${item.name}</h3>
+        ${item.system.tags ? `<p><strong>标签:</strong> ${item.system.tags}</p>` : ''}
+        ${item.system.effect ? `<div><strong>描述:</strong><div>${item.system.effect}</div></div>` : ''}
+      </div>
+    `;
+    
+    new Dialog({
+      title: item.name,
+      content: content,
+      buttons: {
+        close: {
+          icon: '<i class="fas fa-times"></i>',
+          label: "关闭"
+        }
+      }
+    }).render(true);
+  }
+
+  /**
+   * 搜索物品
+   */
+  _onSearchItems(event) {
+    const searchTerm = event.currentTarget.value.toLowerCase();
+    const items = this.element.find('.inventory-table tbody tr');
+    
+    items.each((i, item) => {
+      const $item = $(item);
+      const itemName = $item.find('.item-name-cell').text().toLowerCase();
+      
+      if (itemName.includes(searchTerm)) {
+        $item.attr('data-filtered', 'false');
+      } else {
+        $item.attr('data-filtered', 'true');
+      }
+    });
+  }
+
+  /**
+   * 过滤物品
+   */
+  _onFilterItems(event) {
+    event.preventDefault();
+    const filterType = event.currentTarget.dataset.filter;
+    const items = this.element.find('.inventory-table tbody tr');
+    const filterBtns = this.element.find('.filter-btn');
+    
+    // 更新按钮状态
+    filterBtns.removeClass('active');
+    $(event.currentTarget).addClass('active');
+    
+    // 过滤物品
+    items.each((i, item) => {
+      const $item = $(item);
+      const itemType = $item.data('item-type');
+      
+      if (filterType === 'all') {
+        $item.attr('data-filtered', 'false');
+      } else if (itemType === filterType) {
+        $item.attr('data-filtered', 'false');
+      } else {
+        $item.attr('data-filtered', 'true');
+      }
+    });
   }
 
   /* -------------------------------------------- */
@@ -442,9 +487,7 @@ export default class ShuhaiActorSheet extends ActorSheet {
   /** @override */
   async _onDrop(event) {
     const data = TextEditor.getDragEventData(event);
-    const actor = this.actor;
     
-    // 处理物品拖放
     if (data.type === "Item") {
       return this._onDropItem(event, data);
     }
@@ -454,6 +497,7 @@ export default class ShuhaiActorSheet extends ActorSheet {
 
   /**
    * 处理物品拖放到装备槽
+   * ⭐ 修复：正确处理战斗骰数组槽位
    */
   async _onDropItem(event, data) {
     const item = await Item.implementation.fromDropData(data);
@@ -461,7 +505,6 @@ export default class ShuhaiActorSheet extends ActorSheet {
     
     // 检查是否是从其他角色拖过来的
     if (item.parent && item.parent.id !== this.actor.id) {
-      // 从其他角色拖过来，创建副本
       delete itemData._id;
       return this.actor.createEmbeddedDocuments("Item", [itemData]);
     }
@@ -473,7 +516,26 @@ export default class ShuhaiActorSheet extends ActorSheet {
     }
     
     const slotType = dropTarget.dataset.slot;
-    const slotIndex = dropTarget.dataset.slotIndex !== undefined ? parseInt(dropTarget.dataset.slotIndex) : null;
+    const slotIndex = dropTarget.dataset.slotIndex !== undefined ? 
+      parseInt(dropTarget.dataset.slotIndex) : null;
+    
+    // ⭐ 特殊处理战斗骰槽位
+    if (slotType === 'combatDice') {
+      // 验证物品类型
+      if (item.type !== 'combatDice' && item.type !== 'shootDice') {
+        ui.notifications.warn("只能装备攻击骰或射击骰到战斗骰槽位");
+        return false;
+      }
+      
+      // 检查是否已经装备在其他战斗骰槽位
+      const currentCombatDice = this.actor.system.equipment.combatDice;
+      const existingIndex = currentCombatDice.findIndex(diceId => diceId === item.id);
+      
+      if (existingIndex !== -1 && existingIndex !== slotIndex) {
+        ui.notifications.warn("该战斗骰已经装备在其他槽位");
+        return false;
+      }
+    }
     
     // 装备物品到槽位
     await game.shuhai.equipItem(this.actor, item, slotType, slotIndex);

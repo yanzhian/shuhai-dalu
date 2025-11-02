@@ -1,5 +1,5 @@
 /**
- * 书海大陆物品表单
+ * 书海大陆物品表单 - 通用版
  */
 export default class ShuhaiItemSheet extends ItemSheet {
 
@@ -8,15 +8,15 @@ export default class ShuhaiItemSheet extends ItemSheet {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ["shuhai-dalu", "sheet", "item"],
       width: 520,
-      height: 480,
-      tabs: [{ navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "description" }]
+      height: 600,
+      tabs: []
     });
   }
 
   /** @override */
   get template() {
-    const path = "systems/shuhai-dalu/templates/item";
-    return `${path}/item-${this.item.type}-sheet.hbs`;
+    // 使用通用模板
+    return `systems/shuhai-dalu/templates/item/item-sheet.hbs`;
   }
 
   /* -------------------------------------------- */
@@ -36,8 +36,8 @@ export default class ShuhaiItemSheet extends ItemSheet {
     context.flags = itemData.flags;
 
     // 添加富文本编辑器
-    context.enrichedDescription = await TextEditor.enrichHTML(
-      this.item.system.description || "", 
+    context.enrichedEffect = await TextEditor.enrichHTML(
+      this.item.system.effect || "", 
       { async: true }
     );
 
@@ -51,48 +51,39 @@ export default class ShuhaiItemSheet extends ItemSheet {
    * 准备物品类型特定数据
    */
   _prepareItemTypeData(context) {
-    // 卡牌分类选项
-    if (this.item.type === 'card') {
-      context.categories = [
-        { value: '斩击', label: '斩击' },
-        { value: '打击', label: '打击' },
-        { value: '突刺', label: '突刺' },
-        { value: '闪避', label: '闪避' },
-        { value: '格挡', label: '格挡' },
-        { value: '防御', label: '防御' },
-        { value: '反击-斩击', label: '反击-斩击' },
-        { value: '反击-打击', label: '反击-打击' },
-        { value: '反击-突刺', label: '反击-突刺' },
-        { value: '强化反击-斩击', label: '强化反击-斩击' },
-        { value: '强化反击-打击', label: '强化反击-打击' },
-        { value: '强化防御', label: '强化防御' }
-      ];
-    }
+    const itemType = this.item.type;
+    
+    // 所有物品类型的分类选项
+    context.categories = this._getCategoryOptions(itemType);
+    
+    // 是否显示特定字段
+    context.showDiceFormula = ['combatDice', 'shootDice', 'defenseDice', 'triggerDice', 'passiveDice'].includes(itemType);
+    context.showQuantity = !['passiveDice'].includes(itemType);
+    context.showStarlightCost = ['combatDice', 'shootDice', 'defenseDice', 'triggerDice', 'passiveDice', 'weapon', 'armor', 'equipment'].includes(itemType);
+    context.showArmorProperties = itemType === 'armor';
+  }
 
-    // 武器伤害类型选项
-    if (this.item.type === 'weapon') {
-      context.damageTypes = [
-        { value: '斩击', label: '斩击' },
-        { value: '打击', label: '打击' },
-        { value: '突刺', label: '突刺' }
-      ];
+  /**
+   * 获取分类选项
+   */
+  _getCategoryOptions(type) {
+    const categoryMap = {
+      'combatDice': ['打击', '突刺', '斩击'],
+      'shootDice': ['打击', '突刺', '斩击'],
+      'defenseDice': ['闪避', '反击-斩击', '反击-突刺', '反击-打击', '强化反击-斩击', '强化反击-突刺', '强化反击-打击', '防御', '强化防御'],
+      'triggerDice': ['EX'],
+      'passiveDice': ['道具', '标签'],
+      'weapon': ['武器'],
+      'armor': ['防具'],
+      'item': ['道具'],
+      'equipment': ['装备']
+    };
 
-      context.rangeTypes = [
-        { value: '近战', label: '近战' },
-        { value: '远程', label: '远程' },
-        { value: '投掷', label: '投掷' }
-      ];
-    }
-
-    // 护甲类型选项
-    if (this.item.type === 'armor') {
-      context.armorTypes = [
-        { value: '轻甲', label: '轻甲' },
-        { value: '中甲', label: '中甲' },
-        { value: '重甲', label: '重甲' },
-        { value: '盾牌', label: '盾牌' }
-      ];
-    }
+    const categories = categoryMap[type] || ['未分类'];
+    return categories.map(cat => ({
+      value: cat,
+      label: cat
+    }));
   }
 
   /* -------------------------------------------- */
@@ -119,9 +110,9 @@ export default class ShuhaiItemSheet extends ItemSheet {
   async _onItemUse(event) {
     event.preventDefault();
 
-    if (this.item.type === 'card') {
-      // 使用卡牌
-      await this.item.useCard();
+    if (this.item.type === 'combatDice' || this.item.type === 'shootDice' || this.item.type === 'defenseDice') {
+      // 使用骰子
+      await this.item.use();
     } else {
       ui.notifications.info(`使用 ${this.item.name}`);
       await this.item.displayCard();

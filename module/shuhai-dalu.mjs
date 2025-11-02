@@ -16,6 +16,7 @@ import ShuhaiItem, {
   EquipmentData
 } from "./documents/item.mjs";
 import ShuhaiActorSheet from "./sheets/actor-sheet.mjs";
+import ShuhaiPlayerSheet from "./sheets/player-sheet.mjs";
 import ShuhaiItemSheet from "./sheets/item-sheet.mjs";
 
 /* -------------------------------------------- */
@@ -62,10 +63,19 @@ Hooks.once('init', async function() {
   
   // 注册角色表单
   Actors.unregisterSheet("core", ActorSheet);
-  Actors.registerSheet("shuhai-dalu", ShuhaiActorSheet, {
+  
+  // ⭐ 注册 Player 角色表单（设为默认）
+  Actors.registerSheet("shuhai-dalu", ShuhaiPlayerSheet, {
     types: ["character"],
     makeDefault: true,
-    label: "SHUHAI.SheetLabel.Character"
+    label: "书海大陆 - Player 角色卡"
+  });
+  
+  // 注册标准角色表单
+  Actors.registerSheet("shuhai-dalu", ShuhaiActorSheet, {
+    types: ["character"],
+    makeDefault: false,
+    label: "书海大陆 - 标准角色卡"
   });
   
   // 注册物品表单
@@ -162,36 +172,40 @@ Hooks.once('init', function() {
     return arr || '';
   });
   
-  // 获取物品名称 (改进版，支持从 actor 获取)
-  Handlebars.registerHelper('getItemName', function(itemId, options) {
-    if (!itemId) return '空';
+  // ⭐ 添加 floor helper (向下取整)
+  Handlebars.registerHelper('floor', function(value) {
+    return Math.floor(value);
+  });
+  
+  // ⭐ 添加 ceil helper (向上取整)
+  Handlebars.registerHelper('ceil', function(value) {
+    return Math.ceil(value);
+  });
+  
+  // ⭐ 添加 round helper (四舍五入)
+  Handlebars.registerHelper('round', function(value) {
+    return Math.round(value);
+  });
+  
+  // 获取物品图片
+  Handlebars.registerHelper('getItemImg', function(itemId, options) {
+    if (!itemId) return 'icons/svg/item-bag.svg';
     
     // 尝试从当前上下文的 actor 获取物品
     const actor = options?.data?.root?.actor;
     if (actor && actor.items) {
       const item = actor.items.get(itemId);
-      if (item) return item.name;
+      if (item) return item.img;
     }
     
     // 否则从全局获取
     const item = game.items.get(itemId);
-    return item ? item.name : '未知物品';
+    return item ? item.img : 'icons/svg/item-bag.svg';
   });
   
   // 检查装备槽是否有物品
   Handlebars.registerHelper('hasItem', function(itemId) {
     return itemId && itemId !== '';
-  });
-
-  // 分割字符串
-  Handlebars.registerHelper('split', function(str, separator) {
-    if (!str) return [];
-    return str.split(separator || ',');
-  });
-
-  // 去除首尾空格
-  Handlebars.registerHelper('trim', function(str) {
-    return str ? str.trim() : '';
   });
 });
 
@@ -202,6 +216,8 @@ Hooks.once('init', function() {
 async function preloadHandlebarsTemplates() {
   return loadTemplates([
     // 角色表单的局部模板
+    "systems/shuhai-dalu/templates/actor/actor-character-sheet.hbs",
+    "systems/shuhai-dalu/templates/actor/actor-player-sheet.hbs",
     "systems/shuhai-dalu/templates/actor/parts/actor-info.hbs",
     "systems/shuhai-dalu/templates/actor/parts/actor-attributes.hbs",
     "systems/shuhai-dalu/templates/actor/parts/actor-skills.hbs",
@@ -217,6 +233,9 @@ async function preloadHandlebarsTemplates() {
     "systems/shuhai-dalu/templates/item/item-armor-sheet.hbs",
     "systems/shuhai-dalu/templates/item/item-item-sheet.hbs",
     "systems/shuhai-dalu/templates/item/item-equipment-sheet.hbs",
+    
+    // 对话框模板
+    "systems/shuhai-dalu/templates/dialog/check-dialog.hbs",
     
     // 聊天模板
     "systems/shuhai-dalu/templates/chat/check-roll.hbs",

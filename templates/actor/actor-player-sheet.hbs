@@ -1,0 +1,382 @@
+<form class="{{cssClass}} player-sheet flexcol" autocomplete="off">
+  
+  {{!-- 固定顶部区域 --}}
+  <div class="player-header-fixed">
+    {{!-- 左侧：头像和状态 --}}
+    <div class="left-panel">
+      {{!-- 头像区域 --}}
+      <div class="avatar-section">
+        <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}"/>
+        <button class="lock-btn" title="锁定" type="button"><i class="fas fa-lock"></i></button>
+      </div>
+      
+      {{!-- 状态栏 --}}
+      <div class="status-bars">
+        {{!-- 生命值 --}}
+        <div class="status-bar hp-bar">
+          <label>生命值</label>
+          <div class="bar-content">
+            <div class="bar-fill" style="width: {{multiply (divide system.derived.hp.value system.derived.hp.max) 100}}%"></div>
+            <span class="bar-text">{{system.derived.hp.value}}/{{system.derived.hp.max}}</span>
+          </div>
+        </div>
+        
+        {{!-- 侵蚀值 --}}
+        <div class="status-bar corruption-bar">
+          <label>侵蚀值</label>
+          <div class="bar-content">
+            <div class="bar-fill corruption" style="width: {{multiply (divide system.derived.corruption.value system.derived.corruption.max) 100}}%"></div>
+            <span class="bar-text">{{system.derived.corruption.value}}/{{system.derived.corruption.max}}</span>
+          </div>
+        </div>
+        
+        {{!-- 混乱条 --}}
+        <div class="status-item">
+          <label>混乱条</label>
+          <span class="value">{{system.derived.chaos}}</span>
+        </div>
+        
+        {{!-- 按钮组 --}}
+        <div class="action-buttons">
+          <button class="corruption-check-btn" type="button">侵蚀检定</button>
+          <button class="long-rest-btn" type="button">长休</button>
+        </div>
+      </div>
+    </div>
+    
+    {{!-- 右侧：基础信息和属性 --}}
+    <div class="right-panel">
+      {{!-- 基础信息 --}}
+      <div class="basic-info">
+        <div class="info-row">
+          <div class="info-group">
+            <label>名字</label>
+            <input type="text" name="name" value="{{actor.name}}" placeholder="角色名称"/>
+          </div>
+          <div class="info-group">
+            <label>种族</label>
+            <input type="text" name="system.info.race" value="{{system.info.race}}" placeholder="人类"/>
+          </div>
+          <div class="info-group">
+            <label>性别</label>
+            <input type="text" name="system.info.gender" value="{{system.info.gender}}" placeholder="女"/>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-group">
+            <label>势力</label>
+            <input type="text" name="system.info.faction" value="{{system.info.faction}}" placeholder="所属势力"/>
+          </div>
+          <div class="info-group">
+            <label>经验</label>
+            <input type="number" name="system.info.experience" value="{{system.info.experience}}" data-dtype="Number"/>
+          </div>
+          <div class="info-group">
+            <label>等级</label>
+            <input type="number" name="system.level" value="{{system.level}}" data-dtype="Number" min="1"/>
+          </div>
+        </div>
+      </div>
+      
+      {{!-- 属性信息 --}}
+      <div class="attributes-info">
+        {{#each attributes as |attr key|}}
+        <div class="attr-item">
+          <label>{{attr.label}}</label>
+          <div class="attr-value-group">
+            <input type="number" name="system.attributes.{{key}}" value="{{attr.value}}" data-dtype="Number" min="1" max="30"/>
+            <button class="check-btn" data-attribute="{{key}}" type="button" title="{{attr.label}}检定">
+              <i class="fas fa-circle"></i>
+            </button>
+          </div>
+        </div>
+        {{/each}}
+        
+        {{!-- 星光和速度 --}}
+        <div class="attr-item special">
+          <label>星光</label>
+          <span class="value">{{system.derived.starlight}}/{{add 10 (multiply system.level 2)}}</span>
+        </div>
+        <div class="attr-item special">
+          <label>速度值</label>
+          <div class="attr-value-group">
+            <span class="value">1D6+{{floor (divide system.attributes.dexterity 3)}}</span>
+            <button class="check-btn roll-speed-btn" type="button" title="投掷速度">
+              <i class="fas fa-circle"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  {{!-- 搜索和过滤区域 --}}
+  <div class="search-filter-section">
+    <input type="text" class="item-search" placeholder="搜索物品..." data-filter="items"/>
+    <div class="filter-buttons">
+      <button class="filter-btn" data-filter="combatDice" type="button">战斗骰</button>
+      <button class="filter-btn" data-filter="defenseDice" type="button">守备骰</button>
+      <button class="filter-btn" data-filter="equipment" type="button">装备骰</button>
+      <button class="filter-btn active" data-filter="all" type="button">全部</button>
+    </div>
+  </div>
+  
+  {{!-- 主内容区域：左右分栏 --}}
+  <div class="main-content">
+    {{!-- 左侧面板 --}}
+    <div class="left-content">
+      {{!-- 技能鉴定 --}}
+      <div class="skills-section">
+        <h3>技能鉴定</h3>
+        
+        {{!-- 力敏技能 --}}
+        <div class="skill-category">
+          <div class="category-title">
+            <span>力敏技能</span>
+            <span class="points-display">剩余: {{subtract system.skillPoints.strengthDex.total system.skillPoints.strengthDex.used}}</span>
+          </div>
+          {{#each skillGroups.strengthDex as |skill key|}}
+          <div class="skill-row">
+            <label>{{skill.label}}</label>
+            <div class="skill-controls">
+              <button class="skill-minus" data-skill="{{key}}" data-category="strengthDex" type="button">-</button>
+              <span class="skill-value">{{skill.value}}</span>
+              <button class="skill-plus" data-skill="{{key}}" data-category="strengthDex" type="button">+</button>
+              <button class="check-btn" data-skill="{{key}}" type="button">
+                <i class="fas fa-circle"></i>
+              </button>
+            </div>
+          </div>
+          {{/each}}
+        </div>
+        
+        {{!-- 智力技能 --}}
+        <div class="skill-category">
+          <div class="category-title">
+            <span>智力技能</span>
+            <span class="points-display">剩余: {{subtract system.skillPoints.intelligence.total system.skillPoints.intelligence.used}}</span>
+          </div>
+          {{#each skillGroups.intelligence as |skill key|}}
+          <div class="skill-row">
+            <label>{{skill.label}}</label>
+            <div class="skill-controls">
+              <button class="skill-minus" data-skill="{{key}}" data-category="intelligence" type="button">-</button>
+              <span class="skill-value">{{skill.value}}</span>
+              <button class="skill-plus" data-skill="{{key}}" data-category="intelligence" type="button">+</button>
+              <button class="check-btn" data-skill="{{key}}" type="button">
+                <i class="fas fa-circle"></i>
+              </button>
+            </div>
+          </div>
+          {{/each}}
+        </div>
+        
+        {{!-- 感知技能 --}}
+        <div class="skill-category">
+          <div class="category-title">
+            <span>感知技能</span>
+            <span class="points-display">剩余: {{subtract system.skillPoints.perception.total system.skillPoints.perception.used}}</span>
+          </div>
+          {{#each skillGroups.perception as |skill key|}}
+          <div class="skill-row">
+            <label>{{skill.label}}</label>
+            <div class="skill-controls">
+              <button class="skill-minus" data-skill="{{key}}" data-category="perception" type="button">-</button>
+              <span class="skill-value">{{skill.value}}</span>
+              <button class="skill-plus" data-skill="{{key}}" data-category="perception" type="button">+</button>
+              <button class="check-btn" data-skill="{{key}}" type="button">
+                <i class="fas fa-circle"></i>
+              </button>
+            </div>
+          </div>
+          {{/each}}
+        </div>
+        
+        {{!-- 魅力技能 --}}
+        <div class="skill-category">
+          <div class="category-title">
+            <span>魅力技能</span>
+            <span class="points-display">剩余: {{subtract system.skillPoints.charisma.total system.skillPoints.charisma.used}}</span>
+          </div>
+          {{#each skillGroups.charisma as |skill key|}}
+          <div class="skill-row">
+            <label>{{skill.label}}</label>
+            <div class="skill-controls">
+              <button class="skill-minus" data-skill="{{key}}" data-category="charisma" type="button">-</button>
+              <span class="skill-value">{{skill.value}}</span>
+              <button class="skill-plus" data-skill="{{key}}" data-category="charisma" type="button">+</button>
+              <button class="check-btn" data-skill="{{key}}" type="button">
+                <i class="fas fa-circle"></i>
+              </button>
+            </div>
+          </div>
+          {{/each}}
+        </div>
+      </div>
+      
+      {{!-- 装备栏 --}}
+      <div class="equipment-section">
+        <h3>装备栏</h3>
+        <div class="equipment-grid">
+          {{!-- 武器和防具 --}}
+          <div class="equipment-slot weapon-slot" data-slot-type="weapon">
+            <label>武器</label>
+            <div class="slot-content" data-slot="weapon" data-item-id="{{system.equipment.weapon}}">
+              {{#if (hasItem system.equipment.weapon)}}
+                <img src="{{getItemImg system.equipment.weapon}}" class="item-icon" data-item-id="{{system.equipment.weapon}}"/>
+                <button class="unequip-btn" data-slot-type="weapon" type="button">×</button>
+              {{else}}
+                <span class="empty-slot">空</span>
+              {{/if}}
+            </div>
+          </div>
+          
+          <div class="equipment-slot armor-slot" data-slot-type="armor">
+            <label>防具</label>
+            <div class="slot-content" data-slot="armor" data-item-id="{{system.equipment.armor}}">
+              {{#if (hasItem system.equipment.armor)}}
+                <img src="{{getItemImg system.equipment.armor}}" class="item-icon" data-item-id="{{system.equipment.armor}}"/>
+                <button class="unequip-btn" data-slot-type="armor" type="button">×</button>
+              {{else}}
+                <span class="empty-slot">空</span>
+              {{/if}}
+            </div>
+          </div>
+          
+          {{!-- 战斗骰 --}}
+          {{#each system.equipment.combatDice as |diceId index|}}
+          <div class="equipment-slot dice-slot" data-slot-type="combatDice" data-slot-index="{{index}}">
+            <label>战斗骰{{add index 1}}</label>
+            <div class="slot-content" data-slot="combatDice" data-slot-index="{{index}}" data-item-id="{{diceId}}">
+              {{#if (hasItem diceId)}}
+                <img src="{{getItemImg diceId}}" class="item-icon" data-item-id="{{diceId}}"/>
+                <button class="use-btn" data-item-id="{{diceId}}" type="button">使用</button>
+                <button class="unequip-btn" data-slot-type="combatDice" data-slot-index="{{index}}" type="button">×</button>
+              {{else}}
+                <span class="empty-slot">空</span>
+              {{/if}}
+            </div>
+          </div>
+          {{/each}}
+          
+          {{!-- 守备骰和触发骰 --}}
+          <div class="equipment-slot dice-slot" data-slot-type="defenseDice">
+            <label>守备骰</label>
+            <div class="slot-content" data-slot="defenseDice" data-item-id="{{system.equipment.defenseDice}}">
+              {{#if (hasItem system.equipment.defenseDice)}}
+                <img src="{{getItemImg system.equipment.defenseDice}}" class="item-icon" data-item-id="{{system.equipment.defenseDice}}"/>
+                <button class="use-btn" data-item-id="{{system.equipment.defenseDice}}" type="button">使用</button>
+                <button class="unequip-btn" data-slot-type="defenseDice" type="button">×</button>
+              {{else}}
+                <span class="empty-slot">空</span>
+              {{/if}}
+            </div>
+          </div>
+          
+          <div class="equipment-slot dice-slot" data-slot-type="triggerDice">
+            <label>触发骰</label>
+            <div class="slot-content" data-slot="triggerDice" data-item-id="{{system.equipment.triggerDice}}">
+              {{#if (hasItem system.equipment.triggerDice)}}
+                <img src="{{getItemImg system.equipment.triggerDice}}" class="item-icon" data-item-id="{{system.equipment.triggerDice}}"/>
+                <button class="use-btn" data-item-id="{{system.equipment.triggerDice}}" type="button">使用</button>
+                <button class="unequip-btn" data-slot-type="triggerDice" type="button">×</button>
+              {{else}}
+                <span class="empty-slot">空</span>
+              {{/if}}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {{!-- 货币 --}}
+      <div class="currency-section">
+        <h3>货币</h3>
+        <div class="currency-grid">
+          <div class="currency-item">
+            <label>货币</label>
+            <input type="number" name="system.resources.currency" value="{{system.resources.currency}}" data-dtype="Number" min="0"/>
+          </div>
+          <div class="currency-item">
+            <label>奇遇点</label>
+            <input type="number" name="system.resources.encounterPoints" value="{{system.resources.encounterPoints}}" data-dtype="Number" min="0"/>
+          </div>
+          <div class="currency-item">
+            <label>奇迹点</label>
+            <input type="number" name="system.resources.miraclePoints" value="{{system.resources.miraclePoints}}" data-dtype="Number" min="0"/>
+          </div>
+          <div class="currency-item">
+            <label>复制核心</label>
+            <input type="number" name="system.resources.replicaCore" value="{{system.resources.replicaCore}}" data-dtype="Number" min="0"/>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    {{!-- 右侧面板：物品栏 --}}
+    <div class="right-content">
+      <div class="inventory-header">
+        <h3>物品栏</h3>
+        <div class="create-buttons">
+          <button class="create-item-btn" data-type="combatDice" type="button" title="创建攻击骰">+ 攻击骰</button>
+          <button class="create-item-btn" data-type="shootDice" type="button" title="创建射击骰">+ 射击骰</button>
+          <button class="create-item-btn" data-type="defenseDice" type="button" title="创建守备骰">+ 守备骰</button>
+          <button class="create-item-btn" data-type="triggerDice" type="button" title="创建触发骰">+ 触发骰</button>
+          <button class="create-item-btn" data-type="passiveDice" type="button" title="创建被动骰">+ 被动骰</button>
+          <button class="create-item-btn" data-type="weapon" type="button" title="创建武器">+ 武器</button>
+          <button class="create-item-btn" data-type="armor" type="button" title="创建防具">+ 防具</button>
+          <button class="create-item-btn" data-type="item" type="button" title="创建物品">+ 物品</button>
+          <button class="create-item-btn" data-type="equipment" type="button" title="创建装备">+ 装备</button>
+        </div>
+      </div>
+      
+      {{!-- ⭐ 修改为表格布局 --}}
+      <div class="inventory-list">
+        <table class="inventory-table">
+          <thead>
+            <tr>
+              <th class="item-icon-cell"></th>
+              <th class="item-name-cell">名称</th>
+              <th class="item-type-cell">类型</th>
+              <th class="item-category-cell">分类</th>
+              <th class="item-dice-cell">骰数</th>
+              <th class="item-cost-cell">费用</th>
+              <th class="item-quantity-cell">数量</th>
+              <th class="item-starlight-cell">星光</th>
+              <th class="item-actions-cell">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each items as |item id|}}
+            <tr data-item-id="{{item._id}}" data-item-type="{{item.type}}" data-filtered="false" draggable="true">
+              <td class="item-icon-cell">
+                <img src="{{item.img}}" class="item-icon" data-item-id="{{item._id}}" title="{{item.name}}"/>
+              </td>
+              <td class="item-name-cell">{{item.name}}</td>
+              <td class="item-type-cell">{{item.type}}</td>
+              <td class="item-category-cell">{{item.system.category}}</td>
+              <td class="item-dice-cell">{{item.system.diceFormula}}</td>
+              <td class="item-cost-cell">{{item.system.cost}}</td>
+              <td class="item-quantity-cell">{{item.system.quantity}}</td>
+              <td class="item-starlight-cell">
+                {{#if item.system.starlightCost}}
+                {{item.system.starlightCost}}
+                {{else}}
+                -
+                {{/if}}
+              </td>
+              <td class="item-actions-cell">
+                <div class="item-actions">
+                  <button class="use-item-btn" data-item-id="{{item._id}}" type="button" title="使用">使用</button>
+                  <button class="edit-item-btn" data-item-id="{{item._id}}" type="button" title="编辑">编辑</button>
+                  <button class="delete-item-btn" data-item-id="{{item._id}}" type="button" title="删除">删除</button>
+                </div>
+              </td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+</form>
