@@ -27,7 +27,21 @@
   height: 100%; /* ⭐ 占满高度 */
   overflow: hidden; /* ⭐ 隐藏溢出 */
 }
+/* 禁用状态样式 */
 
+input:disabled,
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+}
+
+button:disabled:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+ 
+
+/* === 固定顶部区域（角色卡信息） === */
 .player-header-fixed {
   display: flex;
   gap: 1rem;
@@ -84,12 +98,16 @@
   justify-content: center;
 }
 
+ 
+
 .avatar-section .lock-btn:hover {
   background: rgba(0, 0, 0, 0.95);
   border-color: #2ecc71;
   transform: scale(1.1);
   box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
 }
+
+ 
 
 .avatar-section .lock-btn.locked {
   color: #e74c3c;
@@ -343,10 +361,37 @@
   transform: scale(1.2);
 }
 
+/* 技能检定按钮 - 红色圆形按钮 */
+.skill-check-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: #e74c3c;
+  border: 2px solid #c0392b;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.skill-check-btn:hover {
+  background: #c0392b;
+  border-color: #a93226;
+  transform: scale(1.15);
+  box-shadow: 0 0 10px rgba(231, 76, 60, 0.6);
+}
+
+.skill-check-btn i {
+  font-size: 0.875rem;
+}
+
 .attr-item.special {
   background: #252525;
 }
-
 .attr-item.combat-switch {
   grid-column: span 2;
   background: transparent;
@@ -372,6 +417,8 @@
   box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
 }
 
+ 
+
 .switch-combat-btn:hover {
   background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
   transform: translateY(-2px);
@@ -381,7 +428,6 @@
 .switch-combat-btn i {
   font-size: 1.25rem;
 }
-
 /* === 搜索和过滤区域 === */
 .search-filter-section {
   display: flex;
@@ -750,7 +796,10 @@
   border: 1px solid #3a3a3a;
   border-radius: 4px 4px 0 0;
   flex-shrink: 0;
+
 }
+
+ 
 
 .inventory-header h3 {
   margin: 0;
@@ -767,8 +816,46 @@
   background: #1e1e1e;
   border: 1px solid #3a3a3a;
   border-top: none;
-  border-radius: 0 0 4px 4px;
+  border-bottom: none;
   min-height: 0; /* ⭐ 允许滚动 */
+}
+
+/* 物品栏底部 */
+.inventory-footer {
+  padding: 1rem;
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.create-item-bottom-btn {
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+  border: 2px solid #229954;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+}
+
+.create-item-bottom-btn:hover {
+  background: linear-gradient(135deg, #229954 0%, #27ae60 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.5);
+}
+
+.create-item-bottom-btn i {
+  font-size: 1.25rem;
 }
 
 /* ⭐ 物品表格样式 - 模仿截图 */
@@ -808,19 +895,38 @@
   color: #e0e0e0;
 }
 
+.inventory-table .item-favorite-cell {
+  width: 50px;
+  text-align: center;
+}
+
+.inventory-table .item-favorite-cell .favorite-item-btn {
+  padding: 0.25rem;
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  filter: grayscale(100%);
+  opacity: 0.4;
+}
+
+.inventory-table .item-favorite-cell .favorite-item-btn.favorited {
+  filter: grayscale(0%);
+  opacity: 1;
+}
+
+.inventory-table .item-favorite-cell .favorite-item-btn:hover {
+  filter: grayscale(0%);
+  opacity: 1;
+  transform: scale(1.2);
+}
+
 .inventory-table .item-icon-cell {
   width: 60px;
   text-align: center;
   position: relative;
-  padding: 0.5rem;
-}
-
-.inventory-table .draggable-cell {
-  cursor: grab;
-}
-
-.inventory-table .draggable-cell:active {
-  cursor: grabbing;
+  cursor: pointer;
 }
 
 .inventory-table .item-icon {
@@ -828,13 +934,36 @@
   height: 48px;
   border: 1px solid #3a3a3a;
   border-radius: 4px;
-  pointer-events: none; /* 防止图标拦截拖动事件 */
+  cursor: pointer;
   transition: all 0.2s;
 }
 
-.inventory-table .draggable-cell:hover .item-icon {
-  transform: scale(1.05);
+.inventory-table .item-icon:hover {
+  transform: scale(1.1);
   border-color: #e74c3c;
+}
+
+.effect-description-tooltip {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2a2a2a;
+  color: #e0e0e0;
+  padding: 0.5rem;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: normal;
+  max-width: 250px;
+  z-index: 1000;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.item-icon-cell:hover .effect-description-tooltip {
+  display: block;
 }
 
 .inventory-table .item-name-cell {
@@ -938,4 +1067,11 @@
 }
 
 /* === 拖拽样式 === */
-/* 拖动功能已移至图标单元格 */
+.inventory-table tbody tr {
+  cursor: grab;
+}
+
+.inventory-table tbody tr:active {
+  cursor: grabbing;
+  opacity: 0.5;
+}
