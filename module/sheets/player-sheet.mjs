@@ -124,9 +124,13 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     html.find('.use-item-btn').click(this._onItemUse.bind(this));
     html.find('.edit-item-btn').click(this._onItemEdit.bind(this));
     html.find('.delete-item-btn').click(this._onItemDelete.bind(this));
-    
+    html.find('.favorite-item-btn').click(this._onItemFavorite.bind(this));
+
     // === 物品图标点击显示详情 ===
     html.find('.item-icon').click(this._onItemIconClick.bind(this));
+
+    // === 物品图标单元格点击编辑效果描述 ===
+    html.find('.item-icon-cell').dblclick(this._onEditEffectDescription.bind(this));
     
     // === 搜索和过滤 ===
     html.find('.item-search').on('input', this._onSearchItems.bind(this));
@@ -403,6 +407,64 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   }
 
   /**
+   * 收藏/取消收藏物品
+   */
+  async _onItemFavorite(event) {
+    event.preventDefault();
+    const itemId = event.currentTarget.dataset.itemId;
+    const item = this.actor.items.get(itemId);
+
+    if (!item) return;
+
+    // 切换收藏状态
+    const currentFavorite = item.system.favorite || false;
+    await item.update({ "system.favorite": !currentFavorite });
+  }
+
+  /**
+   * 双击物品图标单元格编辑效果描述
+   */
+  async _onEditEffectDescription(event) {
+    event.preventDefault();
+    const row = $(event.currentTarget).closest('tr');
+    const itemId = row.data('item-id');
+    const item = this.actor.items.get(itemId);
+
+    if (!item) return;
+
+    // 创建编辑对话框
+    const currentEffect = item.system.effect || "";
+
+    new Dialog({
+      title: `编辑效果描述 - ${item.name}`,
+      content: `
+        <form>
+          <div class="form-group">
+            <label>效果描述:</label>
+            <textarea name="effect" rows="6" style="width: 100%; resize: vertical;">${currentEffect}</textarea>
+          </div>
+        </form>
+      `,
+      buttons: {
+        save: {
+          icon: '<i class="fas fa-save"></i>',
+          label: "保存",
+          callback: async (html) => {
+            const newEffect = html.find('textarea[name="effect"]').val();
+            await item.update({ "system.effect": newEffect });
+            ui.notifications.info(`已更新 ${item.name} 的效果描述`);
+          }
+        },
+        cancel: {
+          icon: '<i class="fas fa-times"></i>',
+          label: "取消"
+        }
+      },
+      default: "save"
+    }).render(true);
+  }
+
+  /**
    * 点击物品图标显示详情
    */
   _onItemIconClick(event) {
@@ -460,18 +522,26 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     const filterType = event.currentTarget.dataset.filter;
     const items = this.element.find('.inventory-table tbody tr');
     const filterBtns = this.element.find('.filter-btn');
-    
+
     // 更新按钮状态
     filterBtns.removeClass('active');
     $(event.currentTarget).addClass('active');
-    
+
     // 过滤物品
     items.each((i, item) => {
       const $item = $(item);
       const itemType = $item.data('item-type');
-      
+      const itemFavorite = $item.data('favorite');
+
       if (filterType === 'all') {
         $item.attr('data-filtered', 'false');
+      } else if (filterType === 'favorite') {
+        // 筛选收藏的物品
+        if (itemFavorite === true || itemFavorite === 'true') {
+          $item.attr('data-filtered', 'false');
+        } else {
+          $item.attr('data-filtered', 'true');
+        }
       } else if (itemType === filterType) {
         $item.attr('data-filtered', 'false');
       } else {
