@@ -713,9 +713,9 @@
 
 .create-buttons {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 0.25rem;
-  justify-content: flex-start;
+  justify-content: flex-start; /* ⭐ 左对齐 */
 }
 
 .create-item-btn {
@@ -737,7 +737,7 @@
 }
 
 .create-item-btn:hover {
-  background: #2ecc71;
+  background: #7f0e9b;
   transform: translateY(-1px);
 }
 
