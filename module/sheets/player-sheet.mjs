@@ -91,7 +91,25 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    * 准备物品数据
    */
   _prepareItems(context) {
-    context.items = context.actor.items.contents;
+    const typeNames = {
+      combatDice: '攻击骰',
+      shootDice: '射击骰',
+      defenseDice: '守备骰',
+      triggerDice: '触发骰',
+      passiveDice: '被动骰',
+      weapon: '武器',
+      armor: '防具',
+      item: '物品',
+      equipment: '装备'
+    };
+
+    // 为每个物品添加中文类型名称
+    context.items = context.actor.items.contents.map(item => {
+      return {
+        ...item,
+        typeLabel: typeNames[item.type] || item.type
+      };
+    });
   }
 
   /* -------------------------------------------- */
@@ -101,7 +119,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     super.activateListeners(html);
     
     if (!this.isEditable) return;
-    
+
     // === 属性检定 ===
     html.find('.check-btn[data-attribute]').click(this._onAttributeRoll.bind(this));
     
@@ -113,23 +131,21 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     // === 状态按钮 ===
     html.find('.corruption-check-btn').click(this._onCorruptionCheck.bind(this));
     html.find('.long-rest-btn').click(this._onLongRest.bind(this));
-    html.find('.roll-speed-btn').click(this._onRollSpeed.bind(this));
+    html.find('.switch-combat-btn').click(this._onSwitchCombat.bind(this));
     
     // === 装备相关 ===
     html.find('.unequip-btn').click(this._onUnequip.bind(this));
     html.find('.use-btn').click(this._onUseDice.bind(this));
     
     // === 物品相关 ===
-    html.find('.create-item-btn').click(this._onItemCreate.bind(this));
+
     html.find('.use-item-btn').click(this._onItemUse.bind(this));
     html.find('.edit-item-btn').click(this._onItemEdit.bind(this));
     html.find('.delete-item-btn').click(this._onItemDelete.bind(this));
     html.find('.favorite-item-btn').click(this._onItemFavorite.bind(this));
 
-    // === 物品图标点击显示详情 ===
-    html.find('.item-icon').click(this._onItemIconClick.bind(this));
-
-    // === 物品图标单元格点击编辑效果描述 ===
+    // === 物品图标单元格点击显示详情，双击编辑效果描述 ===
+    html.find('.item-icon-cell').click(this._onItemIconClick.bind(this));
     html.find('.item-icon-cell').dblclick(this._onEditEffectDescription.bind(this));
     
     // === 搜索和过滤 ===
@@ -138,9 +154,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     
     // === 拖放 ===
     const dragHandler = ev => this._onDragStart(ev);
-    html.find('.inventory-table tbody tr').each((i, tr) => {
-      tr.setAttribute("draggable", true);
-      tr.addEventListener("dragstart", dragHandler, false);
+    html.find('.draggable-cell').each((i, cell) => {
+      cell.addEventListener("dragstart", dragHandler, false);
     });
   }
 
@@ -149,6 +164,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   /* -------------------------------------------- */
 
   /**
+
    * 属性检定
    */
   async _onAttributeRoll(event) {
@@ -267,35 +283,12 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   }
 
   /**
-   * 投掷速度
+   * 切换到战斗区域
    */
-  async _onRollSpeed(event) {
+  async _onSwitchCombat(event) {
     event.preventDefault();
-    
-    const dex = this.actor.system.attributes.dexterity;
-    const roll = new Roll("1d6");
-    await roll.evaluate();
-    
-    if (game.dice3d) {
-      await game.dice3d.showForRoll(roll, game.user, true);
-    }
-    
-    const speed = roll.total + Math.floor(dex / 3);
-    
-    await this.actor.update({ 'system.derived.speed': speed });
-    
-    ChatMessage.create({
-      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      flavor: "速度值投掷",
-      content: `
-        <div class="shuhai-speed-roll">
-          <p>${this.actor.name} 的速度值:</p>
-          <p>${roll.total}[1d6] + ${Math.floor(dex / 3)}[敏捷/3] = <strong>${speed}</strong></p>
-        </div>
-      `,
-      sound: CONFIG.sounds.dice,
-      rolls: [roll]
-    });
+    // TODO: 实现战斗模式切换功能
+    ui.notifications.warn("战斗区域功能开发中...");
   }
 
   /**
@@ -322,27 +315,6 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       await item.use();
     }
   }
-
-  /**
-   * 创建物品
-   */
-  async _onItemCreate(event) {
-    event.preventDefault();
-    const type = event.currentTarget.dataset.type;
-    
-    const itemData = {
-      name: `新${this._getTypeName(type)}`,
-      type: type,
-      system: {}
-    };
-    
-    const cls = getDocumentClass("Item");
-    const item = await cls.create(itemData, { parent: this.actor });
-    
-    // 立即打开编辑窗口
-    if (item) {
-      item.sheet.render(true);
-    }
   }
 
   _getTypeName(type) {
@@ -411,6 +383,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    */
   async _onItemFavorite(event) {
     event.preventDefault();
+    event.stopPropagation();
+
     const itemId = event.currentTarget.dataset.itemId;
     const item = this.actor.items.get(itemId);
 
@@ -419,6 +393,13 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     // 切换收藏状态
     const currentFavorite = item.system.favorite || false;
     await item.update({ "system.favorite": !currentFavorite });
+
+    // 提示
+    if (!currentFavorite) {
+      ui.notifications.info(`已收藏 ${item.name}`);
+    } else {
+      ui.notifications.info(`已取消收藏 ${item.name}`);
+    }
   }
 
   /**
@@ -469,7 +450,9 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    */
   _onItemIconClick(event) {
     event.preventDefault();
-    const itemId = event.currentTarget.dataset.itemId;
+    // 从父行获取item-id
+    const row = $(event.currentTarget).closest('tr');
+    const itemId = row.data('item-id');
     const item = this.actor.items.get(itemId);
     
     if (!item) return;

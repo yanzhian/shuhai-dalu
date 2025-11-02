@@ -1,13 +1,13 @@
 <form class="{{cssClass}} player-sheet flexcol" autocomplete="off">
-  
-  {{!-- 固定顶部区域 --}}
   <div class="player-header-fixed">
     {{!-- 左侧：头像和状态 --}}
     <div class="left-panel">
       {{!-- 头像区域 --}}
       <div class="avatar-section">
         <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}"/>
-        <button class="lock-btn" title="锁定" type="button"><i class="fas fa-lock"></i></button>
+        <button class="lock-btn {{#if isLocked}}locked{{/if}}" title="{{#if isLocked}}点击解锁（编辑模式）{{else}}点击锁定（游玩模式）{{/if}}" type="button">
+          <i class="fas {{#if isLocked}}fa-lock{{else}}fa-lock-open{{/if}}"></i>
+        </button>
       </div>
       
       {{!-- 状态栏 --}}
@@ -91,20 +91,13 @@
           </div>
         </div>
         {{/each}}
-        
-        {{!-- 星光和速度 --}}
-        <div class="attr-item special">
-          <label>星光</label>
-          <span class="value">{{system.derived.starlight}}/{{add 10 (multiply system.level 2)}}</span>
-        </div>
-        <div class="attr-item special">
-          <label>速度值</label>
-          <div class="attr-value-group">
-            <span class="value">1D6+{{floor (divide system.attributes.dexterity 3)}}</span>
-            <button class="check-btn roll-speed-btn" type="button" title="投掷速度">
-              <i class="fas fa-circle"></i>
-            </button>
-          </div>
+
+        {{!-- 转换战斗区域按钮 --}}
+        <div class="attr-item special combat-switch">
+          <button class="switch-combat-btn" type="button" title="切换到战斗模式">
+            <i class="fas fa-swords"></i>
+            <span>战斗区域</span>
+          </button>
         </div>
       </div>
     </div>
@@ -317,17 +310,6 @@
     <div class="right-content">
       <div class="inventory-header">
         <h3>物品栏</h3>
-        <div class="create-buttons">
-          <button class="create-item-btn" data-type="combatDice" type="button" title="创建攻击骰">+ 攻击骰</button>
-          <button class="create-item-btn" data-type="shootDice" type="button" title="创建射击骰">+ 射击骰</button>
-          <button class="create-item-btn" data-type="defenseDice" type="button" title="创建守备骰">+ 守备骰</button>
-          <button class="create-item-btn" data-type="triggerDice" type="button" title="创建触发骰">+ 触发骰</button>
-          <button class="create-item-btn" data-type="passiveDice" type="button" title="创建被动骰">+ 被动骰</button>
-          <button class="create-item-btn" data-type="weapon" type="button" title="创建武器">+ 武器</button>
-          <button class="create-item-btn" data-type="armor" type="button" title="创建防具">+ 防具</button>
-          <button class="create-item-btn" data-type="item" type="button" title="创建物品">+ 物品</button>
-          <button class="create-item-btn" data-type="equipment" type="button" title="创建装备">+ 装备</button>
-        </div>
       </div>
       
       {{!-- ⭐ 修改为表格布局 --}}
@@ -348,13 +330,10 @@
           </thead>
           <tbody>
             {{#each items as |item id|}}
-            <tr data-item-id="{{item._id}}" data-item-type="{{item.type}}" data-favorite="{{item.system.favorite}}" data-filtered="false" draggable="true">
-              <td class="item-icon-cell" title="{{item.system.effect}}">
-                <img src="{{item.img}}" class="item-icon" data-item-id="{{item._id}}"/>
-                <div class="effect-description-tooltip">{{item.system.effect}}</div>
+
               </td>
               <td class="item-name-cell">{{item.name}}</td>
-              <td class="item-type-cell">{{item.type}}</td>
+              <td class="item-type-cell">{{item.typeLabel}}</td>
               <td class="item-category-cell">{{item.system.category}}</td>
               <td class="item-dice-cell">{{item.system.diceFormula}}</td>
               <td class="item-cost-cell">{{item.system.cost}}</td>
