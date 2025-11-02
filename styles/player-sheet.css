@@ -907,7 +907,7 @@ button:disabled:hover {
 
   transition: all 0.2s;
 
-  pointer-events: none;
+  /* pointer-events: none; */
 
 }
 
