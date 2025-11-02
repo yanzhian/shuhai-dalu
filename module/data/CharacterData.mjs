@@ -51,10 +51,11 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
       
       // 常用物品货币
       resources: new fields.SchemaField({
+        starlight: new fields.NumberField({ initial: 0, min: 0, label: "星光剩余" }),
         currency: new fields.NumberField({ initial: 0, min: 0, label: "货币" }),
-        encounterPoints: new fields.NumberField({ initial: 0, min: 0, label: "奇遇点" }),
+        adventurePoints: new fields.NumberField({ initial: 0, min: 0, label: "奇遇点" }),
         miraclePoints: new fields.NumberField({ initial: 1, min: 0, label: "奇迹点" }),
-        replicaCore: new fields.NumberField({ initial: 0, min: 0, label: "复制核心" })
+        copyCore: new fields.NumberField({ initial: 0, min: 0, label: "复制核心" })
       }),
       
       // ==================== 2. 角色技能属性 ====================
@@ -116,23 +117,30 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
           new fields.StringField(),
           { initial: ["", "", "", ""], label: "物品槽" }
         ),
+
+        // 装备骰槽位 (1-4)
+        equipmentDice: new fields.ArrayField(
+          new fields.StringField(),
+          { initial: ["", "", "", ""], label: "装备骰" }
+        ),
+
         gear: new fields.ArrayField(
           new fields.StringField(),
           { initial: ["", "", "", ""], label: "装备槽" }
         ),
-        
+
         // 战斗骰槽位 (1-6)
         combatDice: new fields.ArrayField(
           new fields.StringField(),
           { initial: ["", "", "", "", "", ""], label: "战斗骰" }
         ),
-        
+
         // 守备骰槽位
         defenseDice: new fields.StringField({ initial: "", label: "守备骰" }),
-        
+
         // 触发骰槽位
         triggerDice: new fields.StringField({ initial: "", label: "触发骰" }),
-        
+
         // 被动技能槽位
         passives: new fields.ArrayField(
           new fields.StringField(),
