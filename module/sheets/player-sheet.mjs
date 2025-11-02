@@ -145,26 +145,25 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     // === 物品相关 ===
     html.find('.create-item-btn').click(this._onItemCreateDialog.bind(this));
 
-   html.find('.item-use-btn').click(this._onItemUse.bind(this));
+ // 使用事件委托来处理物品按钮，避免动态生成的元素无法点击
 
-    html.find('.item-edit-btn').click(this._onItemEdit.bind(this));
+    html.on('click', '.item-use-btn', this._onItemUse.bind(this));
 
-    html.find('.item-delete-btn').click(this._onItemDelete.bind(this));
+    html.on('click', '.item-edit-btn', this._onItemEdit.bind(this));
 
-    html.find('.item-favorite-btn').click(this._onItemFavorite.bind(this));
+    html.on('click', '.item-delete-btn', this._onItemDelete.bind(this));
+
+    html.on('click', '.item-favorite-btn', this._onItemFavorite.bind(this));
 
  
 
     // === 物品图标交互 ===
 
-    // 单击图标：编辑物品
+    // 使用事件委托处理图标点击
 
-    html.find('.item-icon-wrapper .item-icon').click(this._onItemIconClick.bind(this));
+    html.on('click', '.item-icon-wrapper .item-icon', this._onItemIconClick.bind(this));
 
-    // 双击图标包装器：编辑效果描述
-
-    html.find('.item-icon-wrapper').dblclick(this._onItemIconDblClick.bind(this));
-
+    html.on('dblclick', '.item-icon-wrapper', this._onItemIconDblClick.bind(this));
     // === 搜索和过滤 ===
     html.find('.item-search').on('input', this._onSearchItems.bind(this));
     html.find('.favorite-filter-btn').click(this._onFavoriteFilter.bind(this));
@@ -208,13 +207,25 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       row.classList.add('dragging');
     }
 
-    // 设置拖动数据
+   // 设置拖动数据 - 使用application/json而不是text/plain
+
     event.dataTransfer.effectAllowed = 'move';
-    event.dataTransfer.setData('text/plain', JSON.stringify({
+
+    const dragData = JSON.stringify({
+
       type: 'Item',
+
       uuid: item.uuid,
+
       itemId: itemId
-    }));
+
+    });
+
+    event.dataTransfer.setData('application/json', dragData);
+
+    // 备用：也设置text/plain，但只包含itemId
+
+    event.dataTransfer.setData('text/plain', itemId);
   }
 
   /**
@@ -264,12 +275,35 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     const targetRow = event.currentTarget;
     targetRow.classList.remove('drag-over');
 
-    // 获取拖动的物品
-    const data = event.dataTransfer.getData('text/plain');
-    if (!data) return;
+    // 优先获取application/json数据，如果没有则使用text/plain
 
-    const dragData = JSON.parse(data);
-    const dragItemId = dragData.itemId;
+    let dragItemId;
+
+    const jsonData = event.dataTransfer.getData('application/json');
+
+    if (jsonData) {
+
+      try {
+
+        const dragData = JSON.parse(jsonData);
+
+        dragItemId = dragData.itemId;
+
+      } catch (e) {
+
+        console.error('Failed to parse JSON drag data:', e);
+
+        return;
+
+      }
+
+    } else {
+
+      // 备用：text/plain直接是itemId
+
+      dragItemId = event.dataTransfer.getData('text/plain');
+
+    }
     const targetItemId = targetRow.dataset.itemId;
 
     if (!dragItemId || !targetItemId || dragItemId === targetItemId) return;
