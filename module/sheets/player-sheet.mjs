@@ -94,7 +94,25 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    * 准备物品数据
    */
   _prepareItems(context) {
-    context.items = context.actor.items.contents;
+    const typeNames = {
+      combatDice: '攻击骰',
+      shootDice: '射击骰',
+      defenseDice: '守备骰',
+      triggerDice: '触发骰',
+      passiveDice: '被动骰',
+      weapon: '武器',
+      armor: '防具',
+      item: '物品',
+      equipment: '装备'
+    };
+
+    // 为每个物品添加中文类型名称
+    context.items = context.actor.items.contents.map(item => {
+      return {
+        ...item,
+        typeLabel: typeNames[item.type] || item.type
+      };
+    });
   }
 
   /* -------------------------------------------- */
@@ -106,7 +124,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     if (!this.isEditable) return;
 
     // === 游玩/编辑模式切换 ===
-    html.find('.mode-btn').click(this._onToggleEditMode.bind(this));
+    html.find('.lock-btn').click(this._onToggleLock.bind(this));
 
     // === 属性检定 ===
     html.find('.check-btn[data-attribute]').click(this._onAttributeRoll.bind(this));
@@ -119,14 +137,13 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     // === 状态按钮 ===
     html.find('.corruption-check-btn').click(this._onCorruptionCheck.bind(this));
     html.find('.long-rest-btn').click(this._onLongRest.bind(this));
-    html.find('.roll-speed-btn').click(this._onRollSpeed.bind(this));
+    html.find('.switch-combat-btn').click(this._onSwitchCombat.bind(this));
     
     // === 装备相关 ===
     html.find('.unequip-btn').click(this._onUnequip.bind(this));
     html.find('.use-btn').click(this._onUseDice.bind(this));
     
     // === 物品相关 ===
-    html.find('.create-item-btn').click(this._onItemCreate.bind(this));
     html.find('.create-item-bottom-btn').click(this._onItemCreateDialog.bind(this));
     html.find('.use-item-btn').click(this._onItemUse.bind(this));
     html.find('.edit-item-btn').click(this._onItemEdit.bind(this));
@@ -156,14 +173,22 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   /* -------------------------------------------- */
 
   /**
-   * 切换游玩/编辑模式
+   * 切换锁定状态
    */
-  async _onToggleEditMode(event) {
+  async _onToggleLock(event) {
     event.preventDefault();
-    const mode = event.currentTarget.dataset.mode;
-    const isLocked = mode === 'play'; // 游玩模式=锁定，编辑模式=解锁
+    const currentLocked = this.actor.getFlag('shuhai-dalu', 'isLocked') ?? true;
+    const newLocked = !currentLocked;
 
-    await this.actor.setFlag('shuhai-dalu', 'isLocked', isLocked);
+    await this.actor.setFlag('shuhai-dalu', 'isLocked', newLocked);
+
+    // 显示提示
+    if (newLocked) {
+      ui.notifications.info("已切换到游玩模式（锁定）");
+    } else {
+      ui.notifications.info("已切换到编辑模式（解锁）");
+    }
+
     this.render(false);
   }
 
@@ -286,35 +311,12 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   }
 
   /**
-   * 投掷速度
+   * 切换到战斗区域
    */
-  async _onRollSpeed(event) {
+  async _onSwitchCombat(event) {
     event.preventDefault();
-    
-    const dex = this.actor.system.attributes.dexterity;
-    const roll = new Roll("1d6");
-    await roll.evaluate();
-    
-    if (game.dice3d) {
-      await game.dice3d.showForRoll(roll, game.user, true);
-    }
-    
-    const speed = roll.total + Math.floor(dex / 3);
-    
-    await this.actor.update({ 'system.derived.speed': speed });
-    
-    ChatMessage.create({
-      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      flavor: "速度值投掷",
-      content: `
-        <div class="shuhai-speed-roll">
-          <p>${this.actor.name} 的速度值:</p>
-          <p>${roll.total}[1d6] + ${Math.floor(dex / 3)}[敏捷/3] = <strong>${speed}</strong></p>
-        </div>
-      `,
-      sound: CONFIG.sounds.dice,
-      rolls: [roll]
-    });
+    // TODO: 实现战斗模式切换功能
+    ui.notifications.warn("战斗区域功能开发中...");
   }
 
   /**
@@ -343,29 +345,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   }
 
   /**
-   * 创建物品
-   */
-  async _onItemCreate(event) {
-    event.preventDefault();
-    const type = event.currentTarget.dataset.type;
-
-    const itemData = {
-      name: `新${this._getTypeName(type)}`,
-      type: type,
-      system: {}
-    };
-
-    const cls = getDocumentClass("Item");
-    const item = await cls.create(itemData, { parent: this.actor });
-
-    // 立即打开编辑窗口
-    if (item) {
-      item.sheet.render(true);
-    }
-  }
-
-  /**
-   * 显示创建物品对话框（底部按钮）
+   * 显示创建物品对话框
    */
   async _onItemCreateDialog(event) {
     event.preventDefault();
@@ -487,6 +467,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    */
   async _onItemFavorite(event) {
     event.preventDefault();
+    event.stopPropagation();
+
     const itemId = event.currentTarget.dataset.itemId;
     const item = this.actor.items.get(itemId);
 
@@ -495,6 +477,13 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     // 切换收藏状态
     const currentFavorite = item.system.favorite || false;
     await item.update({ "system.favorite": !currentFavorite });
+
+    // 提示
+    if (!currentFavorite) {
+      ui.notifications.info(`已收藏 ${item.name}`);
+    } else {
+      ui.notifications.info(`已取消收藏 ${item.name}`);
+    }
   }
 
   /**
