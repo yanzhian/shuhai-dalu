@@ -207,6 +207,99 @@ Hooks.once('init', function() {
   Handlebars.registerHelper('hasItem', function(itemId) {
     return itemId && itemId !== '';
   });
+  // 获取物品费用
+
+  Handlebars.registerHelper('getItemCost', function(itemId, options) {
+
+    if (!itemId) return '';
+
+ 
+
+    // 尝试从当前上下文的 actor 获取物品
+
+    const actor = options?.data?.root?.actor;
+
+    if (actor && actor.items) {
+
+      const item = actor.items.get(itemId);
+
+      if (item && item.system.cost) return item.system.cost;
+
+    }
+
+ 
+
+    // 否则从全局获取
+
+    const item = game.items.get(itemId);
+
+    return (item && item.system.cost) ? item.system.cost : '';
+
+  });
+
+ 
+
+  // 获取物品骰数
+
+  Handlebars.registerHelper('getItemDice', function(itemId, options) {
+
+    if (!itemId) return '';
+
+ 
+
+    // 尝试从当前上下文的 actor 获取物品
+
+    const actor = options?.data?.root?.actor;
+
+    if (actor && actor.items) {
+
+      const item = actor.items.get(itemId);
+
+      if (item && item.system.diceFormula) return item.system.diceFormula;
+
+    }
+
+ 
+
+    // 否则从全局获取
+
+    const item = game.items.get(itemId);
+
+    return (item && item.system.diceFormula) ? item.system.diceFormula : '';
+
+  });
+
+ 
+
+  // 获取物品名称
+
+  Handlebars.registerHelper('getItemName', function(itemId, options) {
+
+    if (!itemId) return '';
+
+ 
+
+    // 尝试从当前上下文的 actor 获取物品
+
+    const actor = options?.data?.root?.actor;
+
+    if (actor && actor.items) {
+
+      const item = actor.items.get(itemId);
+
+      if (item) return item.name;
+
+    }
+
+ 
+
+    // 否则从全局获取
+
+    const item = game.items.get(itemId);
+
+    return item ? item.name : '';
+
+  });
 });
 
 /* -------------------------------------------- */

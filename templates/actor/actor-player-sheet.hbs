@@ -216,19 +216,55 @@
           <label>武器</label>
           <div class="slot-content" data-slot="weapon" data-item-id="{{system.equipment.weapon}}">
             {{#if (hasItem system.equipment.weapon)}}
-              <img src="{{getItemImg system.equipment.weapon}}" class="item-icon" data-item-id="{{system.equipment.weapon}}"/>
+        <img src="{{getItemImg system.equipment.weapon}}" class="item-icon" data-item-id="{{system.equipment.weapon}}"/>
+{{!-- 左上角费用圈 --}}
+
+              <div class="slot-cost">{{getItemCost system.equipment.weapon}}</div>
+
+              {{!-- 右下角骰数框 --}}
+
+              {{#if (getItemDice system.equipment.weapon)}}
+
+              <div class="slot-dice">{{getItemDice system.equipment.weapon}}</div>
+
+              {{/if}}
+
               <button class="unequip-btn" data-slot-type="weapon" type="button">×</button>
+
             {{else}}
+
               <span class="empty-slot">空</span>
+
             {{/if}}
+
           </div>
+
         </div>
 
+ 
+
         <div class="equipment-slot armor-slot" data-slot-type="armor">
+
           <label>防具</label>
+
           <div class="slot-content" data-slot="armor" data-item-id="{{system.equipment.armor}}">
+
             {{#if (hasItem system.equipment.armor)}}
+
               <img src="{{getItemImg system.equipment.armor}}" class="item-icon" data-item-id="{{system.equipment.armor}}"/>
+
+              {{!-- 左上角费用圈 --}}
+
+              <div class="slot-cost">{{getItemCost system.equipment.armor}}</div>
+
+              {{!-- 右下角骰数框 --}}
+
+              {{#if (getItemDice system.equipment.armor)}}
+
+              <div class="slot-dice">{{getItemDice system.equipment.armor}}</div>
+
+              {{/if}}
+
               <button class="unequip-btn" data-slot-type="armor" type="button">×</button>
             {{else}}
               <span class="empty-slot">空</span>
@@ -245,49 +281,144 @@
           <div class="slot-content" data-slot="combatDice" data-slot-index="{{index}}" data-item-id="{{diceId}}">
             {{#if (hasItem diceId)}}
               <img src="{{getItemImg diceId}}" class="item-icon" data-item-id="{{diceId}}"/>
+
+
+
+ {{!-- 左上角费用圈 --}}
+
+              <div class="slot-cost">{{getItemCost diceId}}</div>
+
+              {{!-- 右下角骰数框 --}}
+
+              {{#if (getItemDice diceId)}}
+
+              <div class="slot-dice">{{getItemDice diceId}}</div>
+
+              {{/if}}
+
               <button class="unequip-btn" data-slot-type="combatDice" data-slot-index="{{index}}" type="button">×</button>
+
             {{else}}
+
               <span class="empty-slot">空</span>
+
             {{/if}}
+
           </div>
+
         </div>
+
         {{/each}}
+
       </div>
-    
+
+ 
+
       {{!-- 守备骰 --}}
+
       <div class="equipment-slot defense-dice-slot" data-slot-type="defenseDice">
+
         <label>守备骰</label>
+
         <div class="slot-content" data-slot="defenseDice" data-item-id="{{system.equipment.defenseDice}}">
+
           {{#if (hasItem system.equipment.defenseDice)}}
+
             <img src="{{getItemImg system.equipment.defenseDice}}" class="item-icon" data-item-id="{{system.equipment.defenseDice}}"/>
+
+            {{!-- 左上角费用圈 --}}
+
+            <div class="slot-cost">{{getItemCost system.equipment.defenseDice}}</div>
+
+            {{!-- 右下角骰数框 --}}
+
+            {{#if (getItemDice system.equipment.defenseDice)}}
+
+            <div class="slot-dice">{{getItemDice system.equipment.defenseDice}}</div>
+
+            {{/if}}
+
             <button class="unequip-btn" data-slot-type="defenseDice" type="button">×</button>
+
           {{else}}
+
             <span class="empty-slot">空</span>
+
           {{/if}}
+
         </div>
+
       </div>
+
+ 
 
       {{!-- 触发骰 --}}
+
       <div class="equipment-slot trigger-dice-slot" data-slot-type="triggerDice">
+
         <label>触发骰</label>
+
         <div class="slot-content" data-slot="triggerDice" data-item-id="{{system.equipment.triggerDice}}">
+
           {{#if (hasItem system.equipment.triggerDice)}}
+
             <img src="{{getItemImg system.equipment.triggerDice}}" class="item-icon" data-item-id="{{system.equipment.triggerDice}}"/>
+
+            {{!-- 左上角费用圈 --}}
+
+            <div class="slot-cost">{{getItemCost system.equipment.triggerDice}}</div>
+
+            {{!-- 右下角骰数框 --}}
+
+            {{#if (getItemDice system.equipment.triggerDice)}}
+
+            <div class="slot-dice">{{getItemDice system.equipment.triggerDice}}</div>
+
+            {{/if}}
+
             <button class="unequip-btn" data-slot-type="triggerDice" type="button">×</button>
+
           {{else}}
+
             <span class="empty-slot">空</span>
+
           {{/if}}
+
         </div>
+
       </div>
 
+ 
+
       {{!-- 被动骰 --}}
+
       <div class="passive-dice-slots">
+
         {{#each system.equipment.passives as |passiveId index|}}
+
         <div class="equipment-slot passive-dice-slot" data-slot-type="passiveDice" data-slot-index="{{index}}">
+
           <label>被动骰</label>
+
           <div class="slot-content" data-slot="passiveDice" data-slot-index="{{index}}" data-item-id="{{passiveId}}">
+
             {{#if (hasItem passiveId)}}
+
               <img src="{{getItemImg passiveId}}" class="item-icon" data-item-id="{{passiveId}}"/>
+
+              {{!-- 左上角费用圈 --}}
+
+              <div class="slot-cost">{{getItemCost passiveId}}</div>
+
+              {{!-- 右下角骰数框 --}}
+
+              {{#if (getItemDice passiveId)}}
+
+              <div class="slot-dice">{{getItemDice passiveId}}</div>
+
+              {{/if}}
+
+
               <button class="unequip-btn" data-slot-type="passiveDice" data-slot-index="{{index}}" type="button">×</button>
             {{else}}
               <span class="empty-slot">空</span>
@@ -303,74 +434,142 @@
       <table class="inventory-table">
         <thead>
           <tr>
-            <th class="col-favorite">收藏</th>
-            <th class="col-icon">图标</th>
+<th class="col-icon">图标</th>
+
             <th class="col-name">名称</th>
+
             <th class="col-type">类型</th>
+
             <th class="col-category">分类</th>
+
             <th class="col-dice">骰数</th>
+
             <th class="col-cost">费用</th>
+
             <th class="col-quantity">数量</th>
+
             <th class="col-starlight">星光</th>
+
             <th class="col-actions">操作</th>
+
           </tr>
+
         </thead>
+
         <tbody>
+
           {{#each items as |item id|}}
+
           <tr class="inventory-row"
+
               data-item-id="{{item._id}}"
+
               data-item-type="{{item.type}}"
+
               data-favorite="{{item.system.favorite}}"
+
               data-filtered="false">
-            <td class="col-favorite">
-              <button class="item-favorite {{#if item.system.favorite}}favorited{{/if}}"
-                      data-item-id="{{item._id}}"
-                      type="button"
-                      title="收藏/取消收藏">
-                <i class="fas fa-star"></i>
-              </button>
-            </td>
-            <td class="col-icon" title="{{item.system.effect}}">
-              <img src="{{item.img}}"
-                   class="item-icon"
+
+            {{!-- 图标列：可拖动，单击编辑，双击添加描述，title显示描述 --}}
+
+            <td class="col-icon">
+
+              <div class="item-icon-wrapper"
+
                    data-item-id="{{item._id}}"
-                   draggable="true"/>
-            </td>
-            <td class="col-name">{{item.name}}</td>
-            <td class="col-type">{{item.typeLabel}}</td>
-            <td class="col-category">{{item.system.category}}</td>
-            <td class="col-dice">{{item.system.diceFormula}}</td>
-            <td class="col-cost">{{item.system.cost}}</td>
-            <td class="col-quantity">{{item.system.quantity}}</td>
-            <td class="col-starlight">
-              {{#if item.system.starlightCost}}
-              {{item.system.starlightCost}}
-              {{else}}
-              -
-              {{/if}}
-            </td>
-            <td class="col-actions">
-              <div class="item-actions">
-                <button class="item-use" data-item-id="{{item._id}}" type="button" title="使用">
-                  <i class="fas fa-play"></i>
-                </button>
-                <button class="item-edit" data-item-id="{{item._id}}" type="button" title="编辑">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button class="item-delete" data-item-id="{{item._id}}" type="button" title="删除">
-                  <i class="fas fa-trash"></i>
-                </button>
+
+                   title="{{item.system.effect}}">
+
+                <img src="{{item.img}}"
+
+                     class="item-icon"
+
+                     data-item-id="{{item._id}}"
+
+                     draggable="true"/>
+
               </div>
+
             </td>
+
+            <td class="col-name">{{item.name}}</td>
+
+            <td class="col-type">{{item.typeLabel}}</td>
+
+            <td class="col-category">{{item.system.category}}</td>
+
+            <td class="col-dice">{{item.system.diceFormula}}</td>
+
+            <td class="col-cost">{{item.system.cost}}</td>
+
+            <td class="col-quantity">{{item.system.quantity}}</td>
+
+            <td class="col-starlight">
+
+              {{#if item.system.starlightCost}}
+
+              {{item.system.starlightCost}}
+
+              {{else}}
+
+              -
+
+              {{/if}}
+
+            </td>
+
+            <td class="col-actions">
+
+              <div class="item-actions">
+
+                <button class="item-use-btn" data-item-id="{{item._id}}" type="button" title="使用">
+
+                  <i class="fas fa-play-circle"></i>
+
+                </button>
+
+                <button class="item-edit-btn" data-item-id="{{item._id}}" type="button" title="编辑">
+
+                  <i class="fas fa-edit"></i>
+
+                </button>
+
+                <button class="item-delete-btn" data-item-id="{{item._id}}" type="button" title="删除">
+
+                  <i class="fas fa-trash-alt"></i>
+
+                </button>
+
+                <button class="item-favorite-btn {{#if item.system.favorite}}favorited{{/if}}"
+
+                        data-item-id="{{item._id}}"
+
+                        type="button"
+
+                        title="收藏/取消收藏">
+
+                  <i class="fas fa-star"></i>
+
+                </button>
+
+              </div>
+
+            </td>
+
           </tr>
+
           {{/each}}
+
         </tbody>
+
       </table>
 
-      {{!-- 创建物品按钮 --}}
+ 
+
+      {{!-- 创建物品按钮 - 永远在底部 --}}
       <div class="inventory-footer">
         <button class="create-item-btn" type="button">
-          <i class="fas fa-plus-circle"></i> 新建物品
+          <i class="fas fa-plus-circle"></i> 创建物品
         </button>
       </div>
     </div>

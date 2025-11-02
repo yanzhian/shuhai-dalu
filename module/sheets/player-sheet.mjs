@@ -145,17 +145,25 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     // === 物品相关 ===
     html.find('.create-item-btn').click(this._onItemCreateDialog.bind(this));
 
-    // 使用事件委托确保按钮点击正常工作
-    html.find('.item-use').click(this._onItemUse.bind(this));
-    html.find('.item-edit').click(this._onItemEdit.bind(this));
-    html.find('.item-delete').click(this._onItemDelete.bind(this));
-    html.find('.item-favorite').click(this._onItemFavorite.bind(this));
+   html.find('.item-use-btn').click(this._onItemUse.bind(this));
 
-    // === 物品图标点击显示详情 ===
-    html.find('.col-icon .item-icon').click(this._onItemIconClick.bind(this));
+    html.find('.item-edit-btn').click(this._onItemEdit.bind(this));
 
-    // === 物品图标单元格双击编辑效果描述 ===
-    html.find('.col-icon').dblclick(this._onEditEffectDescription.bind(this));
+    html.find('.item-delete-btn').click(this._onItemDelete.bind(this));
+
+    html.find('.item-favorite-btn').click(this._onItemFavorite.bind(this));
+
+ 
+
+    // === 物品图标交互 ===
+
+    // 单击图标：编辑物品
+
+    html.find('.item-icon-wrapper .item-icon').click(this._onItemIconClick.bind(this));
+
+    // 双击图标包装器：编辑效果描述
+
+    html.find('.item-icon-wrapper').dblclick(this._onItemIconDblClick.bind(this));
 
     // === 搜索和过滤 ===
     html.find('.item-search').on('input', this._onSearchItems.bind(this));
@@ -652,38 +660,111 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   }
 
   /**
-   * 点击物品图标显示详情
+  * 单击物品图标：编辑物品信息
+
    */
+
   _onItemIconClick(event) {
+
     event.preventDefault();
+
     event.stopPropagation();
+
     const itemId = event.currentTarget.dataset.itemId;
+
     const item = this.actor.items.get(itemId);
+
+ 
+
+    if (item) {
+
+      item.sheet.render(true);
+
+    }
+
+  }
+
+ 
+
+  /**
+
+   * 双击物品图标：编辑效果描述
+
+   */
+
+  async _onItemIconDblClick(event) {
+
+    event.preventDefault();
+
+    event.stopPropagation();
+
+    const itemId = event.currentTarget.dataset.itemId;
+
+    const item = this.actor.items.get(itemId);
+
+ 
 
     if (!item) return;
 
-    // 显示物品详情对话框
-    const content = `
-      <div class="item-details-dialog">
-        <h3>${item.name}</h3>
-        <p><strong>类型:</strong> ${this._getTypeName(item.type)}</p>
-        <p><strong>分类:</strong> ${item.system.category || '-'}</p>
-        <p><strong>骰数:</strong> ${item.system.diceFormula || '-'}</p>
-        <p><strong>费用:</strong> ${item.system.cost || '-'}</p>
-        ${item.system.tags ? `<p><strong>标签:</strong> ${item.system.tags}</p>` : ''}
-        ${item.system.effect ? `<div><strong>描述:</strong><div>${item.system.effect}</div></div>` : ''}
-      </div>
-    `;
+ 
+
+    // 创建编辑对话框
+
+    const currentEffect = item.system.effect || "";
+
+ 
 
     new Dialog({
-      title: item.name,
-      content: content,
+
+      title: `编辑效果描述 - ${item.name}`,
+
+      content: `
+
+        <form>
+
+          <div class="form-group">
+
+            <label>效果描述:</label>
+
+            <textarea name="effect" rows="8" style="width: 100%; resize: vertical; padding: 0.5rem; background: #2a2a2a; border: 1px solid #3a3a3a; color: #e0e0e0; border-radius: 3px;">${currentEffect}</textarea>
+
+          </div>
+
+        </form>
+
+      `,
+
       buttons: {
-        close: {
+
+        save: {
+
+          icon: '<i class="fas fa-save"></i>',
+
+          label: "保存",
+
+          callback: async (html) => {
+
+            const newEffect = html.find('textarea[name="effect"]').val();
+
+            await item.update({ "system.effect": newEffect });
+
+            ui.notifications.info(`已更新 ${item.name} 的效果描述`);
+
+          }
+
+        },
+
+        cancel: {
+
           icon: '<i class="fas fa-times"></i>',
-          label: "关闭"
+
+          label: "取消"
+
         }
-      }
+
+      },
+
+      default: "save"
     }).render(true);
   }
 
