@@ -437,7 +437,7 @@
       <table class="inventory-table">
         <thead>
           <tr>
- <th class="col-icon">图标</th>
+<th class="col-icon">图标</th>
 
             <th class="col-name">名称</th>
 
@@ -453,19 +453,17 @@
 
             <th class="col-starlight">星光</th>
 
-            <th class="col-favorite">收藏</th>
+            <th class="col-actions">操作</th>
 
           </tr>
 
         </thead>
 
- 
-
         <tbody>
 
           {{#each items as |item id|}}
 
-          <tr class="inventory-row item-row"
+          <tr class="inventory-row"
 
               data-item-id="{{item._id}}"
 
@@ -473,23 +471,29 @@
 
               data-favorite="{{item.system.favorite}}"
 
-              data-filtered="false"
+              data-filtered="false">
 
-              draggable="true"
-
-              title="{{item.system.effect}}">
-
- 
-
-            {{!-- 图标列 --}}
+            {{!-- 图标列：可拖动，单击编辑，双击添加描述，title显示描述 --}}
 
             <td class="col-icon">
 
-              <img src="{{item.img}}" class="item-icon" alt="{{item.name}}"/>
+              <div class="item-icon-wrapper"
+
+                   data-item-id="{{item._id}}"
+
+                   title="{{item.system.effect}}">
+
+                <img src="{{item.img}}"
+
+                     class="item-icon"
+
+                     data-item-id="{{item._id}}"
+
+                     draggable="true"/>
+
+              </div>
 
             </td>
-
- 
 
             <td class="col-name">{{item.name}}</td>
 
@@ -517,31 +521,47 @@
 
             </td>
 
- 
+            <td class="col-actions">
 
-            {{!-- 收藏状态显示 --}}
+              <div class="item-actions">
 
-            <td class="col-favorite">
+                <button class="item-use-btn" data-item-id="{{item._id}}" type="button" title="使用">
 
-              {{#if item.system.favorite}}
+                  <i class="fas fa-play-circle"></i>
 
-              <i class="fas fa-star favorited"></i>
+                </button>
 
-              {{else}}
+                <button class="item-edit-btn" data-item-id="{{item._id}}" type="button" title="编辑">
 
-              <i class="far fa-star"></i>
+                  <i class="fas fa-edit"></i>
 
-              {{/if}}
+                </button>
+
+                <button class="item-delete-btn" data-item-id="{{item._id}}" type="button" title="删除">
+
+                  <i class="fas fa-trash-alt"></i>
+
+                </button>
+
+                <button class="item-favorite-btn {{#if item.system.favorite}}favorited{{/if}}"
+
+                        data-item-id="{{item._id}}"
+
+                        type="button"
+
+                        title="收藏/取消收藏">
+
+                  <i class="fas fa-star"></i>
+
+                </button>
+
+              </div>
 
             </td>
-
- 
 
           </tr>
 
           {{/each}}
-
- 
 
         </tbody>
 

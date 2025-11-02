@@ -144,107 +144,157 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
     // === 物品相关 ===
     html.find('.create-item-btn').click(this._onItemCreateDialog.bind(this));
-   // 双击物品行打开编辑
 
-    html.find('.item-row').dblclick(event => {
-      const itemId = $(event.currentTarget).data('item-id');
-      const item = this.actor.items.get(itemId);
-      if (item) item.sheet.render(true);
-    });
+   html.find('.item-use-btn').click(this._onItemUse.bind(this));
+
+    html.find('.item-edit-btn').click(this._onItemEdit.bind(this));
+
+    html.find('.item-delete-btn').click(this._onItemDelete.bind(this));
+
+    html.find('.item-favorite-btn').click(this._onItemFavorite.bind(this));
+
  
+
+    // === 物品图标交互 ===
+
+    // 单击图标：编辑物品
+
+    html.find('.item-icon-wrapper .item-icon').click(this._onItemIconClick.bind(this));
+
+    // 双击图标包装器：编辑效果描述
+
+    html.find('.item-icon-wrapper').dblclick(this._onItemIconDblClick.bind(this));
+
     // === 搜索和过滤 ===
     html.find('.item-search').on('input', this._onSearchItems.bind(this));
     html.find('.favorite-filter-btn').click(this._onFavoriteFilter.bind(this));
     html.find('.advanced-filter-btn').click(this._onAdvancedFilter.bind(this));
- 
-    // === 拖放 ===
+
+    // === 拖放 - 只有图标可拖动 ===
     this._setupDragAndDrop(html);
- 
-    // === 右键菜单 ===
-    this._contextMenu(html);
   }
- 
+
   /**
-   * 设置右键菜单
-   */
-  _contextMenu(html) {
-    new ContextMenu(html, ".item-row", [
-      {
-        name: "使用",
-        icon: '<i class="fas fa-play-circle"></i>',
-        condition: li => {
-          const itemId = li.data("item-id");
-          const item = this.actor.items.get(itemId);
-          // 只有骰子类型可以使用
-          return item && ['combatDice', 'shootDice', 'defenseDice', 'triggerDice', 'passiveDice'].includes(item.type);
-        },
-        callback: li => {
-          const itemId = li.data("item-id");
-          this._onItemUse({ currentTarget: { dataset: { itemId } } });
-        }
-      },
-      {
-        name: "编辑",
-        icon: '<i class="fas fa-edit"></i>',
-        callback: li => {
-          const itemId = li.data("item-id");
-          const item = this.actor.items.get(itemId);
-          if (item) item.sheet.render(true);
-        }
-      },
-      {
-        name: "删除",
-        icon: '<i class="fas fa-trash-alt"></i>',
-        callback: li => {
-          const itemId = li.data("item-id");
-          this._onItemDelete({ currentTarget: { dataset: { itemId } } });
-        }
-      },
-      {
-        name: "收藏",
-        icon: '<i class="fas fa-star"></i>',
-        condition: li => {
-          const itemId = li.data("item-id");
-          const item = this.actor.items.get(itemId);
-          return item && !item.system.favorite;
-        },
-        callback: li => {
-          const itemId = li.data("item-id")
-          this._onItemFavorite({ currentTarget: { dataset: { itemId } } });
-        }
-      },
-      {
-        name: "取消收藏",
-        icon: '<i class="far fa-star"></i>',
-        condition: li => {
-          const itemId = li.data("item-id");
-          const item = this.actor.items.get(itemId);
-          return item && item.system.favorite;
-        },
-        callback: li => {
-          const itemId = li.data("item-id");
-          this._onItemFavorite({ currentTarget: { dataset: { itemId } } });
-        }
-      }
-    ]);
-  }
- 
-  /**
-   * 设置拖放功能（使用标准角色卡的方式）
+   * 设置拖放功能
    */
   _setupDragAndDrop(html) {
-    const dragHandler = ev => this._onDragStart(ev);
-    html.find('.item-row').each((i, row) => {
-      row.setAttribute("draggable", true);
-      row.addEventListener("dragstart", dragHandler, false);    
+    // 为物品图标设置拖放
+    html.find('.col-icon .item-icon').each((i, icon) => {
+      icon.addEventListener('dragstart', this._onDragItemStart.bind(this), false);
+      icon.addEventListener('dragend', this._onDragItemEnd.bind(this), false);
+    });
+
+    // 为物品行设置drop区域（用于位置交换）
+    html.find('.inventory-row').each((i, row) => {
+      row.addEventListener('dragover', this._onDragOver.bind(this), false);
+      row.addEventListener('drop', this._onDropOnRow.bind(this), false);
+      row.addEventListener('dragleave', this._onDragLeave.bind(this), false);
     });
   }
 
+  /**
+   * 拖动物品图标开始
+   */
+  _onDragItemStart(event) {
+    const icon = event.currentTarget;
+    const itemId = icon.dataset.itemId;
+    const item = this.actor.items.get(itemId);
 
+    if (!item) return;
 
+    // 添加拖动样式
+    const row = icon.closest('.inventory-row');
+    if (row) {
+      row.classList.add('dragging');
+    }
 
+    // 设置拖动数据
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', JSON.stringify({
+      type: 'Item',
+      uuid: item.uuid,
+      itemId: itemId
+    }));
+  }
 
+  /**
+   * 拖动物品图标结束
+   */
+  _onDragItemEnd(event) {
+    const icon = event.currentTarget;
+    const row = icon.closest('.inventory-row');
+    if (row) {
+      row.classList.remove('dragging');
+    }
 
+    // 清除所有drag-over样式
+    this.element.find('.drag-over').removeClass('drag-over');
+  }
+
+  /**
+   * 拖动经过
+   */
+  _onDragOver(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+
+    const row = event.currentTarget;
+    if (!row.classList.contains('dragging')) {
+      row.classList.add('drag-over');
+    }
+
+    return false;
+  }
+
+  /**
+   * 拖动离开
+   */
+  _onDragLeave(event) {
+    const row = event.currentTarget;
+    row.classList.remove('drag-over');
+  }
+
+  /**
+   * 放下到物品行（交换位置）
+   */
+  async _onDropOnRow(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const targetRow = event.currentTarget;
+    targetRow.classList.remove('drag-over');
+
+    // 获取拖动的物品
+    const data = event.dataTransfer.getData('text/plain');
+    if (!data) return;
+
+    const dragData = JSON.parse(data);
+    const dragItemId = dragData.itemId;
+    const targetItemId = targetRow.dataset.itemId;
+
+    if (!dragItemId || !targetItemId || dragItemId === targetItemId) return;
+
+    // 交换两个物品的sort值
+    await this._swapItemPositions(dragItemId, targetItemId);
+  }
+
+  /**
+   * 交换两个物品的位置
+   */
+  async _swapItemPositions(itemId1, itemId2) {
+    const item1 = this.actor.items.get(itemId1);
+    const item2 = this.actor.items.get(itemId2);
+
+    if (!item1 || !item2) return;
+
+    const sort1 = item1.sort;
+    const sort2 = item2.sort;
+
+    await item1.update({ sort: sort2 });
+    await item2.update({ sort: sort1 });
+
+    ui.notifications.info("物品位置已交换");
+  }
 
   /* -------------------------------------------- */
   /*  事件处理                                      */
