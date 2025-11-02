@@ -1,0 +1,857 @@
+/* ========================================
+   书海大陆 Player 角色卡样式
+   参考截图的深色主题
+   ======================================== */
+
+.player-sheet {
+  background: #2a2a2a;
+  color: #e0e0e0;
+  font-family: "Noto Sans SC", sans-serif;
+  height: 100%;
+  overflow: hidden;
+  display: flex; /* ⭐ 使用 flex 布局 */
+  flex-direction: column; /* ⭐ 垂直排列 */
+}
+
+.player-sheet .window-content {
+  padding: 0;
+  overflow: hidden;
+  display: flex; /* ⭐ 使用 flex 布局 */
+  flex-direction: column; /* ⭐ 垂直排列 */
+  height: 100%; /* ⭐ 占满高度 */
+}
+
+.player-sheet form {
+  display: flex; /* ⭐ 使用 flex 布局 */
+  flex-direction: column; /* ⭐ 垂直排列 */
+  height: 100%; /* ⭐ 占满高度 */
+  overflow: hidden; /* ⭐ 隐藏溢出 */
+}
+
+/* === 固定顶部区域 === */
+.player-header-fixed {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: #1e1e1e;
+  border-bottom: 2px solid #3a3a3a;
+}
+
+/* === 左侧面板：头像和状态 === */
+.left-panel {
+  display: flex;
+  gap: 1rem;
+  width: 400px;
+}
+
+.avatar-section {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.avatar-section .profile-img {
+  width: 150px;
+  height: 150px;
+  border: 3px solid #4a4a4a;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.avatar-section .profile-img:hover {
+  border-color: #e74c3c;
+}
+
+.avatar-section .lock-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 30px;
+  height: 30px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid #555;
+  border-radius: 3px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.avatar-section .lock-btn:hover {
+  background: #e74c3c;
+  border-color: #e74c3c;
+}
+
+/* === 状态栏 === */
+.status-bars {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.status-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.status-bar label {
+  font-size: 0.875rem;
+  font-weight: bold;
+  color: #aaa;
+}
+
+.bar-content {
+  position: relative;
+  height: 24px;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #27ae60 0%, #2ecc71 100%);
+  transition: width 0.3s ease;
+}
+
+.bar-fill.corruption {
+  background: linear-gradient(90deg, #8e44ad 0%, #9b59b6 100%);
+}
+
+.bar-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.875rem;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  z-index: 1;
+}
+
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+}
+
+.status-item label {
+  font-size: 0.875rem;
+  color: #aaa;
+}
+
+.status-item .value {
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-buttons button {
+  flex: 1;
+  padding: 0.5rem;
+  background: #3498db;
+  border: none;
+  border-radius: 3px;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.action-buttons .corruption-check-btn {
+  background: #9b59b6;
+}
+
+.action-buttons .long-rest-btn {
+  background: #16a085;
+}
+
+.action-buttons button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* === 右侧面板：基础信息和属性 === */
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.basic-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.info-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.info-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.info-group label {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.info-group input {
+  padding: 0.375rem 0.5rem;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  color: #e0e0e0;
+  font-size: 0.875rem;
+}
+
+.info-group input:focus {
+  outline: none;
+  border-color: #e74c3c;
+}
+
+.level-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem 0.5rem;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  font-size: 0.875rem;
+  font-weight: bold;
+  color: #e74c3c;
+}
+
+/* === 属性信息 === */
+.attributes-info {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.attr-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+}
+
+.attr-item label {
+  font-size: 0.75rem;
+  color: #888;
+  text-align: center;
+}
+
+.attr-value-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.attr-value-group input {
+  flex: 1;
+  padding: 0.25rem;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  color: #fff;
+  font-size: 1.125rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.attr-value-group input:focus {
+  outline: none;
+  border-color: #e74c3c;
+}
+
+.attr-value-group .value {
+  flex: 1;
+  text-align: center;
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+.check-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: #e74c3c;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.check-btn:hover {
+  color: #c0392b;
+  transform: scale(1.2);
+}
+
+.attr-item.special {
+  background: #252525;
+}
+
+/* === 搜索和过滤区域 === */
+.search-filter-section {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: #1e1e1e;
+  border-bottom: 1px solid #3a3a3a;
+  flex-shrink: 0; /* ⭐ 防止被压缩 */
+  min-height: 60px; /* ⭐ 固定最小高度 */
+  max-height: 60px; /* ⭐ 固定最大高度 */
+  align-items: center; /* ⭐ 垂直居中对齐 */
+}
+
+.item-search {
+  flex: 1;
+  padding: 0.5rem;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  color: #e0e0e0;
+  height: 36px; /* ⭐ 固定输入框高度 */
+}
+
+.item-search:focus {
+  outline: none;
+  border-color: #e74c3c;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0; /* ⭐ 防止被压缩 */
+}
+
+.filter-btn {
+  padding: 0.5rem 1rem;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  color: #aaa;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap; /* ⭐ 防止文字换行 */
+  height: 36px; /* ⭐ 与输入框同高 */
+  display: flex;
+  align-items: center;
+}
+
+.filter-btn:hover {
+  background: #3a3a3a;
+  color: #fff;
+}
+
+.filter-btn.active {
+  background: #e74c3c;
+  border-color: #e74c3c;
+  color: #fff;
+}
+
+/* === 主内容区域 === */
+.main-content {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  height: calc(100% - 350px);
+  overflow: hidden;
+  flex: 1; /* ⭐ 占据剩余空间 */
+  min-height: 0; /* ⭐ 允许 flex 子元素正确计算高度 */
+}
+
+.left-content {
+  width: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex-shrink: 0; /* ⭐ 保持固定宽度 */
+}
+
+.right-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* ⭐ 关键：隐藏溢出 */
+  min-width: 0; /* ⭐ 允许 flex 收缩 */
+  min-height: 0; /* ⭐ 允许子元素正确计算高度 */
+}
+
+/* === 滚动条样式 === */
+.left-content::-webkit-scrollbar,
+.inventory-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.left-content::-webkit-scrollbar-track,
+.inventory-list::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.left-content::-webkit-scrollbar-thumb,
+.inventory-list::-webkit-scrollbar-thumb {
+  background: #3a3a3a;
+  border-radius: 4px;
+}
+
+.left-content::-webkit-scrollbar-thumb:hover,
+.inventory-list::-webkit-scrollbar-thumb:hover {
+  background: #4a4a4a;
+}
+
+/* === 技能鉴定 === */
+.skills-section {
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.skills-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: #e74c3c;
+  border-bottom: 1px solid #3a3a3a;
+  padding-bottom: 0.5rem;
+}
+
+.skill-category {
+  margin-bottom: 1rem;
+}
+
+.skill-category:last-child {
+  margin-bottom: 0;
+}
+
+.category-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  background: #2a2a2a;
+  border-radius: 3px;
+  font-size: 0.875rem;
+}
+
+.category-title span:first-child {
+  color: #aaa;
+  font-weight: bold;
+}
+
+.points-display {
+  color: #3498db;
+  font-weight: bold;
+}
+
+.skill-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  margin-bottom: 0.25rem;
+  background: #252525;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+
+.skill-row:hover {
+  background: #2a2a2a;
+}
+
+.skill-row label {
+  font-size: 0.875rem;
+  color: #e0e0e0;
+}
+
+.skill-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.skill-minus,
+.skill-plus {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: #3a3a3a;
+  border: 1px solid #4a4a4a;
+  border-radius: 3px;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.skill-minus:hover,
+.skill-plus:hover {
+  background: #4a4a4a;
+}
+
+.skill-value {
+  min-width: 30px;
+  text-align: center;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* === 装备栏 === */
+.equipment-section {
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.equipment-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: #e74c3c;
+  border-bottom: 1px solid #3a3a3a;
+  padding-bottom: 0.5rem;
+}
+
+.equipment-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.equipment-slot {
+  background: #252525;
+  border: 2px dashed #3a3a3a;
+  border-radius: 4px;
+  padding: 0.5rem;
+  transition: all 0.3s;
+}
+
+.equipment-slot:hover {
+  border-color: #e74c3c;
+  background: #2a2a2a;
+}
+
+.equipment-slot label {
+  display: block;
+  font-size: 0.75rem;
+  color: #888;
+  margin-bottom: 0.25rem;
+  text-align: center;
+}
+
+.slot-content {
+  position: relative;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.slot-content .item-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.slot-content .item-icon:hover {
+  transform: scale(1.1);
+}
+
+.slot-content .empty-slot {
+  color: #555;
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+.use-btn {
+  padding: 0.25rem 0.5rem;
+  background: #27ae60;
+  border: none;
+  border-radius: 3px;
+  color: #fff;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.use-btn:hover {
+  background: #2ecc71;
+}
+
+.unequip-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: #e74c3c;
+  border: none;
+  border-radius: 3px;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.unequip-btn:hover {
+  background: #c0392b;
+}
+
+/* === 货币 === */
+.currency-section {
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.currency-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: #e74c3c;
+  border-bottom: 1px solid #3a3a3a;
+  padding-bottom: 0.5rem;
+}
+
+.currency-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.currency-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.currency-item label {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.currency-item input {
+  padding: 0.375rem 0.5rem;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  color: #fff;
+  text-align: center;
+}
+
+.currency-item input:focus {
+  outline: none;
+  border-color: #e74c3c;
+}
+
+/* === 物品栏 === */
+.inventory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px 4px 0 0;
+  flex-shrink: 0; /* ⭐ 防止被压缩 */
+}
+
+.inventory-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #e74c3c;
+}
+
+.create-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.create-item-btn {
+  padding: 0.25rem 0.5rem;
+  background: #27ae60;
+  border: none;
+  border-radius: 3px;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.create-item-btn:hover {
+  background: #2ecc71;
+  transform: translateY(-1px);
+}
+
+.inventory-list {
+  flex: 1; /* ⭐ 占据剩余空间 */
+  overflow-y: auto; /* ⭐ 启用垂直滚动 */
+  overflow-x: hidden; /* ⭐ 隐藏水平滚动 */
+  padding: 1rem;
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  min-height: 0; /* ⭐ 允许滚动 */
+}
+
+.inventory-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: #252525;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  cursor: grab;
+  transition: all 0.2s;
+}
+
+.inventory-item:hover {
+  background: #2a2a2a;
+  border-color: #e74c3c;
+  transform: translateX(4px);
+}
+
+.inventory-item:active {
+  cursor: grabbing;
+}
+
+.inventory-item .item-icon {
+  width: 48px;
+  height: 48px;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.inventory-item .item-icon:hover {
+  transform: scale(1.1);
+  border-color: #e74c3c;
+}
+
+.inventory-item .item-info {
+  flex: 1;
+}
+
+.inventory-item .item-name {
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.inventory-item .item-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.inventory-item .item-details span {
+  padding: 0.125rem 0.375rem;
+  background: #1a1a1a;
+  border-radius: 3px;
+  color: #aaa;
+}
+
+.inventory-item .item-type {
+  color: #3498db;
+}
+
+.inventory-item .item-category {
+  color: #9b59b6;
+}
+
+.inventory-item .item-dice {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.inventory-item .item-starlight {
+  color: #f39c12;
+}
+
+.item-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.item-actions button {
+  padding: 0.25rem 0.5rem;
+  border: none;
+  border-radius: 3px;
+  color: #fff;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.use-item-btn {
+  background: #27ae60;
+}
+
+.use-item-btn:hover {
+  background: #2ecc71;
+}
+
+.edit-item-btn {
+  background: #3498db;
+}
+
+.edit-item-btn:hover {
+  background: #5dade2;
+}
+
+.delete-item-btn {
+  background: #e74c3c;
+}
+
+.delete-item-btn:hover {
+  background: #c0392b;
+}
+
+/* === 过滤效果 === */
+.inventory-item[data-filtered="true"] {
+  display: none;
+}
