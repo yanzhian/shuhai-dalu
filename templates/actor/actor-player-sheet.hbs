@@ -114,6 +114,7 @@
   <div class="search-filter-section">
     <input type="text" class="item-search" placeholder="搜索物品..." data-filter="items"/>
     <div class="filter-buttons">
+      <button class="filter-btn" data-filter="favorite" type="button">⭐ 收藏</button>
       <button class="filter-btn" data-filter="combatDice" type="button">战斗骰</button>
       <button class="filter-btn" data-filter="defenseDice" type="button">守备骰</button>
       <button class="filter-btn" data-filter="equipment" type="button">装备骰</button>
@@ -334,7 +335,7 @@
         <table class="inventory-table">
           <thead>
             <tr>
-              <th class="item-icon-cell"></th>
+              <th class="item-icon-cell">效果描述</th>
               <th class="item-name-cell">名称</th>
               <th class="item-type-cell">类型</th>
               <th class="item-category-cell">分类</th>
@@ -347,9 +348,10 @@
           </thead>
           <tbody>
             {{#each items as |item id|}}
-            <tr data-item-id="{{item._id}}" data-item-type="{{item.type}}" data-filtered="false" draggable="true">
-              <td class="item-icon-cell">
-                <img src="{{item.img}}" class="item-icon" data-item-id="{{item._id}}" title="{{item.name}}"/>
+            <tr data-item-id="{{item._id}}" data-item-type="{{item.type}}" data-favorite="{{item.system.favorite}}" data-filtered="false" draggable="true">
+              <td class="item-icon-cell" title="{{item.system.effect}}">
+                <img src="{{item.img}}" class="item-icon" data-item-id="{{item._id}}"/>
+                <div class="effect-description-tooltip">{{item.system.effect}}</div>
               </td>
               <td class="item-name-cell">{{item.name}}</td>
               <td class="item-type-cell">{{item.type}}</td>
@@ -366,6 +368,7 @@
               </td>
               <td class="item-actions-cell">
                 <div class="item-actions">
+                  <button class="favorite-item-btn {{#if item.system.favorite}}favorited{{/if}}" data-item-id="{{item._id}}" type="button" title="收藏">⭐</button>
                   <button class="use-item-btn" data-item-id="{{item._id}}" type="button" title="使用">使用</button>
                   <button class="edit-item-btn" data-item-id="{{item._id}}" type="button" title="编辑">编辑</button>
                   <button class="delete-item-btn" data-item-id="{{item._id}}" type="button" title="删除">删除</button>

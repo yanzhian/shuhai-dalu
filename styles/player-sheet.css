@@ -719,16 +719,21 @@
 }
 
 .create-item-btn {
-  padding: 0.25rem 0.5rem;
+  padding: 0.125rem 0.5rem;
+  height: 18px;
+  line-height: 1;
   background: #27ae60;
   border: none;
   border-radius: 3px;
   color: #fff;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .create-item-btn:hover {
@@ -788,6 +793,8 @@
 .inventory-table .item-icon-cell {
   width: 60px;
   text-align: center;
+  position: relative;
+  cursor: pointer;
 }
 
 .inventory-table .item-icon {
@@ -802,6 +809,29 @@
 .inventory-table .item-icon:hover {
   transform: scale(1.1);
   border-color: #e74c3c;
+}
+
+.effect-description-tooltip {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2a2a2a;
+  color: #e0e0e0;
+  padding: 0.5rem;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: normal;
+  max-width: 250px;
+  z-index: 1000;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.item-icon-cell:hover .effect-description-tooltip {
+  display: block;
 }
 
 .inventory-table .item-name-cell {
@@ -879,6 +909,24 @@
 
 .delete-item-btn:hover {
   background: #c0392b;
+}
+
+.favorite-item-btn {
+  background: #95a5a6;
+  font-size: 1rem;
+  padding: 0.2rem 0.4rem;
+}
+
+.favorite-item-btn:hover {
+  background: #7f8c8d;
+}
+
+.favorite-item-btn.favorited {
+  background: #f39c12;
+}
+
+.favorite-item-btn.favorited:hover {
+  background: #e67e22;
 }
 
 /* === 过滤效果 === */
