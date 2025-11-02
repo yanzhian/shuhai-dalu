@@ -1,14 +1,14 @@
 import InventoryApp from "../apps/inventory-app.mjs";
 
 /**
- * 书海大陆 Player 角色表单 - 重新设计版本
+ * 书海大陆标准角色表单 - 基于Player Sheet的完整UI
  */
-export default class ShuhaiPlayerSheet extends ActorSheet {
+export default class ShuhaiCharacterSheet extends ActorSheet {
 
   /** @override */
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ["shuhai-dalu", "sheet", "actor", "player-sheet"],
+      classes: ["shuhai-dalu", "sheet", "actor", "character-sheet"],
       width: 1400,
       height: 900,
       tabs: [],
@@ -21,7 +21,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
   /** @override */
   get template() {
-    return `systems/shuhai-dalu/templates/actor/actor-player-sheet.hbs`;
+    return `systems/shuhai-dalu/templates/actor/actor-character-sheet-new.hbs`;
   }
 
   /* -------------------------------------------- */
@@ -369,442 +369,6 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     }
   }
 
-  /**
-  显示创建物品对话框
-   */
-  async _onItemCreateDialog(event) {
-    event.preventDefault();
-
-    const content = `
-      <form>
-        <div class="form-group">
-          <label>选择物品类型:</label>
-          <select name="itemType" style="width: 100%; padding: 0.5rem; background: #2a2a2a; border: 1px solid #3a3a3a; color: #e0e0e0; border-radius: 3px;">
-            <option value="combatDice">攻击骰</option>
-            <option value="shootDice">射击骰</option>
-            <option value="defenseDice">守备骰</option>
-            <option value="triggerDice">触发骰</option>
-            <option value="passiveDice">被动骰</option>
-            <option value="weapon">武器</option>
-            <option value="armor">防具</option>
-            <option value="item">物品</option>
-            <option value="equipment">装备</option>
-          </select>
-        </div>
-      </form>
-    `;
-
-    new Dialog({
-      title: "创建物品",
-      content: content,
-      buttons: {
-        create: {
-          icon: '<i class="fas fa-check"></i>',
-          label: "创建",
-          callback: async (html) => {
-            const type = html.find('[name="itemType"]').val();
-            const itemData = {
-              name: `新${this._getTypeName(type)}`,
-              type: type,
-              system: {}
-            };
-
-            const cls = getDocumentClass("Item");
-            const item = await cls.create(itemData, { parent: this.actor });
-
-            if (item) {
-              item.sheet.render(true);
-            }
-          }
-        },
-        cancel: {
-          icon: '<i class="fas fa-times"></i>',
-          label: "取消"
-        }
-      },
-      default: "create"
-    }).render(true);
-  }
-
-  _getTypeName(type) {
-    const typeNames = {
-      combatDice: '攻击骰',
-      shootDice: '射击骰',
-      defenseDice: '守备骰',
-      triggerDice: '触发骰',
-      passiveDice: '被动骰',
-      weapon: '武器',
-      armor: '防具',
-      item: '物品',
-      equipment: '装备'
-    };
-    return typeNames[type] || '物品';
-  }
-
-  /**
-   * 使用物品
-   */
-  async _onItemUse(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    const itemId = event.currentTarget.dataset.itemId;
-    const item = this.actor.items.get(itemId);
-
-    if (item) {
-      await item.use();
-    }
-  }
-
-  /**
-   * 编辑物品
-   */
-  _onItemEdit(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    const itemId = event.currentTarget.dataset.itemId;
-    const item = this.actor.items.get(itemId);
-
-    if (item) {
-      item.sheet.render(true);
-    }
-  }
-
-  /**
-   * 删除物品
-   */
-  async _onItemDelete(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    const itemId = event.currentTarget.dataset.itemId;
-    const item = this.actor.items.get(itemId);
-
-    if (!item) return;
-
-    const confirmed = await Dialog.confirm({
-      title: `删除 ${item.name}?`,
-      content: `<p>确定要删除 <strong>${item.name}</strong> 吗?</p>`
-    });
-
-    if (confirmed) {
-      await item.delete();
-    }
-  }
-
-  /**
-   * 收藏/取消收藏物品
-   */
-  async _onItemFavorite(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    const itemId = event.currentTarget.dataset.itemId;
-    const item = this.actor.items.get(itemId);
-    if (!item) return;
-
-    // 切换收藏状态
-    const currentFavorite = item.system.favorite || false;
-    await item.update({ "system.favorite": !currentFavorite });
-
-    // 提示
-    if (!currentFavorite) {
-      ui.notifications.info(`已收藏 ${item.name}`);
-    } else {
-      ui.notifications.info(`已取消收藏 ${item.name}`);
-    }
-  }
-
-  /**
-   * 双击物品图标单元格编辑效果描述
-   */
-  async _onEditEffectDescription(event) {
-    event.preventDefault();
-    const row = $(event.currentTarget).closest('tr');
-    const itemId = row.data('item-id');
-    const item = this.actor.items.get(itemId);
-
-    if (!item) return;
-
-    // 创建编辑对话框
-    const currentEffect = item.system.effect || "";
-
-    new Dialog({
-      title: `编辑效果描述 - ${item.name}`,
-      content: `
-        <form>
-          <div class="form-group">
-            <label>效果描述:</label>
-            <textarea name="effect" rows="6" style="width: 100%; resize: vertical;">${currentEffect}</textarea>
-          </div>
-        </form>
-      `,
-      buttons: {
-        save: {
-          icon: '<i class="fas fa-save"></i>',
-          label: "保存",
-          callback: async (html) => {
-            const newEffect = html.find('textarea[name="effect"]').val();
-            await item.update({ "system.effect": newEffect });
-            ui.notifications.info(`已更新 ${item.name} 的效果描述`);
-          }
-        },
-        cancel: {
-          icon: '<i class="fas fa-times"></i>',
-          label: "取消"
-        }
-      },
-      default: "save"
-    }).render(true);
-  }
-
-  /**
-  * 单击物品图标：编辑物品信息
-
-   */
-
-  _onItemIconClick(event) {
-
-    event.preventDefault();
-
-    event.stopPropagation();
-
-    const itemId = event.currentTarget.dataset.itemId;
-
-    const item = this.actor.items.get(itemId);
-
- 
-
-    if (item) {
-
-      item.sheet.render(true);
-
-    }
-
-  }
-
- 
-
-  /**
-
-   * 双击物品图标：编辑效果描述
-
-   */
-
-  async _onItemIconDblClick(event) {
-
-    event.preventDefault();
-
-    event.stopPropagation();
-
-    const itemId = event.currentTarget.dataset.itemId;
-
-    const item = this.actor.items.get(itemId);
-
- 
-
-    if (!item) return;
-
- 
-
-    // 创建编辑对话框
-
-    const currentEffect = item.system.effect || "";
-
- 
-
-    new Dialog({
-
-      title: `编辑效果描述 - ${item.name}`,
-
-      content: `
-
-        <form>
-
-          <div class="form-group">
-
-            <label>效果描述:</label>
-
-            <textarea name="effect" rows="8" style="width: 100%; resize: vertical; padding: 0.5rem; background: #2a2a2a; border: 1px solid #3a3a3a; color: #e0e0e0; border-radius: 3px;">${currentEffect}</textarea>
-
-          </div>
-
-        </form>
-
-      `,
-
-      buttons: {
-
-        save: {
-
-          icon: '<i class="fas fa-save"></i>',
-
-          label: "保存",
-
-          callback: async (html) => {
-
-            const newEffect = html.find('textarea[name="effect"]').val();
-
-            await item.update({ "system.effect": newEffect });
-
-            ui.notifications.info(`已更新 ${item.name} 的效果描述`);
-
-          }
-
-        },
-
-        cancel: {
-
-          icon: '<i class="fas fa-times"></i>',
-
-          label: "取消"
-
-        }
-
-      },
-
-      default: "save"
-    }).render(true);
-  }
-
-  /**
-   * 搜索物品
-   */
-  _onSearchItems(event) {
-    const searchTerm = event.currentTarget.value.toLowerCase();
-    const items = this.element.find('.inventory-row');
-
-    items.each((i, item) => {
-      const $item = $(item);
-      const itemName = $item.find('.col-name').text().toLowerCase();
-
-      if (itemName.includes(searchTerm)) {
-        $item.attr('data-filtered', 'false');
-      } else {
-        $item.attr('data-filtered', 'true');
-      }
-    });
-  }
-
-  /**
-   * 收藏过滤
-   */
-  _onFavoriteFilter(event) {
-    event.preventDefault();
-    const btn = $(event.currentTarget);
-    const isActive = btn.hasClass('active');
-
-    if (isActive) {
-      // 取消过滤
-      btn.removeClass('active');
-      this.element.find('.inventory-row').attr('data-filtered', 'false');
-    } else {
-      // 激活过滤
-      btn.addClass('active');
-      const items = this.element.find('.inventory-row');
-
-      items.each((i, item) => {
-        const $item = $(item);
-        const itemFavorite = $item.data('favorite');
-
-        if (itemFavorite === true || itemFavorite === 'true') {
-          $item.attr('data-filtered', 'false');
-        } else {
-          $item.attr('data-filtered', 'true');
-        }
-      });
-    }
-  }
-
-  /**
-   * 高级过滤对话框
-   */
-  _onAdvancedFilter(event) {
-    event.preventDefault();
-
-    const content = `
-      <form>
-        <div class="form-group">
-          <label>物品类型:</label>
-          <select name="filterType" style="width: 100%; padding: 0.5rem; background: #2a2a2a; border: 1px solid #3a3a3a; color: #e0e0e0; border-radius: 3px;">
-            <option value="">全部</option>
-            <option value="combatDice">攻击骰</option>
-            <option value="shootDice">射击骰</option>
-            <option value="defenseDice">守备骰</option>
-            <option value="triggerDice">触发骰</option>
-            <option value="passiveDice">被动骰</option>
-            <option value="weapon">武器</option>
-            <option value="armor">防具</option>
-            <option value="item">物品</option>
-            <option value="equipment">装备</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>分类:</label>
-          <input type="text" name="filterCategory" placeholder="输入分类名称" style="width: 100%; padding: 0.5rem; background: #2a2a2a; border: 1px solid #3a3a3a; color: #e0e0e0; border-radius: 3px;"/>
-        </div>
-        <div class="form-group">
-          <label>
-            <input type="checkbox" name="favoriteOnly"/> 只显示收藏
-          </label>
-        </div>
-      </form>
-    `;
-
-    new Dialog({
-      title: "高级检索",
-      content: content,
-      buttons: {
-        filter: {
-          icon: '<i class="fas fa-filter"></i>',
-          label: "应用",
-          callback: (html) => {
-            const filterType = html.find('[name="filterType"]').val();
-            const filterCategory = html.find('[name="filterCategory"]').val().toLowerCase();
-            const favoriteOnly = html.find('[name="favoriteOnly"]').is(':checked');
-
-            const items = this.element.find('.inventory-row');
-
-            items.each((i, item) => {
-              const $item = $(item);
-              const itemType = $item.data('item-type');
-              const itemCategory = $item.find('.col-category').text().toLowerCase();
-              const itemFavorite = $item.data('favorite');
-
-              let show = true;
-
-              // 类型过滤
-              if (filterType && itemType !== filterType) {
-                show = false;
-              }
-
-              // 分类过滤
-              if (filterCategory && !itemCategory.includes(filterCategory)) {
-                show = false;
-              }
-
-              // 收藏过滤
-              if (favoriteOnly && !(itemFavorite === true || itemFavorite === 'true')) {
-                show = false;
-              }
-
-              $item.attr('data-filtered', show ? 'false' : 'true');
-            });
-
-            ui.notifications.info("已应用过滤条件");
-          }
-        },
-        clear: {
-          icon: '<i class="fas fa-times"></i>',
-          label: "清除",
-          callback: () => {
-            this.element.find('.inventory-row').attr('data-filtered', 'false');
-            this.element.find('.favorite-filter-btn').removeClass('active');
-            ui.notifications.info("已清除所有过滤");
-          }
-        }
-      },
-      default: "filter"
-    }).render(true);
-  }
-
   /* -------------------------------------------- */
   /*  拖放处理                                      */
   /* -------------------------------------------- */
@@ -877,6 +441,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       weapon: ['weapon'],
       armor: ['armor'],
       combatDice: ['combatDice', 'shootDice'],
+      equipmentDice: ['equipment'],
       defenseDice: ['defenseDice'],
       triggerDice: ['triggerDice'],
       passiveDice: ['passiveDice']
@@ -890,6 +455,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
         weapon: '武器',
         armor: '防具',
         combatDice: '战斗骰',
+        equipmentDice: '装备骰',
         defenseDice: '守备骰',
         triggerDice: '触发骰',
         passiveDice: '被动骰'
@@ -899,5 +465,20 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     }
 
     return true;
+  }
+
+  _getTypeName(type) {
+    const typeNames = {
+      combatDice: '攻击骰',
+      shootDice: '射击骰',
+      defenseDice: '守备骰',
+      triggerDice: '触发骰',
+      passiveDice: '被动骰',
+      weapon: '武器',
+      armor: '防具',
+      item: '物品',
+      equipment: '装备'
+    };
+    return typeNames[type] || '物品';
   }
 }
