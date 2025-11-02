@@ -28,20 +28,17 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   async getData() {
     const context = super.getData();
     const actorData = this.actor.toObject(false);
-
+    
     context.system = actorData.system;
     context.flags = actorData.flags;
     context.rollData = this.actor.getRollData();
-
-    // 锁定状态（默认为游玩模式，即锁定）
-    context.isLocked = this.actor.getFlag('shuhai-dalu', 'isLocked') ?? true;
-
+    
     // 准备角色数据
     this._prepareCharacterData(context);
-
+    
     // 准备物品数据
     this._prepareItems(context);
-
+    
     return context;
   }
 
@@ -120,11 +117,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   /** @override */
   activateListeners(html) {
     super.activateListeners(html);
-
+    
     if (!this.isEditable) return;
-
-    // === 游玩/编辑模式切换 ===
-    html.find('.lock-btn').click(this._onToggleLock.bind(this));
 
     // === 属性检定 ===
     html.find('.check-btn[data-attribute]').click(this._onAttributeRoll.bind(this));
@@ -144,7 +138,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     html.find('.use-btn').click(this._onUseDice.bind(this));
     
     // === 物品相关 ===
-    html.find('.create-item-bottom-btn').click(this._onItemCreateDialog.bind(this));
+
     html.find('.use-item-btn').click(this._onItemUse.bind(this));
     html.find('.edit-item-btn').click(this._onItemEdit.bind(this));
     html.find('.delete-item-btn').click(this._onItemDelete.bind(this));
@@ -170,26 +164,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   /* -------------------------------------------- */
 
   /**
-   * 切换锁定状态
-   */
-  async _onToggleLock(event) {
-    event.preventDefault();
-    const currentLocked = this.actor.getFlag('shuhai-dalu', 'isLocked') ?? true;
-    const newLocked = !currentLocked;
 
-    await this.actor.setFlag('shuhai-dalu', 'isLocked', newLocked);
-
-    // 显示提示
-    if (newLocked) {
-      ui.notifications.info("已切换到游玩模式（锁定）");
-    } else {
-      ui.notifications.info("已切换到编辑模式（解锁）");
-    }
-
-    this.render(false);
-  }
-
-  /**
    * 属性检定
    */
   async _onAttributeRoll(event) {
@@ -340,62 +315,6 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       await item.use();
     }
   }
-
-  /**
-   * 显示创建物品对话框
-   */
-  async _onItemCreateDialog(event) {
-    event.preventDefault();
-
-    const content = `
-      <form>
-        <div class="form-group">
-          <label>选择物品类型:</label>
-          <select name="itemType" style="width: 100%; padding: 0.5rem; background: #2a2a2a; border: 1px solid #3a3a3a; color: #e0e0e0; border-radius: 3px;">
-            <option value="combatDice">攻击骰</option>
-            <option value="shootDice">射击骰</option>
-            <option value="defenseDice">守备骰</option>
-            <option value="triggerDice">触发骰</option>
-            <option value="passiveDice">被动骰</option>
-            <option value="weapon">武器</option>
-            <option value="armor">防具</option>
-            <option value="item">物品</option>
-            <option value="equipment">装备</option>
-          </select>
-        </div>
-      </form>
-    `;
-
-    new Dialog({
-      title: "创建物品",
-      content: content,
-      buttons: {
-        create: {
-          icon: '<i class="fas fa-check"></i>',
-          label: "创建",
-          callback: async (html) => {
-            const type = html.find('[name="itemType"]').val();
-            const itemData = {
-              name: `新${this._getTypeName(type)}`,
-              type: type,
-              system: {}
-            };
-
-            const cls = getDocumentClass("Item");
-            const item = await cls.create(itemData, { parent: this.actor });
-
-            if (item) {
-              item.sheet.render(true);
-            }
-          }
-        },
-        cancel: {
-          icon: '<i class="fas fa-times"></i>',
-          label: "取消"
-        }
-      },
-      default: "create"
-    }).render(true);
   }
 
   _getTypeName(type) {
