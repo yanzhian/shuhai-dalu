@@ -1,9 +1,9 @@
 /* ========================================
    书海大陆 FVTT 系统样式
-   ======================================== */
-
-/* 导入 Player Sheet 样式 */
+   ======================================== *//* 导入 Player Sheet 样式 */
 @import url("player-sheet.css");
+
+
 
 /* === 全局样式 === */
 .shuhai-dalu {
@@ -542,7 +542,7 @@
 
 /* === 技能系统 === */
 .shuhai-dalu .skill-category {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(19, 19, 19, 0.9);
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
@@ -637,7 +637,7 @@
 .shuhai-dalu .combat-dice-section,
 .shuhai-dalu .special-dice-section,
 .shuhai-dalu .passive-section {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(19, 19, 19, 0.9);
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
@@ -751,7 +751,7 @@
 }
 
 .shuhai-dalu .inventory-list {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(19, 19, 19, 0.9);
   border-radius: 8px;
   padding: 1rem;
 }
