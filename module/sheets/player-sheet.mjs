@@ -11,9 +11,9 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       height: 900,
       tabs: [],
       dragDrop: [
-        { dragSelector: ".item-icon[draggable]", dropSelector: ".slot-content, .inventory-row" }
+        { dragSelector: ".item[data-item-id]", dropSelector: null }
       ],
-      scrollY: [".info-right", ".equipment-panel", ".inventory-table"]
+      scrollY: [".header-right", ".skills-section", ".equipment-section"]
     });
   }
 
@@ -136,42 +136,10 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     // === 状态按钮 ===
     html.find('.corruption-check-btn').click(this._onCorruptionCheck.bind(this));
     html.find('.long-rest-btn').click(this._onLongRest.bind(this));
-    html.find('.switch-combat-btn').click(this._onSwitchCombat.bind(this));
 
     // === 装备相关 ===
-    html.find('.unequip-btn').click(this._onUnequip.bind(this));
-    html.find('.use-btn').click(this._onUseDice.bind(this));
-
-    // === 物品相关 ===
-    html.find('.create-item-btn').click(this._onItemCreateDialog.bind(this));
-
-   html.find('.item-use-btn').click(this._onItemUse.bind(this));
-
-    html.find('.item-edit-btn').click(this._onItemEdit.bind(this));
-
-    html.find('.item-delete-btn').click(this._onItemDelete.bind(this));
-
-    html.find('.item-favorite-btn').click(this._onItemFavorite.bind(this));
-
- 
-
-    // === 物品图标交互 ===
-
-    // 单击图标：编辑物品
-
-    html.find('.item-icon-wrapper .item-icon').click(this._onItemIconClick.bind(this));
-
-    // 双击图标包装器：编辑效果描述
-
-    html.find('.item-icon-wrapper').dblclick(this._onItemIconDblClick.bind(this));
-
-    // === 搜索和过滤 ===
-    html.find('.item-search').on('input', this._onSearchItems.bind(this));
-    html.find('.favorite-filter-btn').click(this._onFavoriteFilter.bind(this));
-    html.find('.advanced-filter-btn').click(this._onAdvancedFilter.bind(this));
-
-    // === 拖放 - 只有图标可拖动 ===
-    this._setupDragAndDrop(html);
+    html.find('.slot-unequip-btn').click(this._onUnequip.bind(this));
+    html.find('.slot-img').click(this._onUseDice.bind(this));
   }
 
   /**
@@ -435,15 +403,6 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   async _onLongRest(event) {
     event.preventDefault();
     await this.actor.longRest();
-  }
-
-  /**
-  切换到战斗区域
-   */
-  async _onSwitchCombat(event) {
-    event.preventDefault();
-    // TODO: 实现战斗模式切换功能
-    ui.notifications.warn("战斗区域功能开发中...");
   }
 
   /**
@@ -928,6 +887,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    * 处理物品拖放到装备槽
    */
   async _onDropItem(event, data) {
+    if (!this.actor.isOwner) return false;
+
     const item = await Item.implementation.fromDropData(data);
     const itemData = item.toObject();
 
@@ -937,9 +898,10 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       return this.actor.createEmbeddedDocuments("Item", [itemData]);
     }
 
-    // 检查拖放目标
-    const dropTarget = event.target.closest('.slot-content');
+    // 检查拖放目标是否是装备槽
+    const dropTarget = event.target.closest('.slot-container');
     if (!dropTarget) {
+      // 如果不是装备槽，调用父类方法（默认行为）
       return super._onDropItem(event, data);
     }
 
