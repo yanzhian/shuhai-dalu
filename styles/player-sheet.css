@@ -569,6 +569,17 @@ button:disabled:hover {
   color: #fff;
 }
 
+/* 创建物品按钮特殊样式 */
+.search-filter-bar .create-item-btn {
+  background: #16a085;
+  border-color: #16a085;
+}
+
+.search-filter-bar .create-item-btn:hover {
+  background: #1abc9c;
+  border-color: #1abc9c;
+}
+
 /* ========================================
    第三部分: 装备栏和物品栏
    ======================================== */
