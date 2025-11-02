@@ -27,73 +27,8 @@
   height: 100%; /* ⭐ 占满高度 */
   overflow: hidden; /* ⭐ 隐藏溢出 */
 }
-
-/* === 第1层：游玩/编辑锁 === */
-.edit-lock-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-  border-bottom: 2px solid #e74c3c;
-  flex-shrink: 0;
-  min-height: 50px;
-  max-height: 50px;
-}
-
-.lock-toggle {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.mode-btn {
-  padding: 0.5rem 1.25rem;
-  background: #2a2a2a;
-  border: 2px solid #3a3a3a;
-  border-radius: 4px;
-  color: #aaa;
-  font-size: 0.875rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.mode-btn:hover {
-  background: #3a3a3a;
-  border-color: #e74c3c;
-  color: #fff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-.mode-btn.active {
-  background: #e74c3c;
-  border-color: #e74c3c;
-  color: #fff;
-  box-shadow: 0 0 15px rgba(231, 76, 60, 0.5);
-}
-
-.mode-btn i {
-  font-size: 1rem;
-}
-
-.lock-status {
-  font-size: 0.875rem;
-  color: #bbb;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.lock-status i {
-  font-size: 1rem;
-  color: #e74c3c;
-}
-
 /* 禁用状态样式 */
+
 input:disabled,
 button:disabled {
   opacity: 0.5;
@@ -104,8 +39,9 @@ button:disabled:hover {
   transform: none !important;
   box-shadow: none !important;
 }
+ 
 
-/* === 第2层：固定顶部区域（角色卡信息） === */
+/* === 固定顶部区域（角色卡信息） === */
 .player-header-fixed {
   display: flex;
   gap: 1rem;
@@ -148,19 +84,39 @@ button:disabled:hover {
   position: absolute;
   top: 5px;
   right: 5px;
-  width: 30px;
-  height: 30px;
-  background: rgba(0, 0, 0, 0.7);
-  border: 1px solid #555;
-  border-radius: 3px;
-  color: #fff;
+  width: 36px;
+  height: 36px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid #555;
+  border-radius: 50%;
+  color: #2ecc71;
+  font-size: 1.125rem;
   cursor: pointer;
   transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+ 
+
 .avatar-section .lock-btn:hover {
-  background: #e74c3c;
+  background: rgba(0, 0, 0, 0.95);
+  border-color: #2ecc71;
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+}
+
+ 
+
+.avatar-section .lock-btn.locked {
+  color: #e74c3c;
   border-color: #e74c3c;
+}
+
+.avatar-section .lock-btn.locked:hover {
+  border-color: #e74c3c;
+  box-shadow: 0 0 15px rgba(231, 76, 60, 0.5);
 }
 
 /* === 状态栏 === */
@@ -436,7 +392,42 @@ button:disabled:hover {
 .attr-item.special {
   background: #252525;
 }
+.attr-item.combat-switch {
+  grid-column: span 2;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
 
+.switch-combat-btn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  border: 2px solid #c0392b;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+}
+
+ 
+
+.switch-combat-btn:hover {
+  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.5);
+}
+
+.switch-combat-btn i {
+  font-size: 1.25rem;
+}
 /* === 搜索和过滤区域 === */
 .search-filter-section {
   display: flex;
@@ -800,50 +791,21 @@ button:disabled:hover {
 
 /* === 物品栏 === */
 .inventory-header {
-  display: flex;
-  flex-direction: column; /* ⭐ 改为垂直布局 */
-  gap: 0.5rem;
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   background: #1e1e1e;
   border: 1px solid #3a3a3a;
   border-radius: 4px 4px 0 0;
-  flex-shrink: 0; /* ⭐ 防止被压缩 */
+  flex-shrink: 0;
+
 }
+
+ 
 
 .inventory-header h3 {
   margin: 0;
   font-size: 1rem;
   color: #e74c3c;
-}
-
-.create-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-  justify-content: flex-start; /* ⭐ 左对齐 */
-}
-
-.create-item-btn {
-  padding: 0.125rem 0.5rem;
-  height: 18px;
-  line-height: 1;
-  background: #27ae60;
-  border: none;
-  border-radius: 3px;
-  color: #fff;
-  font-size: 0.7rem;
   font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.create-item-btn:hover {
-  background: #7f0e9b;
-  transform: translateY(-1px);
 }
 
 .inventory-list {
