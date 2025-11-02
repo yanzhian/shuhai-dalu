@@ -1,12 +1,7 @@
 /* ========================================
    书海大陆 FVTT 系统样式
-   ======================================== */
-
-/* 导入 Player Sheet 样式 */
+   ======================================== *//* 导入 Player Sheet 样式 */
 @import url("player-sheet.css");
-
-/* 导入 Inventory App 样式 */
-@import url("inventory-app.css");
 
 
 

@@ -1,5 +1,3 @@
-import InventoryApp from "../apps/inventory-app.mjs";
-
 /**
  * 书海大陆 Player 角色表单 - 重新设计版本
  */
@@ -35,8 +33,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     context.flags = actorData.flags;
     context.rollData = this.actor.getRollData();
 
-    // Tidy锁定状态（控制数值编辑）
-    context.isTidyLocked = this.actor.getFlag('shuhai-dalu', 'isTidyLocked') ?? true;
+    // 锁定状态（默认为游玩模式，即锁定）
+    context.isLocked = this.actor.getFlag('shuhai-dalu', 'isLocked') ?? true;
 
     // 准备角色数据
     this._prepareCharacterData(context);
@@ -44,37 +42,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     // 准备物品数据
     this._prepareItems(context);
 
-    // 计算经验值相关数据
-    this._prepareExperienceData(context);
-
     return context;
-  }
-
-  /**
-   * 计算经验值相关数据
-   */
-  _prepareExperienceData(context) {
-    // 经验等级表：300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000
-    const expTable = [0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000];
-
-    const currentLevel = context.system.level || 1;
-    const currentExp = context.system.info.experience || 0;
-
-    // 计算当前等级所需经验
-    const currentLevelExp = currentLevel > 0 ? expTable[currentLevel - 1] : 0;
-
-    // 计算下一等级所需经验
-    const nextLevelExp = currentLevel < 12 ? expTable[currentLevel] : expTable[12];
-
-    // 计算升级所需经验
-    const expRequired = nextLevelExp - currentLevelExp;
-    const expProgress = currentExp - currentLevelExp;
-
-    // 计算进度百分比
-    const progressPercent = expRequired > 0 ? Math.min(100, Math.max(0, (expProgress / expRequired) * 100)) : 100;
-
-    context.expRequiredForNextLevel = nextLevelExp;
-    context.expProgressPercent = progressPercent.toFixed(2);
   }
 
   /**
@@ -154,14 +122,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
     if (!this.isEditable) return;
 
-    // === Tidy Switch 锁切换 ===
-    html.find('.tidy-switch-btn').click(this._onToggleTidyLock.bind(this));
-
-    // === 物品栏按钮 ===
-    html.find('.inventory-btn').click(this._onOpenInventory.bind(this));
-
-    // === 战斗形态按钮 ===
-    html.find('.combat-form-btn').click(this._onOpenCombatForm.bind(this));
+    // === 游玩/编辑模式切换 ===
+    html.find('.lock-btn').click(this._onToggleLock.bind(this));
 
     // === 属性检定 ===
     html.find('.attr-check-btn').click(this._onAttributeRoll.bind(this));
@@ -180,46 +142,147 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     html.find('.slot-img').click(this._onUseDice.bind(this));
   }
 
+  /**
+   * 设置拖放功能
+   */
+  _setupDragAndDrop(html) {
+    // 为物品图标设置拖放
+    html.find('.col-icon .item-icon').each((i, icon) => {
+      icon.addEventListener('dragstart', this._onDragItemStart.bind(this), false);
+      icon.addEventListener('dragend', this._onDragItemEnd.bind(this), false);
+    });
+
+    // 为物品行设置drop区域（用于位置交换）
+    html.find('.inventory-row').each((i, row) => {
+      row.addEventListener('dragover', this._onDragOver.bind(this), false);
+      row.addEventListener('drop', this._onDropOnRow.bind(this), false);
+      row.addEventListener('dragleave', this._onDragLeave.bind(this), false);
+    });
+  }
+
+  /**
+   * 拖动物品图标开始
+   */
+  _onDragItemStart(event) {
+    const icon = event.currentTarget;
+    const itemId = icon.dataset.itemId;
+    const item = this.actor.items.get(itemId);
+
+    if (!item) return;
+
+    // 添加拖动样式
+    const row = icon.closest('.inventory-row');
+    if (row) {
+      row.classList.add('dragging');
+    }
+
+    // 设置拖动数据
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', JSON.stringify({
+      type: 'Item',
+      uuid: item.uuid,
+      itemId: itemId
+    }));
+  }
+
+  /**
+   * 拖动物品图标结束
+   */
+  _onDragItemEnd(event) {
+    const icon = event.currentTarget;
+    const row = icon.closest('.inventory-row');
+    if (row) {
+      row.classList.remove('dragging');
+    }
+
+    // 清除所有drag-over样式
+    this.element.find('.drag-over').removeClass('drag-over');
+  }
+
+  /**
+   * 拖动经过
+   */
+  _onDragOver(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+
+    const row = event.currentTarget;
+    if (!row.classList.contains('dragging')) {
+      row.classList.add('drag-over');
+    }
+
+    return false;
+  }
+
+  /**
+   * 拖动离开
+   */
+  _onDragLeave(event) {
+    const row = event.currentTarget;
+    row.classList.remove('drag-over');
+  }
+
+  /**
+   * 放下到物品行（交换位置）
+   */
+  async _onDropOnRow(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const targetRow = event.currentTarget;
+    targetRow.classList.remove('drag-over');
+
+    // 获取拖动的物品
+    const data = event.dataTransfer.getData('text/plain');
+    if (!data) return;
+
+    const dragData = JSON.parse(data);
+    const dragItemId = dragData.itemId;
+    const targetItemId = targetRow.dataset.itemId;
+
+    if (!dragItemId || !targetItemId || dragItemId === targetItemId) return;
+
+    // 交换两个物品的sort值
+    await this._swapItemPositions(dragItemId, targetItemId);
+  }
+
+  /**
+   * 交换两个物品的位置
+   */
+  async _swapItemPositions(itemId1, itemId2) {
+    const item1 = this.actor.items.get(itemId1);
+    const item2 = this.actor.items.get(itemId2);
+
+    if (!item1 || !item2) return;
+
+    const sort1 = item1.sort;
+    const sort2 = item2.sort;
+
+    await item1.update({ sort: sort2 });
+    await item2.update({ sort: sort1 });
+
+    ui.notifications.info("物品位置已交换");
+  }
+
   /* -------------------------------------------- */
   /*  事件处理                                      */
   /* -------------------------------------------- */
 
   /**
-   * 切换Tidy锁定状态
+   * 切换游玩/编辑模式
    */
-  async _onToggleTidyLock(event) {
+  async _onToggleLock(event) {
     event.preventDefault();
-    const currentLocked = this.actor.getFlag('shuhai-dalu', 'isTidyLocked') ?? true;
+    const currentLocked = this.actor.getFlag('shuhai-dalu', 'isLocked') ?? true;
     const newLocked = !currentLocked;
-    await this.actor.setFlag('shuhai-dalu', 'isTidyLocked', newLocked);
+    await this.actor.setFlag('shuhai-dalu', 'isLocked', newLocked);
     // 显示提示
     if (newLocked) {
-      ui.notifications.info("已锁定数值编辑");
+      ui.notifications.info("已切换到游玩模式（锁定）");
     } else {
-      ui.notifications.info("已解锁数值编辑");
+      ui.notifications.info("已切换到编辑模式（解锁）");
     }
     this.render(false);
-  }
-
-  /**
-   * 打开物品栏弹窗
-   */
-  async _onOpenInventory(event) {
-    event.preventDefault();
-
-    // 创建物品栏Application实例
-    const inventory = new InventoryApp(this.actor, {
-      title: `${this.actor.name} - 物品栏`
-    });
-    inventory.render(true);
-  }
-
-  /**
-   * 打开战斗形态（研发中）
-   */
-  async _onOpenCombatForm(event) {
-    event.preventDefault();
-    ui.notifications.warn("战斗形态功能研发中...");
   }
 
   /**
