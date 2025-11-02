@@ -52,13 +52,10 @@ export default class ShuhaiItemSheet extends ItemSheet {
    */
   _prepareItemTypeData(context) {
     const itemType = this.item.type;
-
+    
     // 所有物品类型的分类选项
     context.categories = this._getCategoryOptions(itemType);
-
-    // 是否允许自定义分类（武器、防具、装备、物品）
-    context.allowCustomCategory = ['weapon', 'armor', 'equipment', 'item'].includes(itemType);
-
+    
     // 是否显示特定字段
     context.showDiceFormula = ['combatDice', 'shootDice', 'defenseDice', 'triggerDice', 'passiveDice'].includes(itemType);
     context.showQuantity = !['passiveDice'].includes(itemType);

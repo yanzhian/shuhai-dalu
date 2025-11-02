@@ -1,15 +1,13 @@
 <form class="{{cssClass}} player-sheet flexcol" autocomplete="off">
-
-{{!-- 固定顶部区域（角色卡信息） --}}
+  
+  {{!-- 固定顶部区域 --}}
   <div class="player-header-fixed">
     {{!-- 左侧：头像和状态 --}}
     <div class="left-panel">
       {{!-- 头像区域 --}}
       <div class="avatar-section">
         <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}"/>
-        <button class="lock-btn {{#if isLocked}}locked{{/if}}" title="{{#if isLocked}}点击解锁（编辑模式）{{else}}点击锁定（游玩模式）{{/if}}" type="button">
-          <i class="fas {{#if isLocked}}fa-lock{{else}}fa-lock-open{{/if}}"></i>
-        </button>
+        <button class="lock-btn" title="锁定" type="button"><i class="fas fa-lock"></i></button>
       </div>
       
       {{!-- 状态栏 --}}
@@ -53,29 +51,29 @@
         <div class="info-row">
           <div class="info-group">
             <label>名字</label>
-            <input type="text" name="name" value="{{actor.name}}" placeholder="角色名称" {{#if isLocked}}disabled{{/if}}/>
+            <input type="text" name="name" value="{{actor.name}}" placeholder="角色名称"/>
           </div>
           <div class="info-group">
             <label>种族</label>
-            <input type="text" name="system.info.race" value="{{system.info.race}}" placeholder="人类" {{#if isLocked}}disabled{{/if}}/>
+            <input type="text" name="system.info.race" value="{{system.info.race}}" placeholder="人类"/>
           </div>
           <div class="info-group">
             <label>性别</label>
-            <input type="text" name="system.info.gender" value="{{system.info.gender}}" placeholder="女" {{#if isLocked}}disabled{{/if}}/>
+            <input type="text" name="system.info.gender" value="{{system.info.gender}}" placeholder="女"/>
           </div>
         </div>
         <div class="info-row">
           <div class="info-group">
             <label>势力</label>
-            <input type="text" name="system.info.faction" value="{{system.info.faction}}" placeholder="所属势力" {{#if isLocked}}disabled{{/if}}/>
+            <input type="text" name="system.info.faction" value="{{system.info.faction}}" placeholder="所属势力"/>
           </div>
           <div class="info-group">
             <label>经验</label>
-            <input type="number" name="system.info.experience" value="{{system.info.experience}}" data-dtype="Number" {{#if isLocked}}disabled{{/if}}/>
+            <input type="number" name="system.info.experience" value="{{system.info.experience}}" data-dtype="Number"/>
           </div>
           <div class="info-group">
             <label>等级</label>
-            <input type="number" name="system.level" value="{{system.level}}" data-dtype="Number" min="1" {{#if isLocked}}disabled{{/if}}/>
+            <input type="number" name="system.level" value="{{system.level}}" data-dtype="Number" min="1"/>
           </div>
         </div>
       </div>
@@ -86,7 +84,7 @@
         <div class="attr-item">
           <label>{{attr.label}}</label>
           <div class="attr-value-group">
-            <input type="number" name="system.attributes.{{key}}" value="{{attr.value}}" data-dtype="Number" min="1" max="30" {{#if ../isLocked}}disabled{{/if}}/>
+            <input type="number" name="system.attributes.{{key}}" value="{{attr.value}}" data-dtype="Number" min="1" max="30"/>
             <button class="check-btn" data-attribute="{{key}}" type="button" title="{{attr.label}}检定">
               <i class="fas fa-circle"></i>
             </button>
@@ -94,12 +92,19 @@
         </div>
         {{/each}}
         
-      {{!-- 转换战斗区域按钮 --}}
-        <div class="attr-item special combat-switch">
-          <button class="switch-combat-btn" type="button" title="切换到战斗模式">
-            <i class="fas fa-swords"></i>
-            <span>战斗区域</span>
-          </button>
+        {{!-- 星光和速度 --}}
+        <div class="attr-item special">
+          <label>星光</label>
+          <span class="value">{{system.derived.starlight}}/{{add 10 (multiply system.level 2)}}</span>
+        </div>
+        <div class="attr-item special">
+          <label>速度值</label>
+          <div class="attr-value-group">
+            <span class="value">1D6+{{floor (divide system.attributes.dexterity 3)}}</span>
+            <button class="check-btn roll-speed-btn" type="button" title="投掷速度">
+              <i class="fas fa-circle"></i>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -135,10 +140,10 @@
           <div class="skill-row">
             <label>{{skill.label}}</label>
             <div class="skill-controls">
-              <button class="skill-minus" data-skill="{{key}}" data-category="strengthDex" type="button" {{#if ../../isLocked}}disabled{{/if}}>-</button>
+              <button class="skill-minus" data-skill="{{key}}" data-category="strengthDex" type="button">-</button>
               <span class="skill-value">{{skill.value}}</span>
-              <button class="skill-plus" data-skill="{{key}}" data-category="strengthDex" type="button" {{#if ../../isLocked}}disabled{{/if}}>+</button>
-              <button class="check-btn skill-check-btn" data-skill="{{key}}" type="button">
+              <button class="skill-plus" data-skill="{{key}}" data-category="strengthDex" type="button">+</button>
+              <button class="check-btn" data-skill="{{key}}" type="button">
                 <i class="fas fa-circle"></i>
               </button>
             </div>
@@ -156,10 +161,10 @@
           <div class="skill-row">
             <label>{{skill.label}}</label>
             <div class="skill-controls">
-              <button class="skill-minus" data-skill="{{key}}" data-category="intelligence" type="button" {{#if ../../isLocked}}disabled{{/if}}>-</button>
+              <button class="skill-minus" data-skill="{{key}}" data-category="intelligence" type="button">-</button>
               <span class="skill-value">{{skill.value}}</span>
-              <button class="skill-plus" data-skill="{{key}}" data-category="intelligence" type="button" {{#if ../../isLocked}}disabled{{/if}}>+</button>
-              <button class="check-btn skill-check-btn" data-skill="{{key}}" type="button">
+              <button class="skill-plus" data-skill="{{key}}" data-category="intelligence" type="button">+</button>
+              <button class="check-btn" data-skill="{{key}}" type="button">
                 <i class="fas fa-circle"></i>
               </button>
             </div>
@@ -177,10 +182,10 @@
           <div class="skill-row">
             <label>{{skill.label}}</label>
             <div class="skill-controls">
-              <button class="skill-minus" data-skill="{{key}}" data-category="perception" type="button" {{#if ../../isLocked}}disabled{{/if}}>-</button>
+              <button class="skill-minus" data-skill="{{key}}" data-category="perception" type="button">-</button>
               <span class="skill-value">{{skill.value}}</span>
-              <button class="skill-plus" data-skill="{{key}}" data-category="perception" type="button" {{#if ../../isLocked}}disabled{{/if}}>+</button>
-              <button class="check-btn skill-check-btn" data-skill="{{key}}" type="button">
+              <button class="skill-plus" data-skill="{{key}}" data-category="perception" type="button">+</button>
+              <button class="check-btn" data-skill="{{key}}" type="button">
                 <i class="fas fa-circle"></i>
               </button>
             </div>
@@ -198,10 +203,10 @@
           <div class="skill-row">
             <label>{{skill.label}}</label>
             <div class="skill-controls">
-              <button class="skill-minus" data-skill="{{key}}" data-category="charisma" type="button" {{#if ../../isLocked}}disabled{{/if}}>-</button>
+              <button class="skill-minus" data-skill="{{key}}" data-category="charisma" type="button">-</button>
               <span class="skill-value">{{skill.value}}</span>
-              <button class="skill-plus" data-skill="{{key}}" data-category="charisma" type="button" {{#if ../../isLocked}}disabled{{/if}}>+</button>
-              <button class="check-btn skill-check-btn" data-skill="{{key}}" type="button">
+              <button class="skill-plus" data-skill="{{key}}" data-category="charisma" type="button">+</button>
+              <button class="check-btn" data-skill="{{key}}" type="button">
                 <i class="fas fa-circle"></i>
               </button>
             </div>
@@ -312,6 +317,17 @@
     <div class="right-content">
       <div class="inventory-header">
         <h3>物品栏</h3>
+        <div class="create-buttons">
+          <button class="create-item-btn" data-type="combatDice" type="button" title="创建攻击骰">+ 攻击骰</button>
+          <button class="create-item-btn" data-type="shootDice" type="button" title="创建射击骰">+ 射击骰</button>
+          <button class="create-item-btn" data-type="defenseDice" type="button" title="创建守备骰">+ 守备骰</button>
+          <button class="create-item-btn" data-type="triggerDice" type="button" title="创建触发骰">+ 触发骰</button>
+          <button class="create-item-btn" data-type="passiveDice" type="button" title="创建被动骰">+ 被动骰</button>
+          <button class="create-item-btn" data-type="weapon" type="button" title="创建武器">+ 武器</button>
+          <button class="create-item-btn" data-type="armor" type="button" title="创建防具">+ 防具</button>
+          <button class="create-item-btn" data-type="item" type="button" title="创建物品">+ 物品</button>
+          <button class="create-item-btn" data-type="equipment" type="button" title="创建装备">+ 装备</button>
+        </div>
       </div>
       
       {{!-- ⭐ 修改为表格布局 --}}
@@ -319,8 +335,7 @@
         <table class="inventory-table">
           <thead>
             <tr>
-              <th class="item-favorite-cell">收藏</th>
-              <th class="item-icon-cell">图标</th>
+              <th class="item-icon-cell">效果描述</th>
               <th class="item-name-cell">名称</th>
               <th class="item-type-cell">类型</th>
               <th class="item-category-cell">分类</th>
@@ -334,15 +349,12 @@
           <tbody>
             {{#each items as |item id|}}
             <tr data-item-id="{{item._id}}" data-item-type="{{item.type}}" data-favorite="{{item.system.favorite}}" data-filtered="false" draggable="true">
-              <td class="item-favorite-cell">
-                <button class="favorite-item-btn {{#if item.system.favorite}}favorited{{/if}}" data-item-id="{{item._id}}" type="button" title="收藏/取消收藏">⭐</button>
-              </td>
               <td class="item-icon-cell" title="{{item.system.effect}}">
                 <img src="{{item.img}}" class="item-icon" data-item-id="{{item._id}}"/>
                 <div class="effect-description-tooltip">{{item.system.effect}}</div>
               </td>
               <td class="item-name-cell">{{item.name}}</td>
-              <td class="item-type-cell">{{item.typeLabel}}</td>
+              <td class="item-type-cell">{{item.type}}</td>
               <td class="item-category-cell">{{item.system.category}}</td>
               <td class="item-dice-cell">{{item.system.diceFormula}}</td>
               <td class="item-cost-cell">{{item.system.cost}}</td>
@@ -356,6 +368,7 @@
               </td>
               <td class="item-actions-cell">
                 <div class="item-actions">
+                  <button class="favorite-item-btn {{#if item.system.favorite}}favorited{{/if}}" data-item-id="{{item._id}}" type="button" title="收藏">⭐</button>
                   <button class="use-item-btn" data-item-id="{{item._id}}" type="button" title="使用">使用</button>
                   <button class="edit-item-btn" data-item-id="{{item._id}}" type="button" title="编辑">编辑</button>
                   <button class="delete-item-btn" data-item-id="{{item._id}}" type="button" title="删除">删除</button>
@@ -365,13 +378,6 @@
             {{/each}}
           </tbody>
         </table>
-      </div>
-
-      {{!-- 物品栏底部：创建物品按钮 --}}
-      <div class="inventory-footer">
-        <button class="create-item-bottom-btn" type="button">
-          <i class="fas fa-plus-circle"></i> 创建物品
-        </button>
       </div>
     </div>
   </div>
