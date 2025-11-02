@@ -152,6 +152,35 @@ button:disabled:hover {
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
+/* 状态输入框行 */
+.status-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.status-input-row input {
+  flex: 1;
+  padding: 0.25rem;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  color: #e0e0e0;
+  text-align: center;
+  font-size: 0.75rem;
+}
+
+.status-input-row input:focus {
+  outline: none;
+  border-color: #e74c3c;
+}
+
+.status-input-row span {
+  color: #95a5a6;
+  font-size: 0.875rem;
+}
+
 /* === 右侧面板：基础信息和属性 === */
 .info-right {
   flex: 1;
@@ -203,6 +232,7 @@ button:disabled:hover {
   align-items: center;
   gap: 0.5rem;
   flex: 0 1 auto;
+  flex-wrap: wrap;
 }
 
 .exp-bar {
@@ -213,6 +243,22 @@ button:disabled:hover {
   border: 1px solid #3a3a3a;
   border-radius: 3px;
   overflow: hidden;
+}
+
+.exp-input {
+  width: 100px;
+  padding: 0.25rem;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  color: #e0e0e0;
+  text-align: center;
+  font-size: 0.75rem;
+}
+
+.exp-input:focus {
+  outline: none;
+  border-color: #e74c3c;
 }
 
 .exp-fill {
@@ -728,16 +774,21 @@ button:disabled:hover {
   font-size: 1.125rem;
   cursor: pointer;
   transition: all 0.2s;
-  filter: grayscale(100%);
+  color: #555;
+  padding: 0.25rem;
 }
 
 .favorite-item-btn:hover {
   transform: scale(1.2);
-  filter: grayscale(0%);
+  color: #f39c12;
 }
 
 .favorite-item-btn.favorited {
-  filter: grayscale(0%);
+  color: #f39c12;
+}
+
+.favorite-item-btn i {
+  pointer-events: none;
 }
 
 /* 物品图标 */

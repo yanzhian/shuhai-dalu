@@ -18,18 +18,37 @@
         <div class="bar-fill hp" style="width: {{multiply (divide system.derived.hp.value system.derived.hp.max) 100}}%"></div>
         <span class="bar-text">{{system.derived.hp.value}}/{{system.derived.hp.max}}</span>
       </div>
+      {{#unless isLocked}}
+      <div class="status-input-row">
+        <input type="number" name="system.derived.hp.value" value="{{system.derived.hp.value}}" data-dtype="Number" min="0" max="{{system.derived.hp.max}}" placeholder="生命值"/>
+        <span>/</span>
+        <input type="number" name="system.derived.hp.max" value="{{system.derived.hp.max}}" data-dtype="Number" min="1" placeholder="最大值"/>
+      </div>
+      {{/unless}}
 
       {{!-- 侵蚀值 --}}
       <div class="status-bar erosion-bar">
         <div class="bar-fill erosion" style="width: {{multiply (divide system.derived.corruption.value system.derived.corruption.max) 100}}%"></div>
         <span class="bar-text">{{system.derived.corruption.value}}/{{system.derived.corruption.max}}</span>
       </div>
+      {{#unless isLocked}}
+      <div class="status-input-row">
+        <input type="number" name="system.derived.corruption.value" value="{{system.derived.corruption.value}}" data-dtype="Number" min="0" max="{{system.derived.corruption.max}}" placeholder="侵蚀值"/>
+        <span>/</span>
+        <input type="number" name="system.derived.corruption.max" value="{{system.derived.corruption.max}}" data-dtype="Number" min="1" placeholder="最大值"/>
+      </div>
+      {{/unless}}
 
       {{!-- 混乱值 --}}
       <div class="status-bar chaos-bar">
         <div class="bar-fill chaos" style="width: {{multiply (divide system.derived.chaos 15) 100}}%"></div>
         <span class="bar-text">{{system.derived.chaos}}/15</span>
       </div>
+      {{#unless isLocked}}
+      <div class="status-input-row">
+        <input type="number" name="system.derived.chaos" value="{{system.derived.chaos}}" data-dtype="Number" min="0" max="15" placeholder="混乱值"/>
+      </div>
+      {{/unless}}
       
       {{!-- 长休和侵蚀鉴定按钮 --}}
       <div class="check-buttons-row">
@@ -63,6 +82,9 @@
             <div class="exp-fill" style="width: {{multiply (divide system.info.experience 2700) 100}}%"></div>
             <span class="exp-text">{{system.info.experience}} / 2700</span>
           </div>
+          {{#unless isLocked}}
+          <input type="number" name="system.info.experience" value="{{system.info.experience}}" data-dtype="Number" min="0" max="2700" placeholder="经验值" class="exp-input"/>
+          {{/unless}}
           <div class="level-display">
             <span>等级</span>
             <input type="number" name="system.level" value="{{system.level}}" data-dtype="Number" min="1" {{#if isLocked}}disabled{{/if}}/>
@@ -304,7 +326,9 @@
               <button class="favorite-item-btn {{#if item.system.favorite}}favorited{{/if}}"
                       data-item-id="{{item._id}}"
                       type="button"
-                      title="收藏/取消收藏">⭐</button>
+                      title="收藏/取消收藏">
+                <i class="fas fa-star"></i>
+              </button>
             </td>
             <td class="col-icon" title="{{item.system.effect}}">
               <img src="{{item.img}}"
