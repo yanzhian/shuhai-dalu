@@ -333,13 +333,12 @@
           </thead>
           <tbody>
             {{#each items as |item id|}}
-            <tr data-item-id="{{item._id}}" data-item-type="{{item.type}}" data-favorite="{{item.system.favorite}}" data-filtered="false" draggable="true">
+            <tr data-item-id="{{item._id}}" data-item-type="{{item.type}}" data-favorite="{{item.system.favorite}}" data-filtered="false">
               <td class="item-favorite-cell">
                 <button class="favorite-item-btn {{#if item.system.favorite}}favorited{{/if}}" data-item-id="{{item._id}}" type="button" title="收藏/取消收藏">⭐</button>
               </td>
-              <td class="item-icon-cell" title="{{item.system.effect}}">
-                <img src="{{item.img}}" class="item-icon" data-item-id="{{item._id}}"/>
-                <div class="effect-description-tooltip">{{item.system.effect}}</div>
+              <td class="item-icon-cell draggable-cell" draggable="true" title="拖动到装备栏装备该物品">
+                <img src="{{item.img}}" class="item-icon" data-item-id="{{item._id}}" title="{{item.system.effect}}"/>
               </td>
               <td class="item-name-cell">{{item.name}}</td>
               <td class="item-type-cell">{{item.typeLabel}}</td>

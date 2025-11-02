@@ -150,10 +150,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     html.find('.delete-item-btn').click(this._onItemDelete.bind(this));
     html.find('.favorite-item-btn').click(this._onItemFavorite.bind(this));
 
-    // === 物品图标点击显示详情 ===
-    html.find('.item-icon').click(this._onItemIconClick.bind(this));
-
-    // === 物品图标单元格点击编辑效果描述 ===
+    // === 物品图标单元格点击显示详情，双击编辑效果描述 ===
+    html.find('.item-icon-cell').click(this._onItemIconClick.bind(this));
     html.find('.item-icon-cell').dblclick(this._onEditEffectDescription.bind(this));
     
     // === 搜索和过滤 ===
@@ -162,9 +160,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     
     // === 拖放 ===
     const dragHandler = ev => this._onDragStart(ev);
-    html.find('.inventory-table tbody tr').each((i, tr) => {
-      tr.setAttribute("draggable", true);
-      tr.addEventListener("dragstart", dragHandler, false);
+    html.find('.draggable-cell').each((i, cell) => {
+      cell.addEventListener("dragstart", dragHandler, false);
     });
   }
 
@@ -534,7 +531,9 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    */
   _onItemIconClick(event) {
     event.preventDefault();
-    const itemId = event.currentTarget.dataset.itemId;
+    // 从父行获取item-id
+    const row = $(event.currentTarget).closest('tr');
+    const itemId = row.data('item-id');
     const item = this.actor.items.get(itemId);
     
     if (!item) return;
