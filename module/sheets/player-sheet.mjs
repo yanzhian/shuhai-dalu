@@ -11,7 +11,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       height: 900,
       tabs: [],
       dragDrop: [
-        { dragSelector: ".inventory-item", dropSelector: ".equipment-slot" }
+        { dragSelector: ".inventory-table tbody tr", dropSelector: ".equipment-slot" }
       ],
       scrollY: [".left-content", ".inventory-list"]
     });
@@ -134,9 +134,9 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     
     // === 拖放 ===
     const dragHandler = ev => this._onDragStart(ev);
-    html.find('.inventory-item').each((i, li) => {
-      li.setAttribute("draggable", true);
-      li.addEventListener("dragstart", dragHandler, false);
+    html.find('.inventory-table tbody tr').each((i, tr) => {
+      tr.setAttribute("draggable", true);
+      tr.addEventListener("dragstart", dragHandler, false);
     });
   }
 
@@ -438,16 +438,16 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    */
   _onSearchItems(event) {
     const searchTerm = event.currentTarget.value.toLowerCase();
-    const items = this.element.find('.inventory-item');
+    const items = this.element.find('.inventory-table tbody tr');
     
     items.each((i, item) => {
-      const itemName = $(item).find('.item-name').text().toLowerCase();
-      const itemType = $(item).data('item-type');
+      const $item = $(item);
+      const itemName = $item.find('.item-name-cell').text().toLowerCase();
       
       if (itemName.includes(searchTerm)) {
-        $(item).attr('data-filtered', 'false');
+        $item.attr('data-filtered', 'false');
       } else {
-        $(item).attr('data-filtered', 'true');
+        $item.attr('data-filtered', 'true');
       }
     });
   }
@@ -458,7 +458,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   _onFilterItems(event) {
     event.preventDefault();
     const filterType = event.currentTarget.dataset.filter;
-    const items = this.element.find('.inventory-item');
+    const items = this.element.find('.inventory-table tbody tr');
     const filterBtns = this.element.find('.filter-btn');
     
     // 更新按钮状态
@@ -467,14 +467,15 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     
     // 过滤物品
     items.each((i, item) => {
-      const itemType = $(item).data('item-type');
+      const $item = $(item);
+      const itemType = $item.data('item-type');
       
       if (filterType === 'all') {
-        $(item).attr('data-filtered', 'false');
+        $item.attr('data-filtered', 'false');
       } else if (itemType === filterType) {
-        $(item).attr('data-filtered', 'false');
+        $item.attr('data-filtered', 'false');
       } else {
-        $(item).attr('data-filtered', 'true');
+        $item.attr('data-filtered', 'true');
       }
     });
   }
@@ -496,6 +497,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
   /**
    * 处理物品拖放到装备槽
+   * ⭐ 修复：正确处理战斗骰数组槽位
    */
   async _onDropItem(event, data) {
     const item = await Item.implementation.fromDropData(data);
@@ -516,6 +518,24 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     const slotType = dropTarget.dataset.slot;
     const slotIndex = dropTarget.dataset.slotIndex !== undefined ? 
       parseInt(dropTarget.dataset.slotIndex) : null;
+    
+    // ⭐ 特殊处理战斗骰槽位
+    if (slotType === 'combatDice') {
+      // 验证物品类型
+      if (item.type !== 'combatDice' && item.type !== 'shootDice') {
+        ui.notifications.warn("只能装备攻击骰或射击骰到战斗骰槽位");
+        return false;
+      }
+      
+      // 检查是否已经装备在其他战斗骰槽位
+      const currentCombatDice = this.actor.system.equipment.combatDice;
+      const existingIndex = currentCombatDice.findIndex(diceId => diceId === item.id);
+      
+      if (existingIndex !== -1 && existingIndex !== slotIndex) {
+        ui.notifications.warn("该战斗骰已经装备在其他槽位");
+        return false;
+      }
+    }
     
     // 装备物品到槽位
     await game.shuhai.equipItem(this.actor, item, slotType, slotIndex);

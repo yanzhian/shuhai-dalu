@@ -7,7 +7,7 @@
       {{!-- 头像区域 --}}
       <div class="avatar-section">
         <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}"/>
-        <button class="lock-btn" title="锁定"><i class="fas fa-lock"></i></button>
+        <button class="lock-btn" title="锁定" type="button"><i class="fas fa-lock"></i></button>
       </div>
       
       {{!-- 状态栏 --}}
@@ -245,7 +245,7 @@
           
           {{!-- 战斗骰 --}}
           {{#each system.equipment.combatDice as |diceId index|}}
-          <div class="equipment-slot dice-slot" data-slot-type="combatDice">
+          <div class="equipment-slot dice-slot" data-slot-type="combatDice" data-slot-index="{{index}}">
             <label>战斗骰{{add index 1}}</label>
             <div class="slot-content" data-slot="combatDice" data-slot-index="{{index}}" data-item-id="{{diceId}}">
               {{#if (hasItem diceId)}}
@@ -329,30 +329,52 @@
         </div>
       </div>
       
+      {{!-- ⭐ 修改为表格布局 --}}
       <div class="inventory-list">
-        {{#each items as |item id|}}
-        <div class="inventory-item" data-item-id="{{item._id}}" data-item-type="{{item.type}}" draggable="true">
-          <img src="{{item.img}}" class="item-icon" data-item-id="{{item._id}}" title="{{item.name}}"/>
-          <div class="item-info">
-            <div class="item-name">{{item.name}}</div>
-            <div class="item-details">
-              <span class="item-type">{{item.type}}</span>
-              <span class="item-category">{{item.system.category}}</span>
-              <span class="item-dice">{{item.system.diceFormula}}</span>
-              <span class="item-cost">{{item.system.cost}}</span>
-              <span class="item-quantity">x{{item.system.quantity}}</span>
-              {{#if item.system.starlightCost}}
-              <span class="item-starlight">⭐{{item.system.starlightCost}}</span>
-              {{/if}}
-            </div>
-          </div>
-          <div class="item-actions">
-            <button class="use-item-btn" data-item-id="{{item._id}}" type="button" title="使用">使用</button>
-            <button class="edit-item-btn" data-item-id="{{item._id}}" type="button" title="编辑">编辑</button>
-            <button class="delete-item-btn" data-item-id="{{item._id}}" type="button" title="删除">删除</button>
-          </div>
-        </div>
-        {{/each}}
+        <table class="inventory-table">
+          <thead>
+            <tr>
+              <th class="item-icon-cell"></th>
+              <th class="item-name-cell">名称</th>
+              <th class="item-type-cell">类型</th>
+              <th class="item-category-cell">分类</th>
+              <th class="item-dice-cell">骰数</th>
+              <th class="item-cost-cell">费用</th>
+              <th class="item-quantity-cell">数量</th>
+              <th class="item-starlight-cell">星光</th>
+              <th class="item-actions-cell">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each items as |item id|}}
+            <tr data-item-id="{{item._id}}" data-item-type="{{item.type}}" data-filtered="false" draggable="true">
+              <td class="item-icon-cell">
+                <img src="{{item.img}}" class="item-icon" data-item-id="{{item._id}}" title="{{item.name}}"/>
+              </td>
+              <td class="item-name-cell">{{item.name}}</td>
+              <td class="item-type-cell">{{item.type}}</td>
+              <td class="item-category-cell">{{item.system.category}}</td>
+              <td class="item-dice-cell">{{item.system.diceFormula}}</td>
+              <td class="item-cost-cell">{{item.system.cost}}</td>
+              <td class="item-quantity-cell">{{item.system.quantity}}</td>
+              <td class="item-starlight-cell">
+                {{#if item.system.starlightCost}}
+                {{item.system.starlightCost}}
+                {{else}}
+                -
+                {{/if}}
+              </td>
+              <td class="item-actions-cell">
+                <div class="item-actions">
+                  <button class="use-item-btn" data-item-id="{{item._id}}" type="button" title="使用">使用</button>
+                  <button class="edit-item-btn" data-item-id="{{item._id}}" type="button" title="编辑">编辑</button>
+                  <button class="delete-item-btn" data-item-id="{{item._id}}" type="button" title="删除">删除</button>
+                </div>
+              </td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
