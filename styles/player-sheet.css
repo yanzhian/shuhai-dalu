@@ -768,27 +768,23 @@ button:disabled:hover {
 .col-actions { width: 200px; }
 
 /* 收藏按钮 */
-.favorite-item-btn {
+.item-favorite {
   background: transparent;
   border: none;
-  font-size: 1.125rem;
+  font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s;
   color: #555;
   padding: 0.25rem;
 }
 
-.favorite-item-btn:hover {
+.item-favorite:hover {
   transform: scale(1.2);
   color: #f39c12;
 }
 
-.favorite-item-btn.favorited {
+.item-favorite.favorited {
   color: #f39c12;
-}
-
-.favorite-item-btn i {
-  pointer-events: none;
 }
 
 /* 物品图标 */
@@ -808,49 +804,54 @@ button:disabled:hover {
 
 /* 操作按钮 */
 .item-actions {
-  display: flex;
-  gap: 0.25rem;
+  display: flex;gap: 0.5rm;
   justify-content: center;
+  align-items: center;
 }
 
 .item-actions button {
-  padding: 0.25rem 0.5rem;
+  width: 28px;
+  height: 28px;
+  padding: 0;
   border: none;
-  border-radius: 3px;
+  border-radius: 4px;
   color: #fff;
   cursor: pointer;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
-.use-item-btn {
+ 
+.item-use {
   background: #27ae60;
 }
 
-.use-item-btn:hover {
+.item-use:hover {
   background: #2ecc71;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(46, 204, 113, 0.3);
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(46, 204, 113, 0.4);
 }
-
-.edit-item-btn {
+ 
+.item-edit {
   background: #3498db;
 }
-
-.edit-item-btn:hover {
+ 
+.item-edit:hover {
   background: #5dade2;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.4);
 }
-
-.delete-item-btn {
+ 
+.item-delete {
   background: #e74c3c;
 }
 
-.delete-item-btn:hover {
+.item-delete:hover {
   background: #c0392b;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
 }
 
 /* 创建物品按钮 */

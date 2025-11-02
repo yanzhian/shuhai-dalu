@@ -323,7 +323,7 @@
               data-favorite="{{item.system.favorite}}"
               data-filtered="false">
             <td class="col-favorite">
-              <button class="favorite-item-btn {{#if item.system.favorite}}favorited{{/if}}"
+              <button class="item-favorite {{#if item.system.favorite}}favorited{{/if}}"
                       data-item-id="{{item._id}}"
                       type="button"
                       title="收藏/取消收藏">
@@ -351,9 +351,15 @@
             </td>
             <td class="col-actions">
               <div class="item-actions">
-                <button class="use-item-btn" data-item-id="{{item._id}}" type="button" title="使用">使用</button>
-                <button class="edit-item-btn" data-item-id="{{item._id}}" type="button" title="编辑">编辑</button>
-                <button class="delete-item-btn" data-item-id="{{item._id}}" type="button" title="删除">删除</button>
+                <button class="item-use" data-item-id="{{item._id}}" type="button" title="使用">
+                  <i class="fas fa-play"></i>
+                </button>
+                <button class="item-edit" data-item-id="{{item._id}}" type="button" title="编辑">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="item-delete" data-item-id="{{item._id}}" type="button" title="删除">
+                  <i class="fas fa-trash"></i>
+                </button>
               </div>
             </td>
           </tr>

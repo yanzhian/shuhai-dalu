@@ -146,10 +146,10 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     html.find('.create-item-btn').click(this._onItemCreateDialog.bind(this));
 
     // 使用事件委托确保按钮点击正常工作
-    html.on('click', '.use-item-btn', this._onItemUse.bind(this));
-    html.on('click', '.edit-item-btn', this._onItemEdit.bind(this));
-    html.on('click', '.delete-item-btn', this._onItemDelete.bind(this));
-    html.on('click', '.favorite-item-btn', this._onItemFavorite.bind(this));
+    html.find('.item-use').click(this._onItemUse.bind(this));
+    html.find('.item-edit').click(this._onItemEdit.bind(this));
+    html.find('.item-delete').click(this._onItemDelete.bind(this));
+    html.find('.item-favorite').click(this._onItemFavorite.bind(this));
 
     // === 物品图标点击显示详情 ===
     html.find('.col-icon .item-icon').click(this._onItemIconClick.bind(this));
