@@ -41,12 +41,12 @@
 
       {{!-- 混乱值 --}}
       <div class="status-bar chaos-bar">
-        <div class="bar-fill chaos" style="width: {{multiply (divide system.derived.chaos 15) 100}}%"></div>
-        <span class="bar-text">{{system.derived.chaos}}/15</span>
+        <div class="bar-fill chaos" style="width: {{multiply (divide system.derived.chaos.value system.derived.chaos.max) 100}}%"></div>
+        <span class="bar-text">{{system.derived.chaos.value}}/{{system.derived.chaos.max}}</span>
       </div>
       {{#unless isLocked}}
       <div class="status-input-row">
-        <input type="number" name="system.derived.chaos" value="{{system.derived.chaos}}" data-dtype="Number" min="0" max="15" placeholder="混乱值"/>
+        <input type="number" name="system.derived.chaos.value" value="{{system.derived.chaos.value}}" data-dtype="Number" min="0" max="{{system.derived.chaos.max}}" placeholder="混乱值"/>
       </div>
       {{/unless}}
       
@@ -566,6 +566,71 @@
         </tbody>
 
       </table>
+    </div>
+
+    {{!-- 资源显示区域 --}}
+    <div class="resources-panel">
+      <div class="panel-header">资源</div>
+
+      <div class="resources-grid">
+        {{!-- 星光剩余 --}}
+        <div class="resource-item">
+          <label>星光</label>
+          <div class="resource-value-display">
+            <span class="resource-current">{{system.derived.starlight}}</span>
+            <span class="resource-separator">/</span>
+            <span class="resource-max">{{add 10 (multiply level 2)}}</span>
+          </div>
+        </div>
+
+        {{!-- 货币 --}}
+        <div class="resource-item">
+          <label>货币</label>
+          {{#if isLocked}}
+          <div class="resource-value-display">
+            <span class="resource-current">{{system.resources.currency}}</span>
+          </div>
+          {{else}}
+          <input type="number" name="system.resources.currency" value="{{system.resources.currency}}" data-dtype="Number" min="0" placeholder="0"/>
+          {{/if}}
+        </div>
+
+        {{!-- 奇遇点 --}}
+        <div class="resource-item">
+          <label>奇遇点</label>
+          {{#if isLocked}}
+          <div class="resource-value-display">
+            <span class="resource-current">{{system.resources.encounterPoints}}</span>
+          </div>
+          {{else}}
+          <input type="number" name="system.resources.encounterPoints" value="{{system.resources.encounterPoints}}" data-dtype="Number" min="0" placeholder="0"/>
+          {{/if}}
+        </div>
+
+        {{!-- 奇迹点 --}}
+        <div class="resource-item">
+          <label>奇迹点</label>
+          {{#if isLocked}}
+          <div class="resource-value-display">
+            <span class="resource-current">{{system.resources.miraclePoints}}</span>
+          </div>
+          {{else}}
+          <input type="number" name="system.resources.miraclePoints" value="{{system.resources.miraclePoints}}" data-dtype="Number" min="0" placeholder="1"/>
+          {{/if}}
+        </div>
+
+        {{!-- 复制核心 --}}
+        <div class="resource-item">
+          <label>复制核心</label>
+          {{#if isLocked}}
+          <div class="resource-value-display">
+            <span class="resource-current">{{system.resources.replicaCore}}</span>
+          </div>
+          {{else}}
+          <input type="number" name="system.resources.replicaCore" value="{{system.resources.replicaCore}}" data-dtype="Number" min="0" placeholder="0"/>
+          {{/if}}
+        </div>
+      </div>
     </div>
   </div>
 

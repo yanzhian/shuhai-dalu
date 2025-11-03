@@ -60,11 +60,8 @@ export default class ShuhaiItem extends Item {
     }
 
     const systemData = this.system;
-    
-    // 检查消耗
-    if (!this._checkCost()) {
-      return;
-    }
+
+    // 费用消耗功能已移除（属于战斗区域功能，由玩家手动操作）
 
     // 根据类型执行不同操作
     if (this.type === 'combatDice' || this.type === 'shootDice') {
@@ -169,16 +166,15 @@ export default class ShuhaiItem extends Item {
       roll: roll
     };
 
-    // 扣除消耗
-    await this._consumeCost();
+    // 费用消耗功能已移除（属于战斗区域功能）
 
     // 创建聊天消息
     const messageData = {
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       flavor: `使用 ${this.name}`,
       content: await renderTemplate("systems/shuhai-dalu/templates/chat/dice-use.hbs", result),
-      sound: CONFIG.sounds.dice,
-      rolls: [roll]
+      sound: CONFIG.sounds.dice
+      // 移除 rolls: [roll] 避免3D骰子动画播放两次
     };
 
     ChatMessage.create(messageData);
@@ -205,8 +201,7 @@ export default class ShuhaiItem extends Item {
       effect: this.system.effect
     };
 
-    // 扣除消耗
-    await this._consumeCost();
+    // 费用消耗功能已移除（属于战斗区域功能）
 
     // 创建聊天消息
     const messageData = {
