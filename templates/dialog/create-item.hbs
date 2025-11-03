@@ -1,0 +1,52 @@
+<div class="shuhai-create-item-dialog">
+  <div class="form-group">
+    <label>物品名称:</label>
+    <input type="text" name="name" placeholder="输入物品名称" autofocus/>
+  </div>
+  
+  <div class="form-group">
+    <label>物品类型:</label>
+    <select name="type">
+      {{#each types as |type|}}
+      <option value="{{type.value}}">{{type.label}}</option>
+      {{/each}}
+    </select>
+  </div>
+  
+  <div class="info-box">
+    <p><i class="fas fa-info-circle"></i> 创建后将自动打开编辑窗口，您可以在那里设置详细属性。</p>
+  </div>
+</div>
+
+<style>
+.shuhai-create-item-dialog .form-group {
+  margin-bottom: 1rem;
+}
+
+.shuhai-create-item-dialog label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.shuhai-create-item-dialog input,
+.shuhai-create-item-dialog select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.shuhai-create-item-dialog .info-box {
+  background: #e3f2fd;
+  border-left: 3px solid #2196f3;
+  padding: 0.75rem;
+  border-radius: 3px;
+}
+
+.shuhai-create-item-dialog .info-box p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #1976d2;
+}
+</style>

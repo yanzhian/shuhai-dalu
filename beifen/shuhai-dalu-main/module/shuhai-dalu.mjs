@@ -207,115 +207,6 @@ Hooks.once('init', function() {
   Handlebars.registerHelper('hasItem', function(itemId) {
     return itemId && itemId !== '';
   });
-  // 获取物品费用
-
-  Handlebars.registerHelper('getItemCost', function(itemId, options) {
-
-    if (!itemId) return '';
-
- 
-
-    // 尝试从当前上下文的 actor 获取物品
-
-    const actor = options?.data?.root?.actor;
-
-    if (actor && actor.items) {
-
-      const item = actor.items.get(itemId);
-
-      if (item && item.system.cost) return item.system.cost;
-
-    }
-
- 
-
-    // 否则从全局获取
-
-    const item = game.items.get(itemId);
-
-    return (item && item.system.cost) ? item.system.cost : '';
-
-  });
-
- 
-
-  // 获取物品骰数
-
-  Handlebars.registerHelper('getItemDice', function(itemId, options) {
-
-    if (!itemId) return '';
-
- 
-
-    // 尝试从当前上下文的 actor 获取物品
-
-    const actor = options?.data?.root?.actor;
-
-    if (actor && actor.items) {
-
-      const item = actor.items.get(itemId);
-
-      if (item && item.system.diceFormula) return item.system.diceFormula;
-
-    }
-
- 
-
-    // 否则从全局获取
-
-    const item = game.items.get(itemId);
-
-    return (item && item.system.diceFormula) ? item.system.diceFormula : '';
-
-  });
-
- 
-
-  // 获取物品名称
-
-  Handlebars.registerHelper('getItemName', function(itemId, options) {
-
-    if (!itemId) return '';
-
-
-
-    // 尝试从当前上下文的 actor 获取物品
-
-    const actor = options?.data?.root?.actor;
-
-    if (actor && actor.items) {
-
-      const item = actor.items.get(itemId);
-
-      if (item) return item.name;
-
-    }
-
-
-
-    // 否则从全局获取
-
-    const item = game.items.get(itemId);
-
-    return item ? item.name : '';
-
-  });
-
-  // 获取物品效果描述
-  Handlebars.registerHelper('getItemEffect', function(itemId, options) {
-    if (!itemId) return '';
-
-    // 尝试从当前上下文的 actor 获取物品
-    const actor = options?.data?.root?.actor;
-    if (actor && actor.items) {
-      const item = actor.items.get(itemId);
-      if (item && item.system.effect) return item.system.effect;
-    }
-
-    // 否则从全局获取
-    const item = game.items.get(itemId);
-    return (item && item.system.effect) ? item.system.effect : '';
-  });
 });
 
 /* -------------------------------------------- */
@@ -332,10 +223,7 @@ async function preloadHandlebarsTemplates() {
     "systems/shuhai-dalu/templates/actor/parts/actor-skills.hbs",
     "systems/shuhai-dalu/templates/actor/parts/actor-equipment.hbs",
     "systems/shuhai-dalu/templates/actor/parts/actor-inventory.hbs",
-
-    // 应用程序模板
-    "systems/shuhai-dalu/templates/apps/inventory-app.hbs",
-
+    
     // 物品模板
     "systems/shuhai-dalu/templates/item/item-combatDice-sheet.hbs",
     "systems/shuhai-dalu/templates/item/item-defenseDice-sheet.hbs",
@@ -345,10 +233,10 @@ async function preloadHandlebarsTemplates() {
     "systems/shuhai-dalu/templates/item/item-armor-sheet.hbs",
     "systems/shuhai-dalu/templates/item/item-item-sheet.hbs",
     "systems/shuhai-dalu/templates/item/item-equipment-sheet.hbs",
-
+    
     // 对话框模板
     "systems/shuhai-dalu/templates/dialog/check-dialog.hbs",
-
+    
     // 聊天模板
     "systems/shuhai-dalu/templates/chat/check-roll.hbs",
     "systems/shuhai-dalu/templates/chat/dice-use.hbs",
@@ -448,8 +336,6 @@ async function equipItem(actor, item, slotType, slotIndex = null) {
     updateData['system.equipment.armor'] = item.id;
   } else if (slotType === 'item' && slotIndex !== null) {
     updateData[`system.equipment.items.${slotIndex}`] = item.id;
-  } else if (slotType === 'equipmentDice' && slotIndex !== null) {
-    updateData[`system.equipment.equipmentDice.${slotIndex}`] = item.id;
   } else if (slotType === 'gear' && slotIndex !== null) {
     updateData[`system.equipment.gear.${slotIndex}`] = item.id;
   } else if (slotType === 'combatDice' && slotIndex !== null) {
@@ -489,9 +375,6 @@ async function unequipItem(actor, slotType, slotIndex = null) {
   } else if (slotType === 'item' && slotIndex !== null) {
     itemId = actor.system.equipment.items[slotIndex];
     updateData[`system.equipment.items.${slotIndex}`] = "";
-  } else if (slotType === 'equipmentDice' && slotIndex !== null) {
-    itemId = actor.system.equipment.equipmentDice[slotIndex];
-    updateData[`system.equipment.equipmentDice.${slotIndex}`] = "";
   } else if (slotType === 'gear' && slotIndex !== null) {
     itemId = actor.system.equipment.gear[slotIndex];
     updateData[`system.equipment.gear.${slotIndex}`] = "";
