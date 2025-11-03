@@ -461,7 +461,7 @@ async function equipItem(actor, item, slotType, slotIndex = null) {
     updateData['system.equipment.defenseDice'] = item.id;
   } else if (slotType === 'triggerDice') {
     updateData['system.equipment.triggerDice'] = item.id;
-  } else if (slotType === 'passive' && slotIndex !== null) {
+  } else if (slotType === 'passiveDice' && slotIndex !== null) {
     const passives = [...actor.system.equipment.passives];
     passives[slotIndex] = item.id;
     updateData['system.equipment.passives'] = passives;
@@ -512,7 +512,7 @@ async function unequipItem(actor, slotType, slotIndex = null) {
   } else if (slotType === 'triggerDice') {
     itemId = actor.system.equipment.triggerDice;
     updateData['system.equipment.triggerDice'] = "";
-  } else if (slotType === 'passive' && slotIndex !== null) {
+  } else if (slotType === 'passiveDice' && slotIndex !== null) {
     itemId = actor.system.equipment.passives[slotIndex];
     const passives = [...actor.system.equipment.passives];
     passives[slotIndex] = "";

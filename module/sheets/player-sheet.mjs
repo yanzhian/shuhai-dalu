@@ -496,7 +496,9 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     event.preventDefault();
 
     // 使用模板渲染对话框内容
-    const content = await renderTemplate("systems/shuhai-dalu/templates/dialog/create-item.hbs", {});
+    const content = await renderTemplate("systems/shuhai-dalu/templates/dialog/create-item.hbs", {
+      actor: this.actor
+    });
 
     new Dialog({
       title: "创建物品",
@@ -1033,7 +1035,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       combatDice: ['combatDice', 'shootDice'],
       defenseDice: ['defenseDice'],
       triggerDice: ['triggerDice'],
-      passiveDice: ['passiveDice']
+      passiveDice: ['passiveDice'],
+      gear: ['equipment', 'item']
     };
 
     const allowedTypes = validations[slotType];
@@ -1046,7 +1049,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
         combatDice: '战斗骰',
         defenseDice: '守备骰',
         triggerDice: '触发骰',
-        passiveDice: '被动骰'
+        passiveDice: '被动骰',
+        gear: '装备'
       };
       ui.notifications.warn(`只能装备${allowedTypes.map(t => this._getTypeName(t)).join('或')}到${slotNames[slotType]}槽位`);
       return false;
