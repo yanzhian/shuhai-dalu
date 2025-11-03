@@ -1,50 +1,48 @@
-<div class="inventory-app">
+<div class="inventory-app-container">
   {{!-- 顶部工具栏 --}}
   <div class="inventory-toolbar">
-    <div class="search-box">
-      <input type="text" class="item-search" placeholder="搜索物品..." />
-      <i class="fas fa-search"></i>
+    <div class="toolbar-left">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" class="search-input" placeholder="搜索物品..." value="{{searchTerm}}" />
+      </div>
     </div>
 
-    <button class="toolbar-btn create-item-btn" type="button" title="创建物品">
-      <i class="fas fa-plus-circle"></i>
-      <span>创建物品</span>
-    </button>
-
-    <div class="filter-menu">
-      <button class="toolbar-btn filter-menu-btn" type="button" title="筛选">
-        <i class="fas fa-filter"></i>
-        <span>筛选</span>
+    <div class="toolbar-center">
+      <button class="toolbar-btn create-item-btn" type="button">
+        <i class="fas fa-plus-circle"></i>
+        <span>创建物品</span>
       </button>
-      <div class="filter-dropdown button-menu-list" style="display: none;">
-        <div class="filter-section">
-          <label>类型</label>
-          <select name="filterType">
-            <option value="">全部类型</option>
-            <option value="combatDice">攻击骰</option>
-            <option value="shootDice">射击骰</option>
-            <option value="defenseDice">守备骰</option>
-            <option value="triggerDice">触发骰</option>
-            <option value="passiveDice">被动骰</option>
-            <option value="weapon">武器</option>
-            <option value="armor">防具</option>
-            <option value="equipment">装备</option>
-            <option value="item">物品</option>
-          </select>
-        </div>
-        <div class="filter-section">
-          <label>费用</label>
-          <input type="text" name="filterCost" placeholder="例如: Cost:2"/>
-        </div>
-        <div class="filter-section">
-          <label>星光</label>
-          <input type="number" name="filterStarlight" placeholder="星光值" min="0"/>
-        </div>
-        <div class="filter-actions">
-          <button class="apply-filter-btn" type="button">应用</button>
-          <button class="clear-filter-btn" type="button">清除</button>
-        </div>
+    </div>
+
+    <div class="toolbar-right">
+      <div class="filter-group">
+        <label>类型筛选:</label>
+        <button class="filter-btn filter-type-btn" data-type="combatDice" type="button">攻击骰</button>
+        <button class="filter-btn filter-type-btn" data-type="shootDice" type="button">射击骰</button>
+        <button class="filter-btn filter-type-btn" data-type="defenseDice" type="button">守备骰</button>
+        <button class="filter-btn filter-type-btn" data-type="weapon" type="button">武器</button>
+        <button class="filter-btn filter-type-btn" data-type="armor" type="button">防具</button>
+        <button class="filter-btn filter-type-btn" data-type="equipment" type="button">装备</button>
       </div>
+
+      <div class="filter-group">
+        <label>费用筛选:</label>
+        <button class="filter-btn filter-cost-btn" data-cost="free" type="button">免费</button>
+        <button class="filter-btn filter-cost-btn" data-cost="currency" type="button">货币</button>
+        <button class="filter-btn filter-cost-btn" data-cost="special" type="button">特殊</button>
+      </div>
+
+      <div class="filter-group">
+        <label>星光筛选:</label>
+        <button class="filter-btn filter-starlight-btn" data-starlight="none" type="button">无消耗</button>
+        <button class="filter-btn filter-starlight-btn" data-starlight="has" type="button">有消耗</button>
+      </div>
+
+      <button class="toolbar-btn clear-filters-btn" type="button">
+        <i class="fas fa-times-circle"></i>
+        <span>清除筛选</span>
+      </button>
     </div>
   </div>
 
@@ -58,74 +56,284 @@
     <div class="header-cell col-cost">费用</div>
     <div class="header-cell col-quantity">数量</div>
     <div class="header-cell col-starlight">星光</div>
-    <div class="header-cell col-actions">操作</div>
   </div>
 
   {{!-- 物品列表内容（可滚动） --}}
   <div class="inventory-content">
-    {{#each items as |item id|}}
-    <div class="inventory-item-row"
-         data-item-id="{{item._id}}"
-         data-item-type="{{item.type}}"
-         data-item-category="{{item.system.category}}"
-         data-item-cost="{{item.system.cost}}"
-         data-item-starlight="{{item.system.starlightCost}}"
-         data-filtered="false">
+    {{#if items}}
+      {{#each items as |itemData|}}
+      <div class="inventory-row"
+           data-item-id="{{itemData.id}}"
+           data-item-type="{{itemData.type}}"
+           draggable="true">
 
-      {{!-- 图标 --}}
-      <div class="item-cell col-icon">
-        <div class="item-icon-wrapper"
-             data-item-id="{{item._id}}"
-             title="{{item.system.effect}}">
-          <img src="{{item.img}}"
+        {{!-- 图标 --}}
+        <div class="item-cell col-icon">
+          <img src="{{itemData.img}}"
                class="item-icon"
-               data-item-id="{{item._id}}"
-               draggable="true"/>
+               title="{{itemData.effect}}"
+               alt="{{itemData.name}}"/>
+        </div>
+
+        {{!-- 名称 --}}
+        <div class="item-cell col-name item-name-cell">{{itemData.name}}</div>
+
+        {{!-- 类型 --}}
+        <div class="item-cell col-type">{{itemData.typeLabel}}</div>
+
+        {{!-- 分类 --}}
+        <div class="item-cell col-category">{{itemData.category}}</div>
+
+        {{!-- 骰数 --}}
+        <div class="item-cell col-dice">{{itemData.diceFormula}}</div>
+
+        {{!-- 费用 --}}
+        <div class="item-cell col-cost">{{itemData.cost}}</div>
+
+        {{!-- 数量 --}}
+        <div class="item-cell col-quantity">{{itemData.quantity}}</div>
+
+        {{!-- 星光 --}}
+        <div class="item-cell col-starlight">
+          {{#if itemData.starlightCost}}
+            {{itemData.starlightCost}}
+          {{else}}
+            -
+          {{/if}}
         </div>
       </div>
-
-      {{!-- 名称 --}}
-      <div class="item-cell col-name">{{item.name}}</div>
-
-      {{!-- 类型 --}}
-      <div class="item-cell col-type">{{item.typeLabel}}</div>
-
-      {{!-- 分类 --}}
-      <div class="item-cell col-category">{{item.system.category}}</div>
-
-      {{!-- 骰数 --}}
-      <div class="item-cell col-dice">{{item.system.diceFormula}}</div>
-
-      {{!-- 费用 --}}
-      <div class="item-cell col-cost">{{item.system.cost}}</div>
-
-      {{!-- 数量 --}}
-      <div class="item-cell col-quantity">{{item.system.quantity}}</div>
-
-      {{!-- 星光 --}}
-      <div class="item-cell col-starlight">
-        {{#if item.system.starlightCost}}
-        {{item.system.starlightCost}}
-        {{else}}
-        -
-        {{/if}}
+      {{/each}}
+    {{else}}
+      <div class="no-items">
+        <p>没有找到物品</p>
       </div>
-
-      {{!-- 操作 --}}
-      <div class="item-cell col-actions">
-        <div class="item-actions">
-          <button class="action-icon-btn item-use-btn" data-item-id="{{item._id}}" type="button" title="使用">
-            <i class="fas fa-play-circle"></i>
-          </button>
-          <button class="action-icon-btn item-edit-btn" data-item-id="{{item._id}}" type="button" title="编辑">
-            <i class="fas fa-edit"></i>
-          </button>
-          <button class="action-icon-btn item-delete-btn" data-item-id="{{item._id}}" type="button" title="删除">
-            <i class="fas fa-trash-alt"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-    {{/each}}
+    {{/if}}
   </div>
 </div>
+
+<style>
+.inventory-app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #1e1e1e;
+  color: #e0e0e0;
+}
+
+/* 工具栏 */
+.inventory-toolbar {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: #2a2a2a;
+  border-bottom: 2px solid #3a3a3a;
+  flex-wrap: wrap;
+}
+
+.toolbar-left,
+.toolbar-center,
+.toolbar-right {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.toolbar-right {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #333;
+  border-radius: 4px;
+  border: 1px solid #4a4a4a;
+}
+
+.search-box i {
+  color: #999;
+}
+
+.search-input {
+  background: transparent;
+  border: none;
+  color: #e0e0e0;
+  outline: none;
+  width: 200px;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.toolbar-btn:hover {
+  background: #2980b9;
+}
+
+.clear-filters-btn {
+  background: #e74c3c;
+}
+
+.clear-filters-btn:hover {
+  background: #c0392b;
+}
+
+.filter-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.filter-group label {
+  color: #999;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.filter-btn {
+  padding: 0.25rem 0.75rem;
+  background: #3a3a3a;
+  color: #e0e0e0;
+  border: 1px solid #4a4a4a;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  background: #4a4a4a;
+}
+
+.filter-btn.active {
+  background: #3498db;
+  border-color: #3498db;
+  color: white;
+}
+
+/* 表头 */
+.inventory-header {
+  display: grid;
+  grid-template-columns: 60px 2fr 1fr 1fr 1fr 1fr 80px 80px;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #2a2a2a;
+  border-bottom: 2px solid #3a3a3a;
+  font-weight: bold;
+  color: #bbb;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.header-cell {
+  text-align: center;
+}
+
+/* 内容区域 */
+.inventory-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.inventory-row {
+  display: grid;
+  grid-template-columns: 60px 2fr 1fr 1fr 1fr 1fr 80px 80px;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #2a2a2a;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.inventory-row:hover {
+  background: #333;
+  transform: translateX(4px);
+}
+
+.item-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.col-icon {
+  justify-content: flex-start;
+}
+
+.col-name {
+  justify-content: flex-start;
+}
+
+.item-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 4px;
+  border: 2px solid #4a4a4a;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.item-icon:hover {
+  transform: scale(1.1);
+  border-color: #3498db;
+}
+
+.item-name-cell {
+  font-weight: bold;
+  color: #3498db;
+  cursor: pointer;
+}
+
+.item-name-cell:hover {
+  text-decoration: underline;
+}
+
+.no-items {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
+  color: #999;
+}
+
+.no-items p {
+  font-size: 1.25rem;
+}
+
+/* 滚动条样式 */
+.inventory-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.inventory-content::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+.inventory-content::-webkit-scrollbar-thumb {
+  background: #4a4a4a;
+  border-radius: 4px;
+}
+
+.inventory-content::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+</style>

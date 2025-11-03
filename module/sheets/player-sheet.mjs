@@ -125,6 +125,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     html.find('.edit-item-btn').click(this._onItemEdit.bind(this));
     html.find('.delete-item-btn').click(this._onItemDelete.bind(this));
     html.find('.favorite-item-btn').click(this._onItemFavorite.bind(this));
+    html.find('.open-inventory-btn').click(this._onOpenInventory.bind(this));
 
     // === 物品图标点击显示详情 ===
     html.find('.item-icon').click(this._onItemIconClick.bind(this));
@@ -419,6 +420,23 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     // 切换收藏状态
     const currentFavorite = item.system.favorite || false;
     await item.update({ "system.favorite": !currentFavorite });
+  }
+
+  /**
+   * 打开物品栏
+   */
+  _onOpenInventory(event) {
+    event.preventDefault();
+
+    // 如果物品栏已打开，则聚焦
+    if (this.inventoryApp && this.inventoryApp.rendered) {
+      this.inventoryApp.bringToTop();
+      return;
+    }
+
+    // 创建新的物品栏应用
+    this.inventoryApp = new game.shuhai.InventoryApp(this.actor);
+    this.inventoryApp.render(true);
   }
 
   /**
