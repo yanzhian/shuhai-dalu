@@ -338,6 +338,9 @@ async function preloadHandlebarsTemplates() {
     "systems/shuhai-dalu/templates/actor/actor-character-sheet.hbs",
     "systems/shuhai-dalu/templates/actor/actor-player-sheet.hbs",
 
+    // 角色表单部分模板
+    "systems/shuhai-dalu/templates/actor/parts/equipment-slots.hbs",
+
     // 物品模板
     "systems/shuhai-dalu/templates/item/item-sheet.hbs",
 
