@@ -1,0 +1,62 @@
+<div class="shuhai-item-use chat-card">
+  <header class="card-header">
+    <img class="icon" src="icons/svg/item-bag.svg" />
+    <h3>{{item}}</h3>
+  </header>
+
+  <div class="card-content">
+    {{#if effect}}
+    <div class="item-effect">
+      <strong>效果:</strong>
+      <div class="effect-content">{{{effect}}}</div>
+    </div>
+    {{else}}
+    <p>使用了物品。</p>
+    {{/if}}
+  </div>
+</div>
+
+<style>
+.shuhai-item-use {
+  border: 2px solid #9b59b6;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+  padding: 0;
+  margin: 0.5rem 0;
+  overflow: hidden;
+}
+
+.shuhai-item-use .card-header {
+  background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 2px solid #8e44ad;
+}
+
+.shuhai-item-use .card-header .icon {
+  width: 32px;
+  height: 32px;
+  filter: brightness(0) invert(1);
+}
+
+.shuhai-item-use .card-header h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.shuhai-item-use .card-content {
+  padding: 1rem;
+}
+
+.shuhai-item-use .effect-content {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(155, 89, 182, 0.1);
+  border-left: 3px solid #9b59b6;
+  border-radius: 3px;
+}
+</style>

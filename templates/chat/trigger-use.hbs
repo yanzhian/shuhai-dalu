@@ -1,0 +1,84 @@
+<div class="shuhai-trigger-use chat-card">
+  <header class="card-header">
+    <img class="icon" src="icons/svg/lightning.svg" />
+    <h3>{{item}}</h3>
+  </header>
+
+  <div class="card-content">
+    <div class="trigger-info">
+      {{#if category}}
+      <div class="trigger-category">
+        <strong>分类:</strong> {{category}}
+      </div>
+      {{/if}}
+
+      {{#if tags}}
+      <div class="trigger-tags">
+        <strong>标签:</strong> {{tags}}
+      </div>
+      {{/if}}
+    </div>
+
+    {{#if effect}}
+    <div class="trigger-effect">
+      <strong>效果:</strong>
+      <div class="effect-content">{{{effect}}}</div>
+    </div>
+    {{/if}}
+  </div>
+</div>
+
+<style>
+.shuhai-trigger-use {
+  border: 2px solid #f39c12;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+  padding: 0;
+  margin: 0.5rem 0;
+  overflow: hidden;
+}
+
+.shuhai-trigger-use .card-header {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 2px solid #e67e22;
+}
+
+.shuhai-trigger-use .card-header .icon {
+  width: 32px;
+  height: 32px;
+  filter: brightness(0) invert(1);
+}
+
+.shuhai-trigger-use .card-header h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.shuhai-trigger-use .card-content {
+  padding: 1rem;
+}
+
+.shuhai-trigger-use .trigger-info > div {
+  margin-bottom: 0.5rem;
+}
+
+.shuhai-trigger-use .trigger-effect {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #3a3a3a;
+}
+
+.shuhai-trigger-use .effect-content {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(243, 156, 18, 0.1);
+  border-left: 3px solid #f39c12;
+  border-radius: 3px;
+}
+</style>

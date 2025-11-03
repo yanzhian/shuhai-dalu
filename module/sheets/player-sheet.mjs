@@ -120,10 +120,20 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   activateListeners(html) {
     super.activateListeners(html);
 
-    if (!this.isEditable) return;
+    console.log('书海大陆 | Player Sheet 激活监听器', {
+      isEditable: this.isEditable,
+      itemButtons: html.find('.item-use-btn').length,
+      iconWrappers: html.find('.item-icon-wrapper').length
+    });
 
-    // === 游玩/编辑模式切换 ===
+    // 游玩/编辑模式切换 - 总是可用
     html.find('.lock-btn').click(this._onToggleLock.bind(this));
+
+    // 以下功能需要编辑权限
+    if (!this.isEditable) {
+      console.warn('书海大陆 | 角色卡不可编辑，跳过事件监听器绑定');
+      return;
+    }
 
     // === 属性检定 ===
     html.find('.attr-check-btn').click(this._onAttributeRoll.bind(this));
@@ -144,25 +154,15 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
     // === 物品相关 ===
     html.find('.create-item-btn').click(this._onItemCreateDialog.bind(this));
-
-   html.find('.item-use-btn').click(this._onItemUse.bind(this));
-
+    html.find('.item-use-btn').click(this._onItemUse.bind(this));
     html.find('.item-edit-btn').click(this._onItemEdit.bind(this));
-
     html.find('.item-delete-btn').click(this._onItemDelete.bind(this));
-
     html.find('.item-favorite-btn').click(this._onItemFavorite.bind(this));
 
- 
-
     // === 物品图标交互 ===
-
     // 单击图标包装器：编辑物品
-
     html.find('.item-icon-wrapper').click(this._onItemIconClick.bind(this));
-
     // 双击图标包装器：编辑效果描述
-
     html.find('.item-icon-wrapper').dblclick(this._onItemIconDblClick.bind(this));
 
     // === 搜索和过滤 ===
@@ -172,6 +172,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
     // === 拖放 - 只有图标可拖动 ===
     this._setupDragAndDrop(html);
+
+    console.log('书海大陆 | Player Sheet 事件监听器绑定完成');
   }
 
   /**
@@ -583,10 +585,13 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    * 使用物品
    */
   async _onItemUse(event) {
+    console.log('书海大陆 | 使用物品按钮被点击');
     event.preventDefault();
     event.stopPropagation();
     const itemId = event.currentTarget.dataset.itemId;
     const item = this.actor.items.get(itemId);
+
+    console.log('书海大陆 | 使用物品', { itemId, item: item?.name });
 
     if (item) {
       await item.use();
@@ -597,10 +602,13 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    * 编辑物品
    */
   _onItemEdit(event) {
+    console.log('书海大陆 | 编辑物品按钮被点击');
     event.preventDefault();
     event.stopPropagation();
     const itemId = event.currentTarget.dataset.itemId;
     const item = this.actor.items.get(itemId);
+
+    console.log('书海大陆 | 编辑物品', { itemId, item: item?.name });
 
     if (item) {
       item.sheet.render(true);
@@ -611,10 +619,13 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    * 删除物品
    */
   async _onItemDelete(event) {
+    console.log('书海大陆 | 删除物品按钮被点击');
     event.preventDefault();
     event.stopPropagation();
     const itemId = event.currentTarget.dataset.itemId;
     const item = this.actor.items.get(itemId);
+
+    console.log('书海大陆 | 删除物品', { itemId, item: item?.name });
 
     if (!item) return;
 
@@ -695,27 +706,20 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
   /**
   * 单击物品图标：编辑物品信息
-
    */
-
   _onItemIconClick(event) {
-
+    console.log('书海大陆 | 物品图标被单击');
     event.preventDefault();
-
     event.stopPropagation();
 
     const itemId = event.currentTarget.dataset.itemId;
-
     const item = this.actor.items.get(itemId);
 
- 
+    console.log('书海大陆 | 单击图标', { itemId, item: item?.name });
 
     if (item) {
-
       item.sheet.render(true);
-
     }
-
   }
 
  
