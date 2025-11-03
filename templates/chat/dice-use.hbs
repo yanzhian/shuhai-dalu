@@ -1,0 +1,100 @@
+<div class="shuhai-dice-use chat-card">
+  <header class="card-header">
+    <img class="icon" src="icons/svg/d20-black.svg" />
+    <h3>{{item}}</h3>
+  </header>
+
+  <div class="card-content">
+    <div class="roll-info">
+      <div class="dice-formula">
+        <strong>骰子公式:</strong> {{formula}}
+        {{#if modifier}}
+          {{#if (gt modifier 0)}}
+            + {{modifier}}
+          {{else}}
+            {{modifier}}
+          {{/if}}
+        {{/if}}
+      </div>
+
+      <div class="dice-result">
+        <strong>结果:</strong> <span class="result-value">{{total}}</span>
+      </div>
+
+      {{#if category}}
+      <div class="dice-category">
+        <strong>分类:</strong> {{category}}
+      </div>
+      {{/if}}
+    </div>
+
+    {{#if effect}}
+    <div class="dice-effect">
+      <strong>效果:</strong>
+      <div class="effect-content">{{{effect}}}</div>
+    </div>
+    {{/if}}
+  </div>
+</div>
+
+<style>
+.shuhai-dice-use {
+  border: 2px solid #3498db;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+  padding: 0;
+  margin: 0.5rem 0;
+  overflow: hidden;
+}
+
+.shuhai-dice-use .card-header {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 2px solid #2980b9;
+}
+
+.shuhai-dice-use .card-header .icon {
+  width: 32px;
+  height: 32px;
+  filter: brightness(0) invert(1);
+}
+
+.shuhai-dice-use .card-header h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.shuhai-dice-use .card-content {
+  padding: 1rem;
+}
+
+.shuhai-dice-use .roll-info > div {
+  margin-bottom: 0.5rem;
+}
+
+.shuhai-dice-use .result-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #2ecc71;
+  text-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+}
+
+.shuhai-dice-use .dice-effect {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #3a3a3a;
+}
+
+.shuhai-dice-use .effect-content {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(52, 152, 219, 0.1);
+  border-left: 3px solid #3498db;
+  border-radius: 3px;
+}
+</style>

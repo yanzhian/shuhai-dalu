@@ -1,0 +1,118 @@
+<div class="shuhai-item-card chat-card">
+  <header class="card-header">
+    <img class="icon" src="{{item.img}}" />
+    <h3>{{item.name}}</h3>
+  </header>
+
+  <div class="card-content">
+    <div class="item-properties">
+      {{#if system.category}}
+      <div class="property">
+        <strong>分类:</strong> {{system.category}}
+      </div>
+      {{/if}}
+
+      {{#if system.diceFormula}}
+      <div class="property">
+        <strong>骰数:</strong> {{system.diceFormula}}
+      </div>
+      {{/if}}
+
+      {{#if system.cost}}
+      <div class="property">
+        <strong>费用:</strong> {{system.cost}}
+      </div>
+      {{/if}}
+
+      {{#if system.tags}}
+      <div class="property">
+        <strong>标签:</strong> {{system.tags}}
+      </div>
+      {{/if}}
+
+      {{#if system.quantity}}
+      <div class="property">
+        <strong>数量:</strong> {{system.quantity}}
+      </div>
+      {{/if}}
+
+      {{#if system.starlightCost}}
+      <div class="property">
+        <strong>星光消耗:</strong> {{system.starlightCost}}
+      </div>
+      {{/if}}
+    </div>
+
+    {{#if system.effect}}
+    <div class="item-description">
+      <strong>描述:</strong>
+      <div class="description-content">{{{system.effect}}}</div>
+    </div>
+    {{/if}}
+  </div>
+</div>
+
+<style>
+.shuhai-item-card {
+  border: 2px solid #95a5a6;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+  padding: 0;
+  margin: 0.5rem 0;
+  overflow: hidden;
+}
+
+.shuhai-item-card .card-header {
+  background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 2px solid #7f8c8d;
+}
+
+.shuhai-item-card .card-header .icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.shuhai-item-card .card-header h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.shuhai-item-card .card-content {
+  padding: 1rem;
+}
+
+.shuhai-item-card .item-properties {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.shuhai-item-card .property {
+  padding: 0.5rem;
+  background: rgba(149, 165, 166, 0.1);
+  border-radius: 3px;
+}
+
+.shuhai-item-card .item-description {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #3a3a3a;
+}
+
+.shuhai-item-card .description-content {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(149, 165, 166, 0.1);
+  border-left: 3px solid #95a5a6;
+  border-radius: 3px;
+}
+</style>
