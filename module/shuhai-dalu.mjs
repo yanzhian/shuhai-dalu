@@ -308,28 +308,18 @@ Hooks.once('init', function() {
 
 async function preloadHandlebarsTemplates() {
   return loadTemplates([
-    // 角色表单的局部模板
+    // 角色表单模板
     "systems/shuhai-dalu/templates/actor/actor-character-sheet.hbs",
     "systems/shuhai-dalu/templates/actor/actor-player-sheet.hbs",
-    "systems/shuhai-dalu/templates/actor/parts/actor-info.hbs",
-    "systems/shuhai-dalu/templates/actor/parts/actor-attributes.hbs",
-    "systems/shuhai-dalu/templates/actor/parts/actor-skills.hbs",
-    "systems/shuhai-dalu/templates/actor/parts/actor-equipment.hbs",
-    "systems/shuhai-dalu/templates/actor/parts/actor-inventory.hbs",
-    
+
     // 物品模板
-    "systems/shuhai-dalu/templates/item/item-combatDice-sheet.hbs",
-    "systems/shuhai-dalu/templates/item/item-defenseDice-sheet.hbs",
-    "systems/shuhai-dalu/templates/item/item-triggerDice-sheet.hbs",
-    "systems/shuhai-dalu/templates/item/item-passiveDice-sheet.hbs",
-    "systems/shuhai-dalu/templates/item/item-weapon-sheet.hbs",
-    "systems/shuhai-dalu/templates/item/item-armor-sheet.hbs",
-    "systems/shuhai-dalu/templates/item/item-item-sheet.hbs",
-    "systems/shuhai-dalu/templates/item/item-equipment-sheet.hbs",
-    
+    "systems/shuhai-dalu/templates/item/item-sheet.hbs",
+
     // 对话框模板
     "systems/shuhai-dalu/templates/dialog/check-dialog.hbs",
-    
+    "systems/shuhai-dalu/templates/dialog/create-item.hbs",
+    "systems/shuhai-dalu/templates/dialog/item-details.hbs",
+
     // 聊天模板
     "systems/shuhai-dalu/templates/chat/check-roll.hbs",
     "systems/shuhai-dalu/templates/chat/dice-use.hbs",
