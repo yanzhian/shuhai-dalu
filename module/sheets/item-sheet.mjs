@@ -52,15 +52,39 @@ export default class ShuhaiItemSheet extends ItemSheet {
    */
   _prepareItemTypeData(context) {
     const itemType = this.item.type;
-    
+
+    // 物品类型标签
+    context.itemTypeLabel = this._getItemTypeLabel(itemType);
+
+    // 是否使用自定义分类（武器、防具、装备、物品类型需要玩家填写）
+    context.useCustomCategory = ['weapon', 'armor', 'equipment', 'item'].includes(itemType);
+
     // 所有物品类型的分类选项
     context.categories = this._getCategoryOptions(itemType);
-    
+
     // 是否显示特定字段
     context.showDiceFormula = ['combatDice', 'shootDice', 'defenseDice', 'triggerDice', 'passiveDice'].includes(itemType);
     context.showQuantity = !['passiveDice'].includes(itemType);
     context.showStarlightCost = ['combatDice', 'shootDice', 'defenseDice', 'triggerDice', 'passiveDice', 'weapon', 'armor', 'equipment'].includes(itemType);
     context.showArmorProperties = itemType === 'armor';
+  }
+
+  /**
+   * 获取物品类型标签
+   */
+  _getItemTypeLabel(type) {
+    const typeLabels = {
+      'combatDice': '攻击骰',
+      'shootDice': '射击骰',
+      'defenseDice': '守备骰',
+      'triggerDice': '触发骰',
+      'passiveDice': '被动骰',
+      'weapon': '武器',
+      'armor': '防具',
+      'item': '物品',
+      'equipment': '装备'
+    };
+    return typeLabels[type] || type;
   }
 
   /**
@@ -73,13 +97,13 @@ export default class ShuhaiItemSheet extends ItemSheet {
       'defenseDice': ['闪避', '反击-斩击', '反击-突刺', '反击-打击', '强化反击-斩击', '强化反击-突刺', '强化反击-打击', '防御', '强化防御'],
       'triggerDice': ['EX'],
       'passiveDice': ['道具', '标签'],
-      'weapon': ['武器'],
-      'armor': ['防具'],
-      'item': ['道具'],
-      'equipment': ['装备']
+      'weapon': [],
+      'armor': [],
+      'item': [],
+      'equipment': []
     };
 
-    const categories = categoryMap[type] || ['未分类'];
+    const categories = categoryMap[type] || [];
     return categories.map(cat => ({
       value: cat,
       label: cat

@@ -487,11 +487,15 @@ export class PassiveDiceData extends foundry.abstract.TypeDataModel {
 export class WeaponData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     const fields = foundry.data.fields;
-    
+
     return {
       category: new fields.StringField({
-        initial: "武器",
+        initial: "",
         label: "分类"
+      }),
+      customCategory: new fields.StringField({
+        initial: "",
+        label: "自定义分类"
       }),
       diceFormula: new fields.StringField({
         initial: "▼",
@@ -529,11 +533,15 @@ export class WeaponData extends foundry.abstract.TypeDataModel {
 export class ArmorData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     const fields = foundry.data.fields;
-    
+
     return {
       category: new fields.StringField({
-        initial: "防具",
+        initial: "",
         label: "分类"
+      }),
+      customCategory: new fields.StringField({
+        initial: "",
+        label: "自定义分类"
       }),
       diceFormula: new fields.StringField({
         initial: "▼",
@@ -580,11 +588,15 @@ export class ArmorData extends foundry.abstract.TypeDataModel {
 export class ItemData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     const fields = foundry.data.fields;
-    
+
     return {
       category: new fields.StringField({
-        initial: "道具",
+        initial: "",
         label: "分类"
+      }),
+      customCategory: new fields.StringField({
+        initial: "",
+        label: "自定义分类"
       }),
       diceFormula: new fields.StringField({
         initial: "▼",
@@ -617,11 +629,15 @@ export class ItemData extends foundry.abstract.TypeDataModel {
 export class EquipmentData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     const fields = foundry.data.fields;
-    
+
     return {
       category: new fields.StringField({
-        initial: "装备",
+        initial: "",
         label: "分类"
+      }),
+      customCategory: new fields.StringField({
+        initial: "",
+        label: "自定义分类"
       }),
       diceFormula: new fields.StringField({
         initial: "▼",
