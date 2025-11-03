@@ -655,18 +655,18 @@
 .shuhai-dalu .equipment-slot,
 .shuhai-dalu .dice-slot,
 .shuhai-dalu .passive-slot {
-  border: 2px dashed #ddd;
+  border: 2px dashed #2c3e50;
   border-radius: 6px;
   padding: 0.75rem;
-  background: white;
+  background: rgb(19, 19, 19);
   transition: all 0.2s;
 }
 
 .shuhai-dalu .equipment-slot:hover,
 .shuhai-dalu .dice-slot:hover,
 .shuhai-dalu .passive-slot:hover {
-  border-color: #4a90e2;
-  background: #f0f8ff;
+  border-color: #3b3b3b;
+  background: #1b1b1b;
 }
 
 .shuhai-dalu .equipment-slot label,
@@ -675,7 +675,7 @@
   display: block;
   font-weight: bold;
   font-size: 0.85rem;
-  color: #666;
+  color: hsl(0, 0%, 100%);
   margin-bottom: 0.5rem;
 }
 
@@ -889,4 +889,5 @@
   .shuhai-dalu .actions-section {
     grid-template-columns: 1fr;
   }
-}
+  
+} 
