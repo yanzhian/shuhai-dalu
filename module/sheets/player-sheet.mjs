@@ -105,12 +105,26 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       item: '物品',
       equipment: '装备'
     };
-    // 为每个物品添加中文类型名称
+
+    // 为每个物品添加中文类型名称和确保有正确的ID
     context.items = context.actor.items.contents.map(item => {
+      const itemObj = item.toObject(false);
       return {
-        ...item,
+        ...itemObj,
+        // 确保_id正确设置
+        _id: item.id,
+        // 添加类型标签
         typeLabel: typeNames[item.type] || item.type
       };
+    });
+
+    console.log('书海大陆 | 准备物品数据', {
+      itemCount: context.items.length,
+      firstItem: context.items[0] ? {
+        id: context.items[0]._id,
+        name: context.items[0].name,
+        type: context.items[0].type
+      } : null
     });
   }
 
@@ -492,8 +506,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
           icon: '<i class="fas fa-check"></i>',
           label: "创建",
           callback: async (html) => {
-            const formData = new FormDataExtended(html[0].querySelector('form') || html[0]).object;
-
+            // 不使用 FormDataExtended，直接使用 jQuery 选择器获取值
             const type = html.find('[name="type"]').val();
             const name = html.find('[name="name"]').val() || `新${this._getTypeName(type)}`;
 
@@ -523,6 +536,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
                 bluntDown: html.find('[name="bluntDown"]').is(':checked')
               };
             }
+
+            console.log('书海大陆 | 创建物品', itemData);
 
             const cls = getDocumentClass("Item");
             const item = await cls.create(itemData, { parent: this.actor });
