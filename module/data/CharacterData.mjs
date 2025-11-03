@@ -136,10 +136,10 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
         // 触发骰槽位
         triggerDice: new fields.StringField({ initial: "", label: "触发骰" }),
         
-        // 被动技能槽位
+        // 被动技能槽位 (1-6)
         passives: new fields.ArrayField(
           new fields.StringField(),
-          { initial: ["", "", "", "", ""], label: "被动技能" }
+          { initial: ["", "", "", "", "", ""], label: "被动技能" }
         )
       }),
       
