@@ -1104,6 +1104,87 @@ button:disabled:hover {
 }
 
 /* ========================================
+   资源显示区域
+   ======================================== */
+.resources-panel {
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.resources-panel .panel-header {
+  background: #2c3e50;
+  padding: 0.5rem;
+  text-align: center;
+  font-weight: bold;
+  color: #ecf0f1;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.resources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.resource-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.resource-item label {
+  font-size: 0.875rem;
+  font-weight: bold;
+  color: #95a5a6;
+}
+
+.resource-item input {
+  padding: 0.5rem;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  color: #e0e0e0;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.resource-item input:focus {
+  outline: none;
+  border-color: #e74c3c;
+}
+
+.resource-value-display {
+  padding: 0.5rem;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.resource-current {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #2ecc71;
+}
+
+.resource-separator {
+  color: #95a5a6;
+}
+
+.resource-max {
+  font-size: 1rem;
+  color: #95a5a6;
+}
+
+/* ========================================
    拖放样式
    ======================================== */
 .dragging {

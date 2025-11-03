@@ -45,7 +45,10 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
           value: new fields.NumberField({ initial: 0, min: 0, label: "当前侵蚀度" }),
           max: new fields.NumberField({ initial: 0, min: 0, label: "最大侵蚀度" }) // 感知/2 + 智力/3
         }),
-        chaos: new fields.NumberField({ initial: 0, min: 0, label: "混乱条" }), // 体质>10 ? 生命值/2 : 生命值/3
+        chaos: new fields.SchemaField({
+          value: new fields.NumberField({ initial: 0, min: 0, label: "当前混乱值" }),
+          max: new fields.NumberField({ initial: 0, min: 0, label: "最大混乱值" }) // 体质>10 ? 生命值/2 : 生命值/3
+        }),
         speed: new fields.NumberField({ initial: 0, min: 0, label: "速度值" }) // 1d6 + 敏捷/3
       }),
       
@@ -172,12 +175,17 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
     
     // 计算最大侵蚀度 (感知/2 + 智力/3，向下取整)
     this.derived.corruption.max = Math.floor(per / 2) + Math.floor(int / 3);
-    
-    // 计算混乱条 (体质>10 ? 生命值/2 : 生命值/3，向下取整)
-    this.derived.chaos = con > 10 
-      ? Math.floor(this.derived.hp.max / 2) 
+
+    // 计算混乱值最大值 (体质>10 ? 生命值/2 : 生命值/3，向下取整)
+    this.derived.chaos.max = con > 10
+      ? Math.floor(this.derived.hp.max / 2)
       : Math.floor(this.derived.hp.max / 3);
-    
+
+    // 初始化当前混乱值
+    if (this.derived.chaos.value === 0 || this.derived.chaos.value > this.derived.chaos.max) {
+      this.derived.chaos.value = 0; // 混乱值从0开始
+    }
+
     // 计算速度值 (1d6 + 敏捷/3，向下取整) - 这里取平均值
     this.derived.speed = 4 + Math.floor(dex / 3); // 1d6平均值为3.5，向上取4
     

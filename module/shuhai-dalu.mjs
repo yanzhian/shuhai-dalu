@@ -418,17 +418,27 @@ async function equipItem(actor, item, slotType, slotIndex = null) {
   } else if (slotType === 'armor') {
     updateData['system.equipment.armor'] = item.id;
   } else if (slotType === 'item' && slotIndex !== null) {
-    updateData[`system.equipment.items.${slotIndex}`] = item.id;
+    // 对于数组类型，需要先复制整个数组再修改
+    const items = [...actor.system.equipment.items];
+    items[slotIndex] = item.id;
+    updateData['system.equipment.items'] = items;
   } else if (slotType === 'gear' && slotIndex !== null) {
-    updateData[`system.equipment.gear.${slotIndex}`] = item.id;
+    const gear = [...actor.system.equipment.gear];
+    gear[slotIndex] = item.id;
+    updateData['system.equipment.gear'] = gear;
   } else if (slotType === 'combatDice' && slotIndex !== null) {
-    updateData[`system.equipment.combatDice.${slotIndex}`] = item.id;
+    // 修复：复制整个combatDice数组，避免后面的槽位消失
+    const combatDice = [...actor.system.equipment.combatDice];
+    combatDice[slotIndex] = item.id;
+    updateData['system.equipment.combatDice'] = combatDice;
   } else if (slotType === 'defenseDice') {
     updateData['system.equipment.defenseDice'] = item.id;
   } else if (slotType === 'triggerDice') {
     updateData['system.equipment.triggerDice'] = item.id;
   } else if (slotType === 'passive' && slotIndex !== null) {
-    updateData[`system.equipment.passives.${slotIndex}`] = item.id;
+    const passives = [...actor.system.equipment.passives];
+    passives[slotIndex] = item.id;
+    updateData['system.equipment.passives'] = passives;
   }
   
   // 增加已使用的星光
@@ -457,13 +467,19 @@ async function unequipItem(actor, slotType, slotIndex = null) {
     updateData['system.equipment.armor'] = "";
   } else if (slotType === 'item' && slotIndex !== null) {
     itemId = actor.system.equipment.items[slotIndex];
-    updateData[`system.equipment.items.${slotIndex}`] = "";
+    const items = [...actor.system.equipment.items];
+    items[slotIndex] = "";
+    updateData['system.equipment.items'] = items;
   } else if (slotType === 'gear' && slotIndex !== null) {
     itemId = actor.system.equipment.gear[slotIndex];
-    updateData[`system.equipment.gear.${slotIndex}`] = "";
+    const gear = [...actor.system.equipment.gear];
+    gear[slotIndex] = "";
+    updateData['system.equipment.gear'] = gear;
   } else if (slotType === 'combatDice' && slotIndex !== null) {
     itemId = actor.system.equipment.combatDice[slotIndex];
-    updateData[`system.equipment.combatDice.${slotIndex}`] = "";
+    const combatDice = [...actor.system.equipment.combatDice];
+    combatDice[slotIndex] = "";
+    updateData['system.equipment.combatDice'] = combatDice;
   } else if (slotType === 'defenseDice') {
     itemId = actor.system.equipment.defenseDice;
     updateData['system.equipment.defenseDice'] = "";
@@ -472,7 +488,9 @@ async function unequipItem(actor, slotType, slotIndex = null) {
     updateData['system.equipment.triggerDice'] = "";
   } else if (slotType === 'passive' && slotIndex !== null) {
     itemId = actor.system.equipment.passives[slotIndex];
-    updateData[`system.equipment.passives.${slotIndex}`] = "";
+    const passives = [...actor.system.equipment.passives];
+    passives[slotIndex] = "";
+    updateData['system.equipment.passives'] = passives;
   }
   
   if (!itemId) {
