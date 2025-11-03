@@ -1123,21 +1123,29 @@ button:disabled:hover {
 }
 
 /* ========================================
-   资源显示区域（在左侧区域内）
+   资源显示区域（在装备和物品栏下方，横向布局）
    ======================================== */
 .resources-panel {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 1.5rem;
   background: #1e1e1e;
   border: 1px solid #3a3a3a;
   border-radius: 4px;
-  padding: 0.5rem;
-  flex-shrink: 0;
+  padding: 1rem;
+  margin-top: 1rem;
+  max-height: 60px;
 }
 
 .resources-panel .panel-header {
-  margin: -0.5rem -0.5rem 0.5rem -0.5rem;
+  background: #2c3e50;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  font-weight: bold;
+  color: #ecf0f1;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .resource-item {

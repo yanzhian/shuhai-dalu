@@ -12,6 +12,17 @@ export default class ShuhaiActor extends Actor {
   prepareBaseData() {
     // 在应用派生数据之前准备基础数据
     // 这里可以设置一些默认值
+
+    // Migration: 确保被动骰槽位有6个（从旧的5个升级到6个）
+    if (this.type === 'character' && this.system.equipment?.passives) {
+      const passives = this.system.equipment.passives;
+      if (passives.length < 6) {
+        // 将数组扩展到6个元素
+        while (passives.length < 6) {
+          passives.push("");
+        }
+      }
+    }
   }
 
   /** @override */
