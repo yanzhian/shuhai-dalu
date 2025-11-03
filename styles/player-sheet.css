@@ -601,7 +601,9 @@ button:disabled:hover {
   background: #1e1e1e;
   border: 1px solid #3a3a3a;
   border-radius: 4px;
+  padding: 0.5rem;
   overflow-y: auto;
+  max-height: 100%;
 }
 
 .panel-header {
@@ -612,6 +614,10 @@ button:disabled:hover {
   background: #2c3e50;
   border-radius: 4px;
   text-align: center;
+}
+
+.equipment-panel .panel-header {
+  margin: -0.5rem -0.5rem 0.5rem -0.5rem;
 }
 
 .equipment-row {
