@@ -17,7 +17,6 @@ import ShuhaiItem, {
 } from "./documents/item.mjs";
 import ShuhaiActorSheet from "./sheets/actor-sheet.mjs";
 import ShuhaiPlayerSheet from "./sheets/player-sheet.mjs";
-import ShuhaiCharacterSheet from "./sheets/character-sheet.mjs";
 import ShuhaiItemSheet from "./sheets/item-sheet.mjs";
 
 /* -------------------------------------------- */
@@ -71,19 +70,12 @@ Hooks.once('init', async function() {
     makeDefault: true,
     label: "书海大陆 - Player 角色卡"
   });
-
-  // 注册新版标准角色表单（与Player表单相同布局）
-  Actors.registerSheet("shuhai-dalu", ShuhaiCharacterSheet, {
-    types: ["character"],
-    makeDefault: false,
-    label: "书海大陆 - 标准角色卡 (新版)"
-  });
-
-  // 注册旧版标准角色表单
+  
+  // 注册标准角色表单
   Actors.registerSheet("shuhai-dalu", ShuhaiActorSheet, {
     types: ["character"],
     makeDefault: false,
-    label: "书海大陆 - 标准角色卡 (旧版)"
+    label: "书海大陆 - 标准角色卡"
   });
   
   // 注册物品表单
@@ -215,99 +207,6 @@ Hooks.once('init', function() {
   Handlebars.registerHelper('hasItem', function(itemId) {
     return itemId && itemId !== '';
   });
-  // 获取物品费用
-
-  Handlebars.registerHelper('getItemCost', function(itemId, options) {
-
-    if (!itemId) return '';
-
- 
-
-    // 尝试从当前上下文的 actor 获取物品
-
-    const actor = options?.data?.root?.actor;
-
-    if (actor && actor.items) {
-
-      const item = actor.items.get(itemId);
-
-      if (item && item.system.cost) return item.system.cost;
-
-    }
-
- 
-
-    // 否则从全局获取
-
-    const item = game.items.get(itemId);
-
-    return (item && item.system.cost) ? item.system.cost : '';
-
-  });
-
- 
-
-  // 获取物品骰数
-
-  Handlebars.registerHelper('getItemDice', function(itemId, options) {
-
-    if (!itemId) return '';
-
- 
-
-    // 尝试从当前上下文的 actor 获取物品
-
-    const actor = options?.data?.root?.actor;
-
-    if (actor && actor.items) {
-
-      const item = actor.items.get(itemId);
-
-      if (item && item.system.diceFormula) return item.system.diceFormula;
-
-    }
-
- 
-
-    // 否则从全局获取
-
-    const item = game.items.get(itemId);
-
-    return (item && item.system.diceFormula) ? item.system.diceFormula : '';
-
-  });
-
- 
-
-  // 获取物品名称
-
-  Handlebars.registerHelper('getItemName', function(itemId, options) {
-
-    if (!itemId) return '';
-
- 
-
-    // 尝试从当前上下文的 actor 获取物品
-
-    const actor = options?.data?.root?.actor;
-
-    if (actor && actor.items) {
-
-      const item = actor.items.get(itemId);
-
-      if (item) return item.name;
-
-    }
-
- 
-
-    // 否则从全局获取
-
-    const item = game.items.get(itemId);
-
-    return item ? item.name : '';
-
-  });
 });
 
 /* -------------------------------------------- */
@@ -318,7 +217,6 @@ async function preloadHandlebarsTemplates() {
   return loadTemplates([
     // 角色表单的局部模板
     "systems/shuhai-dalu/templates/actor/actor-character-sheet.hbs",
-    "systems/shuhai-dalu/templates/actor/actor-character-sheet-new.hbs",
     "systems/shuhai-dalu/templates/actor/actor-player-sheet.hbs",
     "systems/shuhai-dalu/templates/actor/parts/actor-info.hbs",
     "systems/shuhai-dalu/templates/actor/parts/actor-attributes.hbs",
