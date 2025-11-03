@@ -14,16 +14,27 @@
 
   {{!-- 物品属性 --}}
   <div class="sheet-body">
-    {{!-- 基础属性 --}}
+    {{!-- 物品类型 --}}
+    <div class="form-group">
+      <label>物品类型</label>
+      <div class="item-type-display">{{itemTypeLabel}}</div>
+    </div>
+
+    {{!-- 分类 --}}
     <div class="form-group">
       <label>分类</label>
-      <select name="system.category">
-        {{#each categories as |cat|}}
-        <option value="{{cat.value}}" {{#if (eq ../system.category cat.value)}}selected{{/if}}>
-          {{cat.label}}
-        </option>
-        {{/each}}
-      </select>
+      {{#if useCustomCategory}}
+        <input type="text" name="system.customCategory" value="{{system.customCategory}}" placeholder="例如: 太刀、弓箭、藤甲、子弹"/>
+        <p class="hint">请填写自定义分类（例如: 太刀、弓箭、藤甲、子弹等）</p>
+      {{else}}
+        <select name="system.category">
+          {{#each categories as |cat|}}
+          <option value="{{cat.value}}" {{#if (eq ../system.category cat.value)}}selected{{/if}}>
+            {{cat.label}}
+          </option>
+          {{/each}}
+        </select>
+      {{/if}}
     </div>
 
     {{#if showDiceFormula}}
@@ -271,5 +282,14 @@
 .shuhai-dalu.item .item-chat:hover {
   background: #2980b9;
   transform: translateY(-2px);
+}
+
+.shuhai-dalu.item .item-type-display {
+  padding: 0.5rem;
+  background: #3a3a3a;
+  border-radius: 4px;
+  color: #3498db;
+  font-weight: bold;
+  text-align: center;
 }
 </style>

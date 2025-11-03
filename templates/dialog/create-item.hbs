@@ -3,16 +3,22 @@
     <label>物品名称:</label>
     <input type="text" name="name" placeholder="输入物品名称" autofocus/>
   </div>
-  
+
   <div class="form-group">
     <label>物品类型:</label>
     <select name="type">
-      {{#each types as |type|}}
-      <option value="{{type.value}}">{{type.label}}</option>
-      {{/each}}
+      <option value="combatDice">攻击骰</option>
+      <option value="shootDice">射击骰</option>
+      <option value="defenseDice">守备骰</option>
+      <option value="triggerDice">触发骰</option>
+      <option value="passiveDice">被动骰</option>
+      <option value="weapon">武器</option>
+      <option value="armor">防具</option>
+      <option value="item">物品</option>
+      <option value="equipment">装备</option>
     </select>
   </div>
-  
+
   <div class="info-box">
     <p><i class="fas fa-info-circle"></i> 创建后将自动打开编辑窗口，您可以在那里设置详细属性。</p>
   </div>
