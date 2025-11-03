@@ -208,8 +208,11 @@
 
   {{!-- 第三部分: 装备栏和物品栏 --}}
   <div class="equipment-inventory-section">
-    
-    {{!-- 左侧：装备栏 --}}
+
+    {{!-- 左侧区域：装备栏和资源栏 --}}
+    <div class="left-section">
+
+    {{!-- 装备栏 --}}
     <div class="equipment-panel">
       <div class="panel-header">装备栏</div>
 
@@ -430,7 +433,93 @@
         </div>
         {{/each}}
       </div>
+
+      {{!-- 装备栏 1-4 --}}
+      <div class="equipment-slots-grid">
+        {{#each system.equipment.gear as |gearId index|}}
+        <div class="equipment-slot gear-slot" data-slot-type="gear" data-slot-index="{{index}}">
+          <label>装备{{add index 1}}</label>
+          <div class="slot-content" data-slot="gear" data-slot-index="{{index}}" data-item-id="{{gearId}}">
+            {{#if (hasItem gearId)}}
+              <img src="{{getItemImg gearId}}" class="item-icon" data-item-id="{{gearId}}"/>
+
+              {{!-- 左上角费用圈 --}}
+              <div class="slot-cost">{{getItemCost gearId}}</div>
+
+              {{!-- 右下角骰数框 --}}
+              {{#if (getItemDice gearId)}}
+              <div class="slot-dice">{{getItemDice gearId}}</div>
+              {{/if}}
+
+              <button class="unequip-btn" data-slot-type="gear" data-slot-index="{{index}}" type="button">×</button>
+            {{else}}
+              <span class="empty-slot">空</span>
+            {{/if}}
+          </div>
+        </div>
+        {{/each}}
+      </div>
     </div>
+
+    {{!-- 资源面板 --}}
+    <div class="resources-panel">
+      <div class="panel-header">资源</div>
+
+      <div class="resource-item">
+        <label>星光:</label>
+        <div class="resource-value-display">
+          <span class="resource-current">{{system.derived.starlight}}</span>
+          <span class="resource-separator">/</span>
+          <span class="resource-max">{{add 10 (multiply system.level 2)}}</span>
+        </div>
+      </div>
+
+      <div class="resource-item">
+        <label>货币:</label>
+        {{#if isLocked}}
+        <div class="resource-value-display">
+          <span class="resource-current">{{system.resources.currency}}</span>
+        </div>
+        {{else}}
+        <input type="number" name="system.resources.currency" value="{{system.resources.currency}}" data-dtype="Number" min="0" placeholder="0"/>
+        {{/if}}
+      </div>
+
+      <div class="resource-item">
+        <label>奇遇点:</label>
+        {{#if isLocked}}
+        <div class="resource-value-display">
+          <span class="resource-current">{{system.resources.encounterPoints}}</span>
+        </div>
+        {{else}}
+        <input type="number" name="system.resources.encounterPoints" value="{{system.resources.encounterPoints}}" data-dtype="Number" min="0" placeholder="0"/>
+        {{/if}}
+      </div>
+
+      <div class="resource-item">
+        <label>奇迹点:</label>
+        {{#if isLocked}}
+        <div class="resource-value-display">
+          <span class="resource-current">{{system.resources.miraclePoints}}</span>
+        </div>
+        {{else}}
+        <input type="number" name="system.resources.miraclePoints" value="{{system.resources.miraclePoints}}" data-dtype="Number" min="0" placeholder="1"/>
+        {{/if}}
+      </div>
+
+      <div class="resource-item">
+        <label>复制核心:</label>
+        {{#if isLocked}}
+        <div class="resource-value-display">
+          <span class="resource-current">{{system.resources.replicaCore}}</span>
+        </div>
+        {{else}}
+        <input type="number" name="system.resources.replicaCore" value="{{system.resources.replicaCore}}" data-dtype="Number" min="0" placeholder="0"/>
+        {{/if}}
+      </div>
+    </div>
+
+    </div>{{!-- 关闭 left-section --}}
 
     {{!-- 右侧：物品栏 --}}
     <div class="inventory-panel">
@@ -566,64 +655,6 @@
         </tbody>
 
       </table>
-    </div>
-  </div>
-
-  {{!-- 资源显示区域 --}}
-  <div class="resources-panel">
-    <div class="panel-header">资源</div>
-
-    <div class="resource-item">
-      <label>星光:</label>
-      <div class="resource-value-display">
-        <span class="resource-current">{{system.derived.starlight}}</span>
-        <span class="resource-separator">/</span>
-        <span class="resource-max">{{add 10 (multiply system.level 2)}}</span>
-      </div>
-    </div>
-
-    <div class="resource-item">
-      <label>货币:</label>
-      {{#if isLocked}}
-      <div class="resource-value-display">
-        <span class="resource-current">{{system.resources.currency}}</span>
-      </div>
-      {{else}}
-      <input type="number" name="system.resources.currency" value="{{system.resources.currency}}" data-dtype="Number" min="0" placeholder="0"/>
-      {{/if}}
-    </div>
-
-    <div class="resource-item">
-      <label>奇遇点:</label>
-      {{#if isLocked}}
-      <div class="resource-value-display">
-        <span class="resource-current">{{system.resources.encounterPoints}}</span>
-      </div>
-      {{else}}
-      <input type="number" name="system.resources.encounterPoints" value="{{system.resources.encounterPoints}}" data-dtype="Number" min="0" placeholder="0"/>
-      {{/if}}
-    </div>
-
-    <div class="resource-item">
-      <label>奇迹点:</label>
-      {{#if isLocked}}
-      <div class="resource-value-display">
-        <span class="resource-current">{{system.resources.miraclePoints}}</span>
-      </div>
-      {{else}}
-      <input type="number" name="system.resources.miraclePoints" value="{{system.resources.miraclePoints}}" data-dtype="Number" min="0" placeholder="1"/>
-      {{/if}}
-    </div>
-
-    <div class="resource-item">
-      <label>复制核心:</label>
-      {{#if isLocked}}
-      <div class="resource-value-display">
-        <span class="resource-current">{{system.resources.replicaCore}}</span>
-      </div>
-      {{else}}
-      <input type="number" name="system.resources.replicaCore" value="{{system.resources.replicaCore}}" data-dtype="Number" min="0" placeholder="0"/>
-      {{/if}}
     </div>
   </div>
 
