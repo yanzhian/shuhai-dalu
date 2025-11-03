@@ -515,7 +515,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
               name: name,
               type: type,
               system: {
-                category: html.find('[name="category"]').val(),
+                category: html.find('[name="category"]:not(:disabled)').val() || '',
                 diceFormula: html.find('[name="diceFormula"]').val() || this._getDefaultDiceFormula(type),
                 cost: html.find('[name="cost"]').val() || '-',
                 tags: html.find('[name="tags"]').val() || '',

@@ -24,10 +24,12 @@
 
     <div class="form-group half-width">
       <label>分类:</label>
-      <input type="text" name="category" id="category-input" list="category-suggestions" placeholder="选择或自定义分类"/>
-      <datalist id="category-suggestions">
-        <option value="打击">
-      </datalist>
+      {{!-- 骰子类型使用下拉选择 --}}
+      <select name="category" id="category-select" style="display: none;">
+        <option value="打击">打击</option>
+      </select>
+      {{!-- 自定义类型使用输入框 --}}
+      <input type="text" name="category" id="category-input" style="display: none;" placeholder="输入自定义分类"/>
     </div>
   </div>
 
@@ -173,40 +175,49 @@
 <script>
 (function() {
   const typeSelect = document.getElementById('item-type-select');
+  const categorySelect = document.getElementById('category-select');
   const categoryInput = document.getElementById('category-input');
-  const categorySuggestions = document.getElementById('category-suggestions');
   const armorProps = document.querySelector('.armor-properties');
 
-  const categoryMap = {
+  // 固定分类的骰子类型
+  const diceCategories = {
     'combatDice': ['打击', '突刺', '斩击'],
     'shootDice': ['打击', '突刺', '斩击'],
     'defenseDice': ['闪避', '反击-斩击', '反击-突刺', '反击-打击', '强化反击-斩击', '强化反击-突刺', '强化反击-打击', '防御', '强化防御'],
     'triggerDice': ['EX'],
-    'passiveDice': ['道具', '标签'],
-    'weapon': ['武器', '剑', '斧', '锤', '枪', '弓', '法杖'],
-    'armor': ['防具', '轻甲', '中甲', '重甲', '盾牌'],
-    'item': ['道具', '消耗品', '材料', '任务物品'],
-    'equipment': ['装备', '饰品', '工具']
+    'passiveDice': ['道具', '标签']
   };
 
-  let lastType = typeSelect.value;
+  // 需要自定义填写的类型
+  const customTypes = ['weapon', 'armor', 'item', 'equipment'];
 
   function updateCategories() {
     const type = typeSelect.value;
-    const categories = categoryMap[type] || ['未分类'];
 
-    // 更新datalist建议
-    categorySuggestions.innerHTML = '';
-    categories.forEach(cat => {
-      const option = document.createElement('option');
-      option.value = cat;
-      categorySuggestions.appendChild(option);
-    });
+    // 判断是骰子类型还是自定义类型
+    if (diceCategories[type]) {
+      // 骰子类型：显示select，隐藏并禁用input
+      categorySelect.style.display = 'block';
+      categorySelect.disabled = false;
+      categoryInput.style.display = 'none';
+      categoryInput.disabled = true;
 
-    // 如果类型发生变化，总是更新分类为新类型的第一个选项
-    if (type !== lastType) {
-      categoryInput.value = categories[0];
-      lastType = type;
+      // 填充骰子分类选项
+      const categories = diceCategories[type];
+      categorySelect.innerHTML = '';
+      categories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat;
+        option.textContent = cat;
+        categorySelect.appendChild(option);
+      });
+    } else {
+      // 自定义类型：显示input，隐藏并禁用select
+      categorySelect.style.display = 'none';
+      categorySelect.disabled = true;
+      categoryInput.style.display = 'block';
+      categoryInput.disabled = false;
+      categoryInput.value = '';
     }
 
     // 显示/隐藏防具属性
