@@ -14,83 +14,87 @@
 
   {{!-- 物品属性 --}}
   <div class="sheet-body">
-    {{!-- 基础属性 --}}
-    <div class="form-group">
-      <label>分类</label>
-      {{#if allowCustomCategory}}
-      <input type="text" name="system.category" value="{{system.category}}" placeholder="例如: 太刀, 弓箭, 藤甲, 子弹..."/>
-      <p class="hint">可以自由填写物品分类</p>
-      {{else}}
-      <select name="system.category">
-        {{#each categories as |cat|}}
-        <option value="{{cat.value}}" {{#if (eq ../system.category cat.value)}}selected{{/if}}>
-          {{cat.label}}
-        </option>
-        {{/each}}
-      </select>
+    {{!-- 第一行：分类和骰数 --}}
+    <div class="form-row">
+      <div class="form-group half-width">
+        <label>分类</label>
+        {{#if allowCustomCategory}}
+        <input type="text" name="system.category" value="{{system.category}}" placeholder="例如: 太刀, 弓箭, 藤甲, 子弹..."/>
+        {{else}}
+        <select name="system.category">
+          {{#each categories as |cat|}}
+          <option value="{{cat.value}}" {{#if (eq ../system.category cat.value)}}selected{{/if}}>
+            {{cat.label}}
+          </option>
+          {{/each}}
+        </select>
+        {{/if}}
+      </div>
+
+      {{#if showDiceFormula}}
+      <div class="form-group half-width">
+        <label>骰数</label>
+        <input type="text" name="system.diceFormula" value="{{system.diceFormula}}" placeholder="1d6+3 或 ★ ▼ O"/>
+      </div>
       {{/if}}
     </div>
 
-    {{#if showDiceFormula}}
-    <div class="form-group">
-      <label>骰数</label>
-      <input type="text" name="system.diceFormula" value="{{system.diceFormula}}" placeholder="例如: 1d6+3"/>
-      <p class="hint">支持格式: 1d6+3, 2d4, 1d8+2, 或 ★ ▼ O 等特殊符号</p>
-    </div>
-    {{/if}}
+    {{!-- 第二行：费用和数量 --}}
+    <div class="form-row">
+      <div class="form-group half-width">
+        <label>费用</label>
+        <input type="text" name="system.cost" value="{{system.cost}}" placeholder="数字 / Cost:x / San:x / -"/>
+      </div>
 
-    <div class="form-group">
-      <label>费用</label>
-      <input type="text" name="system.cost" value="{{system.cost}}" placeholder="例如: 10, Cost:50, San:3, -"/>
-      <p class="hint">格式: 数字、Cost:数字、San:数字、或 - 表示无消耗</p>
+      {{#if showQuantity}}
+      <div class="form-group half-width">
+        <label>数量</label>
+        <input type="number" name="system.quantity" value="{{system.quantity}}" data-dtype="Number" min="0"/>
+      </div>
+      {{/if}}
     </div>
 
-    {{#if showQuantity}}
-    <div class="form-group">
-      <label>数量</label>
-      <input type="number" name="system.quantity" value="{{system.quantity}}" data-dtype="Number" min="0"/>
-    </div>
-    {{/if}}
+    {{!-- 第三行：星光消耗和标签 --}}
+    <div class="form-row">
+      {{#if showStarlightCost}}
+      <div class="form-group half-width">
+        <label>星光消耗</label>
+        <input type="number" name="system.starlightCost" value="{{system.starlightCost}}" data-dtype="Number" min="0"/>
+      </div>
+      {{/if}}
 
-    {{#if showStarlightCost}}
-    <div class="form-group">
-      <label>星光消耗</label>
-      <input type="number" name="system.starlightCost" value="{{system.starlightCost}}" data-dtype="Number" min="0"/>
-      <p class="hint">装备时消耗的星光数量</p>
-    </div>
-    {{/if}}
-
-    <div class="form-group">
-      <label>标签</label>
-      <input type="text" name="system.tags" value="{{system.tags}}" placeholder="用逗号分隔多个标签"/>
+      <div class="form-group {{#if showStarlightCost}}half-width{{else}}full-width{{/if}}">
+        <label>标签</label>
+        <input type="text" name="system.tags" value="{{system.tags}}" placeholder="用逗号分隔多个标签"/>
+      </div>
     </div>
 
     {{!-- 防具属性 --}}
     {{#if showArmorProperties}}
     <div class="form-group armor-properties">
       <label>防具属性</label>
-      <div class="properties-grid">
-        <label class="checkbox-label">
+      <div class="armor-props-grid">
+        <label>
           <input type="checkbox" name="system.armorProperties.slashUp" {{#if system.armorProperties.slashUp}}checked{{/if}}/>
           <span class="resist">斩击↑</span>
         </label>
-        <label class="checkbox-label">
+        <label>
           <input type="checkbox" name="system.armorProperties.pierceUp" {{#if system.armorProperties.pierceUp}}checked{{/if}}/>
           <span class="resist">突刺↑</span>
         </label>
-        <label class="checkbox-label">
+        <label>
           <input type="checkbox" name="system.armorProperties.bluntUp" {{#if system.armorProperties.bluntUp}}checked{{/if}}/>
           <span class="resist">打击↑</span>
         </label>
-        <label class="checkbox-label">
+        <label>
           <input type="checkbox" name="system.armorProperties.slashDown" {{#if system.armorProperties.slashDown}}checked{{/if}}/>
           <span class="weak">斩击↓</span>
         </label>
-        <label class="checkbox-label">
+        <label>
           <input type="checkbox" name="system.armorProperties.pierceDown" {{#if system.armorProperties.pierceDown}}checked{{/if}}/>
           <span class="weak">突刺↓</span>
         </label>
-        <label class="checkbox-label">
+        <label>
           <input type="checkbox" name="system.armorProperties.bluntDown" {{#if system.armorProperties.bluntDown}}checked{{/if}}/>
           <span class="weak">打击↓</span>
         </label>
@@ -166,11 +170,27 @@
   padding: 1rem;
 }
 
-.shuhai-dalu.item .form-group {
+.shuhai-dalu.item .form-row {
+  display: flex;
+  gap: 1rem;
   margin-bottom: 1rem;
 }
 
-.shuhai-dalu.item .form-group label {
+.shuhai-dalu.item .form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.shuhai-dalu.item .form-group.full-width {
+  flex: 1 1 100%;
+}
+
+.shuhai-dalu.item .form-group.half-width {
+  flex: 1 1 calc(50% - 0.5rem);
+}
+
+.shuhai-dalu.item .form-group > label {
   display: block;
   font-weight: bold;
   color: #bbb;
@@ -201,13 +221,18 @@
   color: #888;
 }
 
-.shuhai-dalu.item .properties-grid {
+.shuhai-dalu.item .armor-properties {
+  margin-bottom: 1rem;
+}
+
+.shuhai-dalu.item .armor-props-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.5rem;
+  margin-top: 0.5rem;
 }
 
-.shuhai-dalu.item .checkbox-label {
+.shuhai-dalu.item .armor-props-grid label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -215,23 +240,24 @@
   background: #333;
   border-radius: 4px;
   cursor: pointer;
+  font-weight: normal;
 }
 
-.shuhai-dalu.item .checkbox-label:hover {
+.shuhai-dalu.item .armor-props-grid label:hover {
   background: #3a3a3a;
 }
 
-.shuhai-dalu.item .checkbox-label input[type="checkbox"] {
+.shuhai-dalu.item .armor-props-grid input[type="checkbox"] {
   width: auto;
   margin: 0;
 }
 
-.shuhai-dalu.item .checkbox-label .resist {
+.shuhai-dalu.item .armor-props-grid .resist {
   color: #2ecc71;
   font-weight: bold;
 }
 
-.shuhai-dalu.item .checkbox-label .weak {
+.shuhai-dalu.item .armor-props-grid .weak {
   color: #e74c3c;
   font-weight: bold;
 }
