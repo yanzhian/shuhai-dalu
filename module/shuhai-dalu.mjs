@@ -18,6 +18,7 @@ import ShuhaiItem, {
 import ShuhaiActorSheet from "./sheets/actor-sheet.mjs";
 import ShuhaiPlayerSheet from "./sheets/player-sheet.mjs";
 import ShuhaiItemSheet from "./sheets/item-sheet.mjs";
+import InventoryApp from "./apps/inventory-app.mjs";
 
 /* -------------------------------------------- */
 /*  初始化钩子                                    */
@@ -30,6 +31,7 @@ Hooks.once('init', async function() {
   game.shuhai = {
     ShuhaiActor,
     ShuhaiItem,
+    InventoryApp,
     rollAttributeCheck,
     rollSkillCheck,
     rollCorruptionCheck,
