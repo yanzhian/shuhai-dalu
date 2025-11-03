@@ -1,25 +1,15 @@
 <div class="shuhai-create-item-dialog">
-  {{!-- 头部：角色头像 --}}
-  <div class="dialog-header">
-    <img class="profile-img" src="{{actor.img}}" title="{{actor.name}}"/>
-    <div class="header-text">
-      <h3>创建新物品</h3>
-      <p>角色：{{actor.name}}</p>
+  <div class="form-row">
+    <div class="form-group full-width">
+      <label>物品名称:</label>
+      <input type="text" name="name" placeholder="输入物品名称" autofocus/>
     </div>
   </div>
-
-  <div class="dialog-body">
-    <div class="form-row">
-      <div class="form-group full-width">
-        <label>物品名称:</label>
-        <input type="text" name="name" placeholder="输入物品名称" autofocus/>
-      </div>
-    </div>
 
   <div class="form-row">
     <div class="form-group half-width">
       <label>物品类型:</label>
-      <select name="type" class="item-type-select">
+      <select name="type" id="item-type-select">
         <option value="combatDice">攻击骰</option>
         <option value="shootDice">射击骰</option>
         <option value="defenseDice">守备骰</option>
@@ -35,11 +25,11 @@
     <div class="form-group half-width">
       <label>分类:</label>
       {{!-- 骰子类型使用下拉选择 --}}
-      <select name="category" class="category-select" style="display: none;">
+      <select name="category" id="category-select" style="display: none;">
         <option value="打击">打击</option>
       </select>
       {{!-- 自定义类型使用输入框 --}}
-      <input type="text" name="category" class="category-input" style="display: none;" placeholder="输入自定义分类"/>
+      <input type="text" name="category" id="category-input" style="display: none;" placeholder="输入自定义分类"/>
     </div>
   </div>
 
@@ -92,48 +82,13 @@
   <div class="info-box">
     <p><i class="fas fa-info-circle"></i> 填写完成后点击创建，您还可以在物品表单中继续编辑。</p>
   </div>
-  </div>{{!-- 关闭 dialog-body --}}
 </div>
 
 <style>
 .shuhai-create-item-dialog {
   max-height: 70vh;
   overflow-y: auto;
-  background: #2a2a2a;
-  color: #e0e0e0;
-}
-
-.shuhai-create-item-dialog .dialog-header {
-  display: flex;
-  gap: 1rem;
-  padding: 1rem;
-  background: #1e1e1e;
-  border-bottom: 2px solid #3a3a3a;
-  align-items: center;
-}
-
-.shuhai-create-item-dialog .dialog-header .profile-img {
-  width: 60px;
-  height: 60px;
-  border: 2px solid #4a4a4a;
-  border-radius: 8px;
-  object-fit: cover;
-}
-
-.shuhai-create-item-dialog .dialog-header .header-text h3 {
-  margin: 0 0 0.25rem 0;
-  color: #e0e0e0;
-  font-size: 1.2rem;
-}
-
-.shuhai-create-item-dialog .dialog-header .header-text p {
-  margin: 0;
-  color: #999;
-  font-size: 0.875rem;
-}
-
-.shuhai-create-item-dialog .dialog-body {
-  padding: 1rem;
+  padding: 0.5rem;
 }
 
 .shuhai-create-item-dialog .form-row {
@@ -159,7 +114,6 @@
   font-weight: bold;
   margin-bottom: 0.25rem;
   font-size: 0.875rem;
-  color: #bbb;
 }
 
 .shuhai-create-item-dialog input,
@@ -167,9 +121,9 @@
 .shuhai-create-item-dialog textarea {
   width: 100%;
   padding: 0.5rem;
-  background: #333;
-  border: 1px solid #4a4a4a;
-  border-radius: 4px;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
   color: #e0e0e0;
   font-family: inherit;
 }
@@ -178,7 +132,7 @@
 .shuhai-create-item-dialog select:focus,
 .shuhai-create-item-dialog textarea:focus {
   outline: none;
-  border-color: #3498db;
+  border-color: #e74c3c;
 }
 
 .shuhai-create-item-dialog textarea {
@@ -195,26 +149,17 @@
 .shuhai-create-item-dialog .armor-props-grid label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  background: #333;
-  border-radius: 4px;
-  cursor: pointer;
+  gap: 0.25rem;
   font-weight: normal;
-}
-
-.shuhai-create-item-dialog .armor-props-grid label:hover {
-  background: #3a3a3a;
 }
 
 .shuhai-create-item-dialog .armor-props-grid input[type="checkbox"] {
   width: auto;
-  margin: 0;
 }
 
 .shuhai-create-item-dialog .info-box {
-  background: rgba(52, 152, 219, 0.1);
-  border-left: 3px solid #3498db;
+  background: rgba(33, 150, 243, 0.1);
+  border-left: 3px solid #2196f3;
   padding: 0.75rem;
   border-radius: 3px;
   margin-top: 1rem;
@@ -229,15 +174,11 @@
 
 <script>
 (function() {
-  // 使用最近的dialog容器作为上下文，避免多开对话框时冲突
-  const dialog = document.currentScript.closest('.shuhai-create-item-dialog');
-  if (!dialog) return;
-
-  const typeSelect = dialog.querySelector('.item-type-select');
-  const categorySelect = dialog.querySelector('.category-select');
-  const categoryInput = dialog.querySelector('.category-input');
-  const armorProps = dialog.querySelector('.armor-properties');
-  const diceFormulaInput = dialog.querySelector('[name="diceFormula"]');
+  const typeSelect = document.getElementById('item-type-select');
+  const categorySelect = document.getElementById('category-select');
+  const categoryInput = document.getElementById('category-input');
+  const armorProps = document.querySelector('.armor-properties');
+  const diceFormulaInput = document.querySelector('[name="diceFormula"]');
 
   // 固定分类的骰子类型
   const diceCategories = {
