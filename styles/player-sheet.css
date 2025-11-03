@@ -1115,6 +1115,7 @@ button:disabled:hover {
   border-radius: 4px;
   padding: 1rem;
   margin-top: 1rem;
+  max-height: 60px
 }
 
 .resources-panel .panel-header {
