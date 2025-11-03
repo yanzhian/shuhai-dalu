@@ -1,0 +1,416 @@
+/* ========================================
+   书海大陆 FVTT 系统样式
+   ======================================== */
+
+/* === 全局样式 === */
+.shuhai-dalu {
+  font-family: "Signika", "Noto Sans SC", sans-serif;
+}
+
+.shuhai-dalu .window-content {
+  background: url("../assets/background.jpg") repeat;
+  background-size: cover;
+}
+
+/* === 角色表单头部 === */
+.shuhai-dalu .sheet-header {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.shuhai-dalu .sheet-header .profile-img {
+  flex: 0 0 100px;
+  height: 100px;
+  margin-right: 1rem;
+  border: 2px solid #4a90e2;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.shuhai-dalu .sheet-header .header-fields {
+  flex: 1;
+}
+
+.shuhai-dalu .sheet-header .charname {
+  margin: 0 0 0.5rem 0;
+  border-bottom: 2px solid #4a90e2;
+}
+
+.shuhai-dalu .sheet-header .charname input {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+  background: transparent;
+}
+
+/* === 资源条 === */
+.shuhai-dalu .resources {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+.shuhai-dalu .resource {
+  display: flex;
+  flex-direction: column;
+}
+
+.shuhai-dalu .resource-label {
+  font-weight: bold;
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.shuhai-dalu .resource-content {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.shuhai-dalu .resource-control {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu .resource-control:hover {
+  background: #4a90e2;
+  color: white;
+  border-color: #4a90e2;
+}
+
+.shuhai-dalu .resource input {
+  flex: 1;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 0.25rem;
+}
+
+.shuhai-dalu .resource .sep {
+  color: #999;
+}
+
+/* === 标签页 === */
+.shuhai-dalu .sheet-tabs {
+  flex: 0 0 auto;
+  margin: 0;
+  border-bottom: 2px solid #4a90e2;
+}
+
+.shuhai-dalu .sheet-tabs .item {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: transparent;
+  color: #666;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu .sheet-tabs .item:hover {
+  color: #4a90e2;
+  text-shadow: 0 0 10px rgba(74, 144, 226, 0.5);
+}
+
+.shuhai-dalu .sheet-tabs .item.active {
+  color: #4a90e2;
+  border-bottom: 3px solid #4a90e2;
+}
+
+/* === 表单主体 === */
+.shuhai-dalu .sheet-body {
+  flex: 1;
+  overflow: hidden;
+}
+
+.shuhai-dalu .sheet-body .tab {
+  height: 100%;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+/* === 属性网格 === */
+.shuhai-dalu .attributes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.shuhai-dalu .attribute {
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid #4a90e2;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.shuhai-dalu .attribute:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(74, 144, 226, 0.3);
+}
+
+.shuhai-dalu .attribute-label {
+  font-weight: bold;
+  font-size: 0.875rem;
+  color: #4a90e2;
+  margin-bottom: 0.5rem;
+}
+
+.shuhai-dalu .attribute-value input {
+  width: 100%;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  border: none;
+  background: transparent;
+  color: #333;
+}
+
+.shuhai-dalu .attribute-roll {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid #4a90e2;
+  border-radius: 4px;
+  background: white;
+  color: #4a90e2;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu .attribute-roll:hover {
+  background: #4a90e2;
+  color: white;
+}
+
+/* === 动作按钮区域 === */
+.shuhai-dalu .actions-section {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.shuhai-dalu .actions-section button {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.shuhai-dalu .corruption-check {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.shuhai-dalu .corruption-check:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.shuhai-dalu .long-rest {
+  background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+  color: #333;
+}
+
+.shuhai-dalu .long-rest:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(132, 250, 176, 0.4);
+}
+
+/* === 技能组 === */
+.shuhai-dalu .skill-group {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.shuhai-dalu .group-title {
+  margin: 0 0 0.5rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #4a90e2;
+  color: #4a90e2;
+  font-size: 1.1rem;
+}
+
+.shuhai-dalu .skills-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+.shuhai-dalu .skill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu .skill:hover {
+  background: #f5f5f5;
+  border-color: #4a90e2;
+}
+
+.shuhai-dalu .skill-label {
+  flex: 1;
+  font-weight: 500;
+}
+
+.shuhai-dalu .skill-value input {
+  width: 50px;
+  text-align: center;
+  padding: 0.25rem;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.shuhai-dalu .skill-roll {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid #4a90e2;
+  border-radius: 4px;
+  background: white;
+  color: #4a90e2;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu .skill-roll:hover {
+  background: #4a90e2;
+  color: white;
+}
+
+/* === 物品列表 === */
+.shuhai-dalu .items-section {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.shuhai-dalu .items-section h3 {
+  margin: 0 0 0.5rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #4a90e2;
+  color: #4a90e2;
+}
+
+.shuhai-dalu .items-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.shuhai-dalu .items-list .item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu .items-list .item:hover {
+  background: #f5f5f5;
+  border-color: #4a90e2;
+}
+
+.shuhai-dalu .item-image {
+  flex: 0 0 auto;
+}
+
+.shuhai-dalu .item-image img {
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.shuhai-dalu .item-name {
+  flex: 1;
+  margin: 0;
+  font-weight: bold;
+}
+
+.shuhai-dalu .item-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.shuhai-dalu .item-control {
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu .item-control:hover {
+  color: #4a90e2;
+  transform: scale(1.2);
+}
+
+.shuhai-dalu .item-create {
+  width: 100%;
+  padding: 0.5rem;
+  border: 2px dashed #4a90e2;
+  border-radius: 4px;
+  background: transparent;
+  color: #4a90e2;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu .item-create:hover {
+  background: rgba(74, 144, 226, 0.1);
+}
+
+/* === 传记编辑器 === */
+.shuhai-dalu .biography {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+/* === 响应式设计 === */
+@media (max-width: 768px) {
+  .shuhai-dalu .attributes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .shuhai-dalu .skills-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .shuhai-dalu .resources {
+    grid-template-columns: 1fr;
+  }
+}
