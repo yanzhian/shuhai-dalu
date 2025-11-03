@@ -17,7 +17,9 @@
     "module/shuhai-dalu.mjs"
   ],
   "styles": [
-    "styles/shuhai-dalu.css"
+    "styles/shuhai-dalu.css",
+    "styles/player-sheet.css",
+    "styles/equipment-grid.css"
   ],
   "documentTypes": {
     "Actor": {

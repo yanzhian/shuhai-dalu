@@ -1,0 +1,192 @@
+{{!-- 装备栏 - 正方形槽位布局 --}}
+<div class="equipment-panel-grid">
+
+  {{!-- 第一行：武器、防具 --}}
+  <div class="equipment-row row-weapons">
+    {{!-- 武器槽 --}}
+    <div class="equipment-slot square-slot" data-slot-type="weapon">
+      <div class="slot-label">武器</div>
+      <div class="slot-content" data-slot="weapon" data-item-id="{{system.equipment.weapon}}"
+           title="{{#if (hasItem system.equipment.weapon)}}{{getItemName system.equipment.weapon}} - {{getItemDescription system.equipment.weapon}}{{/if}}">
+        {{#if (hasItem system.equipment.weapon)}}
+          <img src="{{getItemImg system.equipment.weapon}}" class="slot-icon"/>
+          <div class="slot-info-tl">{{getItemCost system.equipment.weapon}}</div>
+          <div class="slot-info-tr"><button class="unequip-btn-mini" data-slot-type="weapon" type="button">×</button></div>
+          <div class="slot-info-bl">{{getItemCategory system.equipment.weapon}}</div>
+          <div class="slot-info-br">{{getItemDice system.equipment.weapon}}</div>
+        {{else}}
+          <span class="empty-slot-text">空</span>
+        {{/if}}
+      </div>
+    </div>
+
+    {{!-- 防具槽 --}}
+    <div class="equipment-slot square-slot" data-slot-type="armor">
+      <div class="slot-label">防具</div>
+      <div class="slot-content" data-slot="armor" data-item-id="{{system.equipment.armor}}"
+           title="{{#if (hasItem system.equipment.armor)}}{{getItemName system.equipment.armor}} - {{getItemDescription system.equipment.armor}}{{/if}}">
+        {{#if (hasItem system.equipment.armor)}}
+          <img src="{{getItemImg system.equipment.armor}}" class="slot-icon"/>
+          <div class="slot-info-tl">{{getItemCost system.equipment.armor}}</div>
+          <div class="slot-info-tr"><button class="unequip-btn-mini" data-slot-type="armor" type="button">×</button></div>
+          <div class="slot-info-bl">{{getItemCategory system.equipment.armor}}</div>
+          <div class="slot-info-br">{{getItemDice system.equipment.armor}}</div>
+        {{else}}
+          <span class="empty-slot-text">空</span>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+
+  {{!-- 第二行：装备骰1-4 --}}
+  <div class="equipment-row row-gear">
+    {{#each system.equipment.gear as |gearId index|}}
+      {{#if (lt index 4)}}
+      <div class="equipment-slot square-slot" data-slot-type="gear" data-slot-index="{{index}}">
+        <div class="slot-label">装备骰{{add index 1}}</div>
+        <div class="slot-content" data-slot="gear" data-slot-index="{{index}}" data-item-id="{{gearId}}"
+             title="{{#if (hasItem gearId)}}{{getItemName gearId}} - {{getItemDescription gearId}}{{/if}}">
+          {{#if (hasItem gearId)}}
+            <img src="{{getItemImg gearId}}" class="slot-icon"/>
+            <div class="slot-info-tl">{{getItemCost gearId}}</div>
+            <div class="slot-info-tr"><button class="unequip-btn-mini" data-slot-type="gear" data-slot-index="{{index}}" type="button">×</button></div>
+            <div class="slot-info-bl">{{getItemCategory gearId}}</div>
+            <div class="slot-info-br">{{getItemDice gearId}}</div>
+          {{else}}
+            <span class="empty-slot-text">空</span>
+          {{/if}}
+        </div>
+      </div>
+      {{/if}}
+    {{/each}}
+  </div>
+
+  {{!-- 第三行：战斗骰1-3 --}}
+  <div class="equipment-row row-combat-1">
+    {{#each system.equipment.combatDice as |diceId index|}}
+      {{#if (lt index 3)}}
+      <div class="equipment-slot square-slot" data-slot-type="combatDice" data-slot-index="{{index}}">
+        <div class="slot-label">战斗骰{{add index 1}}</div>
+        <div class="slot-content" data-slot="combatDice" data-slot-index="{{index}}" data-item-id="{{diceId}}"
+             title="{{#if (hasItem diceId)}}{{getItemName diceId}} - {{getItemDescription diceId}}{{/if}}">
+          {{#if (hasItem diceId)}}
+            <img src="{{getItemImg diceId}}" class="slot-icon"/>
+            <div class="slot-info-tl">{{getItemCost diceId}}</div>
+            <div class="slot-info-tr"><button class="unequip-btn-mini" data-slot-type="combatDice" data-slot-index="{{index}}" type="button">×</button></div>
+            <div class="slot-info-bl">{{getItemCategory diceId}}</div>
+            <div class="slot-info-br">{{getItemDice diceId}}</div>
+          {{else}}
+            <span class="empty-slot-text">空</span>
+          {{/if}}
+        </div>
+      </div>
+      {{/if}}
+    {{/each}}
+  </div>
+
+  {{!-- 第四行：战斗骰4-6 --}}
+  <div class="equipment-row row-combat-2">
+    {{#each system.equipment.combatDice as |diceId index|}}
+      {{#if (gte index 3)}}
+      <div class="equipment-slot square-slot" data-slot-type="combatDice" data-slot-index="{{index}}">
+        <div class="slot-label">战斗骰{{add index 1}}</div>
+        <div class="slot-content" data-slot="combatDice" data-slot-index="{{index}}" data-item-id="{{diceId}}"
+             title="{{#if (hasItem diceId)}}{{getItemName diceId}} - {{getItemDescription diceId}}{{/if}}">
+          {{#if (hasItem diceId)}}
+            <img src="{{getItemImg diceId}}" class="slot-icon"/>
+            <div class="slot-info-tl">{{getItemCost diceId}}</div>
+            <div class="slot-info-tr"><button class="unequip-btn-mini" data-slot-type="combatDice" data-slot-index="{{index}}" type="button">×</button></div>
+            <div class="slot-info-bl">{{getItemCategory diceId}}</div>
+            <div class="slot-info-br">{{getItemDice diceId}}</div>
+          {{else}}
+            <span class="empty-slot-text">空</span>
+          {{/if}}
+        </div>
+      </div>
+      {{/if}}
+    {{/each}}
+  </div>
+
+  {{!-- 第五行：守备骰、触发骰 --}}
+  <div class="equipment-row row-special">
+    {{!-- 守备骰 --}}
+    <div class="equipment-slot square-slot" data-slot-type="defenseDice">
+      <div class="slot-label">守备骰</div>
+      <div class="slot-content" data-slot="defenseDice" data-item-id="{{system.equipment.defenseDice}}"
+           title="{{#if (hasItem system.equipment.defenseDice)}}{{getItemName system.equipment.defenseDice}} - {{getItemDescription system.equipment.defenseDice}}{{/if}}">
+        {{#if (hasItem system.equipment.defenseDice)}}
+          <img src="{{getItemImg system.equipment.defenseDice}}" class="slot-icon"/>
+          <div class="slot-info-tl">{{getItemCost system.equipment.defenseDice}}</div>
+          <div class="slot-info-tr"><button class="unequip-btn-mini" data-slot-type="defenseDice" type="button">×</button></div>
+          <div class="slot-info-bl">{{getItemCategory system.equipment.defenseDice}}</div>
+          <div class="slot-info-br">{{getItemDice system.equipment.defenseDice}}</div>
+        {{else}}
+          <span class="empty-slot-text">空</span>
+        {{/if}}
+      </div>
+    </div>
+
+    {{!-- 触发骰 --}}
+    <div class="equipment-slot square-slot" data-slot-type="triggerDice">
+      <div class="slot-label">触发骰</div>
+      <div class="slot-content" data-slot="triggerDice" data-item-id="{{system.equipment.triggerDice}}"
+           title="{{#if (hasItem system.equipment.triggerDice)}}{{getItemName system.equipment.triggerDice}} - {{getItemDescription system.equipment.triggerDice}}{{/if}}">
+        {{#if (hasItem system.equipment.triggerDice)}}
+          <img src="{{getItemImg system.equipment.triggerDice}}" class="slot-icon"/>
+          <div class="slot-info-tl">{{getItemCost system.equipment.triggerDice}}</div>
+          <div class="slot-info-tr"><button class="unequip-btn-mini" data-slot-type="triggerDice" type="button">×</button></div>
+          <div class="slot-info-bl">{{getItemCategory system.equipment.triggerDice}}</div>
+          <div class="slot-info-br">{{getItemDice system.equipment.triggerDice}}</div>
+        {{else}}
+          <span class="empty-slot-text">空</span>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+
+  {{!-- 第六、七行：被动骰1-6 --}}
+  <div class="equipment-row row-passive-1">
+    {{#each system.equipment.passives as |passiveId index|}}
+      {{#if (lt index 3)}}
+      <div class="equipment-slot square-slot" data-slot-type="passive" data-slot-index="{{index}}">
+        <div class="slot-label">被动骰{{add index 1}}</div>
+        <div class="slot-content" data-slot="passive" data-slot-index="{{index}}" data-item-id="{{passiveId}}"
+             title="{{#if (hasItem passiveId)}}{{getItemName passiveId}} - {{getItemDescription passiveId}}{{/if}}">
+          {{#if (hasItem passiveId)}}
+            <img src="{{getItemImg passiveId}}" class="slot-icon"/>
+            <div class="slot-info-tl">{{getItemCost passiveId}}</div>
+            <div class="slot-info-tr"><button class="unequip-btn-mini" data-slot-type="passive" data-slot-index="{{index}}" type="button">×</button></div>
+            <div class="slot-info-bl">{{getItemCategory passiveId}}</div>
+            <div class="slot-info-br">{{getItemDice passiveId}}</div>
+          {{else}}
+            <span class="empty-slot-text">空</span>
+          {{/if}}
+        </div>
+      </div>
+      {{/if}}
+    {{/each}}
+  </div>
+
+  <div class="equipment-row row-passive-2">
+    {{#each system.equipment.passives as |passiveId index|}}
+      {{#if (gte index 3)}}
+      <div class="equipment-slot square-slot" data-slot-type="passive" data-slot-index="{{index}}">
+        <div class="slot-label">被动骰{{add index 1}}</div>
+        <div class="slot-content" data-slot="passive" data-slot-index="{{index}}" data-item-id="{{passiveId}}"
+             title="{{#if (hasItem passiveId)}}{{getItemName passiveId}} - {{getItemDescription passiveId}}{{/if}}">
+          {{#if (hasItem passiveId)}}
+            <img src="{{getItemImg passiveId}}" class="slot-icon"/>
+            <div class="slot-info-tl">{{getItemCost passiveId}}</div>
+            <div class="slot-info-tr"><button class="unequip-btn-mini" data-slot-type="passive" data-slot-index="{{index}}" type="button">×</button></div>
+            <div class="slot-info-bl">{{getItemCategory passiveId}}</div>
+            <div class="slot-info-br">{{getItemDice passiveId}}</div>
+          {{else}}
+            <span class="empty-slot-text">空</span>
+          {{/if}}
+        </div>
+      </div>
+      {{/if}}
+    {{/each}}
+  </div>
+
+</div>
