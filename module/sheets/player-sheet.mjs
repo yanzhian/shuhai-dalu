@@ -157,9 +157,9 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
     // === 物品图标交互 ===
 
-    // 单击图标：编辑物品
+    // 单击图标包装器：编辑物品
 
-    html.find('.item-icon-wrapper .item-icon').click(this._onItemIconClick.bind(this));
+    html.find('.item-icon-wrapper').click(this._onItemIconClick.bind(this));
 
     // 双击图标包装器：编辑效果描述
 
@@ -178,10 +178,10 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    * 设置拖放功能
    */
   _setupDragAndDrop(html) {
-    // 为物品图标设置拖放
-    html.find('.col-icon .item-icon').each((i, icon) => {
-      icon.addEventListener('dragstart', this._onDragItemStart.bind(this), false);
-      icon.addEventListener('dragend', this._onDragItemEnd.bind(this), false);
+    // 为物品图标包装器设置拖放
+    html.find('.col-icon .item-icon-wrapper').each((i, wrapper) => {
+      wrapper.addEventListener('dragstart', this._onDragItemStart.bind(this), false);
+      wrapper.addEventListener('dragend', this._onDragItemEnd.bind(this), false);
     });
 
     // 为物品行设置drop区域（用于位置交换）
@@ -196,14 +196,14 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    * 拖动物品图标开始
    */
   _onDragItemStart(event) {
-    const icon = event.currentTarget;
-    const itemId = icon.dataset.itemId;
+    const wrapper = event.currentTarget;
+    const itemId = wrapper.dataset.itemId;
     const item = this.actor.items.get(itemId);
 
     if (!item) return;
 
     // 添加拖动样式
-    const row = icon.closest('.inventory-row');
+    const row = wrapper.closest('.inventory-row');
     if (row) {
       row.classList.add('dragging');
     }
@@ -221,8 +221,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    * 拖动物品图标结束
    */
   _onDragItemEnd(event) {
-    const icon = event.currentTarget;
-    const row = icon.closest('.inventory-row');
+    const wrapper = event.currentTarget;
+    const row = wrapper.closest('.inventory-row');
     if (row) {
       row.classList.remove('dragging');
     }
@@ -479,24 +479,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   async _onItemCreateDialog(event) {
     event.preventDefault();
 
-    const content = `
-      <form>
-        <div class="form-group">
-          <label>选择物品类型:</label>
-          <select name="itemType" style="width: 100%; padding: 0.5rem; background: #2a2a2a; border: 1px solid #3a3a3a; color: #e0e0e0; border-radius: 3px;">
-            <option value="combatDice">攻击骰</option>
-            <option value="shootDice">射击骰</option>
-            <option value="defenseDice">守备骰</option>
-            <option value="triggerDice">触发骰</option>
-            <option value="passiveDice">被动骰</option>
-            <option value="weapon">武器</option>
-            <option value="armor">防具</option>
-            <option value="item">物品</option>
-            <option value="equipment">装备</option>
-          </select>
-        </div>
-      </form>
-    `;
+    // 使用模板渲染对话框内容
+    const content = await renderTemplate("systems/shuhai-dalu/templates/dialog/create-item.hbs", {});
 
     new Dialog({
       title: "创建物品",
@@ -506,18 +490,43 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
           icon: '<i class="fas fa-check"></i>',
           label: "创建",
           callback: async (html) => {
-            const type = html.find('[name="itemType"]').val();
+            const formData = new FormDataExtended(html[0].querySelector('form') || html[0]).object;
+
+            const type = html.find('[name="type"]').val();
+            const name = html.find('[name="name"]').val() || `新${this._getTypeName(type)}`;
+
+            // 构建物品数据
             const itemData = {
-              name: `新${this._getTypeName(type)}`,
+              name: name,
               type: type,
-              system: {}
+              system: {
+                category: html.find('[name="category"]').val(),
+                diceFormula: html.find('[name="diceFormula"]').val() || this._getDefaultDiceFormula(type),
+                cost: html.find('[name="cost"]').val() || '-',
+                tags: html.find('[name="tags"]').val() || '',
+                effect: html.find('[name="effect"]').val() || '',
+                quantity: parseInt(html.find('[name="quantity"]').val()) || 1,
+                starlightCost: parseInt(html.find('[name="starlightCost"]').val()) || 0
+              }
             };
+
+            // 如果是防具，添加防具属性
+            if (type === 'armor') {
+              itemData.system.armorProperties = {
+                slashUp: html.find('[name="slashUp"]').is(':checked'),
+                pierceUp: html.find('[name="pierceUp"]').is(':checked'),
+                bluntUp: html.find('[name="bluntUp"]').is(':checked'),
+                slashDown: html.find('[name="slashDown"]').is(':checked'),
+                pierceDown: html.find('[name="pierceDown"]').is(':checked'),
+                bluntDown: html.find('[name="bluntDown"]').is(':checked')
+              };
+            }
 
             const cls = getDocumentClass("Item");
             const item = await cls.create(itemData, { parent: this.actor });
 
             if (item) {
-              item.sheet.render(true);
+              ui.notifications.info(`已创建物品: ${item.name}`);
             }
           }
         },
@@ -526,8 +535,33 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
           label: "取消"
         }
       },
-      default: "create"
+      default: "create",
+      render: (html) => {
+        // 在对话框渲染后，确保脚本已执行
+        // 脚本已经在模板中，会自动执行
+      }
+    }, {
+      width: 600,
+      height: 'auto'
     }).render(true);
+  }
+
+  /**
+   * 获取类型的默认骰数
+   */
+  _getDefaultDiceFormula(type) {
+    const defaults = {
+      'combatDice': '1d6+3',
+      'shootDice': '1d6+3',
+      'defenseDice': '1d10',
+      'triggerDice': '★',
+      'passiveDice': 'O',
+      'weapon': '▼',
+      'armor': '▼',
+      'item': '▼',
+      'equipment': '▼'
+    };
+    return defaults[type] || '▼';
   }
 
   _getTypeName(type) {
