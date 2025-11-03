@@ -1033,7 +1033,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       combatDice: ['combatDice', 'shootDice'],
       defenseDice: ['defenseDice'],
       triggerDice: ['triggerDice'],
-      passiveDice: ['passiveDice']
+      passive: ['passiveDice'],  // Fixed: slot type is 'passive', item type is 'passiveDice'
+      gear: ['equipment']  // Added: gear slots accept equipment items
     };
 
     const allowedTypes = validations[slotType];
@@ -1046,7 +1047,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
         combatDice: '战斗骰',
         defenseDice: '守备骰',
         triggerDice: '触发骰',
-        passiveDice: '被动骰'
+        passive: '被动骰',
+        gear: '装备骰'
       };
       ui.notifications.warn(`只能装备${allowedTypes.map(t => this._getTypeName(t)).join('或')}到${slotNames[slotType]}槽位`);
       return false;
