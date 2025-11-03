@@ -1,0 +1,33 @@
+<section class="flexcol">
+    <fieldset class="card">
+        {{#each types}}
+        {{#if (eq field.name "fly")}}
+        <div class="form-group split-group">
+            <label>{{ localize field.label }}</label>
+            <div class="form-fields">
+                {{ formInput field value=value placeholder=placeholder }}
+                {{#with @root.hover}}
+                {{ formField field value=value input=input localize=localize classes="checkbox" }}
+                {{/with}}
+            </div>
+        </div>
+        {{else}}
+        {{ formField field value=value placeholder=placeholder localize=true }}
+        {{/if}}
+        {{/each}}
+        {{#if (or fields.units extras.length)}}<hr>{{/if}}
+        {{#if fields.units}}
+        {{ formField fields.units value=data.units options=unitsOptions localize=true blank=unitsOptions.blank }}
+        {{/if}}
+        {{> "dnd5e.fieldlist" extras }}
+    </fieldset>
+    {{#if fields.special}}
+    <fieldset class="card">
+        <legend>{{ localize "DND5E.Special" }}</legend>
+        <div class="form-group">
+            {{ formInput fields.special value=data.special }}
+            <p class="hint">{{ localize "DND5E.SpecialHint" }}</p>
+        </div>
+    </fieldset>
+    {{/if}}
+</section>

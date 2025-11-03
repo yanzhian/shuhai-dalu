@@ -1,0 +1,8 @@
+2025/11/03-01:51:44.514 fbf8 Recovering log #82
+2025/11/03-01:51:44.516 fbf8 Delete type=0 #82
+2025/11/03-01:51:44.517 fbf8 Delete type=3 #80
+2025/11/03-01:52:01.917 15198 Level-0 table #87: started
+2025/11/03-01:52:01.917 15198 Level-0 table #87: 0 bytes OK
+2025/11/03-01:52:01.918 15198 Delete type=0 #85
+2025/11/03-01:52:01.921 15198 Manual compaction at level-0 from '!folders!1GCaQEaMIbogg5ty' @ 72057594037927935 : 1 .. '!items.effects!0kUsT4sMUOr5FcoX.HGtTN5utBdoMs37f' @ 0 : 0; will stop at (end)
+2025/11/03-01:52:01.921 15198 Manual compaction at level-1 from '!folders!1GCaQEaMIbogg5ty' @ 72057594037927935 : 1 .. '!items.effects!0kUsT4sMUOr5FcoX.HGtTN5utBdoMs37f' @ 0 : 0; will stop at (end)
