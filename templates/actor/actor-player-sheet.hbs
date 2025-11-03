@@ -209,227 +209,10 @@
   {{!-- 第三部分: 装备栏和物品栏 --}}
   <div class="equipment-inventory-section">
     
-    {{!-- 左侧：装备栏 --}}
+    {{!-- 左侧：装备栏 - 正方形槽位 --}}
     <div class="equipment-panel">
       <div class="panel-header">装备栏</div>
-
-      {{!-- 武器和防具 --}}
-      <div class="equipment-row">
-        <div class="equipment-slot weapon-slot" data-slot-type="weapon">
-          <label>武器</label>
-          <div class="slot-content" data-slot="weapon" data-item-id="{{system.equipment.weapon}}">
-            {{#if (hasItem system.equipment.weapon)}}
-        <img src="{{getItemImg system.equipment.weapon}}" class="item-icon" data-item-id="{{system.equipment.weapon}}"/>
-{{!-- 左上角费用圈 --}}
-
-              <div class="slot-cost">{{getItemCost system.equipment.weapon}}</div>
-
-              {{!-- 右下角骰数框 --}}
-
-              {{#if (getItemDice system.equipment.weapon)}}
-
-              <div class="slot-dice">{{getItemDice system.equipment.weapon}}</div>
-
-              {{/if}}
-
-              <button class="unequip-btn" data-slot-type="weapon" type="button">×</button>
-
-            {{else}}
-
-              <span class="empty-slot">空</span>
-
-            {{/if}}
-
-          </div>
-
-        </div>
-
- 
-
-        <div class="equipment-slot armor-slot" data-slot-type="armor">
-
-          <label>防具</label>
-
-          <div class="slot-content" data-slot="armor" data-item-id="{{system.equipment.armor}}">
-
-            {{#if (hasItem system.equipment.armor)}}
-
-              <img src="{{getItemImg system.equipment.armor}}" class="item-icon" data-item-id="{{system.equipment.armor}}"/>
-
-              {{!-- 左上角费用圈 --}}
-
-              <div class="slot-cost">{{getItemCost system.equipment.armor}}</div>
-
-              {{!-- 右下角骰数框 --}}
-
-              {{#if (getItemDice system.equipment.armor)}}
-
-              <div class="slot-dice">{{getItemDice system.equipment.armor}}</div>
-
-              {{/if}}
-
-              <button class="unequip-btn" data-slot-type="armor" type="button">×</button>
-            {{else}}
-              <span class="empty-slot">空</span>
-            {{/if}}
-          </div>
-        </div>
-      </div>
-
-      {{!-- 战斗骰 1-6 --}}
-      <div class="combat-dice-grid">
-        {{#each system.equipment.combatDice as |diceId index|}}
-        <div class="equipment-slot combat-dice-slot" data-slot-type="combatDice" data-slot-index="{{index}}">
-          <label>战斗骰{{add index 1}}</label>
-          <div class="slot-content" data-slot="combatDice" data-slot-index="{{index}}" data-item-id="{{diceId}}">
-            {{#if (hasItem diceId)}}
-              <img src="{{getItemImg diceId}}" class="item-icon" data-item-id="{{diceId}}"/>
-
-
-
- {{!-- 左上角费用圈 --}}
-
-              <div class="slot-cost">{{getItemCost diceId}}</div>
-
-              {{!-- 右下角骰数框 --}}
-
-              {{#if (getItemDice diceId)}}
-
-              <div class="slot-dice">{{getItemDice diceId}}</div>
-
-              {{/if}}
-
-              <button class="unequip-btn" data-slot-type="combatDice" data-slot-index="{{index}}" type="button">×</button>
-
-            {{else}}
-
-              <span class="empty-slot">空</span>
-
-            {{/if}}
-
-          </div>
-
-        </div>
-
-        {{/each}}
-
-      </div>
-
- 
-
-      {{!-- 守备骰 --}}
-
-      <div class="equipment-slot defense-dice-slot" data-slot-type="defenseDice">
-
-        <label>守备骰</label>
-
-        <div class="slot-content" data-slot="defenseDice" data-item-id="{{system.equipment.defenseDice}}">
-
-          {{#if (hasItem system.equipment.defenseDice)}}
-
-            <img src="{{getItemImg system.equipment.defenseDice}}" class="item-icon" data-item-id="{{system.equipment.defenseDice}}"/>
-
-            {{!-- 左上角费用圈 --}}
-
-            <div class="slot-cost">{{getItemCost system.equipment.defenseDice}}</div>
-
-            {{!-- 右下角骰数框 --}}
-
-            {{#if (getItemDice system.equipment.defenseDice)}}
-
-            <div class="slot-dice">{{getItemDice system.equipment.defenseDice}}</div>
-
-            {{/if}}
-
-            <button class="unequip-btn" data-slot-type="defenseDice" type="button">×</button>
-
-          {{else}}
-
-            <span class="empty-slot">空</span>
-
-          {{/if}}
-
-        </div>
-
-      </div>
-
- 
-
-      {{!-- 触发骰 --}}
-
-      <div class="equipment-slot trigger-dice-slot" data-slot-type="triggerDice">
-
-        <label>触发骰</label>
-
-        <div class="slot-content" data-slot="triggerDice" data-item-id="{{system.equipment.triggerDice}}">
-
-          {{#if (hasItem system.equipment.triggerDice)}}
-
-            <img src="{{getItemImg system.equipment.triggerDice}}" class="item-icon" data-item-id="{{system.equipment.triggerDice}}"/>
-
-            {{!-- 左上角费用圈 --}}
-
-            <div class="slot-cost">{{getItemCost system.equipment.triggerDice}}</div>
-
-            {{!-- 右下角骰数框 --}}
-
-            {{#if (getItemDice system.equipment.triggerDice)}}
-
-            <div class="slot-dice">{{getItemDice system.equipment.triggerDice}}</div>
-
-            {{/if}}
-
-            <button class="unequip-btn" data-slot-type="triggerDice" type="button">×</button>
-
-          {{else}}
-
-            <span class="empty-slot">空</span>
-
-          {{/if}}
-
-        </div>
-
-      </div>
-
- 
-
-      {{!-- 被动骰 --}}
-
-      <div class="passive-dice-slots">
-
-        {{#each system.equipment.passives as |passiveId index|}}
-
-        <div class="equipment-slot passive-dice-slot" data-slot-type="passiveDice" data-slot-index="{{index}}">
-
-          <label>被动骰</label>
-
-          <div class="slot-content" data-slot="passiveDice" data-slot-index="{{index}}" data-item-id="{{passiveId}}">
-
-            {{#if (hasItem passiveId)}}
-
-              <img src="{{getItemImg passiveId}}" class="item-icon" data-item-id="{{passiveId}}"/>
-
-              {{!-- 左上角费用圈 --}}
-
-              <div class="slot-cost">{{getItemCost passiveId}}</div>
-
-              {{!-- 右下角骰数框 --}}
-
-              {{#if (getItemDice passiveId)}}
-
-              <div class="slot-dice">{{getItemDice passiveId}}</div>
-
-              {{/if}}
-
-
-              <button class="unequip-btn" data-slot-type="passiveDice" data-slot-index="{{index}}" type="button">×</button>
-            {{else}}
-              <span class="empty-slot">空</span>
-            {{/if}}
-          </div>
-        </div>
-        {{/each}}
-      </div>
+      {{> "systems/shuhai-dalu/templates/actor/parts/equipment-slots.hbs"}}
     </div>
 
     {{!-- 右侧：物品栏 --}}
@@ -567,69 +350,69 @@
 
       </table>
     </div>
+  </div>
 
-    {{!-- 资源显示区域 --}}
-    <div class="resources-panel">
-      <div class="panel-header">资源</div>
+  {{!-- 资源显示区域 --}}
+  <div class="resources-panel">
+    <div class="panel-header">资源</div>
 
-      <div class="resources-grid">
-        {{!-- 星光剩余 --}}
-        <div class="resource-item">
-          <label>星光</label>
-          <div class="resource-value-display">
-            <span class="resource-current">{{system.derived.starlight}}</span>
-            <span class="resource-separator">/</span>
-            <span class="resource-max">{{add 10 (multiply level 2)}}</span>
-          </div>
+    <div class="resources-grid">
+      {{!-- 星光剩余 --}}
+      <div class="resource-item">
+        <label>星光</label>
+        <div class="resource-value-display">
+          <span class="resource-current">{{system.derived.starlight}}</span>
+          <span class="resource-separator">/</span>
+          <span class="resource-max">{{add 10 (multiply system.level 2)}}</span>
         </div>
+      </div>
 
-        {{!-- 货币 --}}
-        <div class="resource-item">
-          <label>货币</label>
-          {{#if isLocked}}
-          <div class="resource-value-display">
-            <span class="resource-current">{{system.resources.currency}}</span>
-          </div>
-          {{else}}
-          <input type="number" name="system.resources.currency" value="{{system.resources.currency}}" data-dtype="Number" min="0" placeholder="0"/>
-          {{/if}}
+      {{!-- 货币 --}}
+      <div class="resource-item">
+        <label>货币</label>
+        {{#if isLocked}}
+        <div class="resource-value-display">
+          <span class="resource-current">{{system.resources.currency}}</span>
         </div>
+        {{else}}
+        <input type="number" name="system.resources.currency" value="{{system.resources.currency}}" data-dtype="Number" min="0" placeholder="0"/>
+        {{/if}}
+      </div>
 
-        {{!-- 奇遇点 --}}
-        <div class="resource-item">
-          <label>奇遇点</label>
-          {{#if isLocked}}
-          <div class="resource-value-display">
-            <span class="resource-current">{{system.resources.encounterPoints}}</span>
-          </div>
-          {{else}}
-          <input type="number" name="system.resources.encounterPoints" value="{{system.resources.encounterPoints}}" data-dtype="Number" min="0" placeholder="0"/>
-          {{/if}}
+      {{!-- 奇遇点 --}}
+      <div class="resource-item">
+        <label>奇遇点</label>
+        {{#if isLocked}}
+        <div class="resource-value-display">
+          <span class="resource-current">{{system.resources.encounterPoints}}</span>
         </div>
+        {{else}}
+        <input type="number" name="system.resources.encounterPoints" value="{{system.resources.encounterPoints}}" data-dtype="Number" min="0" placeholder="0"/>
+        {{/if}}
+      </div>
 
-        {{!-- 奇迹点 --}}
-        <div class="resource-item">
-          <label>奇迹点</label>
-          {{#if isLocked}}
-          <div class="resource-value-display">
-            <span class="resource-current">{{system.resources.miraclePoints}}</span>
-          </div>
-          {{else}}
-          <input type="number" name="system.resources.miraclePoints" value="{{system.resources.miraclePoints}}" data-dtype="Number" min="0" placeholder="1"/>
-          {{/if}}
+      {{!-- 奇迹点 --}}
+      <div class="resource-item">
+        <label>奇迹点</label>
+        {{#if isLocked}}
+        <div class="resource-value-display">
+          <span class="resource-current">{{system.resources.miraclePoints}}</span>
         </div>
+        {{else}}
+        <input type="number" name="system.resources.miraclePoints" value="{{system.resources.miraclePoints}}" data-dtype="Number" min="0" placeholder="1"/>
+        {{/if}}
+      </div>
 
-        {{!-- 复制核心 --}}
-        <div class="resource-item">
-          <label>复制核心</label>
-          {{#if isLocked}}
-          <div class="resource-value-display">
-            <span class="resource-current">{{system.resources.replicaCore}}</span>
-          </div>
-          {{else}}
-          <input type="number" name="system.resources.replicaCore" value="{{system.resources.replicaCore}}" data-dtype="Number" min="0" placeholder="0"/>
-          {{/if}}
+      {{!-- 复制核心 --}}
+      <div class="resource-item">
+        <label>复制核心</label>
+        {{#if isLocked}}
+        <div class="resource-value-display">
+          <span class="resource-current">{{system.resources.replicaCore}}</span>
         </div>
+        {{else}}
+        <input type="number" name="system.resources.replicaCore" value="{{system.resources.replicaCore}}" data-dtype="Number" min="0" placeholder="0"/>
+        {{/if}}
       </div>
     </div>
   </div>

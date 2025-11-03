@@ -145,7 +145,15 @@ Hooks.once('init', function() {
   Handlebars.registerHelper('lt', function(a, b) {
     return a < b;
   });
-  
+
+  Handlebars.registerHelper('gte', function(a, b) {
+    return a >= b;
+  });
+
+  Handlebars.registerHelper('lte', function(a, b) {
+    return a <= b;
+  });
+
   Handlebars.registerHelper('add', function(a, b) {
     return a + b;
   });
@@ -272,33 +280,51 @@ Hooks.once('init', function() {
  
 
   // 获取物品名称
-
   Handlebars.registerHelper('getItemName', function(itemId, options) {
-
     if (!itemId) return '';
 
- 
-
     // 尝试从当前上下文的 actor 获取物品
-
     const actor = options?.data?.root?.actor;
-
     if (actor && actor.items) {
-
       const item = actor.items.get(itemId);
-
       if (item) return item.name;
-
     }
 
- 
+    // 否则从全局获取
+    const item = game.items.get(itemId);
+    return item ? item.name : '';
+  });
+
+  // 获取物品描述/效果
+  Handlebars.registerHelper('getItemDescription', function(itemId, options) {
+    if (!itemId) return '';
+
+    // 尝试从当前上下文的 actor 获取物品
+    const actor = options?.data?.root?.actor;
+    if (actor && actor.items) {
+      const item = actor.items.get(itemId);
+      if (item) return item.system.effect || '';
+    }
 
     // 否则从全局获取
-
     const item = game.items.get(itemId);
+    return (item && item.system.effect) ? item.system.effect : '';
+  });
 
-    return item ? item.name : '';
+  // 获取物品分类
+  Handlebars.registerHelper('getItemCategory', function(itemId, options) {
+    if (!itemId) return '';
 
+    // 尝试从当前上下文的 actor 获取物品
+    const actor = options?.data?.root?.actor;
+    if (actor && actor.items) {
+      const item = actor.items.get(itemId);
+      if (item) return item.system.category || '';
+    }
+
+    // 否则从全局获取
+    const item = game.items.get(itemId);
+    return (item && item.system.category) ? item.system.category : '';
   });
 });
 
