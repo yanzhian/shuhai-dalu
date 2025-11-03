@@ -100,14 +100,8 @@
 
     {{!-- 效果描述 --}}
     <div class="form-group">
-      <label>效果描述（简易编辑）</label>
+      <label>效果描述</label>
       <textarea name="system.effect" rows="4" placeholder="描述物品的效果...">{{system.effect}}</textarea>
-      <p class="hint">直接输入文本，或使用下方富文本编辑器</p>
-    </div>
-
-    <div class="form-group description">
-      <label>效果描述（富文本编辑器）</label>
-      {{editor enrichedEffect target="system.effect" button=true owner=owner editable=editable}}
     </div>
 
     {{!-- 操作按钮 --}}

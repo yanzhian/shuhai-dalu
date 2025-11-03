@@ -496,9 +496,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     event.preventDefault();
 
     // 使用模板渲染对话框内容
-    const content = await renderTemplate("systems/shuhai-dalu/templates/dialog/create-item.hbs", {
-      actor: this.actor
-    });
+    const content = await renderTemplate("systems/shuhai-dalu/templates/dialog/create-item.hbs", {});
 
     new Dialog({
       title: "创建物品",
