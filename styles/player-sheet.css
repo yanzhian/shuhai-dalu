@@ -1107,6 +1107,9 @@ button:disabled:hover {
    资源显示区域
    ======================================== */
 .resources-panel {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
   background: #1e1e1e;
   border: 1px solid #3a3a3a;
   border-radius: 4px;
@@ -1116,24 +1119,20 @@ button:disabled:hover {
 
 .resources-panel .panel-header {
   background: #2c3e50;
-  padding: 0.5rem;
+  padding: 0.5rem 1rem;
   text-align: center;
   font-weight: bold;
   color: #ecf0f1;
   border-radius: 4px;
-  margin-bottom: 1rem;
-}
-
-.resources-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .resource-item {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 .resource-item label {

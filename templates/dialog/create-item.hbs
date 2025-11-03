@@ -189,6 +189,8 @@
     'equipment': ['装备', '饰品', '工具']
   };
 
+  let lastType = typeSelect.value;
+
   function updateCategories() {
     const type = typeSelect.value;
     const categories = categoryMap[type] || ['未分类'];
@@ -201,9 +203,10 @@
       categorySuggestions.appendChild(option);
     });
 
-    // 设置默认值为第一个建议（但用户可以修改）
-    if (!categoryInput.value || categoryInput.value === '未分类') {
+    // 如果类型发生变化，总是更新分类为新类型的第一个选项
+    if (type !== lastType) {
       categoryInput.value = categories[0];
+      lastType = type;
     }
 
     // 显示/隐藏防具属性
