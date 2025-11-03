@@ -1,10 +1,4 @@
 <div class="shuhai-create-item-dialog">
-  {{!-- 对话框头部图标 --}}
-  <div class="dialog-header">
-    <i class="fas fa-plus-circle"></i>
-    <h2>创建新物品</h2>
-  </div>
-
   <div class="form-row">
     <div class="form-group full-width">
       <label>物品名称:</label>
@@ -94,45 +88,13 @@
 .shuhai-create-item-dialog {
   max-height: 70vh;
   overflow-y: auto;
-  padding: 0;
-}
-
-.shuhai-create-item-dialog .dialog-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
-  border-radius: 8px 8px 0 0;
-  margin-bottom: 1rem;
-  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
-}
-
-.shuhai-create-item-dialog .dialog-header i {
-  font-size: 2rem;
-  color: #ffffff;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-}
-
-.shuhai-create-item-dialog .dialog-header h2 {
-  margin: 0;
-  color: #ffffff;
-  font-size: 1.5rem;
-  font-weight: bold;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  padding: 0.5rem;
 }
 
 .shuhai-create-item-dialog .form-row {
   display: flex;
   gap: 1rem;
   margin-bottom: 1rem;
-  padding: 0 0.5rem;
 }
 
 .shuhai-create-item-dialog .form-group {
@@ -170,16 +132,11 @@
 .shuhai-create-item-dialog select:focus,
 .shuhai-create-item-dialog textarea:focus {
   outline: none;
-  border-color: #4a90e2;
-  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+  border-color: #e74c3c;
 }
 
 .shuhai-create-item-dialog textarea {
   resize: vertical;
-}
-
-.shuhai-create-item-dialog .armor-properties {
-  padding: 0 0.5rem;
 }
 
 .shuhai-create-item-dialog .armor-props-grid {
@@ -201,11 +158,11 @@
 }
 
 .shuhai-create-item-dialog .info-box {
-  background: rgba(74, 144, 226, 0.1);
-  border-left: 3px solid #4a90e2;
+  background: rgba(33, 150, 243, 0.1);
+  border-left: 3px solid #2196f3;
   padding: 0.75rem;
   border-radius: 3px;
-  margin: 1rem 0.5rem 0.5rem 0.5rem;
+  margin-top: 1rem;
 }
 
 .shuhai-create-item-dialog .info-box p {
