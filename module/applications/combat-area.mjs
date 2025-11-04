@@ -349,7 +349,7 @@ export default class CombatAreaApplication extends Application {
     event.preventDefault();
 
     // 可用的行动骰装扮主题
-    const themes = ['大自然', '永生蜜酒', '猪灵', '蔷薇之主', '蒸汽驱动'];
+    const themes = ['大自然', '永生蜜酒', '猪灵', '蔷薇之主', '蒸汽驱动',"AL-1S","Bianh","PMC","阿里乌斯","阿罗娜","暗邦","暗邦UR"];
 
     const content = `
       <form>
