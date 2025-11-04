@@ -1,0 +1,119 @@
+<div class="counter-area-container">
+
+  {{!-- 挑战者信息 --}}
+  <div class="challenge-info-section">
+    <h2>对抗挑战</h2>
+    <div class="challenge-details">
+      <div class="challenger-info">
+        <span class="label">挑战者：</span>
+        <span class="value">{{challengeData.challengerName}}</span>
+      </div>
+      <div class="challenger-dice">
+        <span class="label">使用骰子：</span>
+        <span class="value">{{challengeData.diceName}}</span>
+      </div>
+      <div class="challenger-total">
+        <span class="label">骰数结果：</span>
+        <span class="value total-number">{{challengeData.total}}</span>
+      </div>
+    </div>
+    <p class="challenge-tip">选择你的骰子进行对抗！结果大于对手则对其造成你的骰数伤害，否则你受到对手的骰数伤害。</p>
+  </div>
+
+  {{!-- 资源状态 --}}
+  <div class="counter-resources-section">
+    <div class="extra-cost-group">
+      <span class="resource-label">额外Cost</span>
+      <div class="resource-buttons">
+        {{#each combatState.extraCost as |active index|}}
+          <button class="extra-cost-btn resource-btn {{#if active}}active{{/if}}" data-index="{{@index}}" type="button"></button>
+        {{/each}}
+      </div>
+    </div>
+    <div class="ex-resource-group">
+      <span class="resource-label">EX</span>
+      <div class="resource-buttons">
+        {{#each combatState.exResources as |active index|}}
+          <button class="ex-resource-btn resource-btn {{#if active}}active{{/if}}" data-index="{{@index}}" type="button">EX</button>
+        {{/each}}
+      </div>
+    </div>
+  </div>
+
+  {{!-- 战斗骰区域（只显示已激活的） --}}
+  <div class="counter-combat-dice-section">
+    <div class="section-header">已激活的战斗骰</div>
+    {{#if activeCombatDice.length}}
+      <div class="counter-dice-grid">
+        {{#each activeCombatDice as |dice index|}}
+          <div class="counter-dice-item">
+            <button class="combat-dice-counter-btn counter-btn" data-index="{{@index}}" type="button">
+              <div class="dice-image">
+                <img src="{{dice.img}}" alt="{{dice.name}}" />
+              </div>
+              <div class="dice-name">{{dice.name}}</div>
+              <div class="dice-formula">{{dice.dice}}</div>
+              <div class="counter-action">
+                <i class="fas fa-swords"></i> 对抗
+              </div>
+            </button>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="no-dice-message">
+        <p>没有已激活的战斗骰！</p>
+        <p><small>请先在战斗区域激活战斗骰</small></p>
+      </div>
+    {{/if}}
+  </div>
+
+  {{!-- 守备骰和触发骰 --}}
+  <div class="counter-special-dice-section">
+    <div class="section-header">守备骰 / 触发骰</div>
+    <div class="counter-dice-grid special-grid">
+
+      {{!-- 守备骰 --}}
+      {{#if defenseDice}}
+        <div class="counter-dice-item">
+          <button class="defense-dice-counter-btn counter-btn" type="button">
+            <div class="dice-image">
+              <img src="{{defenseDice.img}}" alt="{{defenseDice.name}}" />
+            </div>
+            <div class="dice-name">{{defenseDice.name}}</div>
+            <div class="dice-formula">{{defenseDice.dice}}</div>
+            <div class="counter-action defense">
+              <i class="fas fa-shield-alt"></i> 守备对抗
+            </div>
+          </button>
+        </div>
+      {{else}}
+        <div class="counter-dice-item empty">
+          <div class="empty-slot">未装备守备骰</div>
+        </div>
+      {{/if}}
+
+      {{!-- 触发骰 --}}
+      {{#if triggerDice}}
+        <div class="counter-dice-item">
+          <button class="trigger-dice-counter-btn counter-btn {{#unless (hasEx combatState.exResources)}}disabled{{/unless}}" type="button">
+            <div class="dice-image">
+              <img src="{{triggerDice.img}}" alt="{{triggerDice.name}}" />
+            </div>
+            <div class="dice-name">{{triggerDice.name}}</div>
+            <div class="dice-formula">{{triggerDice.dice}}</div>
+            <div class="counter-action trigger">
+              <i class="fas fa-bolt"></i> 触发对抗（消耗1EX）
+            </div>
+          </button>
+        </div>
+      {{else}}
+        <div class="counter-dice-item empty">
+          <div class="empty-slot">未装备触发骰</div>
+        </div>
+      {{/if}}
+
+    </div>
+  </div>
+
+</div>

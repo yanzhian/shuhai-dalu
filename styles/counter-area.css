@@ -1,0 +1,351 @@
+/* ========================================
+   书海大陆 对抗界面样式
+   ======================================== */
+
+.counter-area {
+  background: #2a2a2a;
+  color: #e0e0e0;
+  font-family: "Noto Sans SC", sans-serif;
+}
+
+.counter-area-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* ========================================
+   挑战者信息区域
+   ======================================== */
+.challenge-info-section {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  border: 3px solid #a93226;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(231, 76, 60, 0.4);
+}
+
+.challenge-info-section h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #fff;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.challenge-details {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.challenger-info,
+.challenger-dice,
+.challenger-total {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.75rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.challenge-details .label {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.challenge-details .value {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+.challenger-total .total-number {
+  font-size: 2rem;
+  color: #f39c12;
+  text-shadow: 0 0 10px rgba(243, 156, 18, 0.8);
+}
+
+.challenge-tip {
+  margin: 0;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: #fff;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* ========================================
+   资源状态区域
+   ======================================== */
+.counter-resources-section {
+  background: #1e1e1e;
+  border: 2px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.extra-cost-group,
+.ex-resource-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.resource-label {
+  font-size: 0.875rem;
+  font-weight: bold;
+  color: #ecf0f1;
+}
+
+.resource-buttons {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.resource-btn {
+  width: 40px;
+  height: 40px;
+  background: #555;
+  border: 2px solid #666;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.extra-cost-btn.active {
+  background: #27ae60;
+  border-color: #2ecc71;
+  box-shadow: 0 0 12px rgba(46, 204, 113, 0.6);
+}
+
+.ex-resource-btn.active {
+  background: #f39c12;
+  border-color: #f1c40f;
+  box-shadow: 0 0 12px rgba(241, 196, 15, 0.6);
+}
+
+.resource-btn:hover {
+  transform: scale(1.1);
+}
+
+/* ========================================
+   战斗骰区域
+   ======================================== */
+.counter-combat-dice-section,
+.counter-special-dice-section {
+  background: #1e1e1e;
+  border: 2px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.section-header {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #ecf0f1;
+  padding: 0.5rem 1rem;
+  background: #2c3e50;
+  border-radius: 6px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 1rem;
+}
+
+.counter-dice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.counter-dice-grid.special-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.counter-dice-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.counter-btn {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #34495e, #2c3e50);
+  border: 3px solid #4a4a4a;
+  border-radius: 12px;
+  color: #ecf0f1;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.counter-btn:hover {
+  background: linear-gradient(135deg, #415b76, #34495e);
+  border-color: #3498db;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(52, 152, 219, 0.4);
+}
+
+.counter-btn:active {
+  transform: translateY(-2px);
+}
+
+.counter-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.counter-btn.disabled:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: #4a4a4a;
+}
+
+.dice-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #3a3a3a;
+  background: #1a1a1a;
+}
+
+.dice-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 0.25rem;
+}
+
+.dice-name {
+  font-size: 0.875rem;
+  font-weight: bold;
+  text-align: center;
+  color: #ecf0f1;
+}
+
+.dice-formula {
+  font-size: 0.75rem;
+  color: #3498db;
+  font-weight: bold;
+  text-align: center;
+}
+
+.counter-action {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #3498db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: bold;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.counter-action.defense {
+  background: #2980b9;
+}
+
+.counter-action.trigger {
+  background: #f39c12;
+}
+
+.counter-btn:hover .counter-action {
+  background: #5dade2;
+}
+
+.counter-btn:hover .counter-action.defense {
+  background: #3498db;
+}
+
+.counter-btn:hover .counter-action.trigger {
+  background: #f1c40f;
+}
+
+/* 空槽位 */
+.counter-dice-item.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-slot {
+  padding: 2rem;
+  background: #1a1a1a;
+  border: 2px dashed #3a3a3a;
+  border-radius: 12px;
+  color: #555;
+  font-size: 0.875rem;
+  text-align: center;
+  width: 100%;
+}
+
+/* 没有骰子消息 */
+.no-dice-message {
+  padding: 3rem;
+  text-align: center;
+  color: #95a5a6;
+}
+
+.no-dice-message p {
+  margin: 0.5rem 0;
+}
+
+.no-dice-message p:first-child {
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #e74c3c;
+}
+
+.no-dice-message small {
+  font-size: 0.875rem;
+  color: #7f8c8d;
+}
+
+/* ========================================
+   滚动条样式
+   ======================================== */
+.counter-area ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.counter-area ::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.counter-area ::-webkit-scrollbar-thumb {
+  background: #4a4a4a;
+  border-radius: 4px;
+}
+
+.counter-area ::-webkit-scrollbar-thumb:hover {
+  background: #5a5a5a;
+}

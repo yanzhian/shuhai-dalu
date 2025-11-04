@@ -197,13 +197,25 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     }
 
     if (action === 'counter') {
-      // 对抗：打开自己的战斗区域
-      // 动态导入战斗区域应用
-      const CombatAreaApplication = (await import('./applications/combat-area.mjs')).default;
-      const combatArea = new CombatAreaApplication(actor);
-      combatArea.render(true);
+      // 对抗：打开对抗界面
+      const challengerId = button.dataset.challengerId;
+      const challengerName = button.dataset.challengerName;
+      const diceId = button.dataset.diceId;
+      const diceName = button.dataset.diceName;
+      const total = parseInt(button.dataset.total);
 
-      ui.notifications.info(`对方的骰数是 ${total}，请选择你的战斗骰进行对抗！`);
+      // 动态导入对抗界面应用
+      const CounterAreaApplication = (await import('./applications/counter-area.mjs')).default;
+      const counterArea = new CounterAreaApplication(actor, {
+        challengerId: challengerId,
+        challengerName: challengerName,
+        diceId: diceId,
+        diceName: diceName,
+        total: total
+      });
+      counterArea.render(true);
+
+      ui.notifications.info(`${challengerName} 的骰数是 ${total}，请选择你的骰子进行对抗！`);
 
     } else if (action === 'accept') {
       // 承受：直接受到伤害
@@ -329,6 +341,13 @@ Hooks.once('init', function() {
   Handlebars.registerHelper('hasItem', function(itemId) {
     return itemId && itemId !== '';
   });
+
+  // 检查是否有EX资源
+  Handlebars.registerHelper('hasEx', function(exResources) {
+    if (!Array.isArray(exResources)) return false;
+    return exResources.some(ex => ex === true);
+  });
+
   // 获取物品费用
 
   Handlebars.registerHelper('getItemCost', function(itemId, options) {
@@ -457,6 +476,7 @@ async function preloadHandlebarsTemplates() {
 
     // 战斗区域模板
     "systems/shuhai-dalu/templates/combat/combat-area.hbs",
+    "systems/shuhai-dalu/templates/combat/counter-area.hbs",
 
     // 对话框模板
     "systems/shuhai-dalu/templates/dialog/check-dialog.hbs",
@@ -469,7 +489,8 @@ async function preloadHandlebarsTemplates() {
     "systems/shuhai-dalu/templates/chat/trigger-use.hbs",
     "systems/shuhai-dalu/templates/chat/item-use.hbs",
     "systems/shuhai-dalu/templates/chat/item-card.hbs",
-    "systems/shuhai-dalu/templates/chat/combat-dice-challenge.hbs"
+    "systems/shuhai-dalu/templates/chat/combat-dice-challenge.hbs",
+    "systems/shuhai-dalu/templates/chat/contest-result.hbs"
   ]);
 }
 

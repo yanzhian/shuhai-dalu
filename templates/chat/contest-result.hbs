@@ -1,0 +1,172 @@
+<div class="contest-result-card">
+  <div class="contest-header">
+    <h3>拼点结果</h3>
+  </div>
+
+  <div class="contest-combatants">
+    {{!-- 挑战者 --}}
+    <div class="combatant challenger">
+      <div class="combatant-header">
+        <i class="fas fa-sword"></i> 挑战者
+      </div>
+      <div class="combatant-name">{{challengerName}}</div>
+      <div class="combatant-dice">{{challengerDiceName}}</div>
+      <div class="combatant-total">{{challengerTotal}}</div>
+    </div>
+
+    {{!-- VS --}}
+    <div class="vs-divider">
+      <span>VS</span>
+    </div>
+
+    {{!-- 对抗者 --}}
+    <div class="combatant defender">
+      <div class="combatant-header">
+        <i class="fas fa-shield"></i> 对抗者
+      </div>
+      <div class="combatant-name">{{actor.name}}</div>
+      <div class="combatant-dice">{{diceName}}</div>
+      <div class="combatant-total">{{myTotal}}</div>
+    </div>
+  </div>
+
+  {{!-- 结果 --}}
+  <div class="contest-result">
+    <div class="result-text">{{{resultMessage}}}</div>
+    {{#if damageTarget}}
+      <div class="damage-info">
+        <span class="damage-target">{{damageTarget.name}}</span>
+        受到
+        <span class="damage-amount">{{damageAmount}}</span>
+        点伤害！
+        <br>
+        <small>当前生命值：{{damageTarget.system.derived.hp.value}}/{{damageTarget.system.derived.hp.max}}</small>
+      </div>
+    {{/if}}
+  </div>
+</div>
+
+<style>
+.contest-result-card {
+  background: #2a2a2a;
+  border: 3px solid #f39c12;
+  border-radius: 12px;
+  padding: 1.5rem;
+  color: #e0e0e0;
+}
+
+.contest-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.contest-header h3 {
+  margin: 0;
+  color: #f39c12;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.contest-combatants {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+
+.combatant {
+  background: #1e1e1e;
+  border: 2px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.combatant-header {
+  font-size: 0.75rem;
+  color: #95a5a6;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  letter-spacing: 1px;
+}
+
+.combatant.challenger .combatant-header {
+  color: #e74c3c;
+}
+
+.combatant.defender .combatant-header {
+  color: #3498db;
+}
+
+.combatant-name {
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #ecf0f1;
+  margin-bottom: 0.25rem;
+}
+
+.combatant-dice {
+  font-size: 0.875rem;
+  color: #95a5a6;
+  margin-bottom: 0.5rem;
+}
+
+.combatant-total {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #f39c12;
+  text-shadow: 0 0 10px rgba(243, 156, 18, 0.6);
+}
+
+.vs-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vs-divider span {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #95a5a6;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.contest-result {
+  text-align: center;
+  padding: 1.5rem;
+  background: #1e1e1e;
+  border-radius: 8px;
+  border: 2px solid #3a3a3a;
+}
+
+.result-text {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.damage-info {
+  font-size: 1.125rem;
+  color: #ecf0f1;
+  line-height: 1.8;
+}
+
+.damage-target {
+  font-weight: bold;
+  color: #e74c3c;
+}
+
+.damage-amount {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #f39c12;
+  padding: 0 0.5rem;
+}
+
+.damage-info small {
+  font-size: 0.875rem;
+  color: #95a5a6;
+}
+</style>
