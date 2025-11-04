@@ -98,12 +98,64 @@ Hooks.once('init', async function() {
 
 Hooks.once('ready', async function() {
   console.log('书海大陆 | 系统已就绪');
-  
+
   // 等待字体加载
   await waitForFonts();
-  
+
   // 显示欢迎消息
   ui.notifications.info("书海大陆系统已加载！");
+});
+
+/* -------------------------------------------- */
+/*  聊天消息钩子                                  */
+/* -------------------------------------------- */
+
+/**
+ * 为聊天消息添加事件监听器
+ */
+Hooks.on('renderChatMessage', (message, html, data) => {
+  // 战斗骰挑战按钮事件
+  html.find('.challenge-btn').click(async (event) => {
+    event.preventDefault();
+    const button = event.currentTarget;
+    const action = button.dataset.action;
+    const total = parseInt(button.dataset.total);
+    const actorId = button.dataset.actorId;
+
+    if (action === 'counter') {
+      // 对抗：打开自己的战斗区域
+      const actor = game.actors.get(game.user.character?.id);
+      if (!actor) {
+        ui.notifications.warn("请先选择你的角色");
+        return;
+      }
+
+      // 动态导入战斗区域应用
+      const CombatAreaApplication = (await import('./applications/combat-area.mjs')).default;
+      const combatArea = new CombatAreaApplication(actor);
+      combatArea.render(true);
+
+      ui.notifications.info(`对方的骰数是 ${total}，请选择你的战斗骰进行对抗！`);
+
+    } else if (action === 'accept') {
+      // 承受：直接受到伤害
+      const actor = game.actors.get(game.user.character?.id);
+      if (!actor) {
+        ui.notifications.warn("请先选择你的角色");
+        return;
+      }
+
+      const newHp = Math.max(0, actor.system.derived.hp.value - total);
+      await actor.update({ 'system.derived.hp.value': newHp });
+
+      // 发送消息
+      ChatMessage.create({
+        user: game.user.id,
+        speaker: ChatMessage.getSpeaker({ actor: actor }),
+        content: `${actor.name} 选择承受，受到 ${total} 点伤害！当前生命值：${newHp}/${actor.system.derived.hp.max}`
+      });
+    }
+  });
 });
 
 /* -------------------------------------------- */
@@ -341,6 +393,9 @@ async function preloadHandlebarsTemplates() {
     // 物品模板
     "systems/shuhai-dalu/templates/item/item-sheet.hbs",
 
+    // 战斗区域模板
+    "systems/shuhai-dalu/templates/combat/combat-area.hbs",
+
     // 对话框模板
     "systems/shuhai-dalu/templates/dialog/check-dialog.hbs",
     "systems/shuhai-dalu/templates/dialog/create-item.hbs",
@@ -351,7 +406,8 @@ async function preloadHandlebarsTemplates() {
     "systems/shuhai-dalu/templates/chat/dice-use.hbs",
     "systems/shuhai-dalu/templates/chat/trigger-use.hbs",
     "systems/shuhai-dalu/templates/chat/item-use.hbs",
-    "systems/shuhai-dalu/templates/chat/item-card.hbs"
+    "systems/shuhai-dalu/templates/chat/item-card.hbs",
+    "systems/shuhai-dalu/templates/chat/combat-dice-challenge.hbs"
   ]);
 }
 

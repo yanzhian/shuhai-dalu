@@ -1,0 +1,265 @@
+<div class="combat-area-container">
+
+  {{!-- 第一部分：角色基本属性区域 --}}
+  <div class="combat-character-info">
+
+    {{!-- 左侧：头像 --}}
+    <div class="combat-avatar">
+      <img src="{{actor.img}}" alt="{{actor.name}}" />
+    </div>
+
+    {{!-- 右侧：角色信息 --}}
+    <div class="combat-info-right">
+
+      {{!-- 玩家名字 --}}
+      <div class="combat-player-name">{{actor.name}}</div>
+
+      {{!-- 防具属性 --}}
+      <div class="combat-armor-props">
+        {{#if equipment.armor}}
+          <span class="armor-name">{{equipment.armor.name}}</span>
+          {{#if equipment.armor.system.armorProperties}}
+            <div class="armor-properties">
+              {{#if equipment.armor.system.armorProperties.slashUp}}
+                <span class="prop-badge">斩↑</span>
+              {{/if}}
+              {{#if equipment.armor.system.armorProperties.pierceUp}}
+                <span class="prop-badge">刺↑</span>
+              {{/if}}
+              {{#if equipment.armor.system.armorProperties.bluntUp}}
+                <span class="prop-badge">钝↑</span>
+              {{/if}}
+              {{#if equipment.armor.system.armorProperties.slashDown}}
+                <span class="prop-badge slash-down">斩↓</span>
+              {{/if}}
+              {{#if equipment.armor.system.armorProperties.pierceDown}}
+                <span class="prop-badge pierce-down">刺↓</span>
+              {{/if}}
+              {{#if equipment.armor.system.armorProperties.bluntDown}}
+                <span class="prop-badge blunt-down">钝↓</span>
+              {{/if}}
+            </div>
+          {{/if}}
+        {{else}}
+          <span class="no-armor">未装备防具</span>
+        {{/if}}
+      </div>
+
+      {{!-- 行动骰装扮按钮 --}}
+      <button class="action-dice-theme-btn" type="button">
+        <i class="fas fa-dice-d20"></i> {{actionDiceTheme.name}}
+      </button>
+
+      {{!-- 生命值 --}}
+      <div class="combat-status-bar hp-bar">
+        <div class="bar-fill hp" style="width: {{multiply (divide system.derived.hp.value system.derived.hp.max) 100}}%"></div>
+        <span class="bar-text">生命值 {{system.derived.hp.value}}/{{system.derived.hp.max}}</span>
+      </div>
+
+      {{!-- 侵蚀值 --}}
+      <div class="combat-status-bar erosion-bar">
+        <div class="bar-fill erosion" style="width: {{multiply (divide system.derived.corruption.value system.derived.corruption.max) 100}}%"></div>
+        <span class="bar-text">侵蚀值 {{system.derived.corruption.value}}/{{system.derived.corruption.max}}</span>
+      </div>
+
+      {{!-- 混乱值 --}}
+      <div class="combat-status-bar chaos-bar">
+        <div class="bar-fill chaos" style="width: {{multiply (divide system.derived.chaos.value system.derived.chaos.max) 100}}%"></div>
+        <span class="bar-text">混乱值 {{system.derived.chaos.value}}/{{system.derived.chaos.max}}</span>
+      </div>
+
+      {{!-- 三个速度值 --}}
+      <div class="combat-speed-values">
+        <div class="speed-value">速度1: <span>{{combatState.speedValues.[0]}}</span></div>
+        <div class="speed-value">速度2: <span>{{combatState.speedValues.[1]}}</span></div>
+        <div class="speed-value">速度3: <span>{{combatState.speedValues.[2]}}</span></div>
+      </div>
+    </div>
+  </div>
+
+  {{!-- 第二部分：控制按钮区域 --}}
+  <div class="combat-control-buttons">
+    <button class="draw-activate-btn control-btn" type="button">抽取激活</button>
+    <button class="draw-one-btn control-btn" type="button">抽取一个</button>
+    <button class="speed-draw-btn control-btn" type="button">速度抽取</button>
+    <button class="summon-action-dice-btn control-btn" type="button">召唤行动骰</button>
+  </div>
+
+  {{!-- 第三部分：战斗骰和BUFF区域 --}}
+  <div class="combat-main-area">
+
+    {{!-- 左侧：战斗骰、守备骰/触发骰、装备 --}}
+    <div class="combat-left-area">
+
+      {{!-- 战斗骰区域 --}}
+      <div class="combat-dice-section">
+        <div class="section-header">战斗骰</div>
+        <div class="combat-dice-grid">
+          {{#each combatDice as |dice|}}
+            <div class="combat-dice-item {{#if dice.empty}}empty{{/if}}">
+              {{#unless dice.empty}}
+                <div class="dice-buttons">
+                  <button class="combat-dice-initiate-btn" data-index="{{dice.index}}" type="button" title="发起/对抗">
+                    <i class="fas fa-swords"></i>
+                  </button>
+                  <button class="combat-dice-activate-btn {{#if dice.activated}}activated{{/if}}" data-index="{{dice.index}}" type="button" title="激活">
+                    <i class="fas fa-circle"></i>
+                  </button>
+                </div>
+                <div class="dice-content" title="{{dice.effect}}">
+                  <img src="{{dice.img}}" alt="{{dice.name}}" />
+                  <div class="dice-formula">{{dice.dice}}</div>
+                </div>
+              {{else}}
+                <div class="dice-empty-slot">空</div>
+              {{/unless}}
+            </div>
+          {{/each}}
+        </div>
+      </div>
+
+      {{!-- 额外Cost和EX资源 --}}
+      <div class="combat-resources-section">
+        <div class="extra-cost-group">
+          <span class="resource-label">额外Cost</span>
+          <div class="resource-buttons">
+            {{#each combatState.extraCost as |active index|}}
+              <button class="extra-cost-btn resource-btn {{#if active}}active{{/if}}" data-index="{{@index}}" type="button"></button>
+            {{/each}}
+          </div>
+        </div>
+        <div class="ex-resource-group">
+          <span class="resource-label">EX</span>
+          <div class="resource-buttons">
+            {{#each combatState.exResources as |active index|}}
+              <button class="ex-resource-btn resource-btn {{#if active}}active{{/if}}" data-index="{{@index}}" type="button">EX</button>
+            {{/each}}
+          </div>
+        </div>
+      </div>
+
+      {{!-- 守备骰/触发骰 --}}
+      <div class="defense-trigger-section">
+        <div class="section-header">守备骰/触发骰</div>
+        <div class="defense-trigger-grid">
+          {{!-- 守备骰 --}}
+          <div class="defense-dice-item">
+            {{#if equipment.defenseDice}}
+              <div class="dice-buttons">
+                <button class="defense-dice-btn" type="button" title="对抗">
+                  <i class="fas fa-shield-alt"></i>
+                </button>
+              </div>
+              <div class="dice-content" title="{{equipment.defenseDice.system.effect}}">
+                <img src="{{equipment.defenseDice.img}}" alt="{{equipment.defenseDice.name}}" />
+                <div class="dice-formula">{{equipment.defenseDice.system.diceFormula}}</div>
+              </div>
+            {{else}}
+              <div class="dice-empty-slot">守备骰空</div>
+            {{/if}}
+          </div>
+
+          {{!-- 触发骰 --}}
+          <div class="trigger-dice-item">
+            {{#if equipment.triggerDice}}
+              <div class="dice-buttons">
+                <button class="trigger-dice-btn" type="button" title="触发（消耗1EX）">
+                  <i class="fas fa-bolt"></i>
+                </button>
+              </div>
+              <div class="dice-content" title="{{equipment.triggerDice.system.effect}}">
+                <img src="{{equipment.triggerDice.img}}" alt="{{equipment.triggerDice.name}}" />
+                <div class="dice-formula">{{equipment.triggerDice.system.diceFormula}}</div>
+              </div>
+            {{else}}
+              <div class="dice-empty-slot">触发骰空</div>
+            {{/if}}
+          </div>
+        </div>
+      </div>
+
+      {{!-- 装备/武器/防具 --}}
+      <div class="combat-equipment-section">
+        <div class="section-header">装备/武器/防具</div>
+        <div class="combat-equipment-grid">
+          {{!-- 武器 --}}
+          {{#if equipment.weapon}}
+            <div class="equipment-item">
+              <button class="equipment-show-btn" data-item-id="{{equipment.weapon._id}}" type="button" title="{{equipment.weapon.system.effect}}">
+                <img src="{{equipment.weapon.img}}" alt="{{equipment.weapon.name}}" />
+                <div class="equipment-name">{{equipment.weapon.name}}</div>
+              </button>
+            </div>
+          {{/if}}
+
+          {{!-- 防具 --}}
+          {{#if equipment.armor}}
+            <div class="equipment-item">
+              <button class="equipment-show-btn" data-item-id="{{equipment.armor._id}}" type="button" title="{{equipment.armor.system.effect}}">
+                <img src="{{equipment.armor.img}}" alt="{{equipment.armor.name}}" />
+                <div class="equipment-name">{{equipment.armor.name}}</div>
+              </button>
+            </div>
+          {{/if}}
+
+          {{!-- 被动骰 --}}
+          {{#each equipment.passives as |passive|}}
+            <div class="equipment-item">
+              <button class="equipment-show-btn" data-item-id="{{passive._id}}" type="button" title="{{passive.system.effect}}">
+                <img src="{{passive.img}}" alt="{{passive.name}}" />
+                <div class="equipment-name">{{passive.name}}</div>
+              </button>
+            </div>
+          {{/each}}
+        </div>
+      </div>
+
+    </div>
+
+    {{!-- 右侧：BUFF栏 --}}
+    <div class="combat-buff-area">
+      <div class="section-header">BUFF栏</div>
+      <div class="buff-list">
+        <div class="buff-header-row">
+          <span class="buff-col-icon">图标</span>
+          <span class="buff-col-name">名称</span>
+          <span class="buff-col-layers">层数</span>
+          <span class="buff-col-strength">强度</span>
+          <span class="buff-col-actions">操作</span>
+        </div>
+
+        {{#each buffs as |buff index|}}
+          <div class="buff-row">
+            <div class="buff-col-icon">
+              <img src="{{buff.icon}}" alt="{{buff.name}}" />
+            </div>
+            <div class="buff-col-name">{{buff.name}}</div>
+            <div class="buff-col-layers">
+              <button class="buff-layer-decrease" data-index="{{@index}}" type="button">-</button>
+              <span class="buff-value">{{buff.layers}}</span>
+              <button class="buff-layer-increase" data-index="{{@index}}" type="button">+</button>
+            </div>
+            <div class="buff-col-strength">
+              <button class="buff-strength-decrease" data-index="{{@index}}" type="button">-</button>
+              <span class="buff-value">{{buff.strength}}</span>
+              <button class="buff-strength-increase" data-index="{{@index}}" type="button">+</button>
+            </div>
+            <div class="buff-col-actions">
+              <button class="buff-trigger-btn" data-index="{{@index}}" type="button">触发</button>
+              <button class="buff-clear-btn" data-index="{{@index}}" type="button">清除</button>
+            </div>
+          </div>
+        {{/each}}
+
+        {{!-- 示例BUFF（燃烧） --}}
+        {{#unless buffs.length}}
+          <div class="buff-example-note">
+            <p>暂无BUFF</p>
+            <p><small>示例：燃烧BUFF将会在此显示</small></p>
+          </div>
+        {{/unless}}
+      </div>
+    </div>
+
+  </div>
+</div>
