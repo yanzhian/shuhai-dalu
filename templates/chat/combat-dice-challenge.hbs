@@ -1,0 +1,128 @@
+<div class="combat-dice-challenge-card">
+  <div class="challenge-header">
+    <h3>{{actor.name}} 发起挑战！</h3>
+    <div class="dice-info">
+      <img src="{{dice.img}}" alt="{{dice.name}}" />
+      <span class="dice-name">{{dice.name}}</span>
+    </div>
+  </div>
+
+  <div class="challenge-result">
+    <div class="roll-formula">{{dice.dice}}</div>
+    <div class="roll-total">结果: <span class="total-value">{{total}}</span></div>
+  </div>
+
+  <div class="challenge-actions">
+    <button class="challenge-btn counter-btn" data-action="counter" data-total="{{total}}" data-actor-id="{{actor._id}}">
+      <i class="fas fa-swords"></i> 对抗
+    </button>
+    <button class="challenge-btn accept-btn" data-action="accept" data-total="{{total}}" data-actor-id="{{actor._id}}">
+      <i class="fas fa-heart-broken"></i> 承受
+    </button>
+  </div>
+</div>
+
+<style>
+.combat-dice-challenge-card {
+  background: #2a2a2a;
+  border: 2px solid #e74c3c;
+  border-radius: 8px;
+  padding: 1rem;
+  color: #e0e0e0;
+}
+
+.challenge-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.challenge-header h3 {
+  margin: 0;
+  color: #e74c3c;
+  font-size: 1.25rem;
+}
+
+.dice-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dice-info img {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  border: 2px solid #3a3a3a;
+}
+
+.dice-name {
+  font-weight: bold;
+  color: #ecf0f1;
+}
+
+.challenge-result {
+  text-align: center;
+  padding: 1rem;
+  background: #1e1e1e;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.roll-formula {
+  font-size: 0.875rem;
+  color: #95a5a6;
+  margin-bottom: 0.5rem;
+}
+
+.roll-total {
+  font-size: 1.125rem;
+  color: #ecf0f1;
+}
+
+.total-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #f39c12;
+}
+
+.challenge-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.challenge-btn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.875rem;
+  transition: all 0.3s;
+}
+
+.counter-btn {
+  background: #3498db;
+}
+
+.counter-btn:hover {
+  background: #5dade2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.5);
+}
+
+.accept-btn {
+  background: #e74c3c;
+}
+
+.accept-btn:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.5);
+}
+</style>

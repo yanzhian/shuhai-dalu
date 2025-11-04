@@ -458,8 +458,16 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    */
   async _onSwitchCombat(event) {
     event.preventDefault();
-    // TODO: 实现战斗模式切换功能
-    ui.notifications.warn("战斗区域功能开发中...");
+
+    // 动态导入战斗区域应用
+    const CombatAreaApplication = (await import('../applications/combat-area.mjs')).default;
+
+    // 创建或显示战斗区域窗口
+    if (!this.combatAreaApp) {
+      this.combatAreaApp = new CombatAreaApplication(this.actor);
+    }
+
+    this.combatAreaApp.render(true);
   }
 
   /**
