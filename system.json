@@ -19,7 +19,8 @@
   "styles": [
     "styles/shuhai-dalu.css",
     "styles/player-sheet.css",
-    "styles/combat-area.css"
+    "styles/combat-area.css",
+    "styles/counter-area.css"
   ],
   "documentTypes": {
     "Actor": {

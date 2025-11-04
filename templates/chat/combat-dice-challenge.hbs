@@ -13,10 +13,19 @@
   </div>
 
   <div class="challenge-actions">
-    <button class="challenge-btn counter-btn" data-action="counter" data-total="{{total}}" data-actor-id="{{actor._id}}">
+    <button class="challenge-btn counter-btn"
+            data-action="counter"
+            data-challenger-id="{{challengeData.challengerId}}"
+            data-challenger-name="{{challengeData.challengerName}}"
+            data-dice-id="{{challengeData.diceId}}"
+            data-dice-name="{{challengeData.diceName}}"
+            data-total="{{challengeData.total}}">
       <i class="fas fa-swords"></i> 对抗
     </button>
-    <button class="challenge-btn accept-btn" data-action="accept" data-total="{{total}}" data-actor-id="{{actor._id}}">
+    <button class="challenge-btn accept-btn"
+            data-action="accept"
+            data-total="{{challengeData.total}}"
+            data-actor-id="{{actor._id}}">
       <i class="fas fa-heart-broken"></i> 承受
     </button>
   </div>

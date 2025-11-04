@@ -7,8 +7,8 @@ export default class CombatAreaApplication extends Application {
     super(options);
     this.actor = actor;
 
-    // 初始化战斗状态
-    this.combatState = {
+    // 从角色Flag加载战斗状态，如果没有则初始化
+    this.combatState = this.actor.getFlag('shuhai-dalu', 'combatState') || {
       // 激活的战斗骰（0-5索引对应6个战斗骰）
       activatedDice: [false, false, false, false, false, false],
       // 额外Cost（最多6个）
@@ -20,6 +20,13 @@ export default class CombatAreaApplication extends Application {
       // BUFF列表
       buffs: []
     };
+  }
+
+  /**
+   * 保存战斗状态到角色Flag
+   */
+  async _saveCombatState() {
+    await this.actor.setFlag('shuhai-dalu', 'combatState', this.combatState);
   }
 
   /** @override */
@@ -250,6 +257,8 @@ export default class CombatAreaApplication extends Application {
     // 发送聊天消息
     await this._sendChatMessage(`抽取激活了 ${drawCount} 个战斗骰${extraCount > 0 ? `，重复激活 ${extraCount} 次，获得 ${costCount} 个额外Cost` : ''}`);
 
+    // 保存状态并刷新
+    await this._saveCombatState();
     this.render();
   }
 
@@ -292,6 +301,9 @@ export default class CombatAreaApplication extends Application {
     }
 
     await this._sendChatMessage(message);
+
+    // 保存状态并刷新
+    await this._saveCombatState();
     this.render();
   }
 
@@ -309,6 +321,9 @@ export default class CombatAreaApplication extends Application {
     ];
 
     await this._sendChatMessage(`速度抽取：${this.combatState.speedValues.join(', ')}`);
+
+    // 保存状态并刷新
+    await this._saveCombatState();
     this.render();
   }
 
@@ -444,7 +459,15 @@ export default class CombatAreaApplication extends Application {
         actor: this.actor,
         dice: diceData,
         roll: roll,
-        total: roll.total
+        total: roll.total,
+        // 传递挑战信息用于对抗
+        challengeData: {
+          challengerId: this.actor.id,
+          challengerName: this.actor.name,
+          diceId: diceData.item.id,
+          diceName: diceData.name,
+          total: roll.total
+        }
       }),
       sound: CONFIG.sounds.dice,
       type: CONST.CHAT_MESSAGE_TYPES.ROLL,
@@ -462,6 +485,9 @@ export default class CombatAreaApplication extends Application {
     const index = parseInt(event.currentTarget.dataset.index);
 
     this.combatState.activatedDice[index] = !this.combatState.activatedDice[index];
+
+    // 保存状态并刷新
+    await this._saveCombatState();
     this.render();
   }
 
@@ -512,26 +538,35 @@ export default class CombatAreaApplication extends Application {
     }
 
     await this._sendChatMessage(`消耗1个EX资源，触发：${triggerDice.name}\n效果：${triggerDice.system.effect}`);
+
+    // 保存状态并刷新
+    await this._saveCombatState();
     this.render();
   }
 
   /**
    * 切换额外Cost
    */
-  _onToggleExtraCost(event) {
+  async _onToggleExtraCost(event) {
     event.preventDefault();
     const index = parseInt(event.currentTarget.dataset.index);
     this.combatState.extraCost[index] = !this.combatState.extraCost[index];
+
+    // 保存状态并刷新
+    await this._saveCombatState();
     this.render();
   }
 
   /**
    * 切换EX资源
    */
-  _onToggleExResource(event) {
+  async _onToggleExResource(event) {
     event.preventDefault();
     const index = parseInt(event.currentTarget.dataset.index);
     this.combatState.exResources[index] = !this.combatState.exResources[index];
+
+    // 保存状态并刷新
+    await this._saveCombatState();
     this.render();
   }
 
@@ -568,24 +603,30 @@ export default class CombatAreaApplication extends Application {
   /**
    * 清除BUFF
    */
-  _onBuffClear(event) {
+  async _onBuffClear(event) {
     event.preventDefault();
     const index = parseInt(event.currentTarget.dataset.index);
 
     this.combatState.buffs.splice(index, 1);
+
+    // 保存状态并刷新
+    await this._saveCombatState();
     this.render();
   }
 
   /**
    * 增加BUFF层数
    */
-  _onBuffLayerIncrease(event) {
+  async _onBuffLayerIncrease(event) {
     event.preventDefault();
     const index = parseInt(event.currentTarget.dataset.index);
     const buff = this.combatState.buffs[index];
 
     if (buff) {
       buff.layers++;
+
+      // 保存状态并刷新
+      await this._saveCombatState();
       this.render();
     }
   }
@@ -593,13 +634,16 @@ export default class CombatAreaApplication extends Application {
   /**
    * 减少BUFF层数
    */
-  _onBuffLayerDecrease(event) {
+  async _onBuffLayerDecrease(event) {
     event.preventDefault();
     const index = parseInt(event.currentTarget.dataset.index);
     const buff = this.combatState.buffs[index];
 
     if (buff && buff.layers > 0) {
       buff.layers--;
+
+      // 保存状态并刷新
+      await this._saveCombatState();
       this.render();
     }
   }
@@ -607,13 +651,16 @@ export default class CombatAreaApplication extends Application {
   /**
    * 增加BUFF强度
    */
-  _onBuffStrengthIncrease(event) {
+  async _onBuffStrengthIncrease(event) {
     event.preventDefault();
     const index = parseInt(event.currentTarget.dataset.index);
     const buff = this.combatState.buffs[index];
 
     if (buff) {
       buff.strength++;
+
+      // 保存状态并刷新
+      await this._saveCombatState();
       this.render();
     }
   }
@@ -621,13 +668,16 @@ export default class CombatAreaApplication extends Application {
   /**
    * 减少BUFF强度
    */
-  _onBuffStrengthDecrease(event) {
+  async _onBuffStrengthDecrease(event) {
     event.preventDefault();
     const index = parseInt(event.currentTarget.dataset.index);
     const buff = this.combatState.buffs[index];
 
     if (buff && buff.strength > 0) {
       buff.strength--;
+
+      // 保存状态并刷新
+      await this._saveCombatState();
       this.render();
     }
   }
