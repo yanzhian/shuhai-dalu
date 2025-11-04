@@ -111,6 +111,74 @@ Hooks.once('ready', async function() {
 /* -------------------------------------------- */
 
 /**
+ * 获取当前玩家的角色
+ * 优先级：配置的角色 > 选中的Token > 让用户选择
+ */
+async function getCurrentActor() {
+  // 1. 尝试获取配置的角色
+  if (game.user.character) {
+    return game.user.character;
+  }
+
+  // 2. 尝试获取当前选中的Token对应的角色
+  const controlled = canvas.tokens?.controlled;
+  if (controlled && controlled.length > 0) {
+    return controlled[0].actor;
+  }
+
+  // 3. 获取用户拥有的所有角色
+  const ownedActors = game.actors.filter(a => a.testUserPermission(game.user, "OWNER"));
+
+  if (ownedActors.length === 0) {
+    ui.notifications.error("你没有可用的角色！");
+    return null;
+  }
+
+  // 如果只有一个角色，直接使用
+  if (ownedActors.length === 1) {
+    return ownedActors[0];
+  }
+
+  // 4. 让用户选择角色
+  return new Promise((resolve) => {
+    const options = ownedActors.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+
+    new Dialog({
+      title: "选择角色",
+      content: `
+        <form>
+          <div class="form-group">
+            <label>选择你的角色:</label>
+            <select id="actor-select" style="width: 100%; padding: 0.5rem; background: #2a2a2a; border: 1px solid #3a3a3a; color: #e0e0e0; border-radius: 3px;">
+              ${options}
+            </select>
+          </div>
+          <p style="margin-top: 1rem; font-size: 0.875rem; color: #95a5a6;">
+            <strong>提示：</strong>你可以在用户配置中设置默认角色，避免每次选择。
+          </p>
+        </form>
+      `,
+      buttons: {
+        select: {
+          icon: '<i class="fas fa-check"></i>',
+          label: "确定",
+          callback: (html) => {
+            const actorId = html.find('#actor-select').val();
+            resolve(game.actors.get(actorId));
+          }
+        },
+        cancel: {
+          icon: '<i class="fas fa-times"></i>',
+          label: "取消",
+          callback: () => resolve(null)
+        }
+      },
+      default: "select"
+    }).render(true);
+  });
+}
+
+/**
  * 为聊天消息添加事件监听器
  */
 Hooks.on('renderChatMessage', (message, html, data) => {
@@ -122,14 +190,14 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     const total = parseInt(button.dataset.total);
     const actorId = button.dataset.actorId;
 
+    // 获取当前玩家的角色
+    const actor = await getCurrentActor();
+    if (!actor) {
+      return;
+    }
+
     if (action === 'counter') {
       // 对抗：打开自己的战斗区域
-      const actor = game.actors.get(game.user.character?.id);
-      if (!actor) {
-        ui.notifications.warn("请先选择你的角色");
-        return;
-      }
-
       // 动态导入战斗区域应用
       const CombatAreaApplication = (await import('./applications/combat-area.mjs')).default;
       const combatArea = new CombatAreaApplication(actor);
@@ -139,12 +207,6 @@ Hooks.on('renderChatMessage', (message, html, data) => {
 
     } else if (action === 'accept') {
       // 承受：直接受到伤害
-      const actor = game.actors.get(game.user.character?.id);
-      if (!actor) {
-        ui.notifications.warn("请先选择你的角色");
-        return;
-      }
-
       const newHp = Math.max(0, actor.system.derived.hp.value - total);
       await actor.update({ 'system.derived.hp.value': newHp });
 
