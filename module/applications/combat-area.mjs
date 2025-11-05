@@ -445,6 +445,9 @@ export default class CombatAreaApplication extends Application {
     html.find('.dice-activate-toggle').click(this._onToggleDiceActivation.bind(this));
     html.find('.combat-dice-initiate-btn').click(this._onInitiateCombatDice.bind(this));
 
+    // 装备使用按钮
+    html.find('.equipment-use-btn').click(this._onEquipmentUse.bind(this));
+
     // 先攻按钮
     html.find('.initiative-btn').click(this._onInitiative.bind(this));
 
@@ -767,6 +770,32 @@ export default class CombatAreaApplication extends Application {
     };
 
     await ChatMessage.create(chatData);
+  }
+
+  /**
+   * 使用装备
+   */
+  async _onEquipmentUse(event) {
+    event.preventDefault();
+    const button = $(event.currentTarget);
+    const slotIndex = parseInt(button.data('slot-index'));
+
+    // 从gear数组获取装备
+    const gearArray = this.actor.system.equipment.gear || ["", "", "", ""];
+    if (slotIndex >= 0 && slotIndex < 4 && gearArray[slotIndex]) {
+      const item = this.actor.items.get(gearArray[slotIndex]);
+
+      if (!item) return;
+
+      // 发送使用消息到聊天框
+      await this._sendChatMessage(`
+        <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
+          <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用装备: ${item.name}</h3>
+          <div style="color: #888; margin-bottom: 8px;">费用: ${item.system.cost || 0}</div>
+          <div style="color: #EBBD68;">${item.system.effect || '无特殊效果'}</div>
+        </div>
+      `);
+    }
   }
 
   /**
