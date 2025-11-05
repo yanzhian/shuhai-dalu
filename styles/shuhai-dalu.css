@@ -587,9 +587,9 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem;
-  border: 1px solid #ddd;
+  border: 1px solid #121214;
   border-radius: 4px;
-  background: white;
+  background: #121214;
 }
 
 .shuhai-dalu .skill-item label {
@@ -637,7 +637,7 @@
 .shuhai-dalu .combat-dice-section,
 .shuhai-dalu .special-dice-section,
 .shuhai-dalu .passive-section {
-  background: rgba(19, 19, 19, 0.9);
+  background: rgba(15, 13, 27, 0.9);
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
