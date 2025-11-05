@@ -47,12 +47,13 @@
       </div>
 
       {{!-- 3. 技能鉴定区域 --}}
-      <div class="skills-section scrollable">
+      <div class="skills-section">
         <div class="section-header">
           <span class="line"></span>
           <span class="title">技能鉴定</span>
           <span class="line"></span>
         </div>
+        <div class="skills-content scrollable">
 
         {{!-- 力敏系 --}}
         <div class="skill-category">
@@ -121,20 +122,22 @@
           </div>
           {{/each}}
         </div>
+        </div>
       </div>
 
       {{!-- 4. 装备栏 --}}
-      <div class="equipment-section scrollable">
+      <div class="equipment-section">
         <div class="section-header">
           <span class="line"></span>
           <span class="title">装备栏</span>
           <span class="line"></span>
         </div>
+        <div class="equipment-content scrollable">
 
         {{!-- 武器和防具 --}}
         <div class="equipment-row-2">
           <div class="equipment-slot" data-slot-type="weapon">
-            <div class="slot-content" data-slot="weapon" data-item-id="{{system.equipment.weapon}}">
+            <div class="slot-content" data-slot="weapon" data-item-id="{{system.equipment.weapon}}" title="{{getItemTooltip system.equipment.weapon}}">
               {{#if (hasItem system.equipment.weapon)}}
                 <img src="{{getItemImg system.equipment.weapon}}" class="item-icon" data-item-id="{{system.equipment.weapon}}"/>
                 <div class="slot-cost">{{getItemCost system.equipment.weapon}}</div>
@@ -149,7 +152,7 @@
           </div>
 
           <div class="equipment-slot" data-slot-type="armor">
-            <div class="slot-content" data-slot="armor" data-item-id="{{system.equipment.armor}}">
+            <div class="slot-content" data-slot="armor" data-item-id="{{system.equipment.armor}}" title="{{getItemTooltip system.equipment.armor}}">
               {{#if (hasItem system.equipment.armor)}}
                 <img src="{{getItemImg system.equipment.armor}}" class="item-icon" data-item-id="{{system.equipment.armor}}"/>
                 <div class="slot-cost">{{getItemCost system.equipment.armor}}</div>
@@ -169,7 +172,7 @@
           {{#each system.equipment.combatDice as |diceId index|}}
           {{#if (lt index 3)}}
           <div class="equipment-slot" data-slot-type="combatDice" data-slot-index="{{index}}">
-            <div class="slot-content" data-slot="combatDice" data-slot-index="{{index}}" data-item-id="{{diceId}}">
+            <div class="slot-content" data-slot="combatDice" data-slot-index="{{index}}" data-item-id="{{diceId}}" title="{{getItemTooltip diceId}}">
               {{#if (hasItem diceId)}}
                 <img src="{{getItemImg diceId}}" class="item-icon" data-item-id="{{diceId}}"/>
                 <div class="slot-cost">{{getItemCost diceId}}</div>
@@ -191,7 +194,7 @@
           {{#each system.equipment.combatDice as |diceId index|}}
           {{#if (gte index 3)}}
           <div class="equipment-slot" data-slot-type="combatDice" data-slot-index="{{index}}">
-            <div class="slot-content" data-slot="combatDice" data-slot-index="{{index}}" data-item-id="{{diceId}}">
+            <div class="slot-content" data-slot="combatDice" data-slot-index="{{index}}" data-item-id="{{diceId}}" title="{{getItemTooltip diceId}}">
               {{#if (hasItem diceId)}}
                 <img src="{{getItemImg diceId}}" class="item-icon" data-item-id="{{diceId}}"/>
                 <div class="slot-cost">{{getItemCost diceId}}</div>
@@ -211,7 +214,7 @@
         {{!-- 守备骰和触发骰 --}}
         <div class="equipment-row-2">
           <div class="equipment-slot" data-slot-type="defenseDice">
-            <div class="slot-content" data-slot="defenseDice" data-item-id="{{system.equipment.defenseDice}}">
+            <div class="slot-content" data-slot="defenseDice" data-item-id="{{system.equipment.defenseDice}}" title="{{getItemTooltip system.equipment.defenseDice}}">
               {{#if (hasItem system.equipment.defenseDice)}}
                 <img src="{{getItemImg system.equipment.defenseDice}}" class="item-icon" data-item-id="{{system.equipment.defenseDice}}"/>
                 <div class="slot-cost">{{getItemCost system.equipment.defenseDice}}</div>
@@ -226,7 +229,7 @@
           </div>
 
           <div class="equipment-slot" data-slot-type="triggerDice">
-            <div class="slot-content" data-slot="triggerDice" data-item-id="{{system.equipment.triggerDice}}">
+            <div class="slot-content" data-slot="triggerDice" data-item-id="{{system.equipment.triggerDice}}" title="{{getItemTooltip system.equipment.triggerDice}}">
               {{#if (hasItem system.equipment.triggerDice)}}
                 <img src="{{getItemImg system.equipment.triggerDice}}" class="item-icon" data-item-id="{{system.equipment.triggerDice}}"/>
                 <div class="slot-cost">{{getItemCost system.equipment.triggerDice}}</div>
@@ -246,7 +249,7 @@
           {{#each system.equipment.passives as |passiveId index|}}
           {{#if (lt index 3)}}
           <div class="equipment-slot" data-slot-type="passiveDice" data-slot-index="{{index}}">
-            <div class="slot-content" data-slot="passiveDice" data-slot-index="{{index}}" data-item-id="{{passiveId}}">
+            <div class="slot-content" data-slot="passiveDice" data-slot-index="{{index}}" data-item-id="{{passiveId}}" title="{{getItemTooltip passiveId}}">
               {{#if (hasItem passiveId)}}
                 <img src="{{getItemImg passiveId}}" class="item-icon" data-item-id="{{passiveId}}"/>
                 <div class="slot-cost">{{getItemCost passiveId}}</div>
@@ -268,7 +271,7 @@
           {{#each system.equipment.passives as |passiveId index|}}
           {{#if (gte index 3)}}
           <div class="equipment-slot" data-slot-type="passiveDice" data-slot-index="{{index}}">
-            <div class="slot-content" data-slot="passiveDice" data-slot-index="{{index}}" data-item-id="{{passiveId}}">
+            <div class="slot-content" data-slot="passiveDice" data-slot-index="{{index}}" data-item-id="{{passiveId}}" title="{{getItemTooltip passiveId}}">
               {{#if (hasItem passiveId)}}
                 <img src="{{getItemImg passiveId}}" class="item-icon" data-item-id="{{passiveId}}"/>
                 <div class="slot-cost">{{getItemCost passiveId}}</div>
@@ -290,7 +293,7 @@
           {{#each system.equipment.gear as |gearId index|}}
           {{#if (lt index 2)}}
           <div class="equipment-slot" data-slot-type="gear" data-slot-index="{{index}}">
-            <div class="slot-content" data-slot="gear" data-slot-index="{{index}}" data-item-id="{{gearId}}">
+            <div class="slot-content" data-slot="gear" data-slot-index="{{index}}" data-item-id="{{gearId}}" title="{{getItemTooltip gearId}}">
               {{#if (hasItem gearId)}}
                 <img src="{{getItemImg gearId}}" class="item-icon" data-item-id="{{gearId}}"/>
                 <div class="slot-cost">{{getItemCost gearId}}</div>
@@ -312,7 +315,7 @@
           {{#each system.equipment.gear as |gearId index|}}
           {{#if (gte index 2)}}
           <div class="equipment-slot" data-slot-type="gear" data-slot-index="{{index}}">
-            <div class="slot-content" data-slot="gear" data-slot-index="{{index}}" data-item-id="{{gearId}}">
+            <div class="slot-content" data-slot="gear" data-slot-index="{{index}}" data-item-id="{{gearId}}" title="{{getItemTooltip gearId}}">
               {{#if (hasItem gearId)}}
                 <img src="{{getItemImg gearId}}" class="item-icon" data-item-id="{{gearId}}"/>
                 <div class="slot-cost">{{getItemCost gearId}}</div>
@@ -327,6 +330,7 @@
           </div>
           {{/if}}
           {{/each}}
+        </div>
         </div>
       </div>
 
@@ -405,11 +409,11 @@
           </div>
           <div class="exp-bar-container">
             <div class="exp-bar">
-              <div class="exp-fill" style="width: {{multiply (divide system.info.experience 2700) 100}}%"></div>
+              <div class="exp-fill" style="width: {{multiply (divide system.info.experience maxExp) 100}}%"></div>
             </div>
-            <span class="exp-text">{{system.info.experience}}/2700</span>
+            <span class="exp-text">{{system.info.experience}}/{{maxExp}}</span>
             {{#unless isLocked}}
-            <input type="number" name="system.info.experience" value="{{system.info.experience}}" data-dtype="Number" min="0" max="2700" style="width: 80px; text-align: center; margin-top: 4px;"/>
+            <input type="number" name="system.info.experience" value="{{system.info.experience}}" data-dtype="Number" min="0" max="{{maxExp}}" style="width: 80px; text-align: center; margin-top: 4px;"/>
             {{/unless}}
           </div>
           <div class="action-buttons">

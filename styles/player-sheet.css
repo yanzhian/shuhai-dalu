@@ -182,6 +182,13 @@
 /* 3. 技能鉴定区域 */
 .skills-section {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.skills-content {
+  flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
@@ -291,6 +298,13 @@
 
 /* 4. 装备栏 */
 .equipment-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.equipment-content {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
