@@ -70,6 +70,7 @@
   "gridUnits": "m",
   "primaryTokenAttribute": "derived.hp",
   "secondaryTokenAttribute": "derived.corruption",
+  "initiative": "derived.totalSpeed",
   "url": "https://github.com/yourusername/shuhai-dalu",
   "manifest": "https://github.com/yourusername/shuhai-dalu/releases/latest/download/system.json",
   "download": "https://github.com/yourusername/shuhai-dalu/archive/refs/heads/main.zip",
