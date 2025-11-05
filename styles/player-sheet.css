@@ -878,7 +878,7 @@ input.attr-value {
   grid-template-columns: 48px 1fr 80px 80px 80px 60px 60px 60px 120px;
   gap: 4px;
   align-items: center;
-  height: 32px;
+  height: 36px;
   background: transparent;
   border: 1px solid #EBBD68;
   border-radius: 6px;
