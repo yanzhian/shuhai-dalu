@@ -192,25 +192,7 @@
   padding-right: 4px;
 }
 
-/* 3. 技能鉴定区域 */
-.skills-section {
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-  transition: flex 0.3s ease;
-}
-
-.skills-section.collapsed {
-  flex: 0;
-}
-
-.skills-content {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  overflow: visible;
-}
-
+/* 通用区域标题样式 */
 .section-header {
   display: flex;
   align-items: center;
@@ -264,6 +246,25 @@
 .collapsible-content.collapsed {
   display: none;
   opacity: 0;
+}
+
+/* 3. 技能鉴定区域 */
+.skills-section {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: flex 0.3s ease;
+}
+
+.skills-section.collapsed {
+  flex: 0;
+}
+
+.skills-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: visible;
 }
 
 .skill-category {

@@ -488,15 +488,15 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       return;
     }
 
-    // 保存滚动位置
-    const scrollElement = this.element.find('.skills-content')[0];
+    // 保存滚动位置（现在滚动条在父容器上）
+    const scrollElement = this.element.find('.collapsible-sections-container')[0];
     const scrollPos = scrollElement?.scrollTop || 0;
 
     await this.actor.update({ [`system.skills.${skillKey}`]: currentValue + 1 });
 
     // 恢复滚动位置
     setTimeout(() => {
-      const newScrollElement = this.element.find('.skills-content')[0];
+      const newScrollElement = this.element.find('.collapsible-sections-container')[0];
       if (newScrollElement) newScrollElement.scrollTop = scrollPos;
     }, 100);
   }
@@ -512,15 +512,15 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     const currentValue = this.actor.system.skills[skillKey];
     if (currentValue <= 0) return;
 
-    // 保存滚动位置
-    const scrollElement = this.element.find('.skills-content')[0];
+    // 保存滚动位置（现在滚动条在父容器上）
+    const scrollElement = this.element.find('.collapsible-sections-container')[0];
     const scrollPos = scrollElement?.scrollTop || 0;
 
     await this.actor.update({ [`system.skills.${skillKey}`]: currentValue - 1 });
 
     // 恢复滚动位置
     setTimeout(() => {
-      const newScrollElement = this.element.find('.skills-content')[0];
+      const newScrollElement = this.element.find('.collapsible-sections-container')[0];
       if (newScrollElement) newScrollElement.scrollTop = scrollPos;
     }, 100);
   }
@@ -568,15 +568,15 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     const slotIndex = event.currentTarget.dataset.slotIndex !== undefined ?
       parseInt(event.currentTarget.dataset.slotIndex) : null;
 
-    // 保存滚动位置
-    const scrollElement = this.element.find('.equipment-content')[0];
+    // 保存滚动位置（现在滚动条在父容器上）
+    const scrollElement = this.element.find('.collapsible-sections-container')[0];
     const scrollPos = scrollElement?.scrollTop || 0;
 
     await game.shuhai.unequipItem(this.actor, slotType, slotIndex);
 
     // 恢复滚动位置
     setTimeout(() => {
-      const newScrollElement = this.element.find('.equipment-content')[0];
+      const newScrollElement = this.element.find('.collapsible-sections-container')[0];
       if (newScrollElement) newScrollElement.scrollTop = scrollPos;
     }, 100);
   }
