@@ -15,8 +15,7 @@
     <div class="status-bars-container">
       {{!-- 生命值 --}}
       <div class="status-bar hp-bar">
-        <div class="bar-label">生命值</div>
-        <div class="bar-progress">
+        <div class="bar-progress {{#unless isLocked}}editable{{/unless}}">
           <div class="bar-fill" style="width: {{multiply (divide system.derived.hp.value system.derived.hp.max) 100}}%"></div>
           <span class="bar-text">{{system.derived.hp.value}}/{{system.derived.hp.max}}</span>
         </div>
@@ -26,8 +25,7 @@
       <div class="status-bars-row">
         {{!-- 侵蚀度 --}}
         <div class="status-bar erosion-bar">
-          <div class="bar-label">侵蚀度</div>
-          <div class="bar-progress">
+          <div class="bar-progress {{#unless isLocked}}editable{{/unless}}">
             <div class="bar-fill" style="width: {{multiply (divide system.derived.corruption.value system.derived.corruption.max) 100}}%"></div>
             <span class="bar-text">{{system.derived.corruption.value}}/{{system.derived.corruption.max}}</span>
           </div>
@@ -35,8 +33,7 @@
 
         {{!-- 混乱值 --}}
         <div class="status-bar chaos-bar">
-          <div class="bar-label">混乱值</div>
-          <div class="bar-progress">
+          <div class="bar-progress {{#unless isLocked}}editable{{/unless}}">
             <div class="bar-fill" style="width: {{multiply (divide system.derived.chaos.value system.derived.chaos.max) 100}}%"></div>
             <span class="bar-text">{{system.derived.chaos.value}}/{{system.derived.chaos.max}}</span>
           </div>
@@ -79,10 +76,11 @@
     {{!-- 4. 分割线 --}}
     <div class="divider"></div>
 
-    {{!-- 5. 战斗骰区域 --}}
+    {{!-- 5. 战斗骰/守备/触发/装备区域（统一） --}}
     <div class="combat-dice-section">
       <div class="combat-section-title">战斗骰</div>
       <div class="combat-dice-grid">
+        {{!-- 战斗骰 1-6 --}}
         {{#each combatDiceSlots as |slot index|}}
           <div class="combat-dice-slot {{#unless slot.item}}empty{{/unless}}" data-index="{{@index}}">
             {{#if slot.item}}
@@ -91,8 +89,8 @@
               <button class="dice-activate-toggle {{#if slot.activated}}active{{/if}}" data-index="{{@index}}" type="button">
                 <i class="fas fa-circle"></i>
               </button>
-              <div class="dice-count-badge">{{slot.item.system.diceCount}}</div>
-              <button class="combat-dice-initiate-btn" data-index="{{@index}}" type="button" title="{{slot.item.name}}\n{{slot.item.type}} {{slot.item.system.category}}\n{{slot.item.system.effect}}">
+              <div class="dice-count-badge">{{slot.item.system.diceFormula}}</div>
+              <button class="combat-dice-initiate-btn" data-index="{{@index}}" type="button" title="{{slot.item.name}}&#10;{{slot.item.type}} {{slot.item.system.category}}&#10;{{slot.item.system.effect}}">
                 <img src="{{slot.item.img}}" alt="{{slot.item.name}}" />
               </button>
             {{else}}
@@ -101,19 +99,13 @@
             {{/if}}
           </div>
         {{/each}}
-      </div>
-    </div>
 
-    {{!-- 6. 守备/触发骰 --}}
-    <div class="defense-trigger-section">
-      <div class="defense-trigger-grid">
         {{!-- 守备骰 --}}
-        <div class="dice-slot {{#unless equipment.defenseDice}}empty{{/unless}}">
+        <div class="combat-dice-slot {{#unless equipment.defenseDice}}empty{{/unless}}">
           {{#if equipment.defenseDice}}
-            <button class="dice-activate-toggle active" type="button">
-              <i class="fas fa-circle"></i>
-            </button>
-            <button class="combat-dice-initiate-btn" type="button" title="{{equipment.defenseDice.name}}\n{{equipment.defenseDice.type}} {{equipment.defenseDice.system.category}}\n{{equipment.defenseDice.system.effect}}">
+            <div class="dice-cost-badge">{{equipment.defenseDice.system.cost}}</div>
+            <div class="dice-count-badge">{{equipment.defenseDice.system.diceFormula}}</div>
+            <button class="combat-dice-initiate-btn" type="button" title="{{equipment.defenseDice.name}}&#10;{{equipment.defenseDice.type}} {{equipment.defenseDice.system.category}}&#10;{{equipment.defenseDice.system.effect}}">
               <img src="{{equipment.defenseDice.img}}" alt="{{equipment.defenseDice.name}}" />
             </button>
           {{else}}
@@ -122,49 +114,27 @@
         </div>
 
         {{!-- 触发骰 --}}
-        <div class="dice-slot {{#unless equipment.triggerDice}}empty{{/unless}}">
+        <div class="combat-dice-slot {{#unless equipment.triggerDice}}empty{{/unless}}">
           {{#if equipment.triggerDice}}
-            <button class="dice-activate-toggle active" type="button">
-              <i class="fas fa-circle"></i>
-            </button>
-            <button class="combat-dice-initiate-btn" type="button" title="{{equipment.triggerDice.name}}\n{{equipment.triggerDice.type}} {{equipment.triggerDice.system.category}}\n{{equipment.triggerDice.system.effect}}">
+            <div class="dice-cost-badge">{{equipment.triggerDice.system.cost}}</div>
+            <div class="dice-count-badge">{{equipment.triggerDice.system.diceFormula}}</div>
+            <button class="combat-dice-initiate-btn" type="button" title="{{equipment.triggerDice.name}}&#10;{{equipment.triggerDice.type}} {{equipment.triggerDice.system.category}}&#10;{{equipment.triggerDice.system.effect}}">
               <img src="{{equipment.triggerDice.img}}" alt="{{equipment.triggerDice.name}}" />
             </button>
           {{else}}
             <div class="dice-slot-label">触发骰</div>
           {{/if}}
         </div>
-      </div>
-    </div>
 
-    {{!-- 7. 装备1-4 --}}
-    <div class="equipment-section">
-      <div class="equipment-grid">
+        {{!-- 装备 1-4 --}}
         {{#each equipment.slots as |slot index|}}
-          <div class="equipment-slot {{#unless slot}}empty{{/unless}}">
+          <div class="combat-dice-slot {{#unless slot}}empty{{/unless}}">
             {{#if slot}}
-              <button class="equipment-btn" type="button" title="{{slot.name}}\n{{slot.type}} {{slot.system.category}}\n{{slot.system.effect}}">
+              <button class="combat-dice-initiate-btn" type="button" title="{{slot.name}}&#10;{{slot.type}} {{slot.system.category}}&#10;{{slot.system.effect}}">
                 <img src="{{slot.img}}" alt="{{slot.name}}" />
               </button>
             {{else}}
-              <div class="equipment-slot-label">装备{{add @index 1}}</div>
-            {{/if}}
-          </div>
-        {{/each}}
-      </div>
-    </div>
-
-    {{!-- 被动骰1-3 --}}
-    <div class="passive-dice-section">
-      <div class="passive-dice-grid">
-        {{#each passiveDiceSlots as |slot index|}}
-          <div class="passive-dice-slot {{#unless slot}}empty{{/unless}}">
-            {{#if slot}}
-              <button class="combat-dice-initiate-btn" type="button" title="{{slot.name}}\n{{slot.type}} {{slot.system.category}}\n{{slot.system.effect}}">
-                <img src="{{slot.img}}" alt="{{slot.name}}" />
-              </button>
-            {{else}}
-              <div class="dice-slot-label">被动骰{{add @index 1}}</div>
+              <div class="dice-slot-label">装备{{add @index 1}}</div>
             {{/if}}
           </div>
         {{/each}}
@@ -228,7 +198,7 @@
       <div class="passive-dice-display">
         {{#each passiveDiceSlots as |slot index|}}
           {{#if slot}}
-            <button class="passive-dice-icon" type="button" title="{{slot.name}}\n{{slot.type}} {{slot.system.category}}\n{{slot.system.effect}}">
+            <button class="passive-dice-icon" type="button" title="{{slot.name}}&#10;{{slot.type}} {{slot.system.category}}&#10;{{slot.system.effect}}">
               <img src="{{slot.img}}" alt="{{slot.name}}" />
             </button>
           {{/if}}
@@ -250,7 +220,7 @@
     <div class="buff-display-area">
       <div class="buff-icons-grid">
         {{#each combatState.buffs as |buff index|}}
-          <button class="buff-icon" type="button" title="{{buff.name}}\n{{buff.layers}}/{{buff.strength}}\n{{buff.description}}" data-buff-index="{{@index}}">
+          <button class="buff-icon" type="button" title="{{buff.name}}&#10;{{buff.layers}}/{{buff.strength}}&#10;{{buff.description}}" data-buff-index="{{@index}}">
             <img src="{{buff.icon}}" alt="{{buff.name}}" />
           </button>
         {{/each}}

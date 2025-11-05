@@ -234,6 +234,31 @@ export default class CombatAreaApplication extends Application {
       // 锁定状态
       isLocked: false
     };
+
+    // 迁移/修复：确保costResources有6个元素
+    if (!this.combatState.costResources || this.combatState.costResources.length !== 6) {
+      this.combatState.costResources = [false, false, false, false, false, false];
+    }
+
+    // 迁移/修复：确保exResources有3个元素
+    if (!this.combatState.exResources || this.combatState.exResources.length !== 3) {
+      this.combatState.exResources = [false, false, false];
+    }
+
+    // 迁移/修复：确保activatedDice有6个元素
+    if (!this.combatState.activatedDice || this.combatState.activatedDice.length !== 6) {
+      this.combatState.activatedDice = [false, false, false, false, false, false];
+    }
+
+    // 迁移/修复：确保buffs数组存在
+    if (!this.combatState.buffs) {
+      this.combatState.buffs = [];
+    }
+
+    // 迁移/修复：确保isLocked属性存在
+    if (this.combatState.isLocked === undefined) {
+      this.combatState.isLocked = false;
+    }
   }
 
   /**
@@ -248,8 +273,8 @@ export default class CombatAreaApplication extends Application {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ["shuhai-dalu", "combat-area"],
       template: "systems/shuhai-dalu/templates/combat/combat-area.hbs",
-      width: 1200,
-      height: 800,
+      width: 700,
+      height: 900,
       resizable: true,
       title: "战斗区域"
     });
@@ -399,6 +424,11 @@ export default class CombatAreaApplication extends Application {
     // 锁定按钮
     html.find('.lock-btn').click(this._onToggleLock.bind(this));
 
+    // 状态条编辑（解锁时可编辑）
+    if (!this.combatState.isLocked) {
+      html.find('.bar-progress').click(this._onEditStatusBar.bind(this));
+    }
+
     // 资源圈点击
     html.find('.resource-circle').click(this._onToggleResource.bind(this));
 
@@ -441,6 +471,71 @@ export default class CombatAreaApplication extends Application {
   }
 
   /**
+   * 编辑状态条（解锁时）
+   */
+  async _onEditStatusBar(event) {
+    event.preventDefault();
+    if (this.combatState.isLocked) return;
+
+    const bar = $(event.currentTarget);
+    const barType = bar.closest('.status-bar').hasClass('hp-bar') ? 'hp' :
+                    bar.closest('.status-bar').hasClass('erosion-bar') ? 'erosion' : 'chaos';
+
+    let currentValue, maxValue, label, path;
+
+    if (barType === 'hp') {
+      currentValue = this.actor.system.derived.hp.value;
+      maxValue = this.actor.system.derived.hp.max;
+      label = '生命值';
+      path = 'system.derived.hp.value';
+    } else if (barType === 'erosion') {
+      currentValue = this.actor.system.derived.corruption.value;
+      maxValue = this.actor.system.derived.corruption.max;
+      label = '侵蚀度';
+      path = 'system.derived.corruption.value';
+    } else {
+      currentValue = this.actor.system.derived.chaos.value;
+      maxValue = this.actor.system.derived.chaos.max;
+      label = '混乱值';
+      path = 'system.derived.chaos.value';
+    }
+
+    const content = `
+      <form>
+        <div class="form-group">
+          <label>${label}: </label>
+          <input type="number" name="value" value="${currentValue}" min="0" max="${maxValue * 2}"
+                 style="width: 100%; padding: 0.5rem; background: #0F0D1B; border: 1px solid #EBBD68; color: #EBBD68; border-radius: 3px;"/>
+          <small style="color: #888;">最大值: ${maxValue}</small>
+        </div>
+      </form>
+    `;
+
+    new Dialog({
+      title: `编辑${label}`,
+      content: content,
+      buttons: {
+        save: {
+          icon: '<i class="fas fa-check"></i>',
+          label: "保存",
+          callback: async (html) => {
+            const newValue = parseInt(html.find('[name="value"]').val()) || 0;
+            const updateData = {};
+            updateData[path] = Math.max(0, newValue);
+            await this.actor.update(updateData);
+            this.render();
+          }
+        },
+        cancel: {
+          icon: '<i class="fas fa-times"></i>',
+          label: "取消"
+        }
+      },
+      default: "save"
+    }).render(true);
+  }
+
+  /**
    * 切换资源圈
    */
   async _onToggleResource(event) {
@@ -478,14 +573,21 @@ export default class CombatAreaApplication extends Application {
       return;
     }
 
-    // 随机抽取3个
+    // 随机抽取3个不重复的索引
     const drawCount = Math.min(3, availableIndices.length);
-    let extraCost = 0;
+    const selectedIndices = [];
 
     for (let i = 0; i < drawCount; i++) {
       const randomIndex = Math.floor(Math.random() * availableIndices.length);
-      const diceIndex = availableIndices[randomIndex];
+      selectedIndices.push(availableIndices[randomIndex]);
+      availableIndices.splice(randomIndex, 1);
+    }
 
+    let extraCost = 0;
+    let extraEX = 0;
+
+    // 处理每个选中的骰子
+    for (const diceIndex of selectedIndices) {
       // 如果已经激活，增加Cost
       if (this.combatState.activatedDice[diceIndex]) {
         // 找到第一个空的Cost槽位
@@ -499,13 +601,31 @@ export default class CombatAreaApplication extends Application {
       } else {
         this.combatState.activatedDice[diceIndex] = true;
       }
-
-      // 移除已抽取的索引
-      availableIndices.splice(randomIndex, 1);
     }
 
-    await this._sendChatMessage(`抽取激活了 ${drawCount} 个战斗骰${extraCost > 0 ? `，重复激活获得 ${extraCost} 个Cost` : ''}`);
+    // 每3个重复激活添加1个EX资源
+    if (extraCost >= 3) {
+      const exToAdd = Math.floor(extraCost / 3);
+      for (let i = 0; i < exToAdd; i++) {
+        for (let j = 0; j < 3; j++) {
+          if (!this.combatState.exResources[j]) {
+            this.combatState.exResources[j] = true;
+            extraEX++;
+            break;
+          }
+        }
+      }
+    }
 
+    let message = `抽取激活了 ${drawCount} 个战斗骰`;
+    if (extraCost > 0) {
+      message += `，重复激活获得 ${extraCost} 个Cost`;
+    }
+    if (extraEX > 0) {
+      message += `，${extraEX} 个EX`;
+    }
+
+    await this._sendChatMessage(message);
     await this._saveCombatState();
     this.render();
   }
@@ -533,22 +653,44 @@ export default class CombatAreaApplication extends Application {
     const diceIndex = availableIndices[randomIndex];
 
     let message = `抽取激活了第 ${diceIndex + 1} 个战斗骰`;
+    let extraCost = 0;
+    let extraEX = 0;
 
     // 如果已经激活，增加Cost
     if (this.combatState.activatedDice[diceIndex]) {
+      // 增加Cost资源
       for (let j = 0; j < 6; j++) {
         if (!this.combatState.costResources[j]) {
           this.combatState.costResources[j] = true;
-          message += `，重复激活获得1个Cost`;
+          extraCost = 1;
           break;
         }
+      }
+
+      // 统计当前已有的Cost资源总数，检查是否达到3的倍数来添加EX
+      const totalCost = this.combatState.costResources.filter(c => c).length;
+      if (totalCost > 0 && totalCost % 3 === 0) {
+        // 添加1个EX资源
+        for (let j = 0; j < 3; j++) {
+          if (!this.combatState.exResources[j]) {
+            this.combatState.exResources[j] = true;
+            extraEX = 1;
+            break;
+          }
+        }
+      }
+
+      if (extraCost > 0) {
+        message += `，重复激活获得1个Cost`;
+      }
+      if (extraEX > 0) {
+        message += `，1个EX`;
       }
     } else {
       this.combatState.activatedDice[diceIndex] = true;
     }
 
     await this._sendChatMessage(message);
-
     await this._saveCombatState();
     this.render();
   }
@@ -567,32 +709,70 @@ export default class CombatAreaApplication extends Application {
   }
 
   /**
-   * 发起战斗骰
+   * 发起战斗骰挑战
    */
   async _onInitiateCombatDice(event) {
     event.preventDefault();
     const button = $(event.currentTarget);
     const index = button.data('index');
 
+    let item = null;
+
     if (index !== undefined) {
       const slot = this._prepareCombatDiceSlots()[index];
       if (slot && slot.item) {
-        await this._rollDice(slot.item);
+        item = slot.item;
       }
     } else {
-      // 可能是守备骰、触发骰或被动骰
+      // 可能是守备骰、触发骰或装备
       const title = button.attr('title');
       if (title) {
-        const lines = title.split('\n');
-        if (lines.length > 0) {
-          const itemName = lines[0];
-          const item = this.actor.items.find(i => i.name === itemName);
-          if (item) {
-            await this._rollDice(item);
-          }
-        }
+        const itemName = title.split('&#10;')[0];
+        item = this.actor.items.find(i => i.name === itemName);
       }
     }
+
+    if (!item) return;
+
+    // 投骰
+    const formula = item.system.diceFormula || '1d6';
+    const roll = new Roll(formula);
+    await roll.evaluate();
+
+    // 显示 3D 骰子动画
+    if (game.dice3d) {
+      await game.dice3d.showForRoll(roll, game.user, true);
+    }
+
+    // 创建挑战数据
+    const challengeData = {
+      challengerId: this.actor.id,
+      challengerName: this.actor.name,
+      diceId: item.id,
+      diceName: item.name,
+      total: roll.total,
+      messageId: null // 将由ChatMessage填充
+    };
+
+    // 创建挑战聊天卡片
+    const chatData = {
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      content: await renderTemplate("systems/shuhai-dalu/templates/chat/combat-dice-challenge.hbs", {
+        actor: this.actor,
+        dice: item,
+        total: roll.total,
+        challengeData: challengeData
+      }),
+      sound: CONFIG.sounds.dice,
+      flags: {
+        'shuhai-dalu': {
+          challengeData: challengeData
+        }
+      }
+    };
+
+    await ChatMessage.create(chatData);
   }
 
   /**
