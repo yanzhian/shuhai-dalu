@@ -152,8 +152,7 @@
           <div class="combat-dice-slot {{#unless slot}}empty{{/unless}}">
             {{#if slot}}
               <div class="dice-cost-badge">{{slot.system.cost}}</div>
-              <div class="dice-count-badge">{{slot.system.diceFormula}}</div>
-              <button class="equipment-use-btn" data-slot-index="{{@index}}" type="button" title="{{slot.name}}&#10;{{slot.type}} {{slot.system.category}}&#10;{{slot.system.effect}}">
+              <button class="equipment-use-btn" data-slot-index="{{@index}}" type="button" title="{{slot.name}}&#10;{{slot.system.effect}}">
                 <img src="{{slot.img}}" alt="{{slot.name}}" />
               </button>
             {{else}}
