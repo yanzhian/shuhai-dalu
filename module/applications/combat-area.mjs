@@ -1,6 +1,220 @@
 /**
- * 书海大陆 战斗区域应用
+ * 书海大陆 战斗区域应用 - 完全重新设计
  */
+
+// 预定义BUFF类型
+const BUFF_TYPES = {
+  // 增益BUFF
+  positive: [
+    {
+      id: 'strong',
+      name: '强壮',
+      type: 'positive',
+      description: '一回合内 "战斗骰" 的 "骰数" 增加 等同于本效果层数的数值。',
+      icon: 'icons/svg/upgrade.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    },
+    {
+      id: 'guard',
+      name: '守护',
+      type: 'positive',
+      description: '一回合内 [被击中时] 受到 最终伤害 减少 等同于本效果层数的数值。',
+      icon: 'icons/svg/shield.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    },
+    {
+      id: 'swift',
+      name: '迅捷',
+      type: 'positive',
+      description: '一回合内 所有【行动槽】"速度" 增加 等同于本效果层数的数值。',
+      icon: 'icons/svg/wing.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    },
+    {
+      id: 'endure',
+      name: '忍耐',
+      type: 'positive',
+      description: '一回合内 "守备" 的 骰数 增加 等同于本效果层数的数值。',
+      icon: 'icons/svg/stone-pile.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    },
+    {
+      id: 'advantage',
+      name: '优势',
+      type: 'positive',
+      description: '一回合内 骰至 等同于本效果层数的数值，取最大结果。',
+      icon: 'icons/svg/up.svg',
+      defaultLayers: 2,
+      defaultStrength: 0
+    },
+    {
+      id: 'dice_upgrade',
+      name: '面数增加',
+      type: 'positive',
+      description: '每层增加一个面数等级，面数等级为：4,6,8,10,12,20 面骰',
+      icon: 'icons/svg/d20.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    }
+  ],
+
+  // 减益BUFF
+  negative: [
+    {
+      id: 'weak',
+      name: '虚弱',
+      type: 'negative',
+      description: '一回合内 "战斗骰" 的 "骰数" 减少 等同于本效果层数的数值。',
+      icon: 'icons/svg/downgrade.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    },
+    {
+      id: 'vulnerable',
+      name: '易损',
+      type: 'negative',
+      description: '一回合内 [被击中时] 受到 最终伤害 增加 等同于本效果层数的数值。',
+      icon: 'icons/svg/break.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    },
+    {
+      id: 'bound',
+      name: '束缚',
+      type: 'negative',
+      description: '一回合内 所有【行动槽】"速度" 减少 等同于本效果层数的数值。',
+      icon: 'icons/svg/net.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    },
+    {
+      id: 'flaw',
+      name: '破绽',
+      type: 'negative',
+      description: '一回合内 "守备" 的 骰数 减少 等同于本效果层数的数值。',
+      icon: 'icons/svg/hazard.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    },
+    {
+      id: 'disadvantage',
+      name: '劣势',
+      type: 'negative',
+      description: '一回合内 骰至 等同于本效果层数的数值，取最小结果',
+      icon: 'icons/svg/down.svg',
+      defaultLayers: 2,
+      defaultStrength: 0
+    },
+    {
+      id: 'dice_downgrade',
+      name: '面数减少',
+      type: 'negative',
+      description: '每层减少一个面数等级，面数等级为：4,6,8,10,12,20 面骰',
+      icon: 'icons/svg/d20.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    }
+  ],
+
+  // 效果BUFF
+  effect: [
+    {
+      id: 'rupture',
+      name: '破裂',
+      type: 'effect',
+      description: '受到攻击时：附加数值等同于本效果强度的固定伤害。效果生效后，本效果的层数减少1层。',
+      icon: 'icons/svg/explosion.svg',
+      defaultLayers: 1,
+      defaultStrength: 3
+    },
+    {
+      id: 'bleed',
+      name: '流血',
+      type: 'effect',
+      description: '攻击时：受到数值等同于本效果强度的固定伤害。效果生效后，本效果的层数减少1层。',
+      icon: 'icons/svg/blood.svg',
+      defaultLayers: 1,
+      defaultStrength: 2
+    },
+    {
+      id: 'corruption_effect',
+      name: '沉沦',
+      type: 'effect',
+      description: '受到攻击时：增加数值等同于本效果强度的固定侵蚀点数（没有侵蚀值的目标则受到伤害）。效果生效后，本效果的层数减少1层。',
+      icon: 'icons/svg/shadow.svg',
+      defaultLayers: 1,
+      defaultStrength: 2
+    },
+    {
+      id: 'burn',
+      name: '燃烧',
+      type: 'effect',
+      description: '回合结束时：受到数值等同于本效果强度的固定伤害。效果生效后，本效果的层数减少1层。',
+      icon: 'icons/svg/fire.svg',
+      defaultLayers: 1,
+      defaultStrength: 4
+    },
+    {
+      id: 'breath',
+      name: '呼吸',
+      type: 'effect',
+      description: '攻击命中时：呼吸强度和随机值大于15则暴击，触发暴击时使效果层数减少1层。回合结束时，本效果的层数减少1层。',
+      icon: 'icons/svg/breath.svg',
+      defaultLayers: 1,
+      defaultStrength: 5
+    },
+    {
+      id: 'charge',
+      name: '充能',
+      type: 'effect',
+      description: '特定技能发动附加效果所需的资源。最多叠加至20层。回合结束时，本效果的层数减少1层。',
+      icon: 'icons/svg/lightning.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    },
+    {
+      id: 'tremor',
+      name: '震颤',
+      type: 'effect',
+      description: '受到造成【震颤引爆】的攻击时：混乱值前移等同于本效果强度的数值。回合结束时，本效果的层数减少1层。',
+      icon: 'icons/svg/frozen.svg',
+      defaultLayers: 1,
+      defaultStrength: 3
+    },
+    {
+      id: 'ammo',
+      name: '弹药',
+      type: 'effect',
+      description: '特定技能进行攻击时消耗的资源。缺少弹药时这些攻击将被取消。',
+      icon: 'icons/svg/sword.svg',
+      defaultLayers: 10,
+      defaultStrength: 0
+    },
+    {
+      id: 'chant',
+      name: '吟唱',
+      type: 'effect',
+      description: '特定技能发动附加效果所需的资源。回合结束时，本效果的层数减少1层。',
+      icon: 'icons/svg/book.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    },
+    {
+      id: 'paralyze',
+      name: '麻痹',
+      type: 'effect',
+      description: '一回合内使骰子的变动值固定为0。每层影响1个骰子。',
+      icon: 'icons/svg/paralysis.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    }
+  ]
+};
+
 export default class CombatAreaApplication extends Application {
 
   constructor(actor, options = {}) {
@@ -9,16 +223,16 @@ export default class CombatAreaApplication extends Application {
 
     // 从角色Flag加载战斗状态，如果没有则初始化
     this.combatState = this.actor.getFlag('shuhai-dalu', 'combatState') || {
-      // 激活的战斗骰（0-5索引对应6个战斗骰）
-      activatedDice: [false, false, false, false, false, false],
-      // 额外Cost（最多6个）
-      extraCost: [false, false, false, false, false, false],
-      // EX资源（最多3个）
+      // Cost资源（6个）
+      costResources: [false, false, false, false, false, false],
+      // EX资源（3个）
       exResources: [false, false, false],
-      // 速度值（3个不同的结果）
-      speedValues: [0, 0, 0],
+      // 战斗骰激活状态（6个）
+      activatedDice: [false, false, false, false, false, false],
       // BUFF列表
-      buffs: []
+      buffs: [],
+      // 锁定状态
+      isLocked: false
     };
   }
 
@@ -49,49 +263,46 @@ export default class CombatAreaApplication extends Application {
     context.actor = this.actor;
     context.system = this.actor.system;
     context.combatState = this.combatState;
+    context.isLocked = this.combatState.isLocked;
 
-    // 准备战斗骰数据
-    context.combatDice = this._prepareCombatDice();
+    // 准备战斗骰槽位数据
+    context.combatDiceSlots = this._prepareCombatDiceSlots();
 
     // 准备装备数据
     context.equipment = this._prepareEquipment();
 
-    // 准备BUFF数据
-    context.buffs = this.combatState.buffs;
+    // 准备被动骰槽位
+    context.passiveDiceSlots = this._preparePassiveDiceSlots();
 
-    // 准备行动骰装扮数据
-    context.actionDiceTheme = this._getActionDiceTheme();
+    // 计算速度值
+    context.speedValues = this._calculateSpeedValues();
 
     return context;
   }
 
   /**
-   * 准备战斗骰数据
+   * 准备战斗骰槽位数据（6个）
    */
-  _prepareCombatDice() {
-    const combatDice = [];
+  _prepareCombatDiceSlots() {
+    const slots = [];
     for (let i = 0; i < 6; i++) {
       const diceId = this.actor.system.equipment.combatDice[i];
       if (diceId) {
         const item = this.actor.items.get(diceId);
         if (item) {
-          combatDice.push({
+          slots.push({
             index: i,
             item: item,
-            activated: this.combatState.activatedDice[i],
-            name: item.name,
-            img: item.img,
-            dice: item.system.diceFormula,
-            effect: item.system.effect
+            activated: this.combatState.activatedDice[i]
           });
         } else {
-          combatDice.push({ index: i, empty: true });
+          slots.push({ index: i, item: null, activated: false });
         }
       } else {
-        combatDice.push({ index: i, empty: true });
+        slots.push({ index: i, item: null, activated: false });
       }
     }
-    return combatDice;
+    return slots;
   }
 
   /**
@@ -103,7 +314,7 @@ export default class CombatAreaApplication extends Application {
       armor: null,
       defenseDice: null,
       triggerDice: null,
-      passives: []
+      slots: []
     };
 
     // 武器
@@ -126,14 +337,14 @@ export default class CombatAreaApplication extends Application {
       equipment.triggerDice = this.actor.items.get(this.actor.system.equipment.triggerDice);
     }
 
-    // 被动骰
-    for (let i = 0; i < this.actor.system.equipment.passives.length; i++) {
-      const passiveId = this.actor.system.equipment.passives[i];
-      if (passiveId) {
-        const passive = this.actor.items.get(passiveId);
-        if (passive) {
-          equipment.passives.push(passive);
-        }
+    // 装备槽（4个）
+    for (let i = 0; i < 4; i++) {
+      if (i === 0 && equipment.weapon) {
+        equipment.slots.push(equipment.weapon);
+      } else if (i === 1 && equipment.armor) {
+        equipment.slots.push(equipment.armor);
+      } else {
+        equipment.slots.push(null);
       }
     }
 
@@ -141,65 +352,115 @@ export default class CombatAreaApplication extends Application {
   }
 
   /**
-   * 获取行动骰装扮主题
+   * 准备被动骰槽位（3个）
    */
-  _getActionDiceTheme() {
-    // 从角色数据中获取当前选择的行动骰装扮主题
-    // 默认使用"大自然"主题
-    const theme = this.actor.getFlag('shuhai-dalu', 'actionDiceTheme') || '大自然';
+  _preparePassiveDiceSlots() {
+    const slots = [];
+    const passives = this.actor.system.equipment.passives || [];
 
-    return {
-      name: theme,
-      main: `systems/shuhai-dalu/assets/icons/dice/${theme}-主骰.png`,
-      dice1: `systems/shuhai-dalu/assets/icons/dice/${theme}-1.png`,
-      dice2: `systems/shuhai-dalu/assets/icons/dice/${theme}-2.png`,
-      dice3: `systems/shuhai-dalu/assets/icons/dice/${theme}-3.png`
-    };
+    for (let i = 0; i < 3; i++) {
+      if (i < passives.length && passives[i]) {
+        const item = this.actor.items.get(passives[i]);
+        slots.push(item || null);
+      } else {
+        slots.push(null);
+      }
+    }
+
+    return slots;
+  }
+
+  /**
+   * 计算速度值
+   * 速度=速度值为1D（体质小于9为6，大于9为4）+（敏捷/3向下取整）的结果
+   */
+  _calculateSpeedValues() {
+    const constitution = this.actor.system.attributes.constitution || 0;
+    const dexterity = this.actor.system.attributes.dexterity || 0;
+
+    // 基础骰子大小
+    const diceSize = constitution < 9 ? 6 : 4;
+
+    // 固定加值
+    const bonus = Math.floor(dexterity / 3);
+
+    // 生成3个速度值
+    return [
+      Math.floor(Math.random() * diceSize) + 1 + bonus,
+      Math.floor(Math.random() * diceSize) + 1 + bonus,
+      Math.floor(Math.random() * diceSize) + 1 + bonus
+    ];
   }
 
   /** @override */
   activateListeners(html) {
     super.activateListeners(html);
 
+    // 锁定按钮
+    html.find('.lock-btn').click(this._onToggleLock.bind(this));
+
+    // 资源圈点击
+    html.find('.resource-circle').click(this._onToggleResource.bind(this));
+
     // 控制按钮
     html.find('.draw-activate-btn').click(this._onDrawActivate.bind(this));
     html.find('.draw-one-btn').click(this._onDrawOne.bind(this));
-    html.find('.speed-draw-btn').click(this._onSpeedDraw.bind(this));
-    html.find('.summon-action-dice-btn').click(this._onSummonActionDice.bind(this));
 
     // 战斗骰按钮
-    html.find('.combat-dice-initiate-btn').click(this._onCombatDiceInitiate.bind(this));
-    html.find('.combat-dice-activate-btn').click(this._onCombatDiceActivate.bind(this));
+    html.find('.dice-activate-toggle').click(this._onToggleDiceActivation.bind(this));
+    html.find('.combat-dice-initiate-btn').click(this._onInitiateCombatDice.bind(this));
 
-    // 守备骰/触发骰
-    html.find('.defense-dice-btn').click(this._onDefenseDice.bind(this));
-    html.find('.trigger-dice-btn').click(this._onTriggerDice.bind(this));
+    // 先攻按钮
+    html.find('.initiative-btn').click(this._onInitiative.bind(this));
 
-    // 额外Cost和EX资源
-    html.find('.extra-cost-btn').click(this._onToggleExtraCost.bind(this));
-    html.find('.ex-resource-btn').click(this._onToggleExResource.bind(this));
+    // 行动骰装扮按钮
+    html.find('.action-dice-theme-btn').click(this._onSelectActionDiceTheme.bind(this));
 
-    // 装备按钮
-    html.find('.equipment-show-btn').click(this._onShowEquipment.bind(this));
+    // 召唤行动骰按钮
+    html.find('.summon-action-dice-btn').click(this._onSummonActionDice.bind(this));
 
     // BUFF操作
+    html.find('.buff-value-input').change(this._onBuffValueChange.bind(this));
     html.find('.buff-trigger-btn').click(this._onBuffTrigger.bind(this));
-    html.find('.buff-clear-btn').click(this._onBuffClear.bind(this));
-    html.find('.buff-layer-increase').click(this._onBuffLayerIncrease.bind(this));
-    html.find('.buff-layer-decrease').click(this._onBuffLayerDecrease.bind(this));
-    html.find('.buff-strength-increase').click(this._onBuffStrengthIncrease.bind(this));
-    html.find('.buff-strength-decrease').click(this._onBuffStrengthDecrease.bind(this));
-
-    // 行动骰装扮选择
-    html.find('.action-dice-theme-btn').click(this._onSelectActionDiceTheme.bind(this));
+    html.find('.buff-delete-btn').click(this._onBuffDelete.bind(this));
+    html.find('.add-buff-btn').click(this._onAddBuff.bind(this));
   }
 
   /* -------------------------------------------- */
-  /*  控制按钮事件                                  */
+  /*  事件处理器                                    */
   /* -------------------------------------------- */
 
   /**
-   * 抽取激活：随机点亮3个战斗骰
+   * 切换锁定状态
+   */
+  async _onToggleLock(event) {
+    event.preventDefault();
+    this.combatState.isLocked = !this.combatState.isLocked;
+    await this._saveCombatState();
+    this.render();
+  }
+
+  /**
+   * 切换资源圈
+   */
+  async _onToggleResource(event) {
+    event.preventDefault();
+    const button = $(event.currentTarget);
+    const type = button.data('type');
+    const index = button.data('index');
+
+    if (type === 'cost') {
+      this.combatState.costResources[index] = !this.combatState.costResources[index];
+    } else if (type === 'ex') {
+      this.combatState.exResources[index] = !this.combatState.exResources[index];
+    }
+
+    await this._saveCombatState();
+    this.render();
+  }
+
+  /**
+   * 抽取激活：随机激活3个战斗骰
    */
   async _onDrawActivate(event) {
     event.preventDefault();
@@ -219,31 +480,20 @@ export default class CombatAreaApplication extends Application {
 
     // 随机抽取3个
     const drawCount = Math.min(3, availableIndices.length);
-    let extraCount = 0;
-    let costCount = 0;
+    let extraCost = 0;
 
     for (let i = 0; i < drawCount; i++) {
       const randomIndex = Math.floor(Math.random() * availableIndices.length);
       const diceIndex = availableIndices[randomIndex];
 
-      // 如果已经激活，增加额外Cost和EX
+      // 如果已经激活，增加Cost
       if (this.combatState.activatedDice[diceIndex]) {
-        extraCount++;
-        // 增加额外Cost
+        // 找到第一个空的Cost槽位
         for (let j = 0; j < 6; j++) {
-          if (!this.combatState.extraCost[j]) {
-            this.combatState.extraCost[j] = true;
-            costCount++;
+          if (!this.combatState.costResources[j]) {
+            this.combatState.costResources[j] = true;
+            extraCost++;
             break;
-          }
-        }
-        // 每3个重复激活增加1个EX
-        if (extraCount % 3 === 0) {
-          for (let j = 0; j < 3; j++) {
-            if (!this.combatState.exResources[j]) {
-              this.combatState.exResources[j] = true;
-              break;
-            }
           }
         }
       } else {
@@ -254,16 +504,14 @@ export default class CombatAreaApplication extends Application {
       availableIndices.splice(randomIndex, 1);
     }
 
-    // 发送聊天消息
-    await this._sendChatMessage(`抽取激活了 ${drawCount} 个战斗骰${extraCount > 0 ? `，重复激活 ${extraCount} 次，获得 ${costCount} 个额外Cost` : ''}`);
+    await this._sendChatMessage(`抽取激活了 ${drawCount} 个战斗骰${extraCost > 0 ? `，重复激活获得 ${extraCost} 个Cost` : ''}`);
 
-    // 保存状态并刷新
     await this._saveCombatState();
     this.render();
   }
 
   /**
-   * 抽取一个：随机点亮1个战斗骰
+   * 抽取一个：随机激活1个战斗骰
    */
   async _onDrawOne(event) {
     event.preventDefault();
@@ -286,13 +534,12 @@ export default class CombatAreaApplication extends Application {
 
     let message = `抽取激活了第 ${diceIndex + 1} 个战斗骰`;
 
-    // 如果已经激活，增加额外Cost和EX
+    // 如果已经激活，增加Cost
     if (this.combatState.activatedDice[diceIndex]) {
-      // 增加额外Cost
       for (let j = 0; j < 6; j++) {
-        if (!this.combatState.extraCost[j]) {
-          this.combatState.extraCost[j] = true;
-          message += `，重复激活获得1个额外Cost`;
+        if (!this.combatState.costResources[j]) {
+          this.combatState.costResources[j] = true;
+          message += `，重复激活获得1个Cost`;
           break;
         }
       }
@@ -302,44 +549,90 @@ export default class CombatAreaApplication extends Application {
 
     await this._sendChatMessage(message);
 
-    // 保存状态并刷新
     await this._saveCombatState();
     this.render();
   }
 
   /**
-   * 速度抽取：刷新3个速度值
+   * 切换战斗骰激活状态
    */
-  async _onSpeedDraw(event) {
+  async _onToggleDiceActivation(event) {
     event.preventDefault();
+    const index = parseInt($(event.currentTarget).data('index'));
 
-    // 生成3个不同的速度值（1d20）
-    this.combatState.speedValues = [
-      Math.floor(Math.random() * 20) + 1,
-      Math.floor(Math.random() * 20) + 1,
-      Math.floor(Math.random() * 20) + 1
-    ];
+    this.combatState.activatedDice[index] = !this.combatState.activatedDice[index];
 
-    await this._sendChatMessage(`速度抽取：${this.combatState.speedValues.join(', ')}`);
-
-    // 保存状态并刷新
     await this._saveCombatState();
     this.render();
   }
 
   /**
-   * 召唤行动骰：召唤4个Token
+   * 发起战斗骰
    */
-  async _onSummonActionDice(event) {
+  async _onInitiateCombatDice(event) {
+    event.preventDefault();
+    const button = $(event.currentTarget);
+    const index = button.data('index');
+
+    if (index !== undefined) {
+      const slot = this._prepareCombatDiceSlots()[index];
+      if (slot && slot.item) {
+        await this._rollDice(slot.item);
+      }
+    } else {
+      // 可能是守备骰、触发骰或被动骰
+      const title = button.attr('title');
+      if (title) {
+        const lines = title.split('\n');
+        if (lines.length > 0) {
+          const itemName = lines[0];
+          const item = this.actor.items.find(i => i.name === itemName);
+          if (item) {
+            await this._rollDice(item);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * 投骰
+   */
+  async _rollDice(item) {
+    const formula = item.system.diceFormula || '1d6';
+    const roll = new Roll(formula);
+    await roll.evaluate();
+
+    // 创建聊天消息
+    const chatData = {
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      content: `<div style="background: #0F0D1B; border: 2px solid #EBBD68; border-radius: 4px; padding: 8px; color: #EBBD68;">
+        <h3 style="margin: 0 0 8px 0; color: #EBBD68;">${item.name}</h3>
+        <div style="font-size: 13px; margin-bottom: 6px;">${item.type} - ${item.system.category}</div>
+        <div style="background: #EBBD68; color: #0F0D1B; padding: 6px; border-radius: 3px; font-weight: bold; text-align: center; font-size: 18px;">
+          结果: ${roll.total}
+        </div>
+        ${item.system.effect ? `<div style="margin-top: 6px; font-size: 12px;">${item.system.effect}</div>` : ''}
+      </div>`,
+      sound: CONFIG.sounds.dice,
+      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+      rolls: [roll]
+    };
+
+    await ChatMessage.create(chatData);
+  }
+
+  /**
+   * 先攻按钮：重新计算速度值
+   */
+  async _onInitiative(event) {
     event.preventDefault();
 
-    const theme = this._getActionDiceTheme();
+    const speeds = this._calculateSpeedValues();
+    await this._sendChatMessage(`先攻速度：${speeds.join(', ')}`);
 
-    // TODO: 实现在地图上创建Token的功能
-    // 这需要与Foundry VTT的Token系统集成
-
-    ui.notifications.info(`召唤行动骰：${theme.name}`);
-    await this._sendChatMessage(`召唤了行动骰装扮：${theme.name}`);
+    this.render();
   }
 
   /**
@@ -348,36 +641,15 @@ export default class CombatAreaApplication extends Application {
   async _onSelectActionDiceTheme(event) {
     event.preventDefault();
 
-    // 可用的行动骰装扮主题
-    const themes = ['大自然', '永生蜜酒', '猪灵', '蔷薇之主', '蒸汽驱动',"AL-1S","Bianh","PMC","阿里乌斯","阿罗娜","暗邦","暗邦UR"];
+    const themes = ['大自然', '永生蜜酒', '猪灵', '蔷薇之主', '蒸汽驱动', "AL-1S", "Bianh", "PMC"];
 
     const content = `
       <form>
         <div class="form-group">
           <label>选择行动骰装扮:</label>
-          <select name="theme" style="width: 100%; padding: 0.5rem; background: #2a2a2a; border: 1px solid #3a3a3a; color: #e0e0e0; border-radius: 3px;">
+          <select name="theme" style="width: 100%; padding: 0.5rem; background: #0F0D1B; border: 1px solid #EBBD68; color: #EBBD68; border-radius: 3px;">
             ${themes.map(theme => `<option value="${theme}">${theme}</option>`).join('')}
           </select>
-        </div>
-        <div class="form-group" style="margin-top: 1rem;">
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
-            <div style="text-align: center;">
-              <img src="systems/shuhai-dalu/assets/icons/dice/大自然-主骰.png" style="width: 100%; border: 1px solid #3a3a3a; border-radius: 3px;"/>
-              <small>主骰</small>
-            </div>
-            <div style="text-align: center;">
-              <img src="systems/shuhai-dalu/assets/icons/dice/大自然-1.png" style="width: 100%; border: 1px solid #3a3a3a; border-radius: 3px;"/>
-              <small>行动骰1</small>
-            </div>
-            <div style="text-align: center;">
-              <img src="systems/shuhai-dalu/assets/icons/dice/大自然-2.png" style="width: 100%; border: 1px solid #3a3a3a; border-radius: 3px;"/>
-              <small>行动骰2</small>
-            </div>
-            <div style="text-align: center;">
-              <img src="systems/shuhai-dalu/assets/icons/dice/大自然-3.png" style="width: 100%; border: 1px solid #3a3a3a; border-radius: 3px;"/>
-              <small>行动骰3</small>
-            </div>
-          </div>
         </div>
       </form>
     `;
@@ -393,6 +665,138 @@ export default class CombatAreaApplication extends Application {
             const theme = html.find('[name="theme"]').val();
             await this.actor.setFlag('shuhai-dalu', 'actionDiceTheme', theme);
             ui.notifications.info(`已选择行动骰装扮：${theme}`);
+          }
+        },
+        cancel: {
+          icon: '<i class="fas fa-times"></i>',
+          label: "取消"
+        }
+      },
+      default: "select"
+    }).render(true);
+  }
+
+  /**
+   * 召唤行动骰
+   */
+  async _onSummonActionDice(event) {
+    event.preventDefault();
+
+    const theme = this.actor.getFlag('shuhai-dalu', 'actionDiceTheme') || '大自然';
+    await this._sendChatMessage(`召唤了行动骰装扮：${theme}`);
+    ui.notifications.info(`召唤行动骰：${theme}`);
+  }
+
+  /**
+   * BUFF值变化
+   */
+  async _onBuffValueChange(event) {
+    event.preventDefault();
+    const input = $(event.currentTarget);
+    const buffIndex = input.data('buff-index');
+    const field = input.data('field');
+    const value = parseInt(input.val()) || 0;
+
+    if (this.combatState.buffs[buffIndex]) {
+      this.combatState.buffs[buffIndex][field] = Math.max(0, value);
+      await this._saveCombatState();
+    }
+  }
+
+  /**
+   * 触发BUFF
+   */
+  async _onBuffTrigger(event) {
+    event.preventDefault();
+    const buffIndex = parseInt($(event.currentTarget).data('buff-index'));
+    const buff = this.combatState.buffs[buffIndex];
+
+    if (!buff) return;
+
+    await this._sendChatMessage(`触发BUFF：${buff.name}（层数：${buff.layers}，强度：${buff.strength}）\n${buff.description}`);
+  }
+
+  /**
+   * 删除BUFF
+   */
+  async _onBuffDelete(event) {
+    event.preventDefault();
+    const buffIndex = parseInt($(event.currentTarget).data('buff-index'));
+
+    this.combatState.buffs.splice(buffIndex, 1);
+
+    await this._saveCombatState();
+    this.render();
+  }
+
+  /**
+   * 添加新BUFF
+   */
+  async _onAddBuff(event) {
+    event.preventDefault();
+
+    // 构建BUFF选择列表
+    const allBuffs = [
+      ...BUFF_TYPES.positive,
+      ...BUFF_TYPES.negative,
+      ...BUFF_TYPES.effect
+    ];
+
+    const content = `
+      <form>
+        <div class="form-group">
+          <label>选择BUFF类型:</label>
+          <select name="buffId" style="width: 100%; padding: 0.5rem; background: #0F0D1B; border: 1px solid #EBBD68; color: #EBBD68; border-radius: 3px; font-size: 13px;">
+            <optgroup label="增益BUFF" style="color: #4a7c2c;">
+              ${BUFF_TYPES.positive.map(buff => `<option value="${buff.id}">${buff.name} - ${buff.description.substring(0, 50)}...</option>`).join('')}
+            </optgroup>
+            <optgroup label="减益BUFF" style="color: #c14545;">
+              ${BUFF_TYPES.negative.map(buff => `<option value="${buff.id}">${buff.name} - ${buff.description.substring(0, 50)}...</option>`).join('')}
+            </optgroup>
+            <optgroup label="效果BUFF" style="color: #EBBD68;">
+              ${BUFF_TYPES.effect.map(buff => `<option value="${buff.id}">${buff.name} - ${buff.description.substring(0, 50)}...</option>`).join('')}
+            </optgroup>
+          </select>
+        </div>
+        <div class="form-group" style="margin-top: 1rem;">
+          <label>层数:</label>
+          <input type="number" name="layers" value="1" min="0" style="width: 100%; padding: 0.5rem; background: #0F0D1B; border: 1px solid #EBBD68; color: #EBBD68; border-radius: 3px;"/>
+        </div>
+        <div class="form-group" style="margin-top: 1rem;">
+          <label>强度:</label>
+          <input type="number" name="strength" value="0" min="0" style="width: 100%; padding: 0.5rem; background: #0F0D1B; border: 1px solid #EBBD68; color: #EBBD68; border-radius: 3px;"/>
+        </div>
+      </form>
+    `;
+
+    new Dialog({
+      title: "添加新的BUFF",
+      content: content,
+      buttons: {
+        add: {
+          icon: '<i class="fas fa-plus"></i>',
+          label: "添加",
+          callback: async (html) => {
+            const buffId = html.find('[name="buffId"]').val();
+            const layers = parseInt(html.find('[name="layers"]').val()) || 1;
+            const strength = parseInt(html.find('[name="strength"]').val()) || 0;
+
+            // 查找BUFF定义
+            const buffDef = allBuffs.find(b => b.id === buffId);
+            if (!buffDef) return;
+
+            // 添加到BUFF列表
+            this.combatState.buffs.push({
+              id: buffDef.id,
+              name: buffDef.name,
+              type: buffDef.type,
+              description: buffDef.description,
+              icon: buffDef.icon,
+              layers: layers,
+              strength: strength
+            });
+
+            await this._saveCombatState();
             this.render();
           }
         },
@@ -401,285 +805,8 @@ export default class CombatAreaApplication extends Application {
           label: "取消"
         }
       },
-      default: "select",
-      render: (html) => {
-        // 主题选择变化时更新预览图
-        html.find('[name="theme"]').change((e) => {
-          const selectedTheme = e.target.value;
-          const previewContainer = html.find('.form-group').eq(1).find('div').eq(0);
-          previewContainer.html(`
-            <div style="text-align: center;">
-              <img src="systems/shuhai-dalu/assets/icons/dice/${selectedTheme}-主骰.png" style="width: 100%; border: 1px solid #3a3a3a; border-radius: 3px;"/>
-              <small>主骰</small>
-            </div>
-            <div style="text-align: center;">
-              <img src="systems/shuhai-dalu/assets/icons/dice/${selectedTheme}-1.png" style="width: 100%; border: 1px solid #3a3a3a; border-radius: 3px;"/>
-              <small>行动骰1</small>
-            </div>
-            <div style="text-align: center;">
-              <img src="systems/shuhai-dalu/assets/icons/dice/${selectedTheme}-2.png" style="width: 100%; border: 1px solid #3a3a3a; border-radius: 3px;"/>
-              <small>行动骰2</small>
-            </div>
-            <div style="text-align: center;">
-              <img src="systems/shuhai-dalu/assets/icons/dice/${selectedTheme}-3.png" style="width: 100%; border: 1px solid #3a3a3a; border-radius: 3px;"/>
-              <small>行动骰3</small>
-            </div>
-          `);
-        });
-      }
+      default: "add"
     }).render(true);
-  }
-
-  /* -------------------------------------------- */
-  /*  战斗骰事件                                    */
-  /* -------------------------------------------- */
-
-  /**
-   * 战斗骰发起/对抗
-   */
-  async _onCombatDiceInitiate(event) {
-    event.preventDefault();
-    const index = parseInt(event.currentTarget.dataset.index);
-    const diceData = this._prepareCombatDice()[index];
-
-    if (diceData.empty) {
-      ui.notifications.warn("该槽位没有装备战斗骰");
-      return;
-    }
-
-    // 投骰
-    const roll = new Roll(diceData.dice);
-    await roll.evaluate();
-
-    // 创建聊天消息卡片
-    const chatData = {
-      user: game.user.id,
-      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      content: await renderTemplate("systems/shuhai-dalu/templates/chat/combat-dice-challenge.hbs", {
-        actor: this.actor,
-        dice: diceData,
-        roll: roll,
-        total: roll.total,
-        // 传递挑战信息用于对抗
-        challengeData: {
-          challengerId: this.actor.id,
-          challengerName: this.actor.name,
-          diceId: diceData.item.id,
-          diceName: diceData.name,
-          total: roll.total
-        }
-      }),
-      sound: CONFIG.sounds.dice,
-      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-      rolls: [roll]
-    };
-
-    await ChatMessage.create(chatData);
-  }
-
-  /**
-   * 战斗骰激活/取消激活
-   */
-  async _onCombatDiceActivate(event) {
-    event.preventDefault();
-    const index = parseInt(event.currentTarget.dataset.index);
-
-    this.combatState.activatedDice[index] = !this.combatState.activatedDice[index];
-
-    // 保存状态并刷新
-    await this._saveCombatState();
-    this.render();
-  }
-
-  /**
-   * 守备骰
-   */
-  async _onDefenseDice(event) {
-    event.preventDefault();
-
-    const defenseDice = this.actor.items.get(this.actor.system.equipment.defenseDice);
-    if (!defenseDice) {
-      ui.notifications.warn("没有装备守备骰");
-      return;
-    }
-
-    // 投骰
-    const roll = new Roll(defenseDice.system.diceFormula);
-    await roll.evaluate();
-
-    await this._sendChatMessage(`使用守备骰进行对抗，结果：${roll.total}`, roll);
-  }
-
-  /**
-   * 触发骰
-   */
-  async _onTriggerDice(event) {
-    event.preventDefault();
-
-    // 检查是否有EX资源
-    const hasEx = this.combatState.exResources.some(ex => ex);
-    if (!hasEx) {
-      ui.notifications.warn("没有可用的EX资源");
-      return;
-    }
-
-    const triggerDice = this.actor.items.get(this.actor.system.equipment.triggerDice);
-    if (!triggerDice) {
-      ui.notifications.warn("没有装备触发骰");
-      return;
-    }
-
-    // 消耗1个EX资源
-    for (let i = 0; i < 3; i++) {
-      if (this.combatState.exResources[i]) {
-        this.combatState.exResources[i] = false;
-        break;
-      }
-    }
-
-    await this._sendChatMessage(`消耗1个EX资源，触发：${triggerDice.name}\n效果：${triggerDice.system.effect}`);
-
-    // 保存状态并刷新
-    await this._saveCombatState();
-    this.render();
-  }
-
-  /**
-   * 切换额外Cost
-   */
-  async _onToggleExtraCost(event) {
-    event.preventDefault();
-    const index = parseInt(event.currentTarget.dataset.index);
-    this.combatState.extraCost[index] = !this.combatState.extraCost[index];
-
-    // 保存状态并刷新
-    await this._saveCombatState();
-    this.render();
-  }
-
-  /**
-   * 切换EX资源
-   */
-  async _onToggleExResource(event) {
-    event.preventDefault();
-    const index = parseInt(event.currentTarget.dataset.index);
-    this.combatState.exResources[index] = !this.combatState.exResources[index];
-
-    // 保存状态并刷新
-    await this._saveCombatState();
-    this.render();
-  }
-
-  /**
-   * 显示装备效果
-   */
-  async _onShowEquipment(event) {
-    event.preventDefault();
-    const itemId = event.currentTarget.dataset.itemId;
-    const item = this.actor.items.get(itemId);
-
-    if (!item) return;
-
-    await this._sendChatMessage(`【${item.name}】\n${item.system.effect || '无描述'}`);
-  }
-
-  /* -------------------------------------------- */
-  /*  BUFF事件                                     */
-  /* -------------------------------------------- */
-
-  /**
-   * 触发BUFF
-   */
-  async _onBuffTrigger(event) {
-    event.preventDefault();
-    const index = parseInt(event.currentTarget.dataset.index);
-    const buff = this.combatState.buffs[index];
-
-    if (!buff) return;
-
-    await this._sendChatMessage(`触发BUFF：${buff.name}（层数：${buff.layers}，强度：${buff.strength}）`);
-  }
-
-  /**
-   * 清除BUFF
-   */
-  async _onBuffClear(event) {
-    event.preventDefault();
-    const index = parseInt(event.currentTarget.dataset.index);
-
-    this.combatState.buffs.splice(index, 1);
-
-    // 保存状态并刷新
-    await this._saveCombatState();
-    this.render();
-  }
-
-  /**
-   * 增加BUFF层数
-   */
-  async _onBuffLayerIncrease(event) {
-    event.preventDefault();
-    const index = parseInt(event.currentTarget.dataset.index);
-    const buff = this.combatState.buffs[index];
-
-    if (buff) {
-      buff.layers++;
-
-      // 保存状态并刷新
-      await this._saveCombatState();
-      this.render();
-    }
-  }
-
-  /**
-   * 减少BUFF层数
-   */
-  async _onBuffLayerDecrease(event) {
-    event.preventDefault();
-    const index = parseInt(event.currentTarget.dataset.index);
-    const buff = this.combatState.buffs[index];
-
-    if (buff && buff.layers > 0) {
-      buff.layers--;
-
-      // 保存状态并刷新
-      await this._saveCombatState();
-      this.render();
-    }
-  }
-
-  /**
-   * 增加BUFF强度
-   */
-  async _onBuffStrengthIncrease(event) {
-    event.preventDefault();
-    const index = parseInt(event.currentTarget.dataset.index);
-    const buff = this.combatState.buffs[index];
-
-    if (buff) {
-      buff.strength++;
-
-      // 保存状态并刷新
-      await this._saveCombatState();
-      this.render();
-    }
-  }
-
-  /**
-   * 减少BUFF强度
-   */
-  async _onBuffStrengthDecrease(event) {
-    event.preventDefault();
-    const index = parseInt(event.currentTarget.dataset.index);
-    const buff = this.combatState.buffs[index];
-
-    if (buff && buff.strength > 0) {
-      buff.strength--;
-
-      // 保存状态并刷新
-      await this._saveCombatState();
-      this.render();
-    }
   }
 
   /* -------------------------------------------- */
@@ -693,7 +820,7 @@ export default class CombatAreaApplication extends Application {
     const chatData = {
       user: game.user.id,
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      content: content
+      content: `<div style="background: #0F0D1B; border: 2px solid #EBBD68; border-radius: 4px; padding: 8px; color: #EBBD68;">${content}</div>`
     };
 
     if (roll) {
