@@ -736,20 +736,20 @@
 
 .shuhai-dalu .create-item-btn {
   padding: 0.5rem 1rem;
-  border: 2px solid #4a90e2;
+  /* border: 2px solid #4a90e2; */
   border-radius: 6px;
-  background: white;
-  color: #ffffff;
+  /* background: white; */
+  /* color: #ffffff; */
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s;
   max-width: 40px;
 }
 
-.shuhai-dalu .create-item-btn:hover {
+/* .shuhai-dalu .create-item-btn:hover {
   background: #4a90e2;
   color: white;
-}
+} */
 
 .shuhai-dalu .inventory-list {
   background: rgba(19, 19, 19, 0.9);
