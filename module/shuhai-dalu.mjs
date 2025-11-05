@@ -459,6 +459,47 @@ Hooks.once('init', function() {
     const item = game.items.get(itemId);
     return (item && item.system.category) ? item.system.category : '';
   });
+
+  // 获取物品tooltip（悬停提示）
+  Handlebars.registerHelper('getItemTooltip', function(itemId, options) {
+    if (!itemId) return '';
+
+    // 尝试从当前上下文的 actor 获取物品
+    const actor = options?.data?.root?.actor;
+    let item = null;
+
+    if (actor && actor.items) {
+      item = actor.items.get(itemId);
+    }
+
+    if (!item) {
+      item = game.items.get(itemId);
+    }
+
+    if (!item) return '';
+
+    // 构建tooltip文本
+    const typeNames = {
+      combatDice: '攻击骰',
+      shootDice: '射击骰',
+      defenseDice: '守备骰',
+      triggerDice: '触发骰',
+      passiveDice: '被动骰',
+      weapon: '武器',
+      armor: '防具',
+      item: '物品',
+      equipment: '装备'
+    };
+
+    const parts = [];
+    parts.push(item.name);
+    parts.push(`${typeNames[item.type] || item.type} ${item.system.category || ''}`);
+    if (item.system.effect) {
+      parts.push(item.system.effect);
+    }
+
+    return parts.join('\n');
+  });
 });
 
 /* -------------------------------------------- */
