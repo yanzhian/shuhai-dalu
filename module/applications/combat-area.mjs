@@ -232,7 +232,9 @@ export default class CombatAreaApplication extends Application {
       // BUFF列表
       buffs: [],
       // 锁定状态
-      isLocked: false
+      isLocked: false,
+      // 速度值（3个）
+      speedValues: null
     };
 
     // 迁移/修复：确保costResources有6个元素
@@ -258,6 +260,11 @@ export default class CombatAreaApplication extends Application {
     // 迁移/修复：确保isLocked属性存在
     if (this.combatState.isLocked === undefined) {
       this.combatState.isLocked = false;
+    }
+
+    // 初始化速度值（如果还没有）
+    if (!this.combatState.speedValues) {
+      this.combatState.speedValues = this._calculateSpeedValues();
     }
   }
 
@@ -299,8 +306,8 @@ export default class CombatAreaApplication extends Application {
     // 准备被动骰槽位
     context.passiveDiceSlots = this._preparePassiveDiceSlots();
 
-    // 计算速度值
-    context.speedValues = this._calculateSpeedValues();
+    // 使用保存的速度值
+    context.speedValues = this.combatState.speedValues;
 
     return context;
   }
@@ -362,12 +369,12 @@ export default class CombatAreaApplication extends Application {
       equipment.triggerDice = this.actor.items.get(this.actor.system.equipment.triggerDice);
     }
 
-    // 装备槽（4个）
+    // 装备槽（4个）- 使用items数组
+    const itemsArray = this.actor.system.equipment.items || ["", "", "", ""];
     for (let i = 0; i < 4; i++) {
-      if (i === 0 && equipment.weapon) {
-        equipment.slots.push(equipment.weapon);
-      } else if (i === 1 && equipment.armor) {
-        equipment.slots.push(equipment.armor);
+      if (itemsArray[i]) {
+        const item = this.actor.items.get(itemsArray[i]);
+        equipment.slots.push(item || null);
       } else {
         equipment.slots.push(null);
       }
@@ -690,7 +697,38 @@ export default class CombatAreaApplication extends Application {
 
     if (!item) return;
 
-    // 投骰
+    // 特殊处理：触发骰
+    if (item.type === 'triggerDice') {
+      // 检查是否有EX资源
+      const hasEx = this.combatState.exResources.some(ex => ex);
+      if (!hasEx) {
+        ui.notifications.warn("没有可用的EX资源");
+        return;
+      }
+
+      // 消耗1个EX资源
+      for (let i = 0; i < 3; i++) {
+        if (this.combatState.exResources[i]) {
+          this.combatState.exResources[i] = false;
+          break;
+        }
+      }
+      await this._saveCombatState();
+
+      // 发送效果消息
+      await this._sendChatMessage(`
+        <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
+          <h3 style="margin: 0 0 8px 0; color: #E1AA43;">触发: ${item.name}</h3>
+          <div style="color: #888; margin-bottom: 8px;">消耗1个EX资源</div>
+          <div style="color: #EBBD68;">${item.system.effect || '无特殊效果'}</div>
+        </div>
+      `);
+
+      this.render();
+      return;
+    }
+
+    // 普通战斗骰：投骰并创建挑战
     const formula = item.system.diceFormula || '1d6';
     const roll = new Roll(formula);
     await roll.evaluate();
@@ -765,8 +803,13 @@ export default class CombatAreaApplication extends Application {
   async _onInitiative(event) {
     event.preventDefault();
 
+    // 重新计算速度值并保存
     const speeds = this._calculateSpeedValues();
-    await this._sendChatMessage(`先攻速度：${speeds.join(', ')}`);
+    this.combatState.speedValues = speeds;
+    await this._saveCombatState();
+
+    const totalSpeed = speeds.reduce((sum, speed) => sum + speed, 0);
+    await this._sendChatMessage(`先攻速度：${speeds.join(', ')} (总速度: ${totalSpeed})`);
 
     this.render();
   }

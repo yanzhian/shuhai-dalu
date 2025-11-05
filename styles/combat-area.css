@@ -125,7 +125,7 @@
 }
 
 .combat-area .bar-progress {
-  position: relative;
+  /* position: relative; */
   flex: 1;
   background: #0F0D1B;
   border-radius: 3px;
@@ -473,6 +473,34 @@
   font-style: italic;
 }
 
+.combat-area .weapon-info-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: #EBBD68;
+  margin-top: 4px;
+}
+
+.combat-area .weapon-label {
+  font-weight: bold;
+  cursor: help;
+}
+
+.combat-area .armor-label {
+  cursor: help;
+}
+
+.combat-area .weapon-category {
+  color: #f3c267;
+}
+
+.combat-area .no-weapon {
+  color: #888;
+  font-style: italic;
+}
+
 .combat-area .speed-initiative-area {
   display: flex;
   align-items: center;
@@ -499,6 +527,12 @@
 .combat-area .speed-item span {
   font-weight: bold;
   color: #f3c267;
+}
+
+.combat-area .speed-item.total-speed {
+  background: rgba(235, 189, 104, 0.1);
+  border-width: 2px;
+  font-weight: bold;
 }
 
 .combat-area .initiative-btn {
