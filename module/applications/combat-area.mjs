@@ -369,11 +369,11 @@ export default class CombatAreaApplication extends Application {
       equipment.triggerDice = this.actor.items.get(this.actor.system.equipment.triggerDice);
     }
 
-    // 装备槽（4个）- 使用items数组
-    const itemsArray = this.actor.system.equipment.items || ["", "", "", ""];
+    // 装备槽（4个）- 使用gear数组（装备栏1-4）
+    const gearArray = this.actor.system.equipment.gear || ["", "", "", ""];
     for (let i = 0; i < 4; i++) {
-      if (itemsArray[i]) {
-        const item = this.actor.items.get(itemsArray[i]);
+      if (gearArray[i]) {
+        const item = this.actor.items.get(gearArray[i]);
         equipment.slots.push(item || null);
       } else {
         equipment.slots.push(null);
