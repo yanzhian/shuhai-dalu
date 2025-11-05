@@ -48,12 +48,13 @@
 
       {{!-- 3. 技能鉴定区域 --}}
       <div class="skills-section">
-        <div class="section-header">
+        <div class="section-header collapsible-header" data-section="skills">
           <span class="line"></span>
           <span class="title">技能鉴定</span>
           <span class="line"></span>
+          <i class="fas fa-chevron-down collapse-icon"></i>
         </div>
-        <div class="skills-content scrollable">
+        <div class="skills-content scrollable collapsible-content">
 
         {{!-- 力敏系 --}}
         <div class="skill-category">
@@ -127,12 +128,18 @@
 
       {{!-- 4. 装备栏 --}}
       <div class="equipment-section">
-        <div class="section-header">
+        <div class="section-header collapsible-header" data-section="equipment">
           <span class="line"></span>
           <span class="title">装备栏</span>
           <span class="line"></span>
+          <i class="fas fa-chevron-down collapse-icon"></i>
         </div>
-        <div class="equipment-content scrollable">
+        {{!-- 星光显示（不受折叠影响） --}}
+        <div class="starlight-display">
+          <span class="starlight-label">星光</span>
+          <span class="starlight-value">{{system.derived.starlight}}/{{add 10 (multiply system.level 2)}}</span>
+        </div>
+        <div class="equipment-content scrollable collapsible-content">
 
         {{!-- 武器和防具 --}}
         <div class="equipment-row-2">
@@ -334,18 +341,15 @@
         </div>
       </div>
 
-      {{!-- 5. 资源区域 固定高度90px --}}
+      {{!-- 5. 资源区域 --}}
       <div class="resources-section">
-        <div class="section-header">
+        <div class="section-header collapsible-header" data-section="resources">
           <span class="line"></span>
           <span class="title">资源</span>
           <span class="line"></span>
+          <i class="fas fa-chevron-down collapse-icon"></i>
         </div>
-        <div class="resources-grid">
-          <div class="resource-item">
-            <label>星光</label>
-            <span>{{system.derived.starlight}}/{{add 10 (multiply system.level 2)}}</span>
-          </div>
+        <div class="resources-grid collapsible-content">
           <div class="resource-item">
             <label>货币</label>
             {{#if isLocked}}

@@ -178,6 +178,20 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     // 游玩/编辑模式切换 - 总是可用
     html.find('.lock-btn').click(this._onToggleLock.bind(this));
 
+    // === 折叠功能 - 总是可用 ===
+    html.find('.collapsible-header').click(this._onToggleCollapse.bind(this));
+
+    // 恢复折叠状态
+    const collapsedSections = this.actor.getFlag('shuhai-dalu', 'collapsedSections') || {};
+    Object.keys(collapsedSections).forEach(section => {
+      if (collapsedSections[section]) {
+        const header = html.find(`.collapsible-header[data-section="${section}"]`);
+        const content = header.next('.collapsible-content');
+        header.addClass('collapsed');
+        content.addClass('collapsed');
+      }
+    });
+
     // 以下功能需要编辑权限
     if (!this.isEditable) {
       console.warn('书海大陆 | 角色卡不可编辑，跳过事件监听器绑定');
@@ -358,6 +372,29 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       ui.notifications.info("已切换到编辑模式（解锁）");
     }
     this.render(false);
+  }
+
+  /**
+   * 切换折叠状态
+   */
+  _onToggleCollapse(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const header = $(event.currentTarget);
+    const section = header.data('section');
+
+    // 查找对应的内容区域
+    const content = header.next('.collapsible-content');
+
+    // 切换折叠状态
+    header.toggleClass('collapsed');
+    content.toggleClass('collapsed');
+
+    // 保存折叠状态到 flag
+    const collapsedSections = this.actor.getFlag('shuhai-dalu', 'collapsedSections') || {};
+    collapsedSections[section] = header.hasClass('collapsed');
+    this.actor.setFlag('shuhai-dalu', 'collapsedSections', collapsedSections);
   }
 
   /**
