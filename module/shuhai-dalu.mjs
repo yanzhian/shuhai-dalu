@@ -566,34 +566,8 @@ async function rollAttributeCheck(actor, attributeKey, modifier = 0, difficulty 
  * 技能检定
  */
 async function rollSkillCheck(actor, skillKey, modifier = 0, difficulty = 20) {
-  const skillValue = actor.system.skills[skillKey];
-  
-  // 技能检定使用相关属性
-  const attributeMap = {
-    athletics: 'strength',
-    acrobatics: 'dexterity',
-    sleight: 'dexterity',
-    stealth: 'dexterity',
-    qidian: 'intelligence',
-    history: 'intelligence',
-    investigation: 'intelligence',
-    nature: 'intelligence',
-    religion: 'intelligence',
-    animal: 'charisma',
-    insight: 'perception',
-    medicine: 'intelligence',
-    perception: 'perception',
-    survival: 'perception',
-    deception: 'charisma',
-    intimidation: 'charisma',
-    performance: 'charisma',
-    persuasion: 'charisma'
-  };
-  
-  const attributeKey = attributeMap[skillKey];
-  const totalModifier = modifier + skillValue;
-  
-  return rollAttributeCheck(actor, attributeKey, totalModifier, difficulty);
+  // 直接调用 actor 的 rollSkillCheck 方法
+  return actor.rollSkillCheck(skillKey, modifier, difficulty);
 }
 
 /**
