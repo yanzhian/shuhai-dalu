@@ -987,6 +987,15 @@ input.attr-value {
 }
 
 /* ========== 滚动条样式 ========== */
+
+/* 覆盖 Foundry VTT 的全局滚动条样式 */
+.player-sheet,
+.player-sheet * {
+  scrollbar-width: thin;
+  scrollbar-color: light-dark(#18162e, #f3c267) transparent;
+}
+
+/* WebKit 浏览器（Chrome, Safari, Edge）滚动条样式 */
 .scrollable::-webkit-scrollbar,
 .player-sheet ::-webkit-scrollbar {
   width: 6px;
