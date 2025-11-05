@@ -12,7 +12,7 @@
   border-radius: 8px;
 }
 
-.combat-area-wrapper {
+.combat-area .combat-area-wrapper {
   display: flex;
   gap: 12px;
   padding: 12px;
@@ -23,7 +23,7 @@
 /* ========================================
    左侧面板 (270px宽)
    ======================================== */
-.combat-left-panel {
+.combat-area .combat-left-panel {
   width: 270px;
   flex-shrink: 0;
   display: flex;
@@ -34,34 +34,34 @@
 }
 
 /* 覆盖滚动条样式 */
-.combat-left-panel::-webkit-scrollbar,
-.combat-right-panel::-webkit-scrollbar,
-.buff-list-items::-webkit-scrollbar {
+.combat-area .combat-left-panel::-webkit-scrollbar,
+.combat-area .combat-right-panel::-webkit-scrollbar,
+.combat-area .buff-list-items::-webkit-scrollbar {
   width: 6px;
 }
 
-.combat-left-panel::-webkit-scrollbar-thumb,
-.combat-right-panel::-webkit-scrollbar-thumb,
-.buff-list-items::-webkit-scrollbar-thumb {
+.combat-area .combat-left-panel::-webkit-scrollbar-thumb,
+.combat-area .combat-right-panel::-webkit-scrollbar-thumb,
+.combat-area .buff-list-items::-webkit-scrollbar-thumb {
   background: #EBBD68;
   border-radius: 3px;
 }
 
-.combat-left-panel::-webkit-scrollbar-track,
-.combat-right-panel::-webkit-scrollbar-track,
-.buff-list-items::-webkit-scrollbar-track {
+.combat-area .combat-left-panel::-webkit-scrollbar-track,
+.combat-area .combat-right-panel::-webkit-scrollbar-track,
+.combat-area .buff-list-items::-webkit-scrollbar-track {
   background: transparent;
 }
 
 /* 1. 头像容器 (270x270px) */
-.avatar-container {
+.combat-area .avatar-container {
   position: relative;
   width: 270px;
   height: 270px;
   flex-shrink: 0;
 }
 
-.avatar-image {
+.combat-area .avatar-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -69,7 +69,7 @@
   border: 2px solid #EBBD68;
 }
 
-.lock-btn {
+.combat-area .lock-btn {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -86,51 +86,51 @@
   transition: all 0.2s;
 }
 
-.lock-btn:hover {
+.combat-area .lock-btn:hover {
   background: #EBBD68;
   color: #0F0D1B;
 }
 
-.lock-btn.locked {
+.combat-area .lock-btn.locked {
   background: #EBBD68;
   color: #0F0D1B;
 }
 
 /* 2. 生命值/侵蚀度/混乱值区域 (96px高) */
-.status-bars-container {
+.combat-area .status-bars-container {
   height: 96px;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.status-bars-row {
+.combat-area .status-bars-row {
   display: flex;
   gap: 6px;
   flex: 1;
 }
 
-.status-bar {
+.combat-area .status-bar {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.status-bar.hp-bar {
+.combat-area .status-bar.hp-bar {
   flex: 1;
 }
 
-.status-bars-row .status-bar {
+.combat-area .status-bars-row .status-bar {
   flex: 1;
 }
 
-.bar-label {
+.combat-area .bar-label {
   font-size: 11px;
   color: #EBBD68;
   font-weight: bold;
 }
 
-.bar-progress {
+.combat-area .bar-progress {
   position: relative;
   flex: 1;
   background: #0F0D1B;
@@ -139,7 +139,7 @@
   overflow: hidden;
 }
 
-.bar-fill {
+.combat-area .bar-fill {
   position: absolute;
   left: 0;
   top: 0;
@@ -147,19 +147,19 @@
   transition: width 0.3s ease;
 }
 
-.hp-bar .bar-fill {
+.combat-area .hp-bar .bar-fill {
   background: linear-gradient(90deg, #2d5016, #4a7c2c);
 }
 
-.erosion-bar .bar-fill {
+.combat-area .erosion-bar .bar-fill {
   background: linear-gradient(90deg, #1a4d6d, #2e7da8);
 }
 
-.chaos-bar .bar-fill {
+.combat-area .chaos-bar .bar-fill {
   background: linear-gradient(90deg, #8b4513, #cd853f);
 }
 
-.bar-text {
+.combat-area .bar-text {
   position: relative;
   z-index: 1;
   font-size: 11px;
@@ -171,39 +171,39 @@
 }
 
 /* 3. Cost/EX资源 + 抽取按钮 */
-.resources-control-container {
+.combat-area .resources-control-container {
   display: flex;
   gap: 8px;
   align-items: center;
   padding: 8px 0;
 }
 
-.resources-area {
+.combat-area .resources-area {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.resource-row {
+.combat-area .resource-row {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.resource-label {
+.combat-area .resource-label {
   font-size: 12px;
   font-weight: bold;
   color: #EBBD68;
   min-width: 36px;
 }
 
-.resource-circles {
+.combat-area .resource-circles {
   display: flex;
   gap: 4px;
 }
 
-.resource-circle {
+.combat-area .resource-circle {
   width: 20px;
   height: 20px;
   border: 2px solid #EBBD68;
@@ -214,21 +214,21 @@
   padding: 0;
 }
 
-.resource-circle:hover {
+.combat-area .resource-circle:hover {
   transform: scale(1.1);
 }
 
-.resource-circle.active {
+.combat-area .resource-circle.active {
   background: #EBBD68;
 }
 
-.control-buttons-area {
+.combat-area .control-buttons-area {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.control-btn {
+.combat-area .control-btn {
   width: 40px;
   height: 24px;
   background: #EBBD68;
@@ -243,26 +243,26 @@
   padding: 2px;
 }
 
-.control-btn:hover {
+.combat-area .control-btn:hover {
   background: #f3c267;
   transform: scale(1.05);
 }
 
 /* 4. 分割线 */
-.divider {
+.combat-area .divider {
   height: 2px;
   background: #EBBD68;
   margin: 4px 0;
 }
 
 /* 5. 战斗骰区域 */
-.combat-dice-section {
+.combat-area .combat-dice-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.combat-section-title {
+.combat-area .combat-section-title {
   background: #EBBD68;
   color: #0F0D1B;
   padding: 6px;
@@ -272,13 +272,13 @@
   border-radius: 3px;
 }
 
-.combat-dice-grid {
+.combat-area .combat-dice-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 
-.combat-dice-slot {
+.combat-area .combat-dice-slot {
   position: relative;
   aspect-ratio: 1;
   border: 2px solid #EBBD68;
@@ -289,17 +289,17 @@
   justify-content: center;
 }
 
-.combat-dice-slot.empty {
+.combat-area .combat-dice-slot.empty {
   background: transparent;
 }
 
-.dice-slot-label {
+.combat-area .dice-slot-label {
   font-size: 11px;
   color: #EBBD68;
   text-align: center;
 }
 
-.dice-cost-badge {
+.combat-area .dice-cost-badge {
   position: absolute;
   top: 4px;
   left: 4px;
@@ -316,7 +316,7 @@
   z-index: 2;
 }
 
-.dice-activate-toggle {
+.combat-area .dice-activate-toggle {
   position: absolute;
   top: 4px;
   right: 4px;
@@ -336,16 +336,16 @@
   transition: all 0.2s;
 }
 
-.dice-activate-toggle:hover {
+.combat-area .dice-activate-toggle:hover {
   transform: scale(1.1);
 }
 
-.dice-activate-toggle.active {
+.combat-area .dice-activate-toggle.active {
   background: #E1AA43;
   color: #0F0D1B;
 }
 
-.dice-count-badge {
+.combat-area .dice-count-badge {
   position: absolute;
   bottom: 4px;
   right: 4px;
@@ -358,7 +358,7 @@
   z-index: 2;
 }
 
-.combat-dice-initiate-btn {
+.combat-area .combat-dice-initiate-btn {
   width: 100%;
   height: 100%;
   background: transparent;
@@ -368,29 +368,29 @@
   transition: all 0.2s;
 }
 
-.combat-dice-initiate-btn:hover {
+.combat-area .combat-dice-initiate-btn:hover {
   transform: scale(1.05);
 }
 
-.combat-dice-initiate-btn img {
+.combat-area .combat-dice-initiate-btn img {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
 /* 6. 守备/触发骰区域 */
-.defense-trigger-section {
+.combat-area .defense-trigger-section {
   display: flex;
   flex-direction: column;
 }
 
-.defense-trigger-grid {
+.combat-area .defense-trigger-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
 
-.dice-slot {
+.combat-area .dice-slot {
   position: relative;
   aspect-ratio: 1;
   border: 2px solid #EBBD68;
@@ -401,23 +401,23 @@
   justify-content: center;
 }
 
-.dice-slot.empty {
+.combat-area .dice-slot.empty {
   background: transparent;
 }
 
 /* 7. 装备1-4 */
-.equipment-section {
+.combat-area .equipment-section {
   display: flex;
   flex-direction: column;
 }
 
-.equipment-grid {
+.combat-area .equipment-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
 
-.equipment-slot {
+.combat-area .equipment-slot {
   position: relative;
   aspect-ratio: 1;
   border: 2px solid #EBBD68;
@@ -428,17 +428,17 @@
   justify-content: center;
 }
 
-.equipment-slot.empty {
+.combat-area .equipment-slot.empty {
   background: transparent;
 }
 
-.equipment-slot-label {
+.combat-area .equipment-slot-label {
   font-size: 11px;
   color: #EBBD68;
   text-align: center;
 }
 
-.equipment-btn {
+.combat-area .equipment-btn {
   width: 100%;
   height: 100%;
   background: transparent;
@@ -448,29 +448,29 @@
   transition: all 0.2s;
 }
 
-.equipment-btn:hover {
+.combat-area .equipment-btn:hover {
   transform: scale(1.05);
 }
 
-.equipment-btn img {
+.combat-area .equipment-btn img {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
 /* 被动骰1-3 */
-.passive-dice-section {
+.combat-area .passive-dice-section {
   display: flex;
   flex-direction: column;
 }
 
-.passive-dice-grid {
+.combat-area .passive-dice-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 
-.passive-dice-slot {
+.combat-area .passive-dice-slot {
   position: relative;
   aspect-ratio: 1;
   border: 2px solid #EBBD68;
@@ -481,14 +481,14 @@
   justify-content: center;
 }
 
-.passive-dice-slot.empty {
+.combat-area .passive-dice-slot.empty {
   background: transparent;
 }
 
 /* ========================================
    右侧面板
    ======================================== */
-.combat-right-panel {
+.combat-area .combat-right-panel {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -498,13 +498,13 @@
 }
 
 /* 1. 信息显示区域 */
-.info-display-area {
+.combat-area .info-display-area {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.player-name-display {
+.combat-area .player-name-display {
   height: 40px;
   background: transparent;
   border-bottom: 2px solid #EBBD68;
@@ -517,7 +517,7 @@
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
-.armor-info-display {
+.combat-area .armor-info-display {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -526,20 +526,20 @@
   color: #EBBD68;
 }
 
-.armor-label {
+.combat-area .armor-label {
   font-weight: bold;
 }
 
-.armor-category {
+.combat-area .armor-category {
   color: #f3c267;
 }
 
-.armor-resistances {
+.combat-area .armor-resistances {
   display: flex;
   gap: 4px;
 }
 
-.resistance-badge {
+.combat-area .resistance-badge {
   padding: 2px 6px;
   border-radius: 3px;
   font-size: 11px;
@@ -547,32 +547,32 @@
   color: #0F0D1B;
 }
 
-.resistance-badge.up {
+.combat-area .resistance-badge.up {
   background: #4a7c2c;
 }
 
-.resistance-badge.down {
+.combat-area .resistance-badge.down {
   background: #c14545;
 }
 
-.no-armor {
+.combat-area .no-armor {
   color: #888;
   font-style: italic;
 }
 
-.speed-initiative-area {
+.combat-area .speed-initiative-area {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.speed-displays {
+.combat-area .speed-displays {
   flex: 1;
   display: flex;
   gap: 8px;
 }
 
-.speed-item {
+.combat-area .speed-item {
   flex: 1;
   padding: 6px;
   background: transparent;
@@ -583,12 +583,12 @@
   text-align: center;
 }
 
-.speed-item span {
+.combat-area .speed-item span {
   font-weight: bold;
   color: #f3c267;
 }
 
-.initiative-btn {
+.combat-area .initiative-btn {
   padding: 8px 16px;
   background: #EBBD68;
   border: none;
@@ -600,18 +600,18 @@
   transition: all 0.2s;
 }
 
-.initiative-btn:hover {
+.combat-area .initiative-btn:hover {
   background: #f3c267;
   transform: scale(1.05);
 }
 
-.passive-dice-display {
+.combat-area .passive-dice-display {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-.passive-dice-icon {
+.combat-area .passive-dice-icon {
   width: 40px;
   height: 40px;
   border: 2px solid #EBBD68;
@@ -622,23 +622,23 @@
   transition: all 0.2s;
 }
 
-.passive-dice-icon:hover {
+.combat-area .passive-dice-icon:hover {
   transform: scale(1.1);
   border-color: #f3c267;
 }
 
-.passive-dice-icon img {
+.combat-area .passive-dice-icon img {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-.action-buttons-area {
+.combat-area .action-buttons-area {
   display: flex;
   gap: 8px;
 }
 
-.action-dice-theme-btn {
+.combat-area .action-dice-theme-btn {
   flex: 1;
   padding: 10px;
   background: #EBBD68;
@@ -651,18 +651,18 @@
   transition: all 0.2s;
 }
 
-.action-dice-theme-btn:hover {
+.combat-area .action-dice-theme-btn:hover {
   background: #f3c267;
   transform: translateY(-2px);
 }
 
-.summon-action-dice-btn {
+.combat-area .summon-action-dice-btn {
   flex: 1;
   padding: 10px;
 }
 
 /* 2. BUFF显示区域 */
-.buff-display-area {
+.combat-area .buff-display-area {
   min-height: 60px;
   padding: 8px;
   border: 2px solid #EBBD68;
@@ -670,13 +670,13 @@
   background: transparent;
 }
 
-.buff-icons-grid {
+.combat-area .buff-icons-grid {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
 }
 
-.buff-icon {
+.combat-area .buff-icon {
   width: 30px;
   height: 30px;
   border: 2px solid #EBBD68;
@@ -687,19 +687,19 @@
   transition: all 0.2s;
 }
 
-.buff-icon:hover {
+.combat-area .buff-icon:hover {
   transform: scale(1.15);
   border-color: #f3c267;
 }
 
-.buff-icon img {
+.combat-area .buff-icon img {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
 /* 4. BUFF列表区域 */
-.buff-list-area {
+.combat-area .buff-list-area {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -707,7 +707,7 @@
   overflow: hidden;
 }
 
-.buff-list-header {
+.combat-area .buff-list-header {
   display: grid;
   grid-template-columns: 40px 1fr 60px 60px 100px;
   gap: 6px;
@@ -720,7 +720,7 @@
   text-align: center;
 }
 
-.buff-list-items {
+.combat-area .buff-list-items {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -729,7 +729,7 @@
   overflow-x: hidden;
 }
 
-.buff-list-item {
+.combat-area .buff-list-item {
   display: grid;
   grid-template-columns: 40px 1fr 60px 60px 100px;
   gap: 6px;
@@ -740,20 +740,20 @@
   align-items: center;
 }
 
-.buff-col-icon {
+.combat-area .buff-col-icon {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.buff-col-icon img {
+.combat-area .buff-col-icon img {
   width: 30px;
   height: 30px;
   border-radius: 3px;
   border: 1px solid #EBBD68;
 }
 
-.buff-col-name {
+.combat-area .buff-col-name {
   font-size: 12px;
   color: #EBBD68;
   font-weight: bold;
@@ -763,14 +763,14 @@
   white-space: nowrap;
 }
 
-.buff-col-layers,
-.buff-col-strength {
+.combat-area .buff-col-layers,
+.combat-area .buff-col-strength {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.buff-value-input {
+.combat-area .buff-value-input {
   width: 100%;
   padding: 4px;
   background: #0F0D1B;
@@ -782,19 +782,19 @@
   text-align: center;
 }
 
-.buff-value-input:focus {
+.combat-area .buff-value-input:focus {
   outline: none;
   border-color: #f3c267;
 }
 
-.buff-col-actions {
+.combat-area .buff-col-actions {
   display: flex;
   gap: 4px;
   justify-content: center;
 }
 
-.buff-trigger-btn,
-.buff-delete-btn {
+.combat-area .buff-trigger-btn,
+.combat-area .buff-delete-btn {
   padding: 4px 8px;
   border: none;
   border-radius: 3px;
@@ -804,27 +804,27 @@
   transition: all 0.2s;
 }
 
-.buff-trigger-btn {
+.combat-area .buff-trigger-btn {
   background: #4a7c2c;
   color: #fff;
 }
 
-.buff-trigger-btn:hover {
+.combat-area .buff-trigger-btn:hover {
   background: #5a9c3c;
   transform: scale(1.05);
 }
 
-.buff-delete-btn {
+.combat-area .buff-delete-btn {
   background: #c14545;
   color: #fff;
 }
 
-.buff-delete-btn:hover {
+.combat-area .buff-delete-btn:hover {
   background: #d15555;
   transform: scale(1.05);
 }
 
-.add-buff-btn {
+.combat-area .add-buff-btn {
   width: 100%;
   padding: 10px;
   background: #EBBD68;
@@ -841,7 +841,7 @@
   gap: 6px;
 }
 
-.add-buff-btn:hover {
+.combat-area .add-buff-btn:hover {
   background: #f3c267;
   transform: translateY(-2px);
 }
