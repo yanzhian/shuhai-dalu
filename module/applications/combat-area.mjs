@@ -424,10 +424,8 @@ export default class CombatAreaApplication extends Application {
     // 锁定按钮
     html.find('.lock-btn').click(this._onToggleLock.bind(this));
 
-    // 状态条编辑（解锁时可编辑）
-    if (!this.combatState.isLocked) {
-      html.find('.bar-progress').click(this._onEditStatusBar.bind(this));
-    }
+    // 状态条值输入（解锁时可编辑）
+    html.find('.bar-value-input').change(this._onStatusBarValueChange.bind(this));
 
     // 资源圈点击
     html.find('.resource-circle').click(this._onToggleResource.bind(this));
@@ -471,68 +469,26 @@ export default class CombatAreaApplication extends Application {
   }
 
   /**
-   * 编辑状态条（解锁时）
+   * 状态条值变化（解锁时内联编辑）
    */
-  async _onEditStatusBar(event) {
+  async _onStatusBarValueChange(event) {
     event.preventDefault();
-    if (this.combatState.isLocked) return;
+    const input = $(event.currentTarget);
+    const barType = input.data('bar-type');
+    const newValue = Math.max(0, parseInt(input.val()) || 0);
 
-    const bar = $(event.currentTarget);
-    const barType = bar.closest('.status-bar').hasClass('hp-bar') ? 'hp' :
-                    bar.closest('.status-bar').hasClass('erosion-bar') ? 'erosion' : 'chaos';
-
-    let currentValue, maxValue, label, path;
+    const updateData = {};
 
     if (barType === 'hp') {
-      currentValue = this.actor.system.derived.hp.value;
-      maxValue = this.actor.system.derived.hp.max;
-      label = '生命值';
-      path = 'system.derived.hp.value';
+      updateData['system.derived.hp.value'] = newValue;
     } else if (barType === 'erosion') {
-      currentValue = this.actor.system.derived.corruption.value;
-      maxValue = this.actor.system.derived.corruption.max;
-      label = '侵蚀度';
-      path = 'system.derived.corruption.value';
-    } else {
-      currentValue = this.actor.system.derived.chaos.value;
-      maxValue = this.actor.system.derived.chaos.max;
-      label = '混乱值';
-      path = 'system.derived.chaos.value';
+      updateData['system.derived.corruption.value'] = newValue;
+    } else if (barType === 'chaos') {
+      updateData['system.derived.chaos.value'] = newValue;
     }
 
-    const content = `
-      <form>
-        <div class="form-group">
-          <label>${label}: </label>
-          <input type="number" name="value" value="${currentValue}" min="0" max="${maxValue * 2}"
-                 style="width: 100%; padding: 0.5rem; background: #0F0D1B; border: 1px solid #EBBD68; color: #EBBD68; border-radius: 3px;"/>
-          <small style="color: #888;">最大值: ${maxValue}</small>
-        </div>
-      </form>
-    `;
-
-    new Dialog({
-      title: `编辑${label}`,
-      content: content,
-      buttons: {
-        save: {
-          icon: '<i class="fas fa-check"></i>',
-          label: "保存",
-          callback: async (html) => {
-            const newValue = parseInt(html.find('[name="value"]').val()) || 0;
-            const updateData = {};
-            updateData[path] = Math.max(0, newValue);
-            await this.actor.update(updateData);
-            this.render();
-          }
-        },
-        cancel: {
-          icon: '<i class="fas fa-times"></i>',
-          label: "取消"
-        }
-      },
-      default: "save"
-    }).render(true);
+    await this.actor.update(updateData);
+    this.render();
   }
 
   /**
