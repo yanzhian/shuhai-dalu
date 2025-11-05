@@ -76,10 +76,11 @@
     {{!-- 4. 分割线 --}}
     <div class="divider"></div>
 
-    {{!-- 5. 战斗骰区域 --}}
+    {{!-- 5. 战斗骰/守备/触发/装备区域（统一） --}}
     <div class="combat-dice-section">
       <div class="combat-section-title">战斗骰</div>
       <div class="combat-dice-grid">
+        {{!-- 战斗骰 1-6 --}}
         {{#each combatDiceSlots as |slot index|}}
           <div class="combat-dice-slot {{#unless slot.item}}empty{{/unless}}" data-index="{{@index}}">
             {{#if slot.item}}
@@ -98,18 +99,12 @@
             {{/if}}
           </div>
         {{/each}}
-      </div>
-    </div>
 
-    {{!-- 6. 守备/触发骰 --}}
-    <div class="defense-trigger-section">
-      <div class="defense-trigger-grid">
         {{!-- 守备骰 --}}
-        <div class="dice-slot {{#unless equipment.defenseDice}}empty{{/unless}}">
+        <div class="combat-dice-slot {{#unless equipment.defenseDice}}empty{{/unless}}">
           {{#if equipment.defenseDice}}
-            <button class="dice-activate-toggle active" type="button">
-              <i class="fas fa-circle"></i>
-            </button>
+            <div class="dice-cost-badge">{{equipment.defenseDice.system.cost}}</div>
+            <div class="dice-count-badge">{{equipment.defenseDice.system.diceFormula}}</div>
             <button class="combat-dice-initiate-btn" type="button" title="{{equipment.defenseDice.name}}&#10;{{equipment.defenseDice.type}} {{equipment.defenseDice.system.category}}&#10;{{equipment.defenseDice.system.effect}}">
               <img src="{{equipment.defenseDice.img}}" alt="{{equipment.defenseDice.name}}" />
             </button>
@@ -119,11 +114,10 @@
         </div>
 
         {{!-- 触发骰 --}}
-        <div class="dice-slot {{#unless equipment.triggerDice}}empty{{/unless}}">
+        <div class="combat-dice-slot {{#unless equipment.triggerDice}}empty{{/unless}}">
           {{#if equipment.triggerDice}}
-            <button class="dice-activate-toggle active" type="button">
-              <i class="fas fa-circle"></i>
-            </button>
+            <div class="dice-cost-badge">{{equipment.triggerDice.system.cost}}</div>
+            <div class="dice-count-badge">{{equipment.triggerDice.system.diceFormula}}</div>
             <button class="combat-dice-initiate-btn" type="button" title="{{equipment.triggerDice.name}}&#10;{{equipment.triggerDice.type}} {{equipment.triggerDice.system.category}}&#10;{{equipment.triggerDice.system.effect}}">
               <img src="{{equipment.triggerDice.img}}" alt="{{equipment.triggerDice.name}}" />
             </button>
@@ -131,37 +125,16 @@
             <div class="dice-slot-label">触发骰</div>
           {{/if}}
         </div>
-      </div>
-    </div>
 
-    {{!-- 7. 装备1-4 --}}
-    <div class="equipment-section">
-      <div class="equipment-grid">
+        {{!-- 装备 1-4 --}}
         {{#each equipment.slots as |slot index|}}
-          <div class="equipment-slot {{#unless slot}}empty{{/unless}}">
-            {{#if slot}}
-              <button class="equipment-btn" type="button" title="{{slot.name}}&#10;{{slot.type}} {{slot.system.category}}&#10;{{slot.system.effect}}">
-                <img src="{{slot.img}}" alt="{{slot.name}}" />
-              </button>
-            {{else}}
-              <div class="equipment-slot-label">装备{{add @index 1}}</div>
-            {{/if}}
-          </div>
-        {{/each}}
-      </div>
-    </div>
-
-    {{!-- 被动骰1-3 --}}
-    <div class="passive-dice-section">
-      <div class="passive-dice-grid">
-        {{#each passiveDiceSlots as |slot index|}}
-          <div class="passive-dice-slot {{#unless slot}}empty{{/unless}}">
+          <div class="combat-dice-slot {{#unless slot}}empty{{/unless}}">
             {{#if slot}}
               <button class="combat-dice-initiate-btn" type="button" title="{{slot.name}}&#10;{{slot.type}} {{slot.system.category}}&#10;{{slot.system.effect}}">
                 <img src="{{slot.img}}" alt="{{slot.name}}" />
               </button>
             {{else}}
-              <div class="dice-slot-label">被动骰{{add @index 1}}</div>
+              <div class="dice-slot-label">装备{{add @index 1}}</div>
             {{/if}}
           </div>
         {{/each}}
