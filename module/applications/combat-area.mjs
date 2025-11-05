@@ -248,8 +248,8 @@ export default class CombatAreaApplication extends Application {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ["shuhai-dalu", "combat-area"],
       template: "systems/shuhai-dalu/templates/combat/combat-area.hbs",
-      width: 1200,
-      height: 800,
+      width: 700,
+      height: 900,
       resizable: true,
       title: "战斗区域"
     });
@@ -399,6 +399,11 @@ export default class CombatAreaApplication extends Application {
     // 锁定按钮
     html.find('.lock-btn').click(this._onToggleLock.bind(this));
 
+    // 状态条编辑（解锁时可编辑）
+    if (!this.combatState.isLocked) {
+      html.find('.bar-progress').click(this._onEditStatusBar.bind(this));
+    }
+
     // 资源圈点击
     html.find('.resource-circle').click(this._onToggleResource.bind(this));
 
@@ -438,6 +443,71 @@ export default class CombatAreaApplication extends Application {
     this.combatState.isLocked = !this.combatState.isLocked;
     await this._saveCombatState();
     this.render();
+  }
+
+  /**
+   * 编辑状态条（解锁时）
+   */
+  async _onEditStatusBar(event) {
+    event.preventDefault();
+    if (this.combatState.isLocked) return;
+
+    const bar = $(event.currentTarget);
+    const barType = bar.closest('.status-bar').hasClass('hp-bar') ? 'hp' :
+                    bar.closest('.status-bar').hasClass('erosion-bar') ? 'erosion' : 'chaos';
+
+    let currentValue, maxValue, label, path;
+
+    if (barType === 'hp') {
+      currentValue = this.actor.system.derived.hp.value;
+      maxValue = this.actor.system.derived.hp.max;
+      label = '生命值';
+      path = 'system.derived.hp.value';
+    } else if (barType === 'erosion') {
+      currentValue = this.actor.system.derived.corruption.value;
+      maxValue = this.actor.system.derived.corruption.max;
+      label = '侵蚀度';
+      path = 'system.derived.corruption.value';
+    } else {
+      currentValue = this.actor.system.derived.chaos.value;
+      maxValue = this.actor.system.derived.chaos.max;
+      label = '混乱值';
+      path = 'system.derived.chaos.value';
+    }
+
+    const content = `
+      <form>
+        <div class="form-group">
+          <label>${label}: </label>
+          <input type="number" name="value" value="${currentValue}" min="0" max="${maxValue * 2}"
+                 style="width: 100%; padding: 0.5rem; background: #0F0D1B; border: 1px solid #EBBD68; color: #EBBD68; border-radius: 3px;"/>
+          <small style="color: #888;">最大值: ${maxValue}</small>
+        </div>
+      </form>
+    `;
+
+    new Dialog({
+      title: `编辑${label}`,
+      content: content,
+      buttons: {
+        save: {
+          icon: '<i class="fas fa-check"></i>',
+          label: "保存",
+          callback: async (html) => {
+            const newValue = parseInt(html.find('[name="value"]').val()) || 0;
+            const updateData = {};
+            updateData[path] = Math.max(0, newValue);
+            await this.actor.update(updateData);
+            this.render();
+          }
+        },
+        cancel: {
+          icon: '<i class="fas fa-times"></i>',
+          label: "取消"
+        }
+      },
+      default: "save"
+    }).render(true);
   }
 
   /**

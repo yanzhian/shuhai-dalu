@@ -113,7 +113,7 @@
 .combat-area .status-bar {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  flex: 1;
 }
 
 .combat-area .status-bar.hp-bar {
@@ -124,19 +124,21 @@
   flex: 1;
 }
 
-.combat-area .bar-label {
-  font-size: 11px;
-  color: #EBBD68;
-  font-weight: bold;
-}
-
 .combat-area .bar-progress {
   position: relative;
   flex: 1;
   background: #0F0D1B;
-  border: 1px solid #EBBD68;
   border-radius: 3px;
   overflow: hidden;
+}
+
+.combat-area .bar-progress.editable {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.combat-area .bar-progress.editable:hover {
+  box-shadow: 0 0 8px rgba(235, 189, 104, 0.5);
 }
 
 .combat-area .bar-fill {
@@ -589,15 +591,17 @@
 }
 
 .combat-area .initiative-btn {
-  padding: 8px 16px;
+  width: 40px;
+  height: 24px;
   background: #EBBD68;
   border: none;
   border-radius: 3px;
   color: #0F0D1B;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s;
+  padding: 2px;
 }
 
 .combat-area .initiative-btn:hover {
@@ -639,26 +643,31 @@
 }
 
 .combat-area .action-dice-theme-btn {
-  flex: 1;
-  padding: 10px;
+  width: 80px;
+  height: 24px;
   background: #EBBD68;
   border: none;
   border-radius: 3px;
   color: #0F0D1B;
-  font-size: 13px;
+  font-size: 10px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s;
+  padding: 2px;
+  line-height: 1.1;
 }
 
 .combat-area .action-dice-theme-btn:hover {
   background: #f3c267;
-  transform: translateY(-2px);
+  transform: scale(1.05);
 }
 
 .combat-area .summon-action-dice-btn {
-  flex: 1;
-  padding: 10px;
+  width: 80px;
+  height: 24px;
+  padding: 2px;
+  line-height: 1.1;
+  font-size: 10px;
 }
 
 /* 2. BUFF显示区域 */

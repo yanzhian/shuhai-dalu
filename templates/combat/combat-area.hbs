@@ -15,8 +15,7 @@
     <div class="status-bars-container">
       {{!-- 生命值 --}}
       <div class="status-bar hp-bar">
-        <div class="bar-label">生命值</div>
-        <div class="bar-progress">
+        <div class="bar-progress {{#unless isLocked}}editable{{/unless}}">
           <div class="bar-fill" style="width: {{multiply (divide system.derived.hp.value system.derived.hp.max) 100}}%"></div>
           <span class="bar-text">{{system.derived.hp.value}}/{{system.derived.hp.max}}</span>
         </div>
@@ -26,8 +25,7 @@
       <div class="status-bars-row">
         {{!-- 侵蚀度 --}}
         <div class="status-bar erosion-bar">
-          <div class="bar-label">侵蚀度</div>
-          <div class="bar-progress">
+          <div class="bar-progress {{#unless isLocked}}editable{{/unless}}">
             <div class="bar-fill" style="width: {{multiply (divide system.derived.corruption.value system.derived.corruption.max) 100}}%"></div>
             <span class="bar-text">{{system.derived.corruption.value}}/{{system.derived.corruption.max}}</span>
           </div>
@@ -35,8 +33,7 @@
 
         {{!-- 混乱值 --}}
         <div class="status-bar chaos-bar">
-          <div class="bar-label">混乱值</div>
-          <div class="bar-progress">
+          <div class="bar-progress {{#unless isLocked}}editable{{/unless}}">
             <div class="bar-fill" style="width: {{multiply (divide system.derived.chaos.value system.derived.chaos.max) 100}}%"></div>
             <span class="bar-text">{{system.derived.chaos.value}}/{{system.derived.chaos.max}}</span>
           </div>
