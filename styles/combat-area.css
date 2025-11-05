@@ -125,7 +125,7 @@
 }
 
 .combat-area .bar-progress {
-  position: relative;
+  /* position: relative; */
   flex: 1;
   background: #0F0D1B;
   border-radius: 3px;
