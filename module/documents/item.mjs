@@ -22,20 +22,17 @@ export default class ShuhaiItem extends Item {
    */
   _validateItemData(itemData) {
     const systemData = itemData.system;
-    
-    // 验证分类
+
+    // 验证分类 - 只对骰子类型进行验证，武器/防具/装备/物品允许自定义分类
     const validCategories = {
       'combatDice': ['打击', '突刺', '斩击'],
       'shootDice': ['打击', '突刺', '斩击'],
       'defenseDice': ['闪避', '反击-斩击', '反击-突刺', '反击-打击', '强化反击-斩击', '强化反击-突刺', '强化反击-打击', '防御', '强化防御'],
       'triggerDice': ['EX'],
-      'passiveDice': ['道具', '标签'],
-      'weapon': ['武器'],
-      'armor': ['防具'],
-      'item': ['道具'],
-      'equipment': ['装备']
+      'passiveDice': ['道具', '标签']
+      // weapon, armor, item, equipment 允许自定义分类，不进行验证
     };
-    
+
     const typeCategories = validCategories[itemData.type];
     if (typeCategories && !typeCategories.includes(systemData.category)) {
       systemData.category = typeCategories[0];
@@ -482,10 +479,10 @@ export class PassiveDiceData extends foundry.abstract.TypeDataModel {
 export class WeaponData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     const fields = foundry.data.fields;
-    
+
     return {
       category: new fields.StringField({
-        initial: "武器",
+        initial: "",
         label: "分类"
       }),
       diceFormula: new fields.StringField({
@@ -524,10 +521,10 @@ export class WeaponData extends foundry.abstract.TypeDataModel {
 export class ArmorData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     const fields = foundry.data.fields;
-    
+
     return {
       category: new fields.StringField({
-        initial: "防具",
+        initial: "",
         label: "分类"
       }),
       diceFormula: new fields.StringField({
@@ -575,10 +572,10 @@ export class ArmorData extends foundry.abstract.TypeDataModel {
 export class ItemData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     const fields = foundry.data.fields;
-    
+
     return {
       category: new fields.StringField({
-        initial: "道具",
+        initial: "",
         label: "分类"
       }),
       diceFormula: new fields.StringField({
@@ -612,10 +609,10 @@ export class ItemData extends foundry.abstract.TypeDataModel {
 export class EquipmentData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     const fields = foundry.data.fields;
-    
+
     return {
       category: new fields.StringField({
-        initial: "装备",
+        initial: "",
         label: "分类"
       }),
       diceFormula: new fields.StringField({

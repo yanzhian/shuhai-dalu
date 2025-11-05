@@ -3,6 +3,15 @@
  */
 export default class ShuhaiPlayerSheet extends ActorSheet {
 
+  constructor(...args) {
+    super(...args);
+    // 保存滚动位置，用于渲染后恢复
+    this._scrollPositions = {
+      skills: 0,
+      equipment: 0
+    };
+  }
+
   /** @override */
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
@@ -20,6 +29,33 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   /** @override */
   get template() {
     return `systems/shuhai-dalu/templates/actor/actor-player-sheet.hbs`;
+  }
+
+  /** @override */
+  async _render(force, options) {
+    // 在渲染前保存当前滚动位置（如果元素存在）
+    if (this.element.length > 0) {
+      const skillsElement = this.element.find('.skills-content')[0];
+      const equipmentElement = this.element.find('.equipment-content')[0];
+
+      if (skillsElement) this._scrollPositions.skills = skillsElement.scrollTop;
+      if (equipmentElement) this._scrollPositions.equipment = equipmentElement.scrollTop;
+    }
+
+    await super._render(force, options);
+
+    // 渲染完成后立即恢复滚动位置
+    requestAnimationFrame(() => {
+      const skillsElement = this.element.find('.skills-content')[0];
+      const equipmentElement = this.element.find('.equipment-content')[0];
+
+      if (skillsElement && this._scrollPositions.skills > 0) {
+        skillsElement.scrollTop = this._scrollPositions.skills;
+      }
+      if (equipmentElement && this._scrollPositions.equipment > 0) {
+        equipmentElement.scrollTop = this._scrollPositions.equipment;
+      }
+    });
   }
 
   /* -------------------------------------------- */
@@ -446,17 +482,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       return;
     }
 
-    // 保存滚动位置
-    const scrollElement = this.element.find('.skills-content')[0];
-    const scrollPos = scrollElement?.scrollTop || 0;
-
+    // 滚动位置会在 _render 中自动保存和恢复
     await this.actor.update({ [`system.skills.${skillKey}`]: currentValue + 1 });
-
-    // 恢复滚动位置
-    setTimeout(() => {
-      const newScrollElement = this.element.find('.skills-content')[0];
-      if (newScrollElement) newScrollElement.scrollTop = scrollPos;
-    }, 50);
   }
 
   /**
@@ -470,17 +497,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     const currentValue = this.actor.system.skills[skillKey];
     if (currentValue <= 0) return;
 
-    // 保存滚动位置
-    const scrollElement = this.element.find('.skills-content')[0];
-    const scrollPos = scrollElement?.scrollTop || 0;
-
+    // 滚动位置会在 _render 中自动保存和恢复
     await this.actor.update({ [`system.skills.${skillKey}`]: currentValue - 1 });
-
-    // 恢复滚动位置
-    setTimeout(() => {
-      const newScrollElement = this.element.find('.skills-content')[0];
-      if (newScrollElement) newScrollElement.scrollTop = scrollPos;
-    }, 50);
   }
 
   /**
@@ -526,17 +544,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     const slotIndex = event.currentTarget.dataset.slotIndex !== undefined ?
       parseInt(event.currentTarget.dataset.slotIndex) : null;
 
-    // 保存滚动位置
-    const scrollElement = this.element.find('.equipment-content')[0];
-    const scrollPos = scrollElement?.scrollTop || 0;
-
+    // 滚动位置会在 _render 中自动保存和恢复
     await game.shuhai.unequipItem(this.actor, slotType, slotIndex);
-
-    // 恢复滚动位置
-    setTimeout(() => {
-      const newScrollElement = this.element.find('.equipment-content')[0];
-      if (newScrollElement) newScrollElement.scrollTop = scrollPos;
-    }, 50);
   }
 
   /**
