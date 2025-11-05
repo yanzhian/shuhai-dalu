@@ -593,8 +593,9 @@ input.level-value {
 }
 
 .action-btn {
-  width: 70px;
+  min-width: 40px;
   height: 24px;
+  padding: 0 8px;
   background: #EBBD68;
   border: none;
   border-radius: 6px;
@@ -606,11 +607,16 @@ input.level-value {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 4px;
 }
 
 .action-btn:hover {
   background: #E1AA43;
   transform: translateY(-1px);
+}
+
+.action-btn i {
+  font-size: 14px;
 }
 
 /* 分割线 */
