@@ -46,6 +46,9 @@
         {{/unless}}
       </div>
 
+      {{!-- 可折叠区域容器（包含技能鉴定、装备栏、资源） --}}
+      <div class="collapsible-sections-container">
+
       {{!-- 3. 技能鉴定区域 --}}
       <div class="skills-section">
         <div class="section-header collapsible-header" data-section="skills">
@@ -54,7 +57,7 @@
           <span class="line"></span>
           <i class="fas fa-chevron-down collapse-icon"></i>
         </div>
-        <div class="skills-content scrollable collapsible-content">
+        <div class="skills-content collapsible-content">
 
         {{!-- 力敏系 --}}
         <div class="skill-category">
@@ -134,12 +137,12 @@
           <span class="line"></span>
           <i class="fas fa-chevron-down collapse-icon"></i>
         </div>
-        {{!-- 星光显示（不受折叠影响） --}}
+        <div class="equipment-content collapsible-content">
+        {{!-- 星光显示 --}}
         <div class="starlight-display">
           <span class="starlight-label">星光</span>
           <span class="starlight-value">{{system.derived.starlight}}/{{add 10 (multiply system.level 2)}}</span>
         </div>
-        <div class="equipment-content scrollable collapsible-content">
 
         {{!-- 武器和防具 --}}
         <div class="equipment-row-2">
@@ -384,6 +387,8 @@
           </div>
         </div>
       </div>
+
+      </div>{{!-- 可折叠区域容器结束 --}}
 
     </div>{{!-- 左侧栏结束 --}}
 
