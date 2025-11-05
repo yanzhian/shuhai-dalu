@@ -15,9 +15,16 @@
     <div class="status-bars-container">
       {{!-- 生命值 --}}
       <div class="status-bar hp-bar">
-        <div class="bar-progress {{#unless isLocked}}editable{{/unless}}">
+        <div class="bar-progress">
           <div class="bar-fill" style="width: {{multiply (divide system.derived.hp.value system.derived.hp.max) 100}}%"></div>
-          <span class="bar-text">{{system.derived.hp.value}}/{{system.derived.hp.max}}</span>
+          {{#if isLocked}}
+            <span class="bar-text">{{system.derived.hp.value}}/{{system.derived.hp.max}}</span>
+          {{else}}
+            <span class="bar-text">
+              <input type="number" class="bar-value-input" data-bar-type="hp" value="{{system.derived.hp.value}}" min="0" />
+              /{{system.derived.hp.max}}
+            </span>
+          {{/if}}
         </div>
       </div>
 
@@ -25,17 +32,31 @@
       <div class="status-bars-row">
         {{!-- 侵蚀度 --}}
         <div class="status-bar erosion-bar">
-          <div class="bar-progress {{#unless isLocked}}editable{{/unless}}">
+          <div class="bar-progress">
             <div class="bar-fill" style="width: {{multiply (divide system.derived.corruption.value system.derived.corruption.max) 100}}%"></div>
-            <span class="bar-text">{{system.derived.corruption.value}}/{{system.derived.corruption.max}}</span>
+            {{#if isLocked}}
+              <span class="bar-text">{{system.derived.corruption.value}}/{{system.derived.corruption.max}}</span>
+            {{else}}
+              <span class="bar-text">
+                <input type="number" class="bar-value-input" data-bar-type="erosion" value="{{system.derived.corruption.value}}" min="0" />
+                /{{system.derived.corruption.max}}
+              </span>
+            {{/if}}
           </div>
         </div>
 
         {{!-- 混乱值 --}}
         <div class="status-bar chaos-bar">
-          <div class="bar-progress {{#unless isLocked}}editable{{/unless}}">
+          <div class="bar-progress">
             <div class="bar-fill" style="width: {{multiply (divide system.derived.chaos.value system.derived.chaos.max) 100}}%"></div>
-            <span class="bar-text">{{system.derived.chaos.value}}/{{system.derived.chaos.max}}</span>
+            {{#if isLocked}}
+              <span class="bar-text">{{system.derived.chaos.value}}/{{system.derived.chaos.max}}</span>
+            {{else}}
+              <span class="bar-text">
+                <input type="number" class="bar-value-input" data-bar-type="chaos" value="{{system.derived.chaos.value}}" min="0" />
+                /{{system.derived.chaos.max}}
+              </span>
+            {{/if}}
           </div>
         </div>
       </div>

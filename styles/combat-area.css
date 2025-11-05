@@ -132,15 +132,6 @@
   overflow: hidden;
 }
 
-.combat-area .bar-progress.editable {
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.combat-area .bar-progress.editable:hover {
-  box-shadow: 0 0 8px rgba(235, 189, 104, 0.5);
-}
-
 .combat-area .bar-fill {
   position: absolute;
   left: 0;
@@ -170,6 +161,31 @@
   line-height: 1.4;
   font-weight: bold;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.combat-area .bar-value-input {
+  width: 40px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #EBBD68;
+  color: #EBBD68;
+  font-size: 11px;
+  font-weight: bold;
+  text-align: center;
+  padding: 0;
+  outline: none;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.combat-area .bar-value-input:focus {
+  border-bottom-color: #fff;
+  background: rgba(235, 189, 104, 0.1);
+}
+
+.combat-area .bar-value-input::-webkit-inner-spin-button,
+.combat-area .bar-value-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 /* 3. Cost/EX资源 + 抽取按钮 */
@@ -276,7 +292,7 @@
 
 .combat-area .combat-dice-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 
@@ -327,15 +343,17 @@
   background: transparent;
   border: 2px solid #E1AA43;
   border-radius: 50%;
-  color: #E1AA43;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
   z-index: 2;
   padding: 0;
   transition: all 0.2s;
+}
+
+.combat-area .dice-activate-toggle i {
+  display: none;
 }
 
 .combat-area .dice-activate-toggle:hover {
@@ -344,7 +362,7 @@
 
 .combat-area .dice-activate-toggle.active {
   background: #E1AA43;
-  color: #0F0D1B;
+  border-color: #E1AA43;
 }
 
 .combat-area .dice-count-badge {
