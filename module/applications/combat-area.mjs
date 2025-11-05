@@ -709,32 +709,70 @@ export default class CombatAreaApplication extends Application {
   }
 
   /**
-   * 发起战斗骰
+   * 发起战斗骰挑战
    */
   async _onInitiateCombatDice(event) {
     event.preventDefault();
     const button = $(event.currentTarget);
     const index = button.data('index');
 
+    let item = null;
+
     if (index !== undefined) {
       const slot = this._prepareCombatDiceSlots()[index];
       if (slot && slot.item) {
-        await this._rollDice(slot.item);
+        item = slot.item;
       }
     } else {
-      // 可能是守备骰、触发骰或被动骰
+      // 可能是守备骰、触发骰或装备
       const title = button.attr('title');
       if (title) {
-        const lines = title.split('\n');
-        if (lines.length > 0) {
-          const itemName = lines[0];
-          const item = this.actor.items.find(i => i.name === itemName);
-          if (item) {
-            await this._rollDice(item);
-          }
-        }
+        const itemName = title.split('&#10;')[0];
+        item = this.actor.items.find(i => i.name === itemName);
       }
     }
+
+    if (!item) return;
+
+    // 投骰
+    const formula = item.system.diceFormula || '1d6';
+    const roll = new Roll(formula);
+    await roll.evaluate();
+
+    // 显示 3D 骰子动画
+    if (game.dice3d) {
+      await game.dice3d.showForRoll(roll, game.user, true);
+    }
+
+    // 创建挑战数据
+    const challengeData = {
+      challengerId: this.actor.id,
+      challengerName: this.actor.name,
+      diceId: item.id,
+      diceName: item.name,
+      total: roll.total,
+      messageId: null // 将由ChatMessage填充
+    };
+
+    // 创建挑战聊天卡片
+    const chatData = {
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      content: await renderTemplate("systems/shuhai-dalu/templates/chat/combat-dice-challenge.hbs", {
+        actor: this.actor,
+        dice: item,
+        total: roll.total,
+        challengeData: challengeData
+      }),
+      sound: CONFIG.sounds.dice,
+      flags: {
+        'shuhai-dalu': {
+          challengeData: challengeData
+        }
+      }
+    };
+
+    await ChatMessage.create(chatData);
   }
 
   /**
