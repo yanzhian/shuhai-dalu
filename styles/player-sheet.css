@@ -829,6 +829,10 @@ input.attr-value {
   align-items: center;
   justify-content: center;
   text-align: center;
+  /* 文本截断 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .col-icon {
@@ -862,12 +866,19 @@ input.attr-value {
   justify-content: flex-start !important;
   text-align: left !important;
   padding-left: 8px;
+  /* 确保文本截断生效 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .col-actions {
   display: flex;
   gap: 4px;
   justify-content: center;
+  /* 操作列不需要文本截断 */
+  overflow: visible;
+  white-space: normal;
 }
 
 .item-action-btn {
