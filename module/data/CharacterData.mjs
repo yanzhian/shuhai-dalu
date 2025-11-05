@@ -49,7 +49,8 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
           value: new fields.NumberField({ initial: 0, min: 0, label: "当前混乱值" }),
           max: new fields.NumberField({ initial: 0, min: 0, label: "最大混乱值" }) // 体质>10 ? 生命值/2 : 生命值/3
         }),
-        speed: new fields.NumberField({ initial: 0, min: 0, label: "速度值" }) // 1d6 + 敏捷/3
+        speed: new fields.NumberField({ initial: 0, min: 0, label: "速度值" }), // 1d6 + 敏捷/3
+        totalSpeed: new fields.NumberField({ initial: 0, min: 0, label: "总速度" }) // 用于先攻追踪
       }),
       
       // 常用物品货币

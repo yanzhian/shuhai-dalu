@@ -809,6 +809,10 @@ export default class CombatAreaApplication extends Application {
     await this._saveCombatState();
 
     const totalSpeed = speeds.reduce((sum, speed) => sum + speed, 0);
+
+    // 更新角色的总速度资源（用于战斗遭遇先攻追踪）
+    await this.actor.update({ 'system.derived.totalSpeed': totalSpeed });
+
     await this._sendChatMessage(`先攻速度：${speeds.join(', ')} (总速度: ${totalSpeed})`);
 
     this.render();
