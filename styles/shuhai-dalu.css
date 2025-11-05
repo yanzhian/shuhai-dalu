@@ -1,0 +1,893 @@
+/* ========================================
+   书海大陆 FVTT 系统样式
+   ======================================== *//* 导入 Player Sheet 样式 */
+@import url("player-sheet.css");
+
+
+
+/* === 全局样式 === */
+.shuhai-dalu {
+  font-family: "Signika", "Noto Sans SC", sans-serif;
+}
+
+.shuhai-dalu .window-content {
+  background: url("../assets/background.jpg") repeat;
+  background-size: cover;
+}
+
+/* === 角色表单头部 === */
+.shuhai-dalu .sheet-header {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.shuhai-dalu .sheet-header .profile-img {
+  flex: 0 0 100px;
+  height: 100px;
+  margin-right: 1rem;
+  border: 2px solid #4a90e2;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.shuhai-dalu .sheet-header .header-fields {
+  flex: 1;
+}
+
+.shuhai-dalu .sheet-header .charname {
+  margin: 0 0 0.5rem 0;
+  border-bottom: 2px solid #4a90e2;
+}
+
+.shuhai-dalu .sheet-header .charname input {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+  background: transparent;
+}
+
+/* === 资源条 === */
+.shuhai-dalu .resources {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+.shuhai-dalu .resource {
+  display: flex;
+  flex-direction: column;
+}
+
+.shuhai-dalu .resource-label {
+  font-weight: bold;
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.shuhai-dalu .resource-content {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.shuhai-dalu .resource-control {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu .resource-control:hover {
+  background: #4a90e2;
+  color: white;
+  border-color: #4a90e2;
+}
+
+.shuhai-dalu .resource input {
+  flex: 1;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 0.25rem;
+}
+
+.shuhai-dalu .resource .sep {
+  color: #999;
+}
+
+/* === 标签页 === */
+.shuhai-dalu .sheet-tabs {
+  flex: 0 0 auto;
+  margin: 0;
+  border-bottom: 2px solid #4a90e2;
+}
+
+.shuhai-dalu .sheet-tabs .item {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: transparent;
+  color: #666;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu .sheet-tabs .item:hover {
+  color: #4a90e2;
+  text-shadow: 0 0 10px rgba(74, 144, 226, 0.5);
+}
+
+.shuhai-dalu .sheet-tabs .item.active {
+  color: #4a90e2;
+  border-bottom: 3px solid #4a90e2;
+}
+
+/* === 表单主体 === */
+.shuhai-dalu .sheet-body {
+  flex: 1;
+  overflow: hidden;
+}
+
+.shuhai-dalu .sheet-body .tab {
+  height: 100%;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+/* === 属性网格 === */
+.shuhai-dalu .attributes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.shuhai-dalu .attribute {
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid #4a90e2;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.shuhai-dalu .attribute:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(74, 144, 226, 0.3);
+}
+
+.shuhai-dalu .attribute-label {
+  font-weight: bold;
+  font-size: 0.875rem;
+  color: #4a90e2;
+  margin-bottom: 0.5rem;
+}
+
+.shuhai-dalu .attribute-value input {
+  width: 100%;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  border: none;
+  background: transparent;
+  color: #333;
+}
+
+.shuhai-dalu .attribute-roll {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid #4a90e2;
+  border-radius: 4px;
+  background: white;
+  color: #4a90e2;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu .attribute-roll:hover {
+  background: #4a90e2;
+  color: white;
+}
+
+/* === 动作按钮区域 === */
+.shuhai-dalu .actions-section {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.shuhai-dalu .actions-section button {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.shuhai-dalu .corruption-check {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.shuhai-dalu .corruption-check:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.shuhai-dalu .long-rest {
+  background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+  color: #333;
+}
+
+.shuhai-dalu .long-rest:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(132, 250, 176, 0.4);
+}
+
+/* === 技能组 === */
+.shuhai-dalu .skill-group {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.shuhai-dalu .group-title {
+  margin: 0 0 0.5rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #4a90e2;
+  color: #4a90e2;
+  font-size: 1.1rem;
+}
+
+.shuhai-dalu .skills-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+.shuhai-dalu .skill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu .skill:hover {
+  background: #f5f5f5;
+  border-color: #4a90e2;
+}
+
+.shuhai-dalu .skill-label {
+  flex: 1;
+  font-weight: 500;
+}
+
+.shuhai-dalu .skill-value input {
+  width: 50px;
+  text-align: center;
+  padding: 0.25rem;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.shuhai-dalu .skill-roll {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid #4a90e2;
+  border-radius: 4px;
+  background: white;
+  color: #4a90e2;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu .skill-roll:hover {
+  background: #4a90e2;
+  color: white;
+}
+
+/* === 物品列表 === */
+.shuhai-dalu .items-section {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.shuhai-dalu .items-section h3 {
+  margin: 0 0 0.5rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #4a90e2;
+  color: #4a90e2;
+}
+
+.shuhai-dalu .items-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.shuhai-dalu .items-list .item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu .items-list .item:hover {
+  background: #f5f5f5;
+  border-color: #4a90e2;
+}
+
+.shuhai-dalu .item-image {
+  flex: 0 0 auto;
+}
+
+.shuhai-dalu .item-image img {
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.shuhai-dalu .item-name {
+  flex: 1;
+  margin: 0;
+  font-weight: bold;
+}
+
+.shuhai-dalu .item-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.shuhai-dalu .item-control {
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu .item-control:hover {
+  color: #4a90e2;
+  transform: scale(1.2);
+}
+
+.shuhai-dalu .item-create {
+  width: 100%;
+  padding: 0.5rem;
+  border: 2px dashed #4a90e2;
+  border-radius: 4px;
+  background: transparent;
+  color: #4a90e2;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu .item-create:hover {
+  background: rgba(74, 144, 226, 0.1);
+}
+
+/* === 传记编辑器 === */
+.shuhai-dalu .biography {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+/* === 角色表单头部 - 扩展 === */
+.shuhai-dalu .info-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.shuhai-dalu .info-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.shuhai-dalu .info-field label {
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: #666;
+  margin-bottom: 0.125rem;
+}
+
+.shuhai-dalu .info-field input {
+  padding: 0.25rem;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+/* === 派生属性行 === */
+.shuhai-dalu .derived-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.shuhai-dalu .resource-box {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 6px;
+  padding: 0.5rem;
+  text-align: center;
+  border: 2px solid #ddd;
+}
+
+.shuhai-dalu .resource-box.starlight {
+  border-color: #ffd700;
+  background: linear-gradient(135deg, #fff9e6 0%, #fffbf0 100%);
+}
+
+.shuhai-dalu .resource-box.hp {
+  border-color: #e74c3c;
+}
+
+.shuhai-dalu .resource-box.corruption {
+  border-color: #9b59b6;
+}
+
+.shuhai-dalu .resource-box label {
+  font-size: 0.75rem;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.shuhai-dalu .resource-value {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.shuhai-dalu .resource-value .current {
+  color: #2ecc71;
+}
+
+.shuhai-dalu .resource-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.shuhai-dalu .resource-bar input {
+  width: 50px;
+  text-align: center;
+  padding: 0.125rem;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.shuhai-dalu .progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.shuhai-dalu .progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+  transition: width 0.3s ease;
+}
+
+.shuhai-dalu .progress-bar.corruption .progress-fill {
+  background: linear-gradient(90deg, #9b59b6 0%, #8e44ad 100%);
+}
+
+.shuhai-dalu .resource-detail {
+  font-size: 0.7rem;
+  color: #999;
+}
+
+/* === 货币行 === */
+.shuhai-dalu .currency-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.shuhai-dalu .currency-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.shuhai-dalu .currency-field label {
+  font-size: 0.75rem;
+  font-weight: bold;
+  margin-bottom: 0.125rem;
+}
+
+.shuhai-dalu .currency-field input {
+  width: 100%;
+  text-align: center;
+  padding: 0.25rem;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+/* === 技能系统 === */
+.shuhai-dalu .skill-category {
+  background: rgba(19, 19, 19, 0.9);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.shuhai-dalu .category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #4a90e2;
+}
+
+.shuhai-dalu .category-header h3 {
+  margin: 0;
+  color: #4a90e2;
+}
+
+.shuhai-dalu .skill-points {
+  font-size: 0.9rem;
+}
+
+.shuhai-dalu .points-used {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.shuhai-dalu .points-total {
+  color: #2ecc71;
+  font-weight: bold;
+}
+
+.shuhai-dalu .skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 0.5rem;
+}
+
+.shuhai-dalu .skill-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+}
+
+.shuhai-dalu .skill-item label {
+  flex: 1;
+  font-weight: 500;
+}
+
+.shuhai-dalu .skill-controls {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.shuhai-dalu .skill-increase,
+.shuhai-dalu .skill-decrease {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid #4a90e2;
+  border-radius: 3px;
+  background: white;
+  color: #4a90e2;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu .skill-increase:hover,
+.shuhai-dalu .skill-decrease:hover {
+  background: #4a90e2;
+  color: white;
+}
+
+.shuhai-dalu .skill-controls input {
+  width: 40px;
+  text-align: center;
+  padding: 0.25rem;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background: #f5f5f5;
+}
+
+/* === 装备系统 === */
+.shuhai-dalu .equipment-section,
+.shuhai-dalu .combat-dice-section,
+.shuhai-dalu .special-dice-section,
+.shuhai-dalu .passive-section {
+  background: rgba(19, 19, 19, 0.9);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.shuhai-dalu .equipment-slots,
+.shuhai-dalu .dice-slots,
+.shuhai-dalu .special-slots,
+.shuhai-dalu .passive-slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.shuhai-dalu .equipment-slot,
+.shuhai-dalu .dice-slot,
+.shuhai-dalu .passive-slot {
+  /* border: 2px dashed #2c3e50; */
+  /* border-radius: 6px; */
+  padding: 0.25rem;
+  background: rgb(19, 19, 19);
+  transition: all 0.2s;
+}
+
+.shuhai-dalu .equipment-slot:hover,
+.shuhai-dalu .dice-slot:hover,
+.shuhai-dalu .passive-slot:hover {
+  border-color: #3b3b3b;
+  background: #1b1b1b;
+}
+
+.shuhai-dalu .equipment-slot label,
+.shuhai-dalu .dice-slot label,
+.shuhai-dalu .passive-slot label {
+  display: block;
+  font-weight: bold;
+  font-size: 0.85rem;
+  color: hsl(0, 0%, 100%);
+  margin-bottom: 0.5rem;
+}
+
+.shuhai-dalu .slot-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 32px;
+}
+
+.shuhai-dalu .empty-slot {
+  color: #999;
+  font-style: italic;
+}
+
+.shuhai-dalu .item-name {
+  flex: 1;
+  font-weight: 500;
+  color: #333;
+}
+
+.shuhai-dalu .unequip-btn,
+.shuhai-dalu .use-dice-btn {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #e74c3c;
+  border-radius: 3px;
+  background: white;
+  color: #e74c3c;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu .unequip-btn:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+.shuhai-dalu .use-dice-btn {
+  border-color: #2ecc71;
+  color: #2ecc71;
+}
+
+.shuhai-dalu .use-dice-btn:hover {
+  background: #2ecc71;
+  color: white;
+}
+
+/* === 物品栏 === */
+.shuhai-dalu .inventory-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+}
+
+.shuhai-dalu .create-item-btn {
+  padding: 0.5rem 1rem;
+  border: 2px solid #4a90e2;
+  border-radius: 6px;
+  background: white;
+  color: #4a90e2;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  max-width: 40px;
+}
+
+.shuhai-dalu .create-item-btn:hover {
+  background: #4a90e2;
+  color: white;
+}
+
+.shuhai-dalu .inventory-list {
+  background: rgba(19, 19, 19, 0.9);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.shuhai-dalu .items-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.shuhai-dalu .items-table thead {
+  background: #4a90e2;
+  color: white;
+}
+
+.shuhai-dalu .items-table th {
+  padding: 0.75rem 0.5rem;
+  text-align: left;
+  font-weight: bold;
+}
+
+.shuhai-dalu .items-table td {
+  padding: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.shuhai-dalu .item-row {
+  cursor: grab;
+  transition: background 0.2s;
+}
+
+.shuhai-dalu .item-row:hover {
+  background: #f5f5f5;
+}
+
+.shuhai-dalu .item-row .item-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.shuhai-dalu .item-row .item-name img {
+  border-radius: 3px;
+}
+
+.shuhai-dalu .item-controls {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.shuhai-dalu .item-controls button {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu .item-use {
+  color: #2ecc71;
+  border-color: #2ecc71;
+}
+
+.shuhai-dalu .item-use:hover {
+  background: #2ecc71;
+  color: white;
+}
+
+.shuhai-dalu .item-edit {
+  color: #3498db;
+  border-color: #3498db;
+}
+
+.shuhai-dalu .item-edit:hover {
+  background: #3498db;
+  color: white;
+}
+
+.shuhai-dalu .item-delete {
+  color: #e74c3c;
+  border-color: #e74c3c;
+}
+
+.shuhai-dalu .item-delete:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+/* === 动作按钮 === */
+.shuhai-dalu .actions-section {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.shuhai-dalu .action-btn {
+  padding: 0.75rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+/* === 响应式设计 === */
+@media (max-width: 768px) {
+  .shuhai-dalu .attributes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .shuhai-dalu .info-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .shuhai-dalu .derived-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .shuhai-dalu .currency-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .shuhai-dalu .skills-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .shuhai-dalu .equipment-slots,
+  .shuhai-dalu .dice-slots {
+    grid-template-columns: 1fr;
+  }
+  
+  .shuhai-dalu .actions-section {
+    grid-template-columns: 1fr;
+  }
+  
+} 
