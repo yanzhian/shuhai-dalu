@@ -1,845 +1,1240 @@
 /* ========================================
-   ���rh7
+   书海大陆 Player 角色卡样式 - 重新设计版本
+   严格按照PS设计图排版
    ======================================== */
 
-/* tS�h */
+/* 基础样式 */
 .player-sheet {
-  background-color: #0F0D1B;
-  border: 2px solid #EBBD68;
-  border-radius: 8px;
-  padding: 10px;
-  font-family: Arial, sans-serif;
-  color: #ECE4D6;
+  background: #2a2a2a;
+  color: #e0e0e0;
+  font-family: "Noto Sans SC", sans-serif;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.player-sheet form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   overflow: hidden;
 }
 
-.player-sheet .sheet-container {
-  display: flex;
-  gap: 15px;
-  height: 100%;
+input:disabled,
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+}
+
+button:disabled:hover {
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 /* ========================================
-   �
+   第一部分: 角色卡信息区域
    ======================================== */
+.character-info-section {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: #1e1e1e;
+  border-bottom: 2px solid #3a3a3a;
+  flex-shrink: 0;
+  min-height: 380px;
+  max-height: 400px;
+}
 
-.player-sheet .left-column {
-  width: 270px;
-  max-width: 270px;
-  min-width: 270px;
+/* === 左侧面板：头像和状态栏 === */
+.info-left {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 0.5rem;
+  width: 150px;
+  flex-shrink: 0;
 }
 
-/* 4Ϲh */
-.player-sheet .avatar-container {
-  width: 270px;
-  height: 270px;
+.avatar-container {
   position: relative;
-  border: 2px solid #EBBD68;
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: #1a1825;
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
 }
 
-.player-sheet .avatar-container .profile-img {
+.avatar-container .profile-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  border: 3px solid #4a4a4a;
+  border-radius: 4px;
   cursor: pointer;
+  transition: border-color 0.3s;
 }
 
-.player-sheet .avatar-container .lock-btn {
+.avatar-container .profile-img:hover {
+  border-color: #e74c3c;
+}
+
+.avatar-container .lock-btn {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 36px;
-  height: 36px;
-  border: none;
+  top: 5px;
+  right: 5px;
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid #555;
   border-radius: 50%;
-  background-color: #E1AA43;
-  color: #0F0D1B;
-  font-size: 16px;
+  color: #2ecc71;
+  font-size: 1rem;
   cursor: pointer;
+  transition: all 0.3s;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
 }
 
-.player-sheet .avatar-container .lock-btn:hover {
-  background-color: #EBBD68;
-  transform: scale(1.05);
+.avatar-container .lock-btn:hover {
+  background: rgba(0, 0, 0, 0.95);
+  border-color: #2ecc71;
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
 }
 
-/* �<�h */
-.player-sheet .status-values-container {
-  height: 96px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.avatar-container .lock-btn.locked {
+  color: #e74c3c;
+  border-color: #e74c3c;
 }
 
-.player-sheet .status-bar {
+.avatar-container .lock-btn.locked:hover {
+  border-color: #e74c3c;
+  box-shadow: 0 0 15px rgba(231, 76, 60, 0.5);
+}
+
+/* 状态条 */
+.info-left .status-bar {
   position: relative;
-  height: 30px;
-  border: 2px solid #EBBD68;
-  border-radius: 6px;
-  background-color: #1a1825;
+  height: 28px;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
   overflow: hidden;
-}
-
-.player-sheet .dual-status-row {
   display: flex;
-  gap: 6px;
-  height: 30px;
+  align-items: center;
+  justify-content: center;
 }
 
-.player-sheet .dual-status-row .status-bar {
-  flex: 1;
-}
-
-.player-sheet .bar-fill {
+.status-bar .bar-fill {
   position: absolute;
-  top: 0;
   left: 0;
+  top: 0;
   height: 100%;
   transition: width 0.3s ease;
 }
 
-.player-sheet .bar-fill.hp {
-  background-color: #2d9e4e;
+.status-bar .bar-fill.hp {
+  background: linear-gradient(90deg, #27ae60, #2ecc71);
 }
 
-.player-sheet .bar-fill.erosion {
-  background-color: #b04838;
+.status-bar .bar-fill.erosion {
+  background: linear-gradient(90deg, #d35400, #e67e22);
 }
 
-.player-sheet .bar-fill.chaos {
-  background-color: #8b4513;
+.status-bar .bar-fill.chaos {
+  background: linear-gradient(90deg, #2980b9, #3498db);
 }
 
-.player-sheet .bar-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #ECE4D6;
-  font-size: 14px;
-  font-weight: bold;
+.status-bar .bar-text {
+  position: relative;
   z-index: 1;
+  font-weight: bold;
+  font-size: 0.875rem;
+  color: #fff;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
-/* �ڨ:� */
-.player-sheet .left-scroll-area {
+/* 状态输入框行 */
+.status-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.status-input-row input {
   flex: 1;
+  padding: 0.25rem;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  color: #e0e0e0;
+  text-align: center;
+  font-size: 0.75rem;
+}
+
+.status-input-row input:focus {
+  outline: none;
+  border-color: #e74c3c;
+}
+
+.status-input-row span {
+  color: #95a5a6;
+  font-size: 0.875rem;
+}
+
+/* === 右侧面板：基础信息和属性 === */
+.info-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   overflow-y: auto;
-  overflow-x: hidden;
-  padding-right: 5px;
 }
 
-.player-sheet .left-scroll-area::-webkit-scrollbar {
-  width: 6px;
-}
-
-.player-sheet .left-scroll-area::-webkit-scrollbar-track {
-  background: #1a1825;
-  border-radius: 3px;
-}
-
-.player-sheet .left-scroll-area::-webkit-scrollbar-thumb {
-  background: #EBBD68;
-  border-radius: 3px;
-}
-
-/* :�� */
-.player-sheet .section-header {
+/* 顶部基础信息行 */
+.basic-info-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 10px 0;
-}
-
-.player-sheet .section-header .divider-line {
-  flex: 1;
-  height: 1px;
-  background-color: #EBBD68;
-}
-
-.player-sheet .section-header .header-text {
-  color: #EBBD68;
-  font-size: 16px;
-  font-weight: bold;
-  white-space: nowrap;
-}
-
-/* ��t�:� */
-.player-sheet .skills-check-section {
-  margin-bottom: 15px;
-}
-
-.player-sheet .skills-check-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.player-sheet .skill-category {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.player-sheet .category-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 4px 8px;
-  border: 1px solid #EBBD68;
-  border-radius: 4px;
-  background-color: rgba(235, 189, 104, 0.1);
-  font-size: 11px;
-}
-
-.player-sheet .category-name {
-  color: #EBBD68;
-  font-weight: bold;
-}
-
-.player-sheet .remaining-points {
-  color: #0F0D1B;
-  background-color: #E1AA43;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-weight: bold;
-  min-width: 20px;
-  text-align: center;
-}
-
-.player-sheet .skill-row {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 11px;
-}
-
-.player-sheet .skill-btn {
-  width: 18px;
-  height: 18px;
-  border: 1px solid #EBBD68;
-  border-radius: 3px;
-  background-color: transparent;
-  color: #EBBD68;
-  font-size: 12px;
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  padding: 0;
-}
-
-.player-sheet .skill-btn:hover {
-  background-color: rgba(235, 189, 104, 0.2);
-}
-
-.player-sheet .skill-name {
-  flex: 1;
-  color: #ECE4D6;
-  font-size: 11px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.player-sheet .skill-value {
-  color: #ECE4D6;
-  font-weight: bold;
-  min-width: 16px;
-  text-align: center;
-  font-size: 11px;
-}
-
-.player-sheet .skill-check-btn {
-  width: 16px;
-  height: 16px;
-  border: none;
-  border-radius: 50%;
-  background-color: #E1AA43;
-  cursor: pointer;
-  transition: all 0.2s;
-  padding: 0;
-}
-
-.player-sheet .skill-check-btn:hover {
-  background-color: #EBBD68;
-  transform: scale(1.1);
-}
-
-/* �:� */
-.player-sheet .equipment-section {
-  margin-bottom: 15px;
-}
-
-.player-sheet .equipment-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  margin-bottom: 6px;
-}
-
-.player-sheet .equipment-row:has(.equipment-slot[data-slot="weapon"]) {
-  grid-template-columns: 1fr 1fr;
-}
-
-.player-sheet .equipment-slot {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1;
-  border: 2px solid #EBBD68;
-  border-radius: 6px;
-  background-color: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.player-sheet .equipment-slot:hover {
-  background-color: rgba(235, 189, 104, 0.1);
-}
-
-.player-sheet .equipment-slot .slot-label {
-  color: #EBBD68;
-  font-size: 12px;
-  font-weight: bold;
-  text-align: center;
-}
-
-.player-sheet .equipment-slot .item-icon {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.player-sheet .equipment-slot .slot-cost {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: #E1AA43;
-  color: #0F0D1B;
-  font-size: 11px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-}
-
-.player-sheet .equipment-slot .unequip-btn {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  padding: 2px 6px;
-  border: none;
-  border-radius: 4px;
-  background-color: #E1AA43;
-  color: #0F0D1B;
-  font-size: 10px;
-  font-weight: bold;
-  cursor: pointer;
-  z-index: 2;
-  transition: all 0.2s;
-}
-
-.player-sheet .equipment-slot .unequip-btn:hover {
-  background-color: #EBBD68;
-}
-
-.player-sheet .equipment-slot .slot-dice {
-  position: absolute;
-  bottom: 4px;
-  right: 4px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background-color: #E1AA43;
-  color: #0F0D1B;
-  font-size: 10px;
-  font-weight: bold;
-  z-index: 2;
-}
-
-/* D�:� */
-.player-sheet .resources-section {
-  height: 90px;
-  display: flex;
-  flex-direction: column;
-}
-
-.player-sheet .resources-grid {
-  display: flex;
+  gap: 0.5rem;
   flex-wrap: wrap;
-  gap: 6px;
-  padding: 8px 0;
-}
-
-.player-sheet .resource-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  width: calc(50% - 3px);
-}
-
-.player-sheet .resource-label {
-  color: #EBBD68;
-  font-weight: bold;
-}
-
-.player-sheet .resource-value {
-  color: #ECE4D6;
-}
-
-/* ========================================
-   �
-   ======================================== */
-
-.player-sheet .right-column {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  overflow: hidden;
-}
-
-/* v�6	� */
-.player-sheet .top-controls {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.player-sheet .top-btn {
-  width: 30px;
-  height: 30px;
-  border: none;
-  background-color: transparent;
-  color: #ECE4D6;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-}
-
-.player-sheet .top-btn:hover {
-  background-color: rgba(236, 228, 214, 0.1);
-  color: #EBBD68;
-}
-
-.player-sheet .divider-line-full {
-  height: 1px;
-  background-color: #EBBD68;
-  margin: 5px 0;
-}
-
-/* �r�o */
-.player-sheet .character-info {
-  display: flex;
-  gap: 15px;
-  padding: 10px 0;
-}
-
-.player-sheet .character-info-left {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.player-sheet .player-name input {
-  background: transparent;
-  border: none;
-  color: #EBBD68;
-  font-size: 40px;
-  font-weight: bold;
-  width: 100%;
-  padding: 0;
-  outline: none;
-}
-
-.player-sheet .player-name input:disabled {
-  cursor: default;
-}
-
-.player-sheet .character-details {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.player-sheet .character-details input {
-  background: transparent;
-  border: none;
-  color: #EBBD68;
-  font-size: 20px;
-  padding: 2px 0;
-  outline: none;
-}
-
-.player-sheet .character-details input:disabled {
-  cursor: default;
-}
-
-.player-sheet .character-info-right {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: flex-end;
-}
-
-.player-sheet .level-display {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.player-sheet .level-label {
-  color: #EEE6D8;
-  font-size: 26px;
-  font-weight: normal;
-}
-
-.player-sheet .level-value {
-  color: #EBBD68;
-  font-size: 32px;
-  font-weight: bold;
-}
-
-.player-sheet .exp-bar-container {
-  width: 170px;
-}
-
-.player-sheet .exp-bar {
   position: relative;
-  width: 170px;
-  height: 20px;
-  border: 2px solid #EBBD68;
-  border-radius: 6px;
-  background-color: #1a1825;
+}
+
+.basic-info-row .info-field {
+  flex: 0 1 auto;
+}
+
+.basic-info-row .info-field.name-field {
+  flex: 0 1 160px;
+}
+
+.basic-info-row .info-field.faction-field {
+  flex: 0 1 120px;
+}
+
+.basic-info-row .info-field input {
+  width: 100%;
+  padding: 0.25rem 0.5rem;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  color: #e0e0e0;
+  font-size: 0.875rem;
+}
+
+.basic-info-row .info-field input:focus {
+  outline: none;
+  border-color: #e74c3c;
+}
+
+/* 经验条和等级 */
+.exp-level-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+}
+
+.exp-bar {
+  position: relative;
+  width: 120px;
+  height: 18px;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
   overflow: hidden;
 }
 
-.player-sheet .exp-fill {
+.exp-input {
+  width: 80px;
+  padding: 0.2rem;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  color: #e0e0e0;
+  text-align: center;
+  font-size: 0.72rem;
+}
+
+.exp-input:focus {
+  outline: none;
+  border-color: #e74c3c;
+}
+
+.exp-fill {
   position: absolute;
-  top: 0;
   left: 0;
+  top: 0;
   height: 100%;
-  background-color: #EBBD68;
+  background: linear-gradient(90deg, #8e44ad, #9b59b6);
   transition: width 0.3s ease;
 }
 
-.player-sheet .exp-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #0F0D1B;
-  font-size: 12px;
-  font-weight: bold;
-  z-index: 1;
-}
-
-.player-sheet .action-buttons {
-  display: flex;
-  gap: 6px;
-}
-
-.player-sheet .action-btn {
-  width: 56px;
-  height: 24px;
-  border: none;
-  border-radius: 4px;
-  background-color: #EBBD68;
-  color: #0F0D1B;
-  font-size: 12px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.player-sheet .action-btn:hover {
-  background-color: #E1AA43;
-  transform: translateY(-1px);
-}
-
-/* ^'t� */
-.player-sheet .attributes-section {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
-  padding: 10px 0;
-}
-
-.player-sheet .attribute-box {
+.exp-text {
   position: relative;
-  width: 70px;
-  height: 60px;
-  border: 2px solid #EBBD68;
-  border-radius: 6px;
-  background-color: transparent;
+  z-index: 1;
+  font-size: 0.75rem;
+  color: #fff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.level-display {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.level-display span {
+  color: #aaa;
+}
+
+.level-display input {
+  width: 50px;
+  padding: 0.25rem;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  color: #e0e0e0;
+  text-align: center;
+}
+
+/* 战斗区域切换按钮 */
+.switch-combat-btn {
+  width: 50px;
+  height: 36px;
+  padding: 0.5rem 1rem;
+  background: #34495e;
+  border: 1px solid #4a4a4a;
+  border-radius: 4px;
+  color: #ecf0f1;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 0.875rem;
+}
+
+.switch-combat-btn:hover {
+  background: #415b76;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* 长休和侵蚀鉴定按钮行 */
+.check-buttons-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.check-buttons-row button {
+  /* padding: 0.5rem 1rem; */
+  background: #2c3e50;
+  border: 1px solid #4a4a4a;
+  border-radius: 4px;
+  color: #ecf0f1;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 0.875rem;
+}
+
+.check-buttons-row button:hover {
+  background: #34495e;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* 属性行 */
+.attributes-row {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.attr-block {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
+  gap: 0.25rem;
 }
 
-.player-sheet .attr-name {
-  color: #EBBD68;
-  font-size: 20px;
+.attr-block label {
+  font-size: 0.75rem;
+  color: #aaa;
+}
+
+.attr-block input {
+  width: 44px;
+  padding: 0.2rem;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  color: #e0e0e0;
+  text-align: center;
   font-weight: bold;
+  font-size: 1.05rem;
 }
 
-.player-sheet .attr-value {
-  color: #ECE4D6;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.player-sheet .attr-check-btn {
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 16px;
-  height: 16px;
-  border: none;
-  border-radius: 50%;
-  background-color: #E1AA43;
+.attr-block .attr-check-btn {
+  width: 44px;
+  height: 20px;
+  background: #c0392b;
+  border: 1px solid #e74c3c;
+  border-radius: 3px;
+  color: #fff;
   cursor: pointer;
-  transition: all 0.2s;
-  padding: 0;
-}
-
-.player-sheet .attr-check-btn:hover {
-  background-color: #EBBD68;
-  transform: translateX(-50%) scale(1.1);
-}
-
-/* i�" */
-.player-sheet .item-search-bar {
+  transition: all 0.25s;
   display: flex;
-  gap: 8px;
   align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
 }
 
-.player-sheet .search-input-container {
+.attr-block .attr-check-btn:hover {
+  background: #e74c3c;
+  transform: scale(1.05);
+}
+
+/* 技能鉴定区域 */
+.skills-check-section {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.skills-check-header {
+  font-size: 0.875rem;
+  font-weight: bold;
+  color: #ecf0f1;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid #4a4a4a;
+}
+
+.skills-check-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+}
+
+.skill-check-category {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.category-label {
+  font-size: 0.75rem;
+  color: #95a5a6;
+  padding: 0.25rem;
+  background: #2c3e50;
+  border-radius: 3px;
+  text-align: center;
+}
+
+.skill-check-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+}
+
+.skill-action-btn {
+  width: 18px;
+  height: 18px;
+  background: #34495e;
+  border: 1px solid #4a4a4a;
+  border-radius: 3px;
+  color: #ecf0f1;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-size: 0.72rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.skill-action-btn:hover {
+  background: #415b76;
+}
+
+.skill-name {
+  flex: 1;
+  color: #ecf0f1;
+  font-size: 0.75rem;
+}
+
+.skill-value {
+  color: #3498db;
+  font-weight: bold;
+  font-size: 0.75rem;
+}
+
+.skill-check-btn {
+  width: 18px;
+  height: 18px;
+  background: #c0392b;
+  border: 1px solid #e74c3c;
+  border-radius: 3px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-size: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.skill-check-btn:hover {
+  background: #e74c3c;
+  transform: scale(1.1);
+}
+
+/* ========================================
+   第二部分: 搜索检索栏
+   ======================================== */
+.search-filter-bar {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  background: #1e1e1e;
+  border-bottom: 2px solid #3a3a3a;
+  flex-shrink: 0;
+  height: 30px;
+  min-height: 48px;
+  max-height: 48px;
+  flex-wrap: nowrap;
+  flex-direction: row;
+}
+
+.search-box {
   position: relative;
-  height: 30px;
+  flex: 1;
+  max-width: 2400px;
 }
 
-.player-sheet .item-search-input {
+.search-box input {
   width: 100%;
-  height: 30px;
-  border: 2px solid #EBBD68;
-  border-radius: 6px;
-  background-color: transparent;
-  color: #ECE4D6;
-  padding: 0 30px 0 10px;
-  font-size: 14px;
-  outline: none;
+  height: 100%;
+  padding: 0.5rem 2.5rem 0.5rem 1rem;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  color: #e0e0e0;
+  font-size: 0.875rem;
 }
 
-.player-sheet .search-input-container i {
+.search-box input:focus {
+  outline: none;
+  border-color: #e74c3c;
+}
+
+.search-box i {
   position: absolute;
-  right: 10px;
+  right: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #EBBD68;
+  color: #95a5a6;
+  pointer-events: none;
 }
 
-.player-sheet .search-btn {
-  width: 30px;
-  height: 30px;
-  border: 2px solid #EBBD68;
-  border-radius: 6px;
-  background-color: transparent;
-  color: #EBBD68;
-  font-size: 14px;
+.filter-icon-btn {
+  width: 36px;
+  height: 36px;
+  background: #34495e;
+  border: 1px solid #4a4a4a;
+  border-radius: 4px;
+  color: #ecf0f1;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 1rem;
 }
 
-.player-sheet .search-btn:hover {
-  background-color: rgba(235, 189, 104, 0.2);
+.filter-icon-btn:hover {
+  background: #415b76;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* i� */
-.player-sheet .inventory-section {
+.filter-icon-btn.active,
+.favorite-filter-btn.active {
+  background: #e74c3c;
+  border-color: #c0392b;
+  color: #fff;
+}
+
+/* 创建物品按钮特殊样式 */
+.search-filter-bar .create-item-btn {
+  background: #16a085;
+  border-color: #16a085;
+}
+
+.search-filter-bar .create-item-btn:hover {
+  background: #1abc9c;
+  border-color: #1abc9c;
+}
+
+/* ========================================
+   第三部分: 装备栏和物品栏
+   ======================================== */
+.equipment-inventory-section {
   flex: 1;
   display: flex;
-  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
   overflow: hidden;
 }
 
-.player-sheet .inventory-header {
+/* === 左侧区域：装备栏和资源栏 === */
+.left-section {
+  width: 350px;
+  flex-shrink: 0;
   display: flex;
-  gap: 8px;
-  padding: 8px;
-  background-color: rgba(235, 189, 104, 0.2);
-  border: 2px solid #EBBD68;
-  border-radius: 6px 6px 0 0;
-  font-size: 14px;
-  font-weight: bold;
-  color: #EBBD68;
-}
-
-.player-sheet .inventory-list {
-  flex: 1;
+  flex-direction: column;
+  gap: 0.75rem;
   overflow-y: auto;
-  overflow-x: hidden;
-  padding: 8px;
-  border: 2px solid #EBBD68;
-  border-top: none;
-  border-radius: 0 0 6px 6px;
+}
+
+/* === 装备栏 === */
+.equipment-panel {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-}
-
-.player-sheet .inventory-list::-webkit-scrollbar {
-  width: 8px;
-}
-
-.player-sheet .inventory-list::-webkit-scrollbar-track {
-  background: #1a1825;
+  gap: 0.5rem;
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
   border-radius: 4px;
+  padding: 0.5rem;
+  flex-shrink: 0;
 }
 
-.player-sheet .inventory-list::-webkit-scrollbar-thumb {
-  background: #EBBD68;
+.panel-header {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #ecf0f1;
+  padding: 0.5rem;
+  background: #2c3e50;
   border-radius: 4px;
+  text-align: center;
 }
 
-.player-sheet .inventory-item {
+.equipment-panel .panel-header {
+  margin: -0.5rem -0.5rem 0.5rem -0.5rem;
+}
+
+.equipment-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.combat-dice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.passive-dice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.equipment-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.equipment-slot {
   display: flex;
-  gap: 8px;
-  min-height: 32px;
-  height: 32px;
-  border: 2px solid #EBBD68;
-  border-radius: 6px;
-  background-color: transparent;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.equipment-slot label {
+  font-size: 0.75rem;
+  color: #95a5a6;
+  text-align: center;
+}
+
+.slot-content {
+  position: relative;
+  width: 100%;
+  height: 64px;
+  background: #1a1a1a;
+  border: 2px dashed #3a3a3a;
+  border-radius: 4px;
+  display: flex;
   align-items: center;
-  padding: 4px 8px;
-  transition: all 0.2s;
+  justify-content: center;
+  transition: all 0.3s;
 }
 
-.player-sheet .inventory-item:hover {
-  background-color: rgba(235, 189, 104, 0.1);
+.slot-content:hover {
+  border-color: #e74c3c;
+  background: #252525;
 }
 
-.player-sheet .inv-col {
-  color: #EBBD68;
-  font-size: 14px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.slot-content .empty-slot {
+  color: #555;
+  font-size: 0.875rem;
 }
 
-.player-sheet .inv-col.icon-col {
-  width: 30px;
-  flex-shrink: 0;
+.slot-content .item-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 0.25rem;
+  cursor: pointer;
 }
 
-.player-sheet .inv-col.name-col {
-  flex: 2;
-  min-width: 80px;
-}
-
-.player-sheet .inv-col.type-col {
-  flex: 1;
-  min-width: 60px;
-}
-
-.player-sheet .inv-col.category-col {
-  flex: 1;
-  min-width: 60px;
-}
-
-.player-sheet .inv-col.dice-col {
-  width: 60px;
-  flex-shrink: 0;
-  text-align: center;
-}
-
-.player-sheet .inv-col.cost-col {
-  width: 40px;
-  flex-shrink: 0;
-  text-align: center;
-}
-
-.player-sheet .inv-col.quantity-col {
-  width: 40px;
-  flex-shrink: 0;
-  text-align: center;
-}
-
-.player-sheet .inv-col.starlight-col {
-  width: 40px;
-  flex-shrink: 0;
-  text-align: center;
-}
-
-.player-sheet .inv-col.actions-col {
-  width: 100px;
-  flex-shrink: 0;
-  display: flex;
-  gap: 4px;
-  justify-content: flex-end;
-}
-
-.player-sheet .inv-col .item-icon {
-  width: 30px;
-  height: 30px;
-  object-fit: cover;
-  border-radius: 4px;
-  cursor: grab;
-}
-
-.player-sheet .item-action-btn {
+.slot-content .unequip-btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
   width: 20px;
   height: 20px;
+  background: #e74c3c;
   border: none;
-  background-color: transparent;
-  color: #EBBD68;
-  font-size: 12px;
+  border-radius: 50%;
+  color: #fff;
   cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
   transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.player-sheet .item-action-btn:hover {
-  color: #E1AA43;
+.slot-content .unequip-btn:hover {
+  background: #c0392b;
   transform: scale(1.2);
 }
 
-.player-sheet .item-action-btn.favorite-btn.favorited {
-  color: #E1AA43;
+/* 装备槽 - 费用显示（左上角圆圈） */
+
+
+.slot-content .slot-cost {
+
+  position: absolute;
+
+  top: 4px;
+
+  left: 4px;
+
+  width: 20px;
+
+  height: 20px;
+
+  background: rgba(231, 76, 60, 0.95);
+
+  border: 2px solid #fff;
+
+  border-radius: 50%;
+
+  color: #fff;
+
+  font-size: 0.7rem;
+
+  font-weight: bold;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  z-index: 2;
+
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+
 }
+
+ 
+
+/* 装备槽 - 骰数显示（右下角方框） */
+
+
+.slot-content .slot-dice {
+
+  position: absolute;
+
+  bottom: 4px;
+
+  right: 4px;
+
+  padding: 1px 4px;
+
+  background: rgba(52, 152, 219, 0.95);
+
+  border: 1px solid #fff;
+
+  border-radius: 3px;
+
+  color: #fff;
+
+  font-size: 0.65rem;
+
+  font-weight: bold;
+
+  z-index: 2;
+
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+
+  white-space: nowrap;
+
+}
+
+/* === 右侧：物品栏 === */
+.inventory-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow: hidden;
+  overflow-y: auto;
+}
+
+.inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  overflow-y: auto;
+}
+
+.inventory-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #2c3e50;
+}
+
+.inventory-table thead th {
+  padding: 0.5rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #ecf0f1;
+  border-bottom: 2px solid #3a3a3a;
+  border-right: 1px solid #3a3a3a;
+}
+
+.inventory-table thead th:last-child {
+  border-right: none;
+}
+
+.inventory-table tbody {
+  overflow-y: auto;
+}
+
+.inventory-row {
+  border-bottom: 1px solid #2a2a2a;
+  transition: background-color 0.2s;
+}
+
+.inventory-row:hover {
+  background: #252525;
+}
+
+.inventory-row[data-filtered="true"] {
+  display: none;
+}
+
+.inventory-table td {
+  padding: 0.4rem;
+  text-align: center;
+  font-size: 0.72rem;
+  color: #e0e0e0;
+  border-right: 1px solid #2a2a2a;
+}
+
+.inventory-table td:last-child {
+  border-right: none;
+}
+
+/* 表格列宽 */
+.col-icon { width: 48px; }
+
+.col-name { width: 120px; }
+
+.col-type { width: 80px; }
+
+.col-category { width: 80px; }
+
+.col-dice { width: 80px; }
+
+.col-cost { width: 60px; }
+
+.col-quantity { width: 48px; }
+
+.col-starlight { width: 48px; }
+
+.col-actions { width: 120px; }
+
+ 
+
+/* 物品图标包装器 */
+
+.item-icon-wrapper {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  width: 48px;
+
+  height: 48px;
+
+  margin: 0 auto;
+
+  cursor: pointer;
+
+  border-radius: 4px;
+
+  transition: all 0.2s;
+
+}
+
+ 
+
+.item-icon-wrapper:hover {
+
+  background: rgba(231, 76, 60, 0.1);
+
+}
+
+ 
+
+/* 物品图标 */
+
+.item-icon-wrapper .item-icon {
+
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: contain;
+
+  border-radius: 4px;
+
+  transition: all 0.2s;
+
+  pointer-events: none;
+
+}
+
+ 
+
+.item-icon-wrapper:hover .item-icon {
+
+  transform: scale(1.1);
+
+  filter: drop-shadow(0 0 8px rgba(231, 76, 60, 0.5));
+}
+
+/* 操作按钮 */
+.item-actions {
+  display: flex;
+
+
+ gap: 0.25rem;
+
+  justify-content: center;
+
+  align-items: center;
+
+}
+
+ 
+
+.item-actions button {
+
+  width: 26px;
+
+  height: 26px;
+
+  padding: 0;
+
+  border: none;
+
+  border-radius: 4px;
+
+  color: #fff;
+
+  cursor: pointer;
+
+  font-size: 0.875rem;
+
+  transition: all 0.2s;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+}
+
+ 
+
+.item-use-btn {
+
+  background: #27ae60;
+
+}
+
+ 
+
+.item-use-btn:hover {
+
+  background: #2ecc71;
+
+  transform: scale(1.15);
+
+  box-shadow: 0 2px 8px rgba(46, 204, 113, 0.5);
+
+}
+
+ 
+
+.item-edit-btn {
+
+  background: #3498db;
+
+}
+
+ 
+
+.item-edit-btn:hover {
+
+  background: #5dade2;
+
+  transform: scale(1.15);
+
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.5);
+
+}
+
+ 
+
+.item-delete-btn {
+
+  background: #e74c3c;
+
+}
+
+ 
+
+.item-delete-btn:hover {
+
+  background: #c0392b;
+
+  transform: scale(1.15);
+
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.5);
+
+}
+
+ 
+
+.item-favorite-btn {
+
+  background: transparent;
+
+  border: none;
+
+  width: 26px;
+
+  height: 26px;
+
+  font-size: 1rem;
+
+  cursor: pointer;
+
+  transition: all 0.2s;
+
+  color: #555;
+
+  padding: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+}
+
+ 
+
+.item-favorite-btn:hover {
+
+  transform: scale(1.3);
+
+  color: #f39c12;
+
+}
+
+ 
+
+.item-favorite-btn.favorited {
+
+  color: #f39c12;
+
+}
+
+/* 创建物品按钮 */
+.inventory-footer {
+  padding: 1rem;
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.create-item-btn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #16a085;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: bold;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.create-item-btn:hover {
+  background: #1abc9c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(22, 160, 133, 0.3);
+}
+
+/* ========================================
+   资源显示区域（在装备和物品栏下方，横向布局）
+   ======================================== */
+.resources-panel {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-top: 1rem;
+  max-height: 60px;
+}
+
+.resources-panel .panel-header {
+  background: #2c3e50;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  font-weight: bold;
+  color: #ecf0f1;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.resource-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.resource-item label {
+  font-size: 0.875rem;
+  font-weight: bold;
+  color: #95a5a6;
+}
+
+.resource-item input {
+  padding: 0.5rem;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  color: #e0e0e0;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.resource-item input:focus {
+  outline: none;
+  border-color: #e74c3c;
+}
+
+.resource-value-display {
+  padding: 0.5rem;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.resource-current {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #2ecc71;
+}
+
+.resource-separator {
+  color: #95a5a6;
+}
+
+.resource-max {
+  font-size: 1rem;
+  color: #95a5a6;
+}
+
+/* ========================================
+   拖放样式
+   ======================================== */
+.dragging {
+  opacity: 0.5;
+}
+
+.drag-over {
+  border-color: #f39c12 !important;
+  background: rgba(243, 156, 18, 0.2) !important;
+}
+
+/* ========================================
+   滚动条样式
+   ======================================== */
+.player-sheet ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.player-sheet ::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.player-sheet ::-webkit-scrollbar-thumb {
+  background: #4a4a4a;
+  border-radius: 4px;
+}
+
+.player-sheet ::-webkit-scrollbar-thumb:hover {
+  background: #5a5a5a;
+}
+
