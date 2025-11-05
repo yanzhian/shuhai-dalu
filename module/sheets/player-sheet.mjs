@@ -218,8 +218,100 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     html.find('.item-search').on('input', this._onSearchItems.bind(this));
     html.find('.favorite-filter-btn').click(this._onFavoriteFilter.bind(this));
     html.find('.advanced-filter-btn').click(this._onAdvancedFilter.bind(this));
+    html.find('.sort-btn').click(this._onSortItems.bind(this));
 
     console.log('书海大陆 | Player Sheet 事件监听器绑定完成');
+  }
+
+  /**
+   * 排序物品
+   */
+  _onSortItems(event) {
+    event.preventDefault();
+
+    // 获取当前排序状态
+    const currentSort = this.sortState || 'cost-asc';
+
+    // 循环切换排序状态：费用升序 -> 费用降序 -> 星光升序 -> 星光降序 -> 费用升序
+    const sortStates = ['cost-asc', 'cost-desc', 'starlight-asc', 'starlight-desc'];
+    const currentIndex = sortStates.indexOf(currentSort);
+    const nextIndex = (currentIndex + 1) % sortStates.length;
+    this.sortState = sortStates[nextIndex];
+
+    // 更新按钮显示
+    const btn = $(event.currentTarget);
+    const sortLabels = {
+      'cost-asc': '费用↑',
+      'cost-desc': '费用↓',
+      'starlight-asc': '星光↑',
+      'starlight-desc': '星光↓'
+    };
+    btn.html(`<i class="fas fa-sort"></i> ${sortLabels[this.sortState]}`);
+
+    // 执行排序
+    this._sortInventoryItems();
+
+    ui.notifications.info(`按${sortLabels[this.sortState]}排序`);
+  }
+
+  /**
+   * 执行物品排序
+   */
+  _sortInventoryItems() {
+    const inventoryList = this.element.find('.inventory-list');
+    const items = inventoryList.find('.inventory-row').toArray();
+
+    items.sort((a, b) => {
+      const aId = $(a).data('item-id');
+      const bId = $(b).data('item-id');
+      const aItem = this.actor.items.get(aId);
+      const bItem = this.actor.items.get(bId);
+
+      if (!aItem || !bItem) return 0;
+
+      let aVal, bVal;
+
+      if (this.sortState.startsWith('cost')) {
+        // 费用排序：需要解析费用字符串
+        aVal = this._parseCost(aItem.system.cost);
+        bVal = this._parseCost(bItem.system.cost);
+      } else {
+        // 星光排序
+        aVal = aItem.system.starlightCost || 0;
+        bVal = bItem.system.starlightCost || 0;
+      }
+
+      // 升序或降序
+      if (this.sortState.endsWith('asc')) {
+        return aVal - bVal;
+      } else {
+        return bVal - aVal;
+      }
+    });
+
+    // 重新排列DOM元素
+    items.forEach(item => {
+      inventoryList.append(item);
+    });
+  }
+
+  /**
+   * 解析费用字符串为数字
+   */
+  _parseCost(costStr) {
+    if (!costStr || costStr === '-') return 0;
+
+    // 如果是纯数字
+    const num = parseFloat(costStr);
+    if (!isNaN(num)) return num;
+
+    // 如果包含Cost:或San:前缀
+    const match = costStr.match(/(?:Cost:|San:)?(\d+)/);
+    if (match) {
+      return parseFloat(match[1]);
+    }
+
+    return 0;
   }
 
   /** @override */

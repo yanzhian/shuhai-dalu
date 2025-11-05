@@ -76,10 +76,10 @@ export default class ShuhaiItemSheet extends ItemSheet {
       'defenseDice': ['闪避', '反击-斩击', '反击-突刺', '反击-打击', '强化反击-斩击', '强化反击-突刺', '强化反击-打击', '防御', '强化防御'],
       'triggerDice': ['EX'],
       'passiveDice': ['道具', '标签'],
-      'weapon': ['武器'],
-      'armor': ['防具'],
-      'item': ['道具'],
-      'equipment': ['装备']
+      'weapon': [],  // 武器允许自定义，不提供默认选项
+      'armor': [],   // 防具允许自定义，不提供默认选项
+      'item': [],    // 物品允许自定义，不提供默认选项
+      'equipment': [] // 装备允许自定义，不提供默认选项
     };
 
     const categories = categoryMap[type] || ['未分类'];
