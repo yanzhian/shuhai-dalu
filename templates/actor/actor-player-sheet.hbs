@@ -62,11 +62,11 @@
           </div>
           {{#each skillGroups.strengthDex as |skill key|}}
           <div class="skill-item">
-            <button class="skill-btn minus" data-skill="{{key}}" data-category="strengthDex" type="button">-</button>
+            <button class="skill-action-btn minus" data-skill="{{key}}" data-category="strengthDex" type="button" {{#if ../../isLocked}}disabled{{/if}}>-</button>
             <span class="skill-name">{{skill.label}}</span>
             <span class="skill-value">{{skill.value}}</span>
-            <button class="skill-btn plus" data-skill="{{key}}" data-category="strengthDex" type="button">+</button>
-            <button class="skill-check" data-skill="{{key}}" type="button"></button>
+            <button class="skill-action-btn plus" data-skill="{{key}}" data-category="strengthDex" type="button" {{#if ../../isLocked}}disabled{{/if}}>+</button>
+            <button class="skill-check-btn" data-skill="{{key}}" type="button"></button>
           </div>
           {{/each}}
         </div>
@@ -79,11 +79,11 @@
           </div>
           {{#each skillGroups.charisma as |skill key|}}
           <div class="skill-item">
-            <button class="skill-btn minus" data-skill="{{key}}" data-category="charisma" type="button">-</button>
+            <button class="skill-action-btn minus" data-skill="{{key}}" data-category="charisma" type="button" {{#if ../../isLocked}}disabled{{/if}}>-</button>
             <span class="skill-name">{{skill.label}}</span>
             <span class="skill-value">{{skill.value}}</span>
-            <button class="skill-btn plus" data-skill="{{key}}" data-category="charisma" type="button">+</button>
-            <button class="skill-check" data-skill="{{key}}" type="button"></button>
+            <button class="skill-action-btn plus" data-skill="{{key}}" data-category="charisma" type="button" {{#if ../../isLocked}}disabled{{/if}}>+</button>
+            <button class="skill-check-btn" data-skill="{{key}}" type="button"></button>
           </div>
           {{/each}}
         </div>
@@ -96,11 +96,11 @@
           </div>
           {{#each skillGroups.perception as |skill key|}}
           <div class="skill-item">
-            <button class="skill-btn minus" data-skill="{{key}}" data-category="perception" type="button">-</button>
+            <button class="skill-action-btn minus" data-skill="{{key}}" data-category="perception" type="button" {{#if ../../isLocked}}disabled{{/if}}>-</button>
             <span class="skill-name">{{skill.label}}</span>
             <span class="skill-value">{{skill.value}}</span>
-            <button class="skill-btn plus" data-skill="{{key}}" data-category="perception" type="button">+</button>
-            <button class="skill-check" data-skill="{{key}}" type="button"></button>
+            <button class="skill-action-btn plus" data-skill="{{key}}" data-category="perception" type="button" {{#if ../../isLocked}}disabled{{/if}}>+</button>
+            <button class="skill-check-btn" data-skill="{{key}}" type="button"></button>
           </div>
           {{/each}}
         </div>
@@ -113,11 +113,11 @@
           </div>
           {{#each skillGroups.intelligence as |skill key|}}
           <div class="skill-item">
-            <button class="skill-btn minus" data-skill="{{key}}" data-category="intelligence" type="button">-</button>
+            <button class="skill-action-btn minus" data-skill="{{key}}" data-category="intelligence" type="button" {{#if ../../isLocked}}disabled{{/if}}>-</button>
             <span class="skill-name">{{skill.label}}</span>
             <span class="skill-value">{{skill.value}}</span>
-            <button class="skill-btn plus" data-skill="{{key}}" data-category="intelligence" type="button">+</button>
-            <button class="skill-check" data-skill="{{key}}" type="button"></button>
+            <button class="skill-action-btn plus" data-skill="{{key}}" data-category="intelligence" type="button" {{#if ../../isLocked}}disabled{{/if}}>+</button>
+            <button class="skill-check-btn" data-skill="{{key}}" type="button"></button>
           </div>
           {{/each}}
         </div>
@@ -138,7 +138,7 @@
               {{#if (hasItem system.equipment.weapon)}}
                 <img src="{{getItemImg system.equipment.weapon}}" class="item-icon" data-item-id="{{system.equipment.weapon}}"/>
                 <div class="slot-cost">{{getItemCost system.equipment.weapon}}</div>
-                <button class="unequip-btn" data-slot-type="weapon" type="button">卸下</button>
+                <button class="unequip-btn" data-slot-type="weapon" type="button">×</button>
                 {{#if (getItemDice system.equipment.weapon)}}
                 <div class="slot-dice">{{getItemDice system.equipment.weapon}}</div>
                 {{/if}}
@@ -153,7 +153,7 @@
               {{#if (hasItem system.equipment.armor)}}
                 <img src="{{getItemImg system.equipment.armor}}" class="item-icon" data-item-id="{{system.equipment.armor}}"/>
                 <div class="slot-cost">{{getItemCost system.equipment.armor}}</div>
-                <button class="unequip-btn" data-slot-type="armor" type="button">卸下</button>
+                <button class="unequip-btn" data-slot-type="armor" type="button">×</button>
                 {{#if (getItemDice system.equipment.armor)}}
                 <div class="slot-dice">{{getItemDice system.equipment.armor}}</div>
                 {{/if}}
@@ -173,7 +173,7 @@
               {{#if (hasItem diceId)}}
                 <img src="{{getItemImg diceId}}" class="item-icon" data-item-id="{{diceId}}"/>
                 <div class="slot-cost">{{getItemCost diceId}}</div>
-                <button class="unequip-btn" data-slot-type="combatDice" data-slot-index="{{index}}" type="button">卸下</button>
+                <button class="unequip-btn" data-slot-type="combatDice" data-slot-index="{{index}}" type="button">×</button>
                 {{#if (getItemDice diceId)}}
                 <div class="slot-dice">{{getItemDice diceId}}</div>
                 {{/if}}
@@ -195,7 +195,7 @@
               {{#if (hasItem diceId)}}
                 <img src="{{getItemImg diceId}}" class="item-icon" data-item-id="{{diceId}}"/>
                 <div class="slot-cost">{{getItemCost diceId}}</div>
-                <button class="unequip-btn" data-slot-type="combatDice" data-slot-index="{{index}}" type="button">卸下</button>
+                <button class="unequip-btn" data-slot-type="combatDice" data-slot-index="{{index}}" type="button">×</button>
                 {{#if (getItemDice diceId)}}
                 <div class="slot-dice">{{getItemDice diceId}}</div>
                 {{/if}}
@@ -215,7 +215,7 @@
               {{#if (hasItem system.equipment.defenseDice)}}
                 <img src="{{getItemImg system.equipment.defenseDice}}" class="item-icon" data-item-id="{{system.equipment.defenseDice}}"/>
                 <div class="slot-cost">{{getItemCost system.equipment.defenseDice}}</div>
-                <button class="unequip-btn" data-slot-type="defenseDice" type="button">卸下</button>
+                <button class="unequip-btn" data-slot-type="defenseDice" type="button">×</button>
                 {{#if (getItemDice system.equipment.defenseDice)}}
                 <div class="slot-dice">{{getItemDice system.equipment.defenseDice}}</div>
                 {{/if}}
@@ -230,7 +230,7 @@
               {{#if (hasItem system.equipment.triggerDice)}}
                 <img src="{{getItemImg system.equipment.triggerDice}}" class="item-icon" data-item-id="{{system.equipment.triggerDice}}"/>
                 <div class="slot-cost">{{getItemCost system.equipment.triggerDice}}</div>
-                <button class="unequip-btn" data-slot-type="triggerDice" type="button">卸下</button>
+                <button class="unequip-btn" data-slot-type="triggerDice" type="button">×</button>
                 {{#if (getItemDice system.equipment.triggerDice)}}
                 <div class="slot-dice">{{getItemDice system.equipment.triggerDice}}</div>
                 {{/if}}
@@ -250,7 +250,7 @@
               {{#if (hasItem passiveId)}}
                 <img src="{{getItemImg passiveId}}" class="item-icon" data-item-id="{{passiveId}}"/>
                 <div class="slot-cost">{{getItemCost passiveId}}</div>
-                <button class="unequip-btn" data-slot-type="passiveDice" data-slot-index="{{index}}" type="button">卸下</button>
+                <button class="unequip-btn" data-slot-type="passiveDice" data-slot-index="{{index}}" type="button">×</button>
                 {{#if (getItemDice passiveId)}}
                 <div class="slot-dice">{{getItemDice passiveId}}</div>
                 {{/if}}
@@ -272,7 +272,7 @@
               {{#if (hasItem passiveId)}}
                 <img src="{{getItemImg passiveId}}" class="item-icon" data-item-id="{{passiveId}}"/>
                 <div class="slot-cost">{{getItemCost passiveId}}</div>
-                <button class="unequip-btn" data-slot-type="passiveDice" data-slot-index="{{index}}" type="button">卸下</button>
+                <button class="unequip-btn" data-slot-type="passiveDice" data-slot-index="{{index}}" type="button">×</button>
                 {{#if (getItemDice passiveId)}}
                 <div class="slot-dice">{{getItemDice passiveId}}</div>
                 {{/if}}
@@ -294,7 +294,7 @@
               {{#if (hasItem gearId)}}
                 <img src="{{getItemImg gearId}}" class="item-icon" data-item-id="{{gearId}}"/>
                 <div class="slot-cost">{{getItemCost gearId}}</div>
-                <button class="unequip-btn" data-slot-type="gear" data-slot-index="{{index}}" type="button">卸下</button>
+                <button class="unequip-btn" data-slot-type="gear" data-slot-index="{{index}}" type="button">×</button>
                 {{#if (getItemDice gearId)}}
                 <div class="slot-dice">{{getItemDice gearId}}</div>
                 {{/if}}
@@ -316,7 +316,7 @@
               {{#if (hasItem gearId)}}
                 <img src="{{getItemImg gearId}}" class="item-icon" data-item-id="{{gearId}}"/>
                 <div class="slot-cost">{{getItemCost gearId}}</div>
-                <button class="unequip-btn" data-slot-type="gear" data-slot-index="{{index}}" type="button">卸下</button>
+                <button class="unequip-btn" data-slot-type="gear" data-slot-index="{{index}}" type="button">×</button>
                 {{#if (getItemDice gearId)}}
                 <div class="slot-dice">{{getItemDice gearId}}</div>
                 {{/if}}
@@ -344,19 +344,35 @@
           </div>
           <div class="resource-item">
             <label>货币</label>
+            {{#if isLocked}}
             <span>{{system.resources.currency}}</span>
+            {{else}}
+            <input type="number" name="system.resources.currency" value="{{system.resources.currency}}" data-dtype="Number" min="0"/>
+            {{/if}}
           </div>
           <div class="resource-item">
             <label>奇遇点</label>
+            {{#if isLocked}}
             <span>{{system.resources.encounterPoints}}</span>
+            {{else}}
+            <input type="number" name="system.resources.encounterPoints" value="{{system.resources.encounterPoints}}" data-dtype="Number" min="0"/>
+            {{/if}}
           </div>
           <div class="resource-item">
             <label>奇迹点</label>
+            {{#if isLocked}}
             <span>{{system.resources.miraclePoints}}</span>
+            {{else}}
+            <input type="number" name="system.resources.miraclePoints" value="{{system.resources.miraclePoints}}" data-dtype="Number" min="0"/>
+            {{/if}}
           </div>
           <div class="resource-item">
             <label>复制核心</label>
+            {{#if isLocked}}
             <span>{{system.resources.replicaCore}}</span>
+            {{else}}
+            <input type="number" name="system.resources.replicaCore" value="{{system.resources.replicaCore}}" data-dtype="Number" min="0"/>
+            {{/if}}
           </div>
         </div>
       </div>
@@ -381,18 +397,25 @@
         <div class="info-right-part">
           <div class="level-display">
             <span class="level-label">LEVEL</span>
+            {{#if isLocked}}
             <span class="level-value">{{system.level}}</span>
+            {{else}}
+            <input type="number" name="system.level" class="level-value" value="{{system.level}}" data-dtype="Number" min="1"/>
+            {{/if}}
           </div>
           <div class="exp-bar-container">
             <div class="exp-bar">
               <div class="exp-fill" style="width: {{multiply (divide system.info.experience 2700) 100}}%"></div>
             </div>
             <span class="exp-text">{{system.info.experience}}/2700</span>
+            {{#unless isLocked}}
+            <input type="number" name="system.info.experience" value="{{system.info.experience}}" data-dtype="Number" min="0" max="2700" style="width: 80px; text-align: center; margin-top: 4px;"/>
+            {{/unless}}
           </div>
           <div class="action-buttons">
             <button class="action-btn long-rest-btn" type="button">长休</button>
             <button class="action-btn corruption-check-btn" type="button">侵蚀</button>
-            <button class="action-btn combat-area-btn" type="button">战斗区域</button>
+            <button class="action-btn switch-combat-btn" type="button">战斗区域</button>
           </div>
         </div>
       </div>
@@ -404,7 +427,11 @@
         {{#each attributes as |attr key|}}
         <div class="attribute-box">
           <span class="attr-name">{{attr.label}}</span>
+          {{#if ../isLocked}}
           <span class="attr-value">{{attr.value}}</span>
+          {{else}}
+          <input type="number" name="system.attributes.{{key}}" class="attr-value" value="{{attr.value}}" data-dtype="Number" min="1" max="30"/>
+          {{/if}}
           <button class="attr-check-btn" data-attribute="{{key}}" type="button"></button>
         </div>
         {{/each}}
@@ -415,13 +442,13 @@
       {{!-- 8. 物品搜索栏 --}}
       <div class="item-search-bar">
         <div class="search-input-wrapper">
-          <input type="text" class="item-search-input" placeholder="搜索..." />
+          <input type="text" class="item-search" placeholder="搜索..." />
           <i class="fas fa-search"></i>
         </div>
-        <button class="search-btn favorite-btn" data-filter="favorite" type="button">
+        <button class="search-btn favorite-filter-btn" data-filter="favorite" type="button">
           <i class="fas fa-star"></i>
         </button>
-        <button class="search-btn filter-btn" type="button">
+        <button class="search-btn advanced-filter-btn" type="button">
           <i class="fas fa-filter"></i>
         </button>
         <button class="search-btn sort-btn" type="button">
@@ -430,7 +457,7 @@
         <button class="search-btn settings-btn" type="button">
           <i class="fas fa-cog"></i>
         </button>
-        <button class="search-btn create-btn" type="button">
+        <button class="search-btn create-item-btn" type="button">
           <i class="fas fa-plus-circle"></i>
         </button>
       </div>
@@ -453,7 +480,7 @@
 
         <div class="inventory-list scrollable">
           {{#each items as |item id|}}
-          <div class="inventory-item"
+          <div class="inventory-row"
                data-item-id="{{item._id}}"
                data-item-type="{{item.type}}"
                data-favorite="{{item.system.favorite}}"
@@ -471,10 +498,10 @@
             <div class="col-quantity">{{item.system.quantity}}</div>
             <div class="col-starlight">{{#if item.system.starlightCost}}{{item.system.starlightCost}}{{else}}-{{/if}}</div>
             <div class="col-actions">
-              <button class="item-action-btn use-btn" data-item-id="{{item._id}}" type="button"><i class="fas fa-play-circle"></i></button>
-              <button class="item-action-btn edit-btn" data-item-id="{{item._id}}" type="button"><i class="fas fa-edit"></i></button>
-              <button class="item-action-btn delete-btn" data-item-id="{{item._id}}" type="button"><i class="fas fa-trash-alt"></i></button>
-              <button class="item-action-btn favorite-btn {{#if item.system.favorite}}favorited{{/if}}" data-item-id="{{item._id}}" type="button"><i class="fas fa-star"></i></button>
+              <button class="item-action-btn item-use-btn" data-item-id="{{item._id}}" type="button"><i class="fas fa-play-circle"></i></button>
+              <button class="item-action-btn item-edit-btn" data-item-id="{{item._id}}" type="button"><i class="fas fa-edit"></i></button>
+              <button class="item-action-btn item-delete-btn" data-item-id="{{item._id}}" type="button"><i class="fas fa-trash-alt"></i></button>
+              <button class="item-action-btn item-favorite-btn {{#if item.system.favorite}}favorited{{/if}}" data-item-id="{{item._id}}" type="button"><i class="fas fa-star"></i></button>
             </div>
           </div>
           {{/each}}
