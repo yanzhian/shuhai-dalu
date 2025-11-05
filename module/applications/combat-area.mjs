@@ -234,6 +234,31 @@ export default class CombatAreaApplication extends Application {
       // 锁定状态
       isLocked: false
     };
+
+    // 迁移/修复：确保costResources有6个元素
+    if (!this.combatState.costResources || this.combatState.costResources.length !== 6) {
+      this.combatState.costResources = [false, false, false, false, false, false];
+    }
+
+    // 迁移/修复：确保exResources有3个元素
+    if (!this.combatState.exResources || this.combatState.exResources.length !== 3) {
+      this.combatState.exResources = [false, false, false];
+    }
+
+    // 迁移/修复：确保activatedDice有6个元素
+    if (!this.combatState.activatedDice || this.combatState.activatedDice.length !== 6) {
+      this.combatState.activatedDice = [false, false, false, false, false, false];
+    }
+
+    // 迁移/修复：确保buffs数组存在
+    if (!this.combatState.buffs) {
+      this.combatState.buffs = [];
+    }
+
+    // 迁移/修复：确保isLocked属性存在
+    if (this.combatState.isLocked === undefined) {
+      this.combatState.isLocked = false;
+    }
   }
 
   /**
