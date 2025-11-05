@@ -811,6 +811,11 @@ input.attr-value {
   display: none;
 }
 
+.inventory-row.equipped {
+  background: rgba(225, 170, 67, 0.15);
+  border-color: #E1AA43;
+}
+
 .inventory-row > div {
   display: flex;
   align-items: center;
@@ -878,10 +883,10 @@ input.attr-value {
   transform: scale(1.1);
 }
 
-.item-action-btn.favorited {
-  background: rgba(235, 189, 104, 0.3);
+.item-action-btn.equipped {
+  background: rgba(225, 170, 67, 0.3);
   border-color: #E1AA43;
-  color: #E1AA43;
+  color: #4CAF50;
 }
 
 /* ========== 滚动条样式 ========== */

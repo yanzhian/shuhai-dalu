@@ -118,15 +118,18 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       equipment: '装备'
     };
 
-    // 为每个物品添加中文类型名称和确保有正确的ID
+    // 为每个物品添加中文类型名称、确保有正确的ID、并标记是否已装备
     context.items = context.actor.items.contents.map(item => {
       const itemObj = item.toObject(false);
+      const isEquipped = this._isItemEquipped(item);
       return {
         ...itemObj,
         // 确保_id正确设置
         _id: item.id,
         // 添加类型标签
-        typeLabel: typeNames[item.type] || item.type
+        typeLabel: typeNames[item.type] || item.type,
+        // 标记是否已装备
+        isEquipped: isEquipped
       };
     });
 
@@ -135,9 +138,29 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       firstItem: context.items[0] ? {
         id: context.items[0]._id,
         name: context.items[0].name,
-        type: context.items[0].type
+        type: context.items[0].type,
+        isEquipped: context.items[0].isEquipped
       } : null
     });
+  }
+
+  /**
+   * 检查物品是否已装备
+   */
+  _isItemEquipped(item) {
+    const equipment = this.actor.system.equipment;
+    const itemId = item.id;
+
+    // 检查各种装备槽
+    if (equipment.weapon === itemId) return true;
+    if (equipment.armor === itemId) return true;
+    if (equipment.defenseDice === itemId) return true;
+    if (equipment.triggerDice === itemId) return true;
+    if (equipment.combatDice && equipment.combatDice.includes(itemId)) return true;
+    if (equipment.passives && equipment.passives.includes(itemId)) return true;
+    if (equipment.gear && equipment.gear.includes(itemId)) return true;
+
+    return false;
   }
 
   /* -------------------------------------------- */
@@ -196,132 +219,31 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     html.find('.favorite-filter-btn').click(this._onFavoriteFilter.bind(this));
     html.find('.advanced-filter-btn').click(this._onAdvancedFilter.bind(this));
 
-    // === 拖放 - 只有图标可拖动 ===
-    this._setupDragAndDrop(html);
-
     console.log('书海大陆 | Player Sheet 事件监听器绑定完成');
   }
 
-  /**
-   * 设置拖放功能
-   */
-  _setupDragAndDrop(html) {
-    // 为物品图标包装器设置拖放
-    html.find('.col-icon .item-icon-wrapper').each((i, wrapper) => {
-      wrapper.addEventListener('dragstart', this._onDragItemStart.bind(this), false);
-      wrapper.addEventListener('dragend', this._onDragItemEnd.bind(this), false);
-    });
+  /** @override */
+  _onDragStart(event) {
+    const li = event.currentTarget;
+    if ( event.target.classList.contains("content-link") ) return;
 
-    // 为物品行设置drop区域（用于位置交换）
-    html.find('.inventory-row').each((i, row) => {
-      row.addEventListener('dragover', this._onDragOver.bind(this), false);
-      row.addEventListener('drop', this._onDropOnRow.bind(this), false);
-      row.addEventListener('dragleave', this._onDragLeave.bind(this), false);
-    });
-  }
+    // 获取物品ID
+    let itemId = li.dataset.itemId;
+    if (!itemId) {
+      const wrapper = li.closest('[data-item-id]');
+      itemId = wrapper?.dataset.itemId;
+    }
 
-  /**
-   * 拖动物品图标开始
-   */
-  _onDragItemStart(event) {
-    const wrapper = event.currentTarget;
-    const itemId = wrapper.dataset.itemId;
+    if (!itemId) return;
+
     const item = this.actor.items.get(itemId);
-
     if (!item) return;
 
-    // 添加拖动样式
-    const row = wrapper.closest('.inventory-row');
-    if (row) {
-      row.classList.add('dragging');
-    }
-
     // 设置拖动数据
-    event.dataTransfer.effectAllowed = 'move';
-    event.dataTransfer.setData('text/plain', JSON.stringify({
-      type: 'Item',
-      uuid: item.uuid,
-      itemId: itemId
-    }));
-  }
+    const dragData = item.toDragData();
+    event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
 
-  /**
-   * 拖动物品图标结束
-   */
-  _onDragItemEnd(event) {
-    const wrapper = event.currentTarget;
-    const row = wrapper.closest('.inventory-row');
-    if (row) {
-      row.classList.remove('dragging');
-    }
-
-    // 清除所有drag-over样式
-    this.element.find('.drag-over').removeClass('drag-over');
-  }
-
-  /**
-   * 拖动经过
-   */
-  _onDragOver(event) {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
-
-    const row = event.currentTarget;
-    if (!row.classList.contains('dragging')) {
-      row.classList.add('drag-over');
-    }
-
-    return false;
-  }
-
-  /**
-   * 拖动离开
-   */
-  _onDragLeave(event) {
-    const row = event.currentTarget;
-    row.classList.remove('drag-over');
-  }
-
-  /**
-   * 放下到物品行（交换位置）
-   */
-  async _onDropOnRow(event) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    const targetRow = event.currentTarget;
-    targetRow.classList.remove('drag-over');
-
-    // 获取拖动的物品
-    const data = event.dataTransfer.getData('text/plain');
-    if (!data) return;
-
-    const dragData = JSON.parse(data);
-    const dragItemId = dragData.itemId;
-    const targetItemId = targetRow.dataset.itemId;
-
-    if (!dragItemId || !targetItemId || dragItemId === targetItemId) return;
-
-    // 交换两个物品的sort值
-    await this._swapItemPositions(dragItemId, targetItemId);
-  }
-
-  /**
-   * 交换两个物品的位置
-   */
-  async _swapItemPositions(itemId1, itemId2) {
-    const item1 = this.actor.items.get(itemId1);
-    const item2 = this.actor.items.get(itemId2);
-
-    if (!item1 || !item2) return;
-
-    const sort1 = item1.sort;
-    const sort2 = item2.sort;
-
-    await item1.update({ sort: sort2 });
-    await item2.update({ sort: sort1 });
-
-    ui.notifications.info("物品位置已交换");
+    console.log('书海大陆 | 开始拖动物品', { itemId, item: item.name });
   }
 
   /* -------------------------------------------- */
@@ -705,7 +627,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   }
 
   /**
-   * 收藏/取消收藏物品
+   * 装备/卸下物品（原收藏功能）
    */
   async _onItemFavorite(event) {
     event.preventDefault();
@@ -714,15 +636,131 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     const item = this.actor.items.get(itemId);
     if (!item) return;
 
-    // 切换收藏状态
-    const currentFavorite = item.system.favorite || false;
-    await item.update({ "system.favorite": !currentFavorite });
+    // 检查是否已装备
+    const isEquipped = this._isItemEquipped(item);
 
-    // 提示
-    if (!currentFavorite) {
-      ui.notifications.info(`已收藏 ${item.name}`);
+    if (isEquipped) {
+      // 如果已装备，则卸下
+      await this._autoUnequipItem(item);
     } else {
-      ui.notifications.info(`已取消收藏 ${item.name}`);
+      // 如果未装备，则自动装备
+      await this._autoEquipItem(item);
+    }
+  }
+
+  /**
+   * 自动装备物品到合适的槽位
+   */
+  async _autoEquipItem(item) {
+    const equipment = this.actor.system.equipment;
+
+    // 根据物品类型找到合适的槽位
+    let slotType = null;
+    let slotIndex = null;
+
+    switch (item.type) {
+      case 'weapon':
+        if (!equipment.weapon) {
+          slotType = 'weapon';
+        } else {
+          ui.notifications.warn('武器槽已满，请先卸下当前武器');
+          return;
+        }
+        break;
+
+      case 'armor':
+        if (!equipment.armor) {
+          slotType = 'armor';
+        } else {
+          ui.notifications.warn('防具槽已满，请先卸下当前防具');
+          return;
+        }
+        break;
+
+      case 'defenseDice':
+        if (!equipment.defenseDice) {
+          slotType = 'defenseDice';
+        } else {
+          ui.notifications.warn('守备骰槽已满，请先卸下当前守备骰');
+          return;
+        }
+        break;
+
+      case 'triggerDice':
+        if (!equipment.triggerDice) {
+          slotType = 'triggerDice';
+        } else {
+          ui.notifications.warn('触发骰槽已满，请先卸下当前触发骰');
+          return;
+        }
+        break;
+
+      case 'combatDice':
+      case 'shootDice':
+        // 找到第一个空的战斗骰槽位
+        slotType = 'combatDice';
+        slotIndex = equipment.combatDice.findIndex(id => !id || id === '');
+        if (slotIndex === -1) {
+          ui.notifications.warn('战斗骰槽已满，请先卸下一个战斗骰');
+          return;
+        }
+        break;
+
+      case 'passiveDice':
+        // 找到第一个空的被动骰槽位
+        slotType = 'passiveDice';
+        slotIndex = equipment.passives.findIndex(id => !id || id === '');
+        if (slotIndex === -1) {
+          ui.notifications.warn('被动骰槽已满，请先卸下一个被动骰');
+          return;
+        }
+        break;
+
+      case 'equipment':
+      case 'item':
+        // 找到第一个空的装备槽位
+        slotType = 'gear';
+        slotIndex = equipment.gear.findIndex(id => !id || id === '');
+        if (slotIndex === -1) {
+          ui.notifications.warn('装备槽已满，请先卸下一个装备');
+          return;
+        }
+        break;
+
+      default:
+        ui.notifications.warn(`无法自动装备 ${item.type} 类型的物品`);
+        return;
+    }
+
+    // 装备物品
+    await game.shuhai.equipItem(this.actor, item, slotType, slotIndex);
+  }
+
+  /**
+   * 自动卸下物品
+   */
+  async _autoUnequipItem(item) {
+    const equipment = this.actor.system.equipment;
+    const itemId = item.id;
+
+    // 找到物品所在的槽位
+    if (equipment.weapon === itemId) {
+      await game.shuhai.unequipItem(this.actor, 'weapon');
+    } else if (equipment.armor === itemId) {
+      await game.shuhai.unequipItem(this.actor, 'armor');
+    } else if (equipment.defenseDice === itemId) {
+      await game.shuhai.unequipItem(this.actor, 'defenseDice');
+    } else if (equipment.triggerDice === itemId) {
+      await game.shuhai.unequipItem(this.actor, 'triggerDice');
+    } else if (equipment.combatDice && equipment.combatDice.includes(itemId)) {
+      const slotIndex = equipment.combatDice.indexOf(itemId);
+      await game.shuhai.unequipItem(this.actor, 'combatDice', slotIndex);
+    } else if (equipment.passives && equipment.passives.includes(itemId)) {
+      const slotIndex = equipment.passives.indexOf(itemId);
+      await game.shuhai.unequipItem(this.actor, 'passiveDice', slotIndex);
+    } else if (equipment.gear && equipment.gear.includes(itemId)) {
+      const slotIndex = equipment.gear.indexOf(itemId);
+      await game.shuhai.unequipItem(this.actor, 'gear', slotIndex);
     }
   }
 
@@ -891,7 +929,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   }
 
   /**
-   * 收藏过滤
+   * 已装备物品过滤（原收藏过滤）
    */
   _onFavoriteFilter(event) {
     event.preventDefault();
@@ -903,15 +941,16 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       btn.removeClass('active');
       this.element.find('.inventory-row').attr('data-filtered', 'false');
     } else {
-      // 激活过滤
+      // 激活过滤：只显示已装备的物品
       btn.addClass('active');
       const items = this.element.find('.inventory-row');
 
-      items.each((i, item) => {
-        const $item = $(item);
-        const itemFavorite = $item.data('favorite');
+      items.each((i, itemRow) => {
+        const $item = $(itemRow);
+        const itemId = $item.data('item-id');
+        const item = this.actor.items.get(itemId);
 
-        if (itemFavorite === true || itemFavorite === 'true') {
+        if (item && this._isItemEquipped(item)) {
           $item.attr('data-filtered', 'false');
         } else {
           $item.attr('data-filtered', 'true');

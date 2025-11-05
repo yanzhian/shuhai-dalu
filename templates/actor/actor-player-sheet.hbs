@@ -484,10 +484,9 @@
 
         <div class="inventory-list scrollable">
           {{#each items as |item id|}}
-          <div class="inventory-row"
+          <div class="inventory-row {{#if item.isEquipped}}equipped{{/if}}"
                data-item-id="{{item._id}}"
                data-item-type="{{item.type}}"
-               data-favorite="{{item.system.favorite}}"
                data-filtered="false">
             <div class="col-icon">
               <div class="item-icon-wrapper" data-item-id="{{item._id}}" title="{{item.system.effect}}" draggable="true">
@@ -505,7 +504,7 @@
               <button class="item-action-btn item-use-btn" data-item-id="{{item._id}}" type="button"><i class="fas fa-play-circle"></i></button>
               <button class="item-action-btn item-edit-btn" data-item-id="{{item._id}}" type="button"><i class="fas fa-edit"></i></button>
               <button class="item-action-btn item-delete-btn" data-item-id="{{item._id}}" type="button"><i class="fas fa-trash-alt"></i></button>
-              <button class="item-action-btn item-favorite-btn {{#if item.system.favorite}}favorited{{/if}}" data-item-id="{{item._id}}" type="button"><i class="fas fa-star"></i></button>
+              <button class="item-action-btn item-favorite-btn {{#if item.isEquipped}}equipped{{/if}}" data-item-id="{{item._id}}" type="button"><i class="fas fa-check-circle"></i></button>
             </div>
           </div>
           {{/each}}
