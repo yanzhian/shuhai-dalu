@@ -573,14 +573,21 @@ export default class CombatAreaApplication extends Application {
       return;
     }
 
-    // 随机抽取3个
+    // 随机抽取3个不重复的索引
     const drawCount = Math.min(3, availableIndices.length);
-    let extraCost = 0;
+    const selectedIndices = [];
 
     for (let i = 0; i < drawCount; i++) {
       const randomIndex = Math.floor(Math.random() * availableIndices.length);
-      const diceIndex = availableIndices[randomIndex];
+      selectedIndices.push(availableIndices[randomIndex]);
+      availableIndices.splice(randomIndex, 1);
+    }
 
+    let extraCost = 0;
+    let extraEX = 0;
+
+    // 处理每个选中的骰子
+    for (const diceIndex of selectedIndices) {
       // 如果已经激活，增加Cost
       if (this.combatState.activatedDice[diceIndex]) {
         // 找到第一个空的Cost槽位
@@ -594,13 +601,31 @@ export default class CombatAreaApplication extends Application {
       } else {
         this.combatState.activatedDice[diceIndex] = true;
       }
-
-      // 移除已抽取的索引
-      availableIndices.splice(randomIndex, 1);
     }
 
-    await this._sendChatMessage(`抽取激活了 ${drawCount} 个战斗骰${extraCost > 0 ? `，重复激活获得 ${extraCost} 个Cost` : ''}`);
+    // 每3个重复激活添加1个EX资源
+    if (extraCost >= 3) {
+      const exToAdd = Math.floor(extraCost / 3);
+      for (let i = 0; i < exToAdd; i++) {
+        for (let j = 0; j < 3; j++) {
+          if (!this.combatState.exResources[j]) {
+            this.combatState.exResources[j] = true;
+            extraEX++;
+            break;
+          }
+        }
+      }
+    }
 
+    let message = `抽取激活了 ${drawCount} 个战斗骰`;
+    if (extraCost > 0) {
+      message += `，重复激活获得 ${extraCost} 个Cost`;
+    }
+    if (extraEX > 0) {
+      message += `，${extraEX} 个EX`;
+    }
+
+    await this._sendChatMessage(message);
     await this._saveCombatState();
     this.render();
   }
@@ -628,22 +653,44 @@ export default class CombatAreaApplication extends Application {
     const diceIndex = availableIndices[randomIndex];
 
     let message = `抽取激活了第 ${diceIndex + 1} 个战斗骰`;
+    let extraCost = 0;
+    let extraEX = 0;
 
     // 如果已经激活，增加Cost
     if (this.combatState.activatedDice[diceIndex]) {
+      // 增加Cost资源
       for (let j = 0; j < 6; j++) {
         if (!this.combatState.costResources[j]) {
           this.combatState.costResources[j] = true;
-          message += `，重复激活获得1个Cost`;
+          extraCost = 1;
           break;
         }
+      }
+
+      // 统计当前已有的Cost资源总数，检查是否达到3的倍数来添加EX
+      const totalCost = this.combatState.costResources.filter(c => c).length;
+      if (totalCost > 0 && totalCost % 3 === 0) {
+        // 添加1个EX资源
+        for (let j = 0; j < 3; j++) {
+          if (!this.combatState.exResources[j]) {
+            this.combatState.exResources[j] = true;
+            extraEX = 1;
+            break;
+          }
+        }
+      }
+
+      if (extraCost > 0) {
+        message += `，重复激活获得1个Cost`;
+      }
+      if (extraEX > 0) {
+        message += `，1个EX`;
       }
     } else {
       this.combatState.activatedDice[diceIndex] = true;
     }
 
     await this._sendChatMessage(message);
-
     await this._saveCombatState();
     this.render();
   }
