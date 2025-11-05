@@ -219,6 +219,44 @@
   white-space: nowrap;
 }
 
+/* 折叠功能样式 */
+.collapsible-header {
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  user-select: none;
+}
+
+.collapsible-header:hover {
+  opacity: 0.8;
+}
+
+.collapsible-header .collapse-icon {
+  position: absolute;
+  right: 0;
+  font-size: 12px;
+  transition: transform 0.3s ease;
+  color: #EBBD68;
+}
+
+.collapsible-header.collapsed .collapse-icon {
+  transform: rotate(-90deg);
+}
+
+.collapsible-content {
+  max-height: 1000px;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  opacity: 1;
+}
+
+.collapsible-content.collapsed {
+  max-height: 0 !important;
+  opacity: 0;
+  margin: 0;
+  padding: 0;
+}
+
 .skill-category {
   display: flex;
   flex-direction: column;
@@ -304,6 +342,31 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+/* 星光显示（不受折叠影响） */
+.starlight-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  background: rgba(235, 189, 104, 0.15);
+  border: 1px solid #EBBD68;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  flex-shrink: 0;
+}
+
+.starlight-label {
+  font-size: 13px;
+  font-weight: bold;
+  color: #EBBD68;
+}
+
+.starlight-value {
+  font-size: 14px;
+  font-weight: bold;
+  color: #E1AA43;
 }
 
 .equipment-content {
