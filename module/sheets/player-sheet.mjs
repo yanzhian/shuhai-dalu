@@ -187,8 +187,10 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       if (collapsedSections[section]) {
         const header = html.find(`.collapsible-header[data-section="${section}"]`);
         const content = header.next('.collapsible-content');
+        const sectionContainer = header.parent();
         header.addClass('collapsed');
         content.addClass('collapsed');
+        sectionContainer.addClass('collapsed');
       }
     });
 
@@ -384,12 +386,14 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     const header = $(event.currentTarget);
     const section = header.data('section');
 
-    // 查找对应的内容区域
+    // 查找对应的内容区域和父容器
     const content = header.next('.collapsible-content');
+    const sectionContainer = header.parent();
 
     // 切换折叠状态
     header.toggleClass('collapsed');
     content.toggleClass('collapsed');
+    sectionContainer.toggleClass('collapsed');
 
     // 保存折叠状态到 flag
     const collapsedSections = this.actor.getFlag('shuhai-dalu', 'collapsedSections') || {};

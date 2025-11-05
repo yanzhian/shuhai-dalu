@@ -181,15 +181,8 @@
   font-size: 12px;
 }
 
-/* 3. 技能鉴定区域 */
-.skills-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.skills-content {
+/* 可折叠区域容器（包含技能鉴定、装备栏、资源） */
+.collapsible-sections-container {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
@@ -197,6 +190,25 @@
   flex-direction: column;
   gap: 8px;
   padding-right: 4px;
+}
+
+/* 3. 技能鉴定区域 */
+.skills-section {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: flex 0.3s ease;
+}
+
+.skills-section.collapsed {
+  flex: 0;
+}
+
+.skills-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: visible;
 }
 
 .section-header {
@@ -244,17 +256,14 @@
 }
 
 .collapsible-content {
-  max-height: 1000px;
-  overflow: hidden;
-  transition: max-height 0.3s ease, opacity 0.3s ease;
+  overflow: visible;
+  transition: all 0.3s ease;
   opacity: 1;
 }
 
 .collapsible-content.collapsed {
-  max-height: 0 !important;
+  display: none;
   opacity: 0;
-  margin: 0;
-  padding: 0;
 }
 
 .skill-category {
@@ -338,13 +347,24 @@
 
 /* 4. 装备栏 */
 .equipment-section {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  flex-shrink: 0;
+  transition: flex 0.3s ease;
 }
 
-/* 星光显示（不受折叠影响） */
+.equipment-section.collapsed {
+  flex: 0;
+}
+
+.equipment-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: visible;
+}
+
+/* 星光显示 */
 .starlight-display {
   display: flex;
   justify-content: space-between;
@@ -367,16 +387,6 @@
   font-size: 14px;
   font-weight: bold;
   color: #E1AA43;
-}
-
-.equipment-content {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding-right: 4px;
 }
 
 .equipment-row-2 {
@@ -487,11 +497,15 @@
 
 /* 5. 资源区域 固定高度90px */
 .resources-section {
-  height: 90px;
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   gap: 6px;
+  transition: flex 0.3s ease;
+}
+
+.resources-section.collapsed {
+  flex: 0;
 }
 
 .resources-grid {
