@@ -176,6 +176,113 @@ export default class ShuhaiActor extends Actor {
   }
 
   /**
+   * 进行技能检定
+   */
+  async rollSkillCheck(skillKey, modifier = 0, difficulty = 20) {
+    const skillValue = this.system.skills[skillKey];
+    if (skillValue === undefined) {
+      ui.notifications.error("无效的技能");
+      return null;
+    }
+
+    // 使用 Foundry Roll 类投掷希望骰(蓝色d12)和侵蚀骰(红色d12)
+    const hopeRoll = new Roll("1d12");
+    const corruptRoll = new Roll("1d12");
+
+    // 评估骰子
+    await hopeRoll.evaluate();
+    await corruptRoll.evaluate();
+
+    // ⭐ 同时显示两个 3D 骰子动画
+    if (game.dice3d) {
+      // 使用 Promise.all 让两个骰子同时出现
+      await Promise.all([
+        game.dice3d.showForRoll(hopeRoll, game.user, true, null, false, null, {appearance: {colorset: 'blue'}}),
+        game.dice3d.showForRoll(corruptRoll, game.user, true, null, false, null, {appearance: {colorset: 'red'}})
+      ]);
+    }
+
+    const hopeDice = hopeRoll.total;
+    const corruptDice = corruptRoll.total;
+    const diceSum = hopeDice + corruptDice;
+    const total = diceSum + skillValue + modifier;
+
+    const isSuccess = total >= difficulty;
+
+    // 判断检定类型
+    let resultType = '';
+    let resultText = '';
+
+    if (hopeDice === corruptDice) {
+      resultType = 'critical';
+      resultText = '🎉🎉🎉 大成功! 🎉🎉🎉\n希望与侵蚀达成完美平衡,可能性的奇迹显现!';
+    } else if (hopeDice > corruptDice) {
+      if (isSuccess) {
+        resultType = 'hope-success';
+        resultText = '✨ 希望成功 ✨\n希望之光驱散了侵蚀的阴影!';
+      } else {
+        resultType = 'hope-failure';
+        resultText = '💔 希望失败 💔\n尽管力量仍然不足,但希望尚存...';
+      }
+    } else {
+      if (isSuccess) {
+        resultType = 'corrupt-success';
+        resultText = '🌑 侵蚀成功 🌑\n你成功了,但侵蚀的代价正在悄然蔓延...';
+      } else {
+        resultType = 'corrupt-failure';
+        resultText = '🕳️ 侵蚀失败 🕳️\n侵蚀吞噬了你的希望,行动以失败告终...';
+      }
+    }
+
+    const skillLabels = {
+      athletics: '运动',
+      acrobatics: '敏捷',
+      sleight: '巧手',
+      stealth: '隐蔽',
+      qidian: '奇点',
+      history: '历史',
+      investigation: '调查',
+      nature: '自然',
+      religion: '宗教',
+      animal: '驯兽',
+      insight: '洞悉',
+      medicine: '医药',
+      perception: '察觉',
+      survival: '求生',
+      deception: '欺瞒',
+      intimidation: '威吓',
+      performance: '表演',
+      persuasion: '游说'
+    };
+
+    const result = {
+      actor: this.name,
+      attribute: skillLabels[skillKey] || skillKey,
+      hopeDice,
+      corruptDice,
+      diceSum,
+      attrValue: skillValue,
+      modifier,
+      total,
+      difficulty,
+      success: isSuccess,
+      type: resultType,
+      text: resultText
+    };
+
+    // 创建聊天消息
+    const messageData = {
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `${result.attribute}检定`,
+      content: await renderTemplate("systems/shuhai-dalu/templates/chat/check-roll.hbs", result),
+      sound: CONFIG.sounds.dice
+    };
+
+    ChatMessage.create(messageData);
+    return result;
+  }
+
+  /**
    * 进行侵蚀检定
    */
   async rollCorruptionCheck() {
