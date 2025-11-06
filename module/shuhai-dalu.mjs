@@ -187,20 +187,16 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     event.preventDefault();
     const button = event.currentTarget;
 
-    // 获取发起数据
-    const initiateData = {
-      initiatorId: button.dataset.initiatorId,
-      initiatorName: button.dataset.initiatorName,
-      diceId: button.dataset.diceId,
-      diceName: button.dataset.diceName,
-      diceFormula: button.dataset.diceFormula,
-      diceImg: button.dataset.diceImg,
-      diceCost: button.dataset.diceCost,
-      diceType: button.dataset.diceType,
-      diceCategory: button.dataset.diceCategory,
-      adjustment: button.dataset.adjustment,
-      targetId: button.dataset.targetId
-    };
+    // 从聊天消息的flags中获取完整的发起数据
+    const messageId = $(button).closest('.message').data('messageId');
+    const chatMessage = game.messages.get(messageId);
+
+    if (!chatMessage || !chatMessage.flags['shuhai-dalu']?.initiateData) {
+      ui.notifications.error("无法获取发起数据");
+      return;
+    }
+
+    const initiateData = chatMessage.flags['shuhai-dalu'].initiateData;
 
     // 检查是否是指定目标，如果是，验证当前玩家
     if (initiateData.targetId) {
@@ -232,6 +228,56 @@ Hooks.on('renderChatMessage', (message, html, data) => {
       const counterArea = new CounterAreaApplication(actor, initiateData);
       counterArea.render(true);
     }
+  });
+
+  // 结算伤害按钮事件（counter-result.hbs）
+  html.find('.settle-damage-btn').click(async (event) => {
+    event.preventDefault();
+    const button = $(event.currentTarget);
+
+    const loserId = button.data('loser-id');
+    const finalDamage = parseInt(button.data('final-damage')) || 0;
+
+    // 获取失败者角色
+    const loser = game.actors.get(loserId);
+    if (!loser) {
+      ui.notifications.error("无法找到失败者角色");
+      return;
+    }
+
+    // 应用伤害
+    const newHp = Math.max(0, loser.system.derived.hp.value - finalDamage);
+    await loser.update({ 'system.derived.hp.value': newHp });
+
+    // 禁用按钮
+    button.prop('disabled', true);
+    button.text('已结算');
+
+    // 刷新所有打开的角色表单
+    if (loser.sheet && loser.sheet.rendered) {
+      loser.sheet.render(false);
+    }
+
+    // 刷新战斗区域（如果有打开）
+    Object.values(ui.windows).forEach(app => {
+      if (app.constructor.name === 'CombatAreaApplication' && app.actor.id === loserId) {
+        app.render(false);
+      }
+    });
+
+    // 发送结算消息
+    ChatMessage.create({
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: loser }),
+      content: `
+        <div style="background: #0F0D1B; border: 2px solid #EBBD68; border-radius: 8px; padding: 12px; color: #EBBD68; text-align: center;">
+          <strong>${loser.name}</strong> 受到了 <span style="color: #E1AA43; font-weight: bold;">${finalDamage}</span> 点伤害
+          <div style="margin-top: 8px;">当前生命值: <span style="color: #4a7c2c; font-weight: bold;">${newHp}</span>/${loser.system.derived.hp.max}</div>
+        </div>
+      `
+    });
+
+    ui.notifications.info(`${loser.name} 受到 ${finalDamage} 点伤害`);
   });
 
   // 承受按钮事件（combat-dice-initiate.hbs）
@@ -307,6 +353,17 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     // 重新获取更新后的角色数据
     const updatedActor = game.actors.get(actor.id);
 
+    // 刷新所有打开的角色表单和战斗区域
+    if (updatedActor.sheet && updatedActor.sheet.rendered) {
+      updatedActor.sheet.render(false);
+    }
+
+    Object.values(ui.windows).forEach(app => {
+      if (app.constructor.name === 'CombatAreaApplication' && app.actor.id === actor.id) {
+        app.render(false);
+      }
+    });
+
     // 发送消息
     ChatMessage.create({
       user: game.user.id,
@@ -330,6 +387,8 @@ Hooks.on('renderChatMessage', (message, html, data) => {
         </div>
       `
     });
+
+    ui.notifications.info(`${actor.name} 承受了 ${finalDamage} 点伤害`);
   });
 
   // 旧的挑战按钮事件（兼容性保留）
