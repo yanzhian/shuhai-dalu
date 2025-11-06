@@ -953,7 +953,8 @@ async function preloadHandlebarsTemplates() {
     "systems/shuhai-dalu/templates/chat/combat-dice-challenge.hbs",
     "systems/shuhai-dalu/templates/chat/combat-dice-initiate.hbs",
     "systems/shuhai-dalu/templates/chat/counter-result.hbs",
-    "systems/shuhai-dalu/templates/chat/contest-result.hbs"
+    "systems/shuhai-dalu/templates/chat/contest-result.hbs",
+    "systems/shuhai-dalu/templates/chat/counter-attack-result.hbs"
   ]);
 }
 

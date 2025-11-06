@@ -1,0 +1,86 @@
+{{!-- 反击结果聊天卡片 - 双方都需要扣血 --}}
+<div class="counter-attack-result-card" style="background: #0F0D1B; border: 2px solid #EBBD68; border-radius: 8px; padding: 16px; color: #EBBD68; font-family: 'Noto Sans SC', sans-serif;">
+
+  {{!-- 标题 --}}
+  <div class="result-header" style="text-align: center; padding: 8px 0; border-bottom: 1px solid #EBBD68; margin-bottom: 12px;">
+    <h3 style="margin: 0; font-size: 18px; color: #c14545;">⚔️ 反击效果</h3>
+  </div>
+
+  {{!-- 双方信息 --}}
+  <div class="participants" style="display: flex; gap: 16px; justify-content: center; margin-bottom: 16px;">
+
+    {{!-- 发起者（攻击者）--}}
+    <div class="participant" style="flex: 1; text-align: center; padding: 12px; background: rgba(235, 189, 104, 0.1); border-radius: 6px;">
+      <div style="font-size: 14px; color: #888; margin-bottom: 4px;">发起者</div>
+      <div style="font-size: 16px; font-weight: bold; color: #EBBD68; margin-bottom: 8px;">{{initiatorName}}</div>
+      <div style="font-size: 13px; color: #c14545;">受到 {{counterDamage}} 点反击伤害</div>
+    </div>
+
+    {{!-- VS 分隔 --}}
+    <div style="display: flex; align-items: center; font-size: 24px; font-weight: bold; color: #EBBD68;">⚔</div>
+
+    {{!-- 对抗者（反击者）--}}
+    <div class="participant" style="flex: 1; text-align: center; padding: 12px; background: rgba(235, 189, 104, 0.1); border-radius: 6px;">
+      <div style="font-size: 14px; color: #888; margin-bottom: 4px;">对抗者</div>
+      <div style="font-size: 16px; font-weight: bold; color: #EBBD68; margin-bottom: 8px;">{{counterName}}</div>
+      <div style="font-size: 13px; color: #c14545;">受到 {{initiatorDamage}} 点攻击伤害</div>
+    </div>
+
+  </div>
+
+  {{!-- 详细信息 --}}
+  <div class="details" style="padding: 12px; background: rgba(235, 189, 104, 0.1); border-radius: 6px; margin-bottom: 12px; font-size: 13px; line-height: 1.8;">
+    <div><strong>{{counterName}}</strong> 使用了 <span style="color: #E1AA43; font-weight: bold;">{{defenseDiceName}}</span>（反击）</div>
+    <div>反击骰数：{{counterDiceRoll}} + {{counterAdjustment}} = <span style="color: #E1AA43; font-weight: bold;">{{counterDamage}}</span></div>
+    <div>攻击伤害：{{initiatorTotal}} = <span style="color: #c14545; font-weight: bold;">{{initiatorDamage}}</span></div>
+  </div>
+
+  {{!-- 扣血按钮区域 --}}
+  <div class="damage-buttons" style="display: flex; gap: 12px; justify-content: center;">
+
+    {{!-- 发起者扣血按钮 --}}
+    <div style="flex: 1; text-align: center;">
+      <button class="deduct-selected-token-hp-btn"
+              data-final-damage="{{counterDamage}}"
+              style="width: 100%; padding: 10px 20px; background: #c14545; color: #FFFFFF; border: none; border-radius: 4px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+        扣除反击伤害
+      </button>
+      <div style="margin-top: 6px; font-size: 11px; color: #888;">
+        选中【{{initiatorName}}】的Token
+      </div>
+    </div>
+
+    {{!-- 对抗者扣血按钮 --}}
+    <div style="flex: 1; text-align: center;">
+      <button class="deduct-selected-token-hp-btn"
+              data-final-damage="{{initiatorDamage}}"
+              style="width: 100%; padding: 10px 20px; background: #c14545; color: #FFFFFF; border: none; border-radius: 4px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+        扣除攻击伤害
+      </button>
+      <div style="margin-top: 6px; font-size: 11px; color: #888;">
+        选中【{{counterName}}】的Token
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<style>
+.counter-attack-result-card .deduct-selected-token-hp-btn:hover {
+  background: #d94545;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+}
+
+.counter-attack-result-card .deduct-selected-token-hp-btn:active {
+  transform: translateY(0);
+}
+
+.counter-attack-result-card .deduct-selected-token-hp-btn:disabled {
+  background: #888;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+</style>

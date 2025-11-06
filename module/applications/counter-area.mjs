@@ -271,12 +271,29 @@ export default class CounterAreaApplication extends Application {
       return;
     }
 
-    // 请求调整值
-    const adjustment = await this._requestAdjustment();
-    if (adjustment === null) return; // 用户取消
+    const category = defenseDice.system.category || '';
 
-    // 执行对抗
-    await this._performCounter(defenseDice, adjustment);
+    // 根据守备骰分类执行不同逻辑
+    switch(category) {
+      case '闪避':
+        await this._performDodge(defenseDice);
+        break;
+      case '反击':
+        await this._performCounterAttack(defenseDice);
+        break;
+      case '强化反击':
+        await this._performEnhancedCounterAttack(defenseDice);
+        break;
+      case '防御':
+        await this._performDefense(defenseDice);
+        break;
+      case '强化防御':
+        await this._performEnhancedDefense(defenseDice);
+        break;
+      default:
+        ui.notifications.warn(`未知的守备骰分类: ${category}`);
+        break;
+    }
   }
 
   /**
@@ -552,5 +569,402 @@ export default class CounterAreaApplication extends Application {
     desc += `<div>${loserName}${damageDesc}</div>`;
 
     return desc;
+  }
+
+  /* -------------------------------------------- */
+  /*  守备骰专用方法                                */
+  /* -------------------------------------------- */
+
+  /**
+   * 闪避 - 需要拼点，成功无视攻击
+   */
+  async _performDodge(defenseDice) {
+    const adjustment = await this._requestAdjustment();
+    if (adjustment === null) return;
+
+    // 投骰
+    const roll = new Roll(defenseDice.system.diceFormula);
+    await roll.evaluate();
+
+    if (game.dice3d) {
+      await game.dice3d.showForRoll(roll, game.user, true);
+    }
+
+    // 计算守备BUFF加成（忍耐/破绽）
+    const buffBonus = this._calculateDefenseBuffBonus();
+    const dodgeResult = roll.total + buffBonus + adjustment;
+
+    // 发起者数据
+    const initiator = game.actors.get(this.initiateData.initiatorId);
+    const initiatorResult = parseInt(this.initiateData.diceRoll) +
+                           parseInt(this.initiateData.buffBonus) +
+                           parseInt(this.initiateData.adjustment);
+
+    // 判断是否闪避成功
+    const dodgeSuccess = dodgeResult > initiatorResult;
+
+    let resultMessage = '';
+    let finalDamage = 0;
+    let loserId = null;
+
+    if (dodgeSuccess) {
+      resultMessage = `<div style="color: #4a7c2c; font-weight: bold;">${this.actor.name} 闪避成功！无视本次攻击</div>`;
+    } else {
+      // 闪避失败，计算伤害
+      const { finalDamage: damage } = this._calculateDamage(
+        initiatorResult,
+        this.initiateData.diceCategory,
+        this.actor
+      );
+      finalDamage = damage;
+      loserId = this.actor.id;
+      resultMessage = `<div style="color: #c14545; font-weight: bold;">${this.actor.name} 闪避失败！</div>`;
+    }
+
+    // 创建结果消息
+    const chatData = {
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      content: await renderTemplate("systems/shuhai-dalu/templates/chat/counter-result.hbs", {
+        initiatorName: initiator.name,
+        initiatorDiceImg: this.initiateData.diceImg,
+        initiatorDiceName: this.initiateData.diceName,
+        initiatorDiceCost: this.initiateData.diceCost,
+        initiatorDiceFormula: this.initiateData.diceFormula,
+        initiatorResult: initiatorResult,
+        initiatorDiceRoll: this.initiateData.diceRoll,
+        initiatorBuff: this.initiateData.buffBonus,
+        initiatorAdjustment: this.initiateData.adjustment,
+        counterName: this.actor.name,
+        counterDiceImg: defenseDice.img,
+        counterDiceName: defenseDice.name + '（闪避）',
+        counterDiceCost: defenseDice.system.cost,
+        counterDiceFormula: defenseDice.system.diceFormula,
+        counterResult: dodgeResult,
+        counterDiceRoll: roll.total,
+        counterBuff: buffBonus,
+        counterAdjustment: adjustment,
+        initiatorWon: !dodgeSuccess,
+        resultDescription: resultMessage,
+        loserId: loserId,
+        finalDamage: finalDamage
+      }),
+      sound: CONFIG.sounds.dice,
+      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+      rolls: [roll]
+    };
+
+    await ChatMessage.create(chatData);
+    this.close();
+  }
+
+  /**
+   * 反击 - 无需拼点，双方互相造成伤害
+   */
+  async _performCounterAttack(defenseDice) {
+    const adjustment = await this._requestAdjustment();
+    if (adjustment === null) return;
+
+    // 投骰
+    const roll = new Roll(defenseDice.system.diceFormula);
+    await roll.evaluate();
+
+    if (game.dice3d) {
+      await game.dice3d.showForRoll(roll, game.user, true);
+    }
+
+    // 反击伤害 = 骰数 + 调整值（不受BUFF影响）
+    const counterDamage = roll.total + adjustment;
+
+    // 发起者数据
+    const initiator = game.actors.get(this.initiateData.initiatorId);
+    const initiatorTotal = parseInt(this.initiateData.diceRoll) +
+                          parseInt(this.initiateData.buffBonus) +
+                          parseInt(this.initiateData.adjustment);
+
+    // 计算对抗者受到的伤害（考虑抗性）
+    const { finalDamage: initiatorDamage } = this._calculateDamage(
+      initiatorTotal,
+      this.initiateData.diceCategory,
+      this.actor
+    );
+
+    // 创建反击结果消息
+    const chatData = {
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      content: await renderTemplate("systems/shuhai-dalu/templates/chat/counter-attack-result.hbs", {
+        initiatorName: initiator.name,
+        counterName: this.actor.name,
+        defenseDiceName: defenseDice.name,
+        counterDiceRoll: roll.total,
+        counterAdjustment: adjustment,
+        counterDamage: counterDamage,
+        initiatorTotal: initiatorTotal,
+        initiatorDamage: initiatorDamage
+      }),
+      sound: CONFIG.sounds.dice,
+      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+      rolls: [roll]
+    };
+
+    await ChatMessage.create(chatData);
+    this.close();
+  }
+
+  /**
+   * 强化反击 - 需要拼点，使用忍耐/破绽BUFF
+   */
+  async _performEnhancedCounterAttack(defenseDice) {
+    const adjustment = await this._requestAdjustment();
+    if (adjustment === null) return;
+
+    // 投骰
+    const roll = new Roll(defenseDice.system.diceFormula);
+    await roll.evaluate();
+
+    if (game.dice3d) {
+      await game.dice3d.showForRoll(roll, game.user, true);
+    }
+
+    // 计算守备BUFF加成（忍耐/破绽）
+    const buffBonus = this._calculateDefenseBuffBonus();
+    const counterResult = roll.total + buffBonus + adjustment;
+
+    // 发起者数据
+    const initiator = game.actors.get(this.initiateData.initiatorId);
+    const initiatorResult = parseInt(this.initiateData.diceRoll) +
+                           parseInt(this.initiateData.buffBonus) +
+                           parseInt(this.initiateData.adjustment);
+
+    // 判断胜负
+    const counterWon = counterResult > initiatorResult;
+    const loser = counterWon ? initiator : this.actor;
+    const baseDamage = counterWon ? counterResult : initiatorResult;
+
+    // 计算抗性结果
+    const { finalDamage, description } = this._calculateDamage(
+      baseDamage,
+      this.initiateData.diceCategory,
+      loser
+    );
+
+    // 创建结果消息
+    const resultDescription = counterWon
+      ? `<div style="color: #4a7c2c; font-weight: bold;">${this.actor.name} 强化反击成功！</div><div>${loser.name}${description}</div>`
+      : `<div style="color: #c14545; font-weight: bold;">${initiator.name} 攻击成功！</div><div>${loser.name}${description}</div>`;
+
+    const chatData = {
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      content: await renderTemplate("systems/shuhai-dalu/templates/chat/counter-result.hbs", {
+        initiatorName: initiator.name,
+        initiatorDiceImg: this.initiateData.diceImg,
+        initiatorDiceName: this.initiateData.diceName,
+        initiatorDiceCost: this.initiateData.diceCost,
+        initiatorDiceFormula: this.initiateData.diceFormula,
+        initiatorResult: initiatorResult,
+        initiatorDiceRoll: this.initiateData.diceRoll,
+        initiatorBuff: this.initiateData.buffBonus,
+        initiatorAdjustment: this.initiateData.adjustment,
+        counterName: this.actor.name,
+        counterDiceImg: defenseDice.img,
+        counterDiceName: defenseDice.name + '（强化反击）',
+        counterDiceCost: defenseDice.system.cost,
+        counterDiceFormula: defenseDice.system.diceFormula,
+        counterResult: counterResult,
+        counterDiceRoll: roll.total,
+        counterBuff: buffBonus,
+        counterAdjustment: adjustment,
+        initiatorWon: !counterWon,
+        resultDescription: resultDescription,
+        loserId: loser.id,
+        finalDamage: finalDamage
+      }),
+      sound: CONFIG.sounds.dice,
+      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+      rolls: [roll]
+    };
+
+    await ChatMessage.create(chatData);
+    this.close();
+  }
+
+  /**
+   * 防御 - 无需拼点，直接受伤但减少防御骰数
+   */
+  async _performDefense(defenseDice) {
+    const adjustment = await this._requestAdjustment();
+    if (adjustment === null) return;
+
+    // 投骰
+    const roll = new Roll(defenseDice.system.diceFormula);
+    await roll.evaluate();
+
+    if (game.dice3d) {
+      await game.dice3d.showForRoll(roll, game.user, true);
+    }
+
+    // 防御骰数
+    const defenseValue = roll.total + adjustment;
+
+    // 发起者数据
+    const initiator = game.actors.get(this.initiateData.initiatorId);
+    const initiatorTotal = parseInt(this.initiateData.diceRoll) +
+                          parseInt(this.initiateData.buffBonus) +
+                          parseInt(this.initiateData.adjustment);
+
+    // 先计算原始伤害（包含抗性）
+    const { finalDamage: baseDamage } = this._calculateDamage(
+      initiatorTotal,
+      this.initiateData.diceCategory,
+      this.actor
+    );
+
+    // 再减少防御值
+    const finalDamage = Math.max(0, baseDamage - defenseValue);
+
+    // 创建结果消息
+    const resultDescription = `<div>${this.actor.name} 使用防御</div><div>原始伤害：${baseDamage}，防御减免：${defenseValue}</div><div style="color: #c14545; font-weight: bold;">最终伤害：${finalDamage}</div>`;
+
+    const chatData = {
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      content: await renderTemplate("systems/shuhai-dalu/templates/chat/counter-result.hbs", {
+        initiatorName: initiator.name,
+        initiatorDiceImg: this.initiateData.diceImg,
+        initiatorDiceName: this.initiateData.diceName,
+        initiatorDiceCost: this.initiateData.diceCost,
+        initiatorDiceFormula: this.initiateData.diceFormula,
+        initiatorResult: initiatorTotal,
+        initiatorDiceRoll: this.initiateData.diceRoll,
+        initiatorBuff: this.initiateData.buffBonus,
+        initiatorAdjustment: this.initiateData.adjustment,
+        counterName: this.actor.name,
+        counterDiceImg: defenseDice.img,
+        counterDiceName: defenseDice.name + '（防御）',
+        counterDiceCost: defenseDice.system.cost,
+        counterDiceFormula: defenseDice.system.diceFormula,
+        counterResult: defenseValue,
+        counterDiceRoll: roll.total,
+        counterBuff: 0,
+        counterAdjustment: adjustment,
+        initiatorWon: true,
+        resultDescription: resultDescription,
+        loserId: this.actor.id,
+        finalDamage: finalDamage
+      }),
+      sound: CONFIG.sounds.dice,
+      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+      rolls: [roll]
+    };
+
+    await ChatMessage.create(chatData);
+    this.close();
+  }
+
+  /**
+   * 强化防御 - 需要拼点，成功抵挡，失败受伤但减少防御骰数
+   */
+  async _performEnhancedDefense(defenseDice) {
+    const adjustment = await this._requestAdjustment();
+    if (adjustment === null) return;
+
+    // 投骰
+    const roll = new Roll(defenseDice.system.diceFormula);
+    await roll.evaluate();
+
+    if (game.dice3d) {
+      await game.dice3d.showForRoll(roll, game.user, true);
+    }
+
+    // 计算守备BUFF加成（忍耐/破绽）
+    const buffBonus = this._calculateDefenseBuffBonus();
+    const defenseResult = roll.total + buffBonus + adjustment;
+
+    // 发起者数据
+    const initiator = game.actors.get(this.initiateData.initiatorId);
+    const initiatorResult = parseInt(this.initiateData.diceRoll) +
+                           parseInt(this.initiateData.buffBonus) +
+                           parseInt(this.initiateData.adjustment);
+
+    // 判断是否防御成功
+    const defenseSuccess = defenseResult > initiatorResult;
+
+    let resultDescription = '';
+    let finalDamage = 0;
+
+    if (defenseSuccess) {
+      // 防御成功，无伤害
+      resultDescription = `<div style="color: #4a7c2c; font-weight: bold;">${this.actor.name} 强化防御成功！完全抵挡了攻击</div>`;
+    } else {
+      // 防御失败，计算伤害（先算抗性，再减防御值）
+      const { finalDamage: baseDamage } = this._calculateDamage(
+        initiatorResult,
+        this.initiateData.diceCategory,
+        this.actor
+      );
+
+      // 减少防御值
+      finalDamage = Math.max(0, baseDamage - defenseResult);
+      resultDescription = `<div style="color: #c14545; font-weight: bold;">${this.actor.name} 强化防御失败</div><div>原始伤害：${baseDamage}，防御减免：${defenseResult}</div><div style="color: #c14545; font-weight: bold;">最终伤害：${finalDamage}</div>`;
+    }
+
+    // 创建结果消息
+    const chatData = {
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      content: await renderTemplate("systems/shuhai-dalu/templates/chat/counter-result.hbs", {
+        initiatorName: initiator.name,
+        initiatorDiceImg: this.initiateData.diceImg,
+        initiatorDiceName: this.initiateData.diceName,
+        initiatorDiceCost: this.initiateData.diceCost,
+        initiatorDiceFormula: this.initiateData.diceFormula,
+        initiatorResult: initiatorResult,
+        initiatorDiceRoll: this.initiateData.diceRoll,
+        initiatorBuff: this.initiateData.buffBonus,
+        initiatorAdjustment: this.initiateData.adjustment,
+        counterName: this.actor.name,
+        counterDiceImg: defenseDice.img,
+        counterDiceName: defenseDice.name + '（强化防御）',
+        counterDiceCost: defenseDice.system.cost,
+        counterDiceFormula: defenseDice.system.diceFormula,
+        counterResult: defenseResult,
+        counterDiceRoll: roll.total,
+        counterBuff: buffBonus,
+        counterAdjustment: adjustment,
+        initiatorWon: !defenseSuccess,
+        resultDescription: resultDescription,
+        loserId: defenseSuccess ? null : this.actor.id,
+        finalDamage: finalDamage
+      }),
+      sound: CONFIG.sounds.dice,
+      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+      rolls: [roll]
+    };
+
+    await ChatMessage.create(chatData);
+    this.close();
+  }
+
+  /**
+   * 计算守备BUFF加成（忍耐/破绽）
+   */
+  _calculateDefenseBuffBonus() {
+    let bonus = 0;
+
+    if (!this.combatState.buffs) return bonus;
+
+    for (const buff of this.combatState.buffs) {
+      if (buff.id === 'endure') {
+        // 忍耐：守备骰数增加
+        bonus += buff.layers;
+      } else if (buff.id === 'flaw') {
+        // 破绽：守备骰数减少
+        bonus -= buff.layers;
+      }
+    }
+
+    return bonus;
   }
 }
