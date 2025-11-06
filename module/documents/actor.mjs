@@ -23,6 +23,12 @@ export default class ShuhaiActor extends Actor {
         }
       }
     }
+
+    // 初始化新角色的HP（仅在创建时，通过检查是否有hpInitialized标记）
+    if (this.type === 'character' && !this.getFlag('shuhai-dalu', 'hpInitialized')) {
+      // 标记为已初始化（这样下次就不会再重置了）
+      // 注意：这个标记会在prepareDerivedData计算完hp.max后由系统自动设置
+    }
   }
 
   /** @override */

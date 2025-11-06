@@ -167,10 +167,24 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
     this.derived.starlight = totalStarlight - this.derived.starlightUsed;
     
     // 计算最大生命值 (体质*3 + 力量 + 等级*3)
-    this.derived.hp.max = con * 3 + str + lvl * 3;
-    
-    // 初始化当前生命值
-    if (this.derived.hp.value === 0 || this.derived.hp.value > this.derived.hp.max) {
+    const newMaxHp = con * 3 + str + lvl * 3;
+    const oldMaxHp = this.derived.hp.max;
+    this.derived.hp.max = newMaxHp;
+
+    // 初始化新角色的HP（仅在首次计算时，即当前HP为初始值0且max刚被计算出来）
+    // 使用parent（Actor实例）的flag来判断是否已初始化
+    if (this.parent && !this.parent.getFlag('shuhai-dalu', 'hpInitialized')) {
+      if (this.derived.hp.value === 0 && this.derived.hp.max > 0) {
+        this.derived.hp.value = this.derived.hp.max;
+        // 异步设置flag，标记已初始化（不阻塞当前流程）
+        setTimeout(() => {
+          this.parent.setFlag('shuhai-dalu', 'hpInitialized', true);
+        }, 0);
+      }
+    }
+
+    // 确保HP不超过最大值（允许HP为0，代表角色死亡）
+    if (this.derived.hp.value > this.derived.hp.max) {
       this.derived.hp.value = this.derived.hp.max;
     }
     
