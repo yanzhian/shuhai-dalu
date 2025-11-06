@@ -524,8 +524,35 @@ export default class CounterAreaApplication extends Application {
     let finalDamage = baseDamage;
     let description = "";
 
+    // 优先从场景中的 Token 获取装备信息
+    let actualTarget = target;
+
+    // 尝试找到场景中对应的 Token
+    const token = canvas.tokens?.placeables.find(t => t.actor?.id === target.id);
+    if (token && token.actor) {
+      actualTarget = token.actor;
+      console.log('【调试】使用 Token 的装备数据:', {
+        actorName: target.name,
+        tokenId: token.id,
+        hasArmor: !!actualTarget.system.equipment.armor
+      });
+    } else {
+      console.log('【调试】使用 Actor 的装备数据:', {
+        actorName: target.name,
+        hasArmor: !!actualTarget.system.equipment.armor
+      });
+    }
+
     // 获取目标的防具
-    const armor = target.items.get(target.system.equipment.armor);
+    const armor = actualTarget.items.get(actualTarget.system.equipment.armor);
+
+    console.log('【调试】抗性计算:', {
+      target: actualTarget.name,
+      damageCategory: damageCategory,
+      baseDamage: baseDamage,
+      hasArmor: !!armor,
+      armorName: armor?.name
+    });
 
     if (armor && armor.system.armorProperties) {
       const props = armor.system.armorProperties;
