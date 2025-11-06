@@ -107,6 +107,29 @@ Hooks.once('ready', async function() {
 });
 
 /* -------------------------------------------- */
+/*  Actor创建钩子 - 初始化新角色HP                */
+/* -------------------------------------------- */
+
+Hooks.on('preCreateActor', (actor, data, options, userId) => {
+  // 只处理角色类型
+  if (actor.type !== 'character') return;
+
+  // 计算初始最大HP（需要先有属性值）
+  const con = data.system?.attributes?.constitution || 10;
+  const str = data.system?.attributes?.strength || 10;
+  const lvl = data.system?.level || 1;
+  const maxHp = con * 3 + str + lvl * 3;
+
+  // 设置初始HP为最大值
+  actor.updateSource({
+    'system.derived.hp.value': maxHp,
+    'system.derived.hp.max': maxHp
+  });
+
+  console.log(`书海大陆 | 新角色HP初始化: ${maxHp}/${maxHp}`);
+});
+
+/* -------------------------------------------- */
 /*  聊天消息钩子                                  */
 /* -------------------------------------------- */
 
