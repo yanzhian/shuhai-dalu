@@ -81,29 +81,35 @@
     {{{resultDescription}}}
   </div>
 
-  {{!-- 打开角色卡按钮 --}}
+  {{!-- 扣除选中Token生命值按钮 --}}
   <div class="settle-section" style="text-align: center;">
-    <button class="open-loser-sheet-btn"
-            data-loser-id="{{loserId}}"
+    <button class="deduct-selected-token-hp-btn"
             data-final-damage="{{finalDamage}}"
-            style="padding: 10px 28px; background: #E1AA43; color: #0F0D1B; border: none; border-radius: 4px; font-size: 15px; font-weight: bold; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-      打开角色卡
+            style="padding: 10px 28px; background: #c14545; color: #FFFFFF; border: none; border-radius: 4px; font-size: 15px; font-weight: bold; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+      扣除生命值
     </button>
     <div style="margin-top: 8px; font-size: 12px; color: #888;">
-      请手动扣除 <span style="color: #c14545; font-weight: bold;">{{finalDamage}}</span> 点生命值
+      先选中Token，再点击按钮扣除 <span style="color: #c14545; font-weight: bold;">{{finalDamage}}</span> 点生命值
     </div>
   </div>
 
 </div>
 
 <style>
-.open-loser-sheet-btn:hover {
-  background: #f3c267;
+.deduct-selected-token-hp-btn:hover {
+  background: #d94545;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0,0,0,0.4);
 }
 
-.open-loser-sheet-btn:active {
+.deduct-selected-token-hp-btn:active {
   transform: translateY(0);
+}
+
+.deduct-selected-token-hp-btn:disabled {
+  background: #888;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 </style>

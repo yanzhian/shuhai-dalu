@@ -414,25 +414,81 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     console.log('【调试】承受伤害流程完成');
   });
 
-  // 打开失败者角色卡按钮（counter-result.hbs）
-  html.find('.open-loser-sheet-btn').click(async (event) => {
+  // 扣除选中Token生命值按钮（counter-result.hbs）
+  html.find('.deduct-selected-token-hp-btn').click(async (event) => {
     event.preventDefault();
     const button = event.currentTarget;
 
-    const loserId = button.dataset.loserId;
     const finalDamage = parseInt(button.dataset.finalDamage) || 0;
 
-    // 获取失败者角色
-    const loser = game.actors.get(loserId);
-    if (!loser) {
-      ui.notifications.error("无法找到失败者角色");
+    // 获取当前选中的Token
+    const controlled = canvas.tokens?.controlled;
+    if (!controlled || controlled.length === 0) {
+      ui.notifications.warn("请先选中一个Token！");
       return;
     }
 
-    // 打开角色卡
-    loser.sheet.render(true);
+    if (controlled.length > 1) {
+      ui.notifications.warn("请只选中一个Token！");
+      return;
+    }
 
-    ui.notifications.info(`请在 ${loser.name} 的角色卡中手动扣除 ${finalDamage} 点生命值`);
+    const token = controlled[0];
+    const actor = token.actor;
+
+    if (!actor) {
+      ui.notifications.error("选中的Token没有关联角色！");
+      return;
+    }
+
+    // 记录伤害前的HP
+    const hpBefore = actor.system.derived.hp.value;
+    const hpMax = actor.system.derived.hp.max;
+
+    // 应用伤害
+    const newHp = Math.max(0, hpBefore - finalDamage);
+
+    try {
+      await actor.update({ 'system.derived.hp.value': newHp });
+      console.log('【调试】HP更新成功:', actor.name, hpBefore, '->', newHp);
+    } catch (error) {
+      console.error('【调试】HP更新失败:', error);
+      ui.notifications.error(`更新HP失败: ${error.message}`);
+      return;
+    }
+
+    // 禁用按钮
+    button.disabled = true;
+    button.textContent = '已扣除';
+
+    // 刷新角色表单和战斗区域
+    if (actor.sheet && actor.sheet.rendered) {
+      actor.sheet.render(false);
+    }
+
+    Object.values(ui.windows).forEach(app => {
+      if (app.constructor.name === 'CombatAreaApplication' && app.actor.id === actor.id) {
+        app.render(false);
+      }
+    });
+
+    // 发送确认消息
+    ChatMessage.create({
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: actor }),
+      content: `
+        <div style="background: #0F0D1B; border: 2px solid #c14545; border-radius: 8px; padding: 12px; color: #EBBD68; text-align: center; font-family: 'Noto Sans SC', sans-serif;">
+          <div style="font-size: 16px; font-weight: bold; color: #c14545; margin-bottom: 8px;">✓ 生命值已扣除</div>
+          <div style="margin-bottom: 8px;"><strong>${actor.name}</strong> 受到了 <span style="color: #c14545; font-weight: bold;">${finalDamage}</span> 点伤害</div>
+          <div style="padding: 8px; background: rgba(193, 69, 69, 0.1); border-radius: 4px;">
+            <div style="font-size: 14px; color: #888;">伤害前: ${hpBefore}/${hpMax}</div>
+            <div style="font-size: 16px; font-weight: bold; color: ${newHp > 0 ? '#EBBD68' : '#c14545'}; margin-top: 4px;">当前生命值: ${newHp}/${hpMax}</div>
+          </div>
+        </div>
+      `
+    });
+
+    ui.notifications.info(`${actor.name} 受到了 ${finalDamage} 点伤害，当前生命值: ${newHp}/${hpMax}`);
   });
 
   // 承受按钮事件（combat-dice-initiate.hbs）
