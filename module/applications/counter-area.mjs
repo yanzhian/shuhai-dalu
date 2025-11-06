@@ -696,14 +696,24 @@ export default class CounterAreaApplication extends Application {
 
     // 计算守备BUFF加成（忍耐/破绽）
     const buffBonus = this._calculateDefenseBuffBonus();
-    // 反击伤害 = 骰数 + BUFF + 调整值
-    const counterDamage = roll.total + buffBonus + adjustment;
+    // 反击基础伤害 = 骰数 + BUFF + 调整值
+    const counterBaseDamage = roll.total + buffBonus + adjustment;
 
     // 发起者数据
     const initiator = game.actors.get(this.initiateData.initiatorId);
     const initiatorTotal = initiatorRollResult.total +
                           parseInt(this.initiateData.buffBonus) +
                           parseInt(this.initiateData.adjustment);
+
+    // 从反击骰子的分类中提取攻击类型（例如"反击-斩击" → "斩击"）
+    const counterAttackType = this._extractAttackType(defenseDice.system.category);
+
+    // 计算反击伤害（考虑发起者的抗性）
+    const { finalDamage: counterDamage } = this._calculateDamage(
+      counterBaseDamage,
+      counterAttackType,
+      initiator
+    );
 
     // 计算对抗者受到的伤害（考虑抗性）
     const { finalDamage: initiatorDamage } = this._calculateDamage(
@@ -775,10 +785,20 @@ export default class CounterAreaApplication extends Application {
     const loser = counterWon ? initiator : this.actor;
     const baseDamage = counterWon ? counterResult : initiatorResult;
 
+    // 根据胜者决定攻击类型
+    let attackType;
+    if (counterWon) {
+      // 反击者赢了，使用反击骰子的攻击类型
+      attackType = this._extractAttackType(defenseDice.system.category);
+    } else {
+      // 发起者赢了，使用发起者的攻击类型
+      attackType = this.initiateData.diceCategory;
+    }
+
     // 计算抗性结果
     const { finalDamage, description } = this._calculateDamage(
       baseDamage,
-      this.initiateData.diceCategory,
+      attackType,
       loser
     );
 
@@ -1019,6 +1039,27 @@ export default class CounterAreaApplication extends Application {
     }
 
     return bonus;
+  }
+
+  /**
+   * 从骰子分类中提取攻击类型
+   * 例如："反击-斩击" → "斩击"
+   *      "强化反击-打击" → "打击"
+   *      "反击" → ""
+   */
+  _extractAttackType(category) {
+    if (!category) return '';
+
+    // 分割字符串，例如 "反击-斩击" 分割为 ["反击", "斩击"]
+    const parts = category.split('-');
+
+    // 如果有第二部分，就是攻击类型
+    if (parts.length > 1) {
+      return parts[1].trim();
+    }
+
+    // 否则没有特定攻击类型
+    return '';
   }
 
   /**
