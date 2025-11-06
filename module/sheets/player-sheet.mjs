@@ -27,10 +27,10 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   /** @override */
   async getData() {
     const context = super.getData();
-    const actorData = this.actor.toObject(false);
 
-    context.system = actorData.system;
-    context.flags = actorData.flags;
+    // 直接使用this.actor.system而不是toObject，确保获取最新的derived数据
+    context.system = this.actor.system;
+    context.flags = this.actor.flags;
     context.rollData = this.actor.getRollData();
 
     // 锁定状态（默认为游玩模式，即锁定）
