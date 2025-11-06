@@ -31,6 +31,18 @@ export default class CounterAreaApplication extends Application {
   }
 
   /** @override */
+  async close(options = {}) {
+    // 关闭时刷新战斗区域，确保同步
+    Object.values(ui.windows).forEach(app => {
+      if (app.constructor.name === 'CombatAreaApplication' && app.actor.id === this.actor.id) {
+        app.render(false);
+      }
+    });
+
+    return super.close(options);
+  }
+
+  /** @override */
   async getData() {
     const context = await super.getData();
 
@@ -205,6 +217,13 @@ export default class CounterAreaApplication extends Application {
    */
   async _saveCombatState() {
     await this.actor.setFlag('shuhai-dalu', 'combatState', this.combatState);
+
+    // 同步刷新战斗区域
+    Object.values(ui.windows).forEach(app => {
+      if (app.constructor.name === 'CombatAreaApplication' && app.actor.id === this.actor.id) {
+        app.render(false);
+      }
+    });
   }
 
   /**
@@ -367,15 +386,6 @@ export default class CounterAreaApplication extends Application {
       loser
     );
 
-    // 应用伤害并重新获取最新的角色数据
-    if (finalDamage > 0) {
-      const newHp = Math.max(0, loser.system.derived.hp.value - finalDamage);
-      await loser.update({ 'system.derived.hp.value': newHp });
-    }
-
-    // 重新获取最新的loser数据
-    const updatedLoser = game.actors.get(loser.id);
-
     // 使用后解除激活状态（对抗者）
     if (diceIndex !== null && diceIndex >= 0 && diceIndex < 6) {
       this.combatState.activatedDice[diceIndex] = false;
@@ -384,7 +394,7 @@ export default class CounterAreaApplication extends Application {
     // 保存对抗者的状态（同步回combat-area）
     await this._saveCombatState();
 
-    // 创建结果消息
+    // 创建结果消息（不应用伤害，由结算按钮来应用）
     const resultDescription = this._createResultDescription(
       initiator,
       this.actor,
@@ -396,7 +406,7 @@ export default class CounterAreaApplication extends Application {
       buffBonus,
       initiatorAdjustment,
       adjustment,
-      updatedLoser,
+      loser,
       finalDamage,
       description
     );
@@ -424,7 +434,9 @@ export default class CounterAreaApplication extends Application {
         counterBuff: buffBonus,
         counterAdjustment: adjustment,
         initiatorWon: initiatorWon,
-        resultDescription: resultDescription
+        resultDescription: resultDescription,
+        loserId: loser.id,
+        finalDamage: finalDamage
       }),
       sound: CONFIG.sounds.dice,
       type: CONST.CHAT_MESSAGE_TYPES.ROLL,
@@ -530,9 +542,8 @@ export default class CounterAreaApplication extends Application {
     const winnerName = initiatorResult > counterResult ? initiator.name : counter.name;
     const loserName = loser.name;
 
-    let desc = `<div>本次对抗，${winnerName}【获胜】，${loserName}【败北】，</div>`;
-    desc += `<div>${loserName}${damageDesc}。</div>`;
-    desc += `<div>${loserName}生命值：${loser.system.derived.hp.value}/${loser.system.derived.hp.max}</div>`;
+    let desc = `<div>本次对抗，${winnerName}【获胜】，${loserName}【败北】</div>`;
+    desc += `<div>${loserName}${damageDesc}</div>`;
 
     return desc;
   }
