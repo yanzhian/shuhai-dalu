@@ -81,27 +81,29 @@
     {{{resultDescription}}}
   </div>
 
-  {{!-- 结算按钮 --}}
+  {{!-- 结算按钮 - 直接承受伤害 --}}
   <div class="settle-section" style="text-align: center;">
-    <button class="settle-damage-btn"
+    <button class="apply-contest-damage-btn"
             data-loser-id="{{loserId}}"
             data-final-damage="{{finalDamage}}"
-            style="padding: 8px 24px; background: #E1AA43; color: #0F0D1B; border: none; border-radius: 4px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.2s;">
-      结算伤害
+            style="padding: 10px 28px; background: #c14545; color: #FFFFFF; border: none; border-radius: 4px; font-size: 15px; font-weight: bold; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+      承受伤害
     </button>
   </div>
 
 </div>
 
 <style>
-.settle-damage-btn:hover {
-  background: #f3c267;
-  transform: translateY(-2px);
+.apply-contest-damage-btn:hover {
+  background: #d94545;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
 }
 
-.settle-damage-btn:disabled {
+.apply-contest-damage-btn:disabled {
   background: #888;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 </style>
