@@ -709,14 +709,14 @@ export default class CounterAreaApplication extends Application {
     const counterAttackType = this._extractAttackType(defenseDice.system.category);
 
     // 计算反击伤害（考虑发起者的抗性）
-    const { finalDamage: counterDamage } = this._calculateDamage(
+    const { finalDamage: counterDamage, description: counterDescription } = this._calculateDamage(
       counterBaseDamage,
       counterAttackType,
       initiator
     );
 
     // 计算对抗者受到的伤害（考虑抗性）
-    const { finalDamage: initiatorDamage } = this._calculateDamage(
+    const { finalDamage: initiatorDamage, description: initiatorDescription } = this._calculateDamage(
       initiatorTotal,
       this.initiateData.diceCategory,
       this.actor
@@ -733,9 +733,14 @@ export default class CounterAreaApplication extends Application {
         counterDiceRoll: roll.total,
         counterBuff: buffBonus,
         counterAdjustment: adjustment,
+        counterBaseDamage: counterBaseDamage,
         counterDamage: counterDamage,
+        counterDescription: counterDescription,
+        counterAttackType: counterAttackType || '无属性',
         initiatorTotal: initiatorTotal,
-        initiatorDamage: initiatorDamage
+        initiatorDamage: initiatorDamage,
+        initiatorDescription: initiatorDescription,
+        initiatorAttackType: this.initiateData.diceCategory || '无属性'
       }),
       sound: CONFIG.sounds.dice,
       type: CONST.CHAT_MESSAGE_TYPES.ROLL,
