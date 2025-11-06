@@ -414,93 +414,25 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     console.log('【调试】承受伤害流程完成');
   });
 
-  // 对抗结果直接承受伤害按钮（counter-result.hbs）
-  html.find('.apply-contest-damage-btn').click(async (event) => {
+  // 打开失败者角色卡按钮（counter-result.hbs）
+  html.find('.open-loser-sheet-btn').click(async (event) => {
     event.preventDefault();
     const button = event.currentTarget;
-
-    console.log('【调试】对抗承受伤害按钮被点击');
-    console.log('【调试】button.dataset:', button.dataset);
 
     const loserId = button.dataset.loserId;
     const finalDamage = parseInt(button.dataset.finalDamage) || 0;
 
-    console.log('【调试】loserId:', loserId);
-    console.log('【调试】finalDamage:', finalDamage);
-
     // 获取失败者角色
     const loser = game.actors.get(loserId);
     if (!loser) {
-      console.error('【调试】无法找到角色, loserId:', loserId);
       ui.notifications.error("无法找到失败者角色");
       return;
     }
 
-    console.log('【调试】找到角色:', loser.name);
+    // 打开角色卡
+    loser.sheet.render(true);
 
-    // 记录伤害前的HP
-    const hpBefore = loser.system.derived.hp.value;
-    const hpMax = loser.system.derived.hp.max;
-
-    console.log('【调试】伤害前HP:', hpBefore, '/', hpMax);
-
-    // 应用伤害
-    const newHp = Math.max(0, hpBefore - finalDamage);
-    console.log('【调试】准备更新HP到:', newHp);
-
-    try {
-      await loser.update({ 'system.derived.hp.value': newHp });
-      console.log('【调试】HP更新成功');
-    } catch (error) {
-      console.error('【调试】HP更新失败:', error);
-      ui.notifications.error(`更新HP失败: ${error.message}`);
-      return;
-    }
-
-    // 等待更新完成
-    await new Promise(resolve => setTimeout(resolve, 100));
-    const updatedLoser = game.actors.get(loserId);
-    console.log('【调试】更新后HP:', updatedLoser.system.derived.hp.value);
-
-    // 禁用按钮
-    button.disabled = true;
-    button.textContent = '已承受';
-    button.style.background = '#888';
-    button.style.cursor = 'not-allowed';
-    button.style.boxShadow = 'none';
-
-    // 刷新所有打开的角色表单
-    if (updatedLoser.sheet && updatedLoser.sheet.rendered) {
-      updatedLoser.sheet.render(false);
-      console.log('【调试】角色表已刷新');
-    }
-
-    // 刷新战斗区域（如果有打开）
-    Object.values(ui.windows).forEach(app => {
-      if (app.constructor.name === 'CombatAreaApplication' && app.actor.id === loserId) {
-        app.render(false);
-        console.log('【调试】战斗区域已刷新');
-      }
-    });
-
-    // 发送确认消息
-    ChatMessage.create({
-      user: game.user.id,
-      speaker: ChatMessage.getSpeaker({ actor: updatedLoser }),
-      content: `
-        <div style="background: #0F0D1B; border: 2px solid #c14545; border-radius: 8px; padding: 12px; color: #EBBD68; text-align: center; font-family: 'Noto Sans SC', sans-serif;">
-          <div style="font-size: 16px; font-weight: bold; color: #c14545; margin-bottom: 8px;">✓ 对抗伤害已承受</div>
-          <div style="margin-bottom: 8px;"><strong>${updatedLoser.name}</strong> 受到了 <span style="color: #c14545; font-weight: bold;">${finalDamage}</span> 点伤害</div>
-          <div style="padding: 8px; background: rgba(193, 69, 69, 0.1); border-radius: 4px;">
-            <div style="font-size: 14px; color: #888;">伤害前: ${hpBefore}/${hpMax}</div>
-            <div style="font-size: 16px; font-weight: bold; color: ${updatedLoser.system.derived.hp.value > 0 ? '#EBBD68' : '#c14545'}; margin-top: 4px;">当前生命值: ${updatedLoser.system.derived.hp.value}/${hpMax}</div>
-          </div>
-        </div>
-      `
-    });
-
-    ui.notifications.info(`${updatedLoser.name} 承受了 ${finalDamage} 点伤害，当前生命值: ${updatedLoser.system.derived.hp.value}/${hpMax}`);
-    console.log('【调试】对抗承受伤害流程完成');
+    ui.notifications.info(`请在 ${loser.name} 的角色卡中手动扣除 ${finalDamage} 点生命值`);
   });
 
   // 承受按钮事件（combat-dice-initiate.hbs）
