@@ -368,13 +368,20 @@ export default class CounterAreaApplication extends Application {
    * 执行对抗
    */
   async _performCounter(dice, adjustment, consumedEx = false, diceIndex = null) {
-    // 投骰
+    // 先投发起者的骰子（如果还没投）
+    const initiatorRollResult = await this._rollInitiatorDice();
+
+    // 再投对抗者的骰子
     const roll = new Roll(dice.system.diceFormula);
     await roll.evaluate();
 
-    // 显示3D骰子动画
+    // 一起显示3D骰子动画
     if (game.dice3d) {
-      await game.dice3d.showForRoll(roll, game.user, true);
+      const rolls = [roll];
+      if (initiatorRollResult.roll) {
+        rolls.unshift(initiatorRollResult.roll); // 发起者的骰子在前
+      }
+      await game.dice3d.showForRoll(rolls, game.user, true);
     }
 
     // 计算BUFF加成
@@ -386,7 +393,7 @@ export default class CounterAreaApplication extends Application {
 
     // 发起者数据
     const initiator = game.actors.get(this.initiateData.initiatorId);
-    const initiatorRoll = parseInt(this.initiateData.diceRoll) || 0;
+    const initiatorRoll = initiatorRollResult.total;
     const initiatorBuffBonus = parseInt(this.initiateData.buffBonus) || 0;
     const initiatorAdjustment = parseInt(this.initiateData.adjustment) || 0;
     const initiatorResult = initiatorRoll + initiatorBuffBonus + initiatorAdjustment;
@@ -577,12 +584,20 @@ export default class CounterAreaApplication extends Application {
     const adjustment = await this._requestAdjustment();
     if (adjustment === null) return;
 
-    // 投骰
+    // 先投发起者的骰子（如果还没投）
+    const initiatorRollResult = await this._rollInitiatorDice();
+
+    // 再投对抗者的骰子
     const roll = new Roll(defenseDice.system.diceFormula);
     await roll.evaluate();
 
+    // 一起显示3D骰子动画
     if (game.dice3d) {
-      await game.dice3d.showForRoll(roll, game.user, true);
+      const rolls = [roll];
+      if (initiatorRollResult.roll) {
+        rolls.unshift(initiatorRollResult.roll);
+      }
+      await game.dice3d.showForRoll(rolls, game.user, true);
     }
 
     // 计算守备BUFF加成（忍耐/破绽）
@@ -591,7 +606,7 @@ export default class CounterAreaApplication extends Application {
 
     // 发起者数据
     const initiator = game.actors.get(this.initiateData.initiatorId);
-    const initiatorResult = parseInt(this.initiateData.diceRoll) +
+    const initiatorResult = initiatorRollResult.total +
                            parseInt(this.initiateData.buffBonus) +
                            parseInt(this.initiateData.adjustment);
 
@@ -660,12 +675,20 @@ export default class CounterAreaApplication extends Application {
     const adjustment = await this._requestAdjustment();
     if (adjustment === null) return;
 
-    // 投骰
+    // 先投发起者的骰子（如果还没投）
+    const initiatorRollResult = await this._rollInitiatorDice();
+
+    // 再投对抗者的骰子
     const roll = new Roll(defenseDice.system.diceFormula);
     await roll.evaluate();
 
+    // 一起显示3D骰子动画
     if (game.dice3d) {
-      await game.dice3d.showForRoll(roll, game.user, true);
+      const rolls = [roll];
+      if (initiatorRollResult.roll) {
+        rolls.unshift(initiatorRollResult.roll);
+      }
+      await game.dice3d.showForRoll(rolls, game.user, true);
     }
 
     // 计算守备BUFF加成（忍耐/破绽）
@@ -675,7 +698,7 @@ export default class CounterAreaApplication extends Application {
 
     // 发起者数据
     const initiator = game.actors.get(this.initiateData.initiatorId);
-    const initiatorTotal = parseInt(this.initiateData.diceRoll) +
+    const initiatorTotal = initiatorRollResult.total +
                           parseInt(this.initiateData.buffBonus) +
                           parseInt(this.initiateData.adjustment);
 
@@ -717,12 +740,20 @@ export default class CounterAreaApplication extends Application {
     const adjustment = await this._requestAdjustment();
     if (adjustment === null) return;
 
-    // 投骰
+    // 先投发起者的骰子（如果还没投）
+    const initiatorRollResult = await this._rollInitiatorDice();
+
+    // 再投对抗者的骰子
     const roll = new Roll(defenseDice.system.diceFormula);
     await roll.evaluate();
 
+    // 一起显示3D骰子动画
     if (game.dice3d) {
-      await game.dice3d.showForRoll(roll, game.user, true);
+      const rolls = [roll];
+      if (initiatorRollResult.roll) {
+        rolls.unshift(initiatorRollResult.roll);
+      }
+      await game.dice3d.showForRoll(rolls, game.user, true);
     }
 
     // 计算守备BUFF加成（忍耐/破绽）
@@ -731,7 +762,7 @@ export default class CounterAreaApplication extends Application {
 
     // 发起者数据
     const initiator = game.actors.get(this.initiateData.initiatorId);
-    const initiatorResult = parseInt(this.initiateData.diceRoll) +
+    const initiatorResult = initiatorRollResult.total +
                            parseInt(this.initiateData.buffBonus) +
                            parseInt(this.initiateData.adjustment);
 
@@ -795,12 +826,20 @@ export default class CounterAreaApplication extends Application {
     const adjustment = await this._requestAdjustment();
     if (adjustment === null) return;
 
-    // 投骰
+    // 先投发起者的骰子（如果还没投）
+    const initiatorRollResult = await this._rollInitiatorDice();
+
+    // 再投对抗者的骰子
     const roll = new Roll(defenseDice.system.diceFormula);
     await roll.evaluate();
 
+    // 一起显示3D骰子动画
     if (game.dice3d) {
-      await game.dice3d.showForRoll(roll, game.user, true);
+      const rolls = [roll];
+      if (initiatorRollResult.roll) {
+        rolls.unshift(initiatorRollResult.roll);
+      }
+      await game.dice3d.showForRoll(rolls, game.user, true);
     }
 
     // 计算守备BUFF加成（忍耐/破绽）
@@ -810,7 +849,7 @@ export default class CounterAreaApplication extends Application {
 
     // 发起者数据
     const initiator = game.actors.get(this.initiateData.initiatorId);
-    const initiatorTotal = parseInt(this.initiateData.diceRoll) +
+    const initiatorTotal = initiatorRollResult.total +
                           parseInt(this.initiateData.buffBonus) +
                           parseInt(this.initiateData.adjustment);
 
@@ -870,12 +909,20 @@ export default class CounterAreaApplication extends Application {
     const adjustment = await this._requestAdjustment();
     if (adjustment === null) return;
 
-    // 投骰
+    // 先投发起者的骰子（如果还没投）
+    const initiatorRollResult = await this._rollInitiatorDice();
+
+    // 再投对抗者的骰子
     const roll = new Roll(defenseDice.system.diceFormula);
     await roll.evaluate();
 
+    // 一起显示3D骰子动画
     if (game.dice3d) {
-      await game.dice3d.showForRoll(roll, game.user, true);
+      const rolls = [roll];
+      if (initiatorRollResult.roll) {
+        rolls.unshift(initiatorRollResult.roll);
+      }
+      await game.dice3d.showForRoll(rolls, game.user, true);
     }
 
     // 计算守备BUFF加成（忍耐/破绽）
@@ -884,7 +931,7 @@ export default class CounterAreaApplication extends Application {
 
     // 发起者数据
     const initiator = game.actors.get(this.initiateData.initiatorId);
-    const initiatorResult = parseInt(this.initiateData.diceRoll) +
+    const initiatorResult = initiatorRollResult.total +
                            parseInt(this.initiateData.buffBonus) +
                            parseInt(this.initiateData.adjustment);
 
@@ -966,5 +1013,31 @@ export default class CounterAreaApplication extends Application {
     }
 
     return bonus;
+  }
+
+  /**
+   * 投发起者的骰子（如果还没投）
+   * 返回发起者的骰子结果和Roll对象
+   */
+  async _rollInitiatorDice() {
+    // 检查是否已经投过骰
+    if (this.initiateData.diceRoll !== null && this.initiateData.diceRoll !== undefined) {
+      return {
+        roll: null,
+        total: this.initiateData.diceRoll
+      };
+    }
+
+    // 投发起者的骰子
+    const roll = new Roll(this.initiateData.diceFormula);
+    await roll.evaluate();
+
+    // 更新 initiateData
+    this.initiateData.diceRoll = roll.total;
+
+    return {
+      roll: roll,
+      total: roll.total
+    };
   }
 }
