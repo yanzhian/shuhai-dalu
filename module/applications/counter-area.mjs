@@ -371,17 +371,18 @@ export default class CounterAreaApplication extends Application {
     // 先投发起者的骰子（如果还没投）
     const initiatorRollResult = await this._rollInitiatorDice();
 
+    // 显示发起者的骰子动画（如果有）
+    if (game.dice3d && initiatorRollResult.roll) {
+      await game.dice3d.showForRoll(initiatorRollResult.roll, game.user, true);
+    }
+
     // 再投对抗者的骰子
     const roll = new Roll(dice.system.diceFormula);
     await roll.evaluate();
 
-    // 一起显示3D骰子动画
+    // 显示对抗者的骰子动画
     if (game.dice3d) {
-      const rolls = [roll];
-      if (initiatorRollResult.roll) {
-        rolls.unshift(initiatorRollResult.roll); // 发起者的骰子在前
-      }
-      await game.dice3d.showForRoll(rolls, game.user, true);
+      await game.dice3d.showForRoll(roll, game.user, true);
     }
 
     // 计算BUFF加成
@@ -587,17 +588,18 @@ export default class CounterAreaApplication extends Application {
     // 先投发起者的骰子（如果还没投）
     const initiatorRollResult = await this._rollInitiatorDice();
 
+    // 显示发起者的骰子动画（如果有）
+    if (game.dice3d && initiatorRollResult.roll) {
+      await game.dice3d.showForRoll(initiatorRollResult.roll, game.user, true);
+    }
+
     // 再投对抗者的骰子
     const roll = new Roll(defenseDice.system.diceFormula);
     await roll.evaluate();
 
-    // 一起显示3D骰子动画
+    // 显示对抗者的骰子动画
     if (game.dice3d) {
-      const rolls = [roll];
-      if (initiatorRollResult.roll) {
-        rolls.unshift(initiatorRollResult.roll);
-      }
-      await game.dice3d.showForRoll(rolls, game.user, true);
+      await game.dice3d.showForRoll(roll, game.user, true);
     }
 
     // 计算守备BUFF加成（忍耐/破绽）
@@ -678,17 +680,18 @@ export default class CounterAreaApplication extends Application {
     // 先投发起者的骰子（如果还没投）
     const initiatorRollResult = await this._rollInitiatorDice();
 
+    // 显示发起者的骰子动画（如果有）
+    if (game.dice3d && initiatorRollResult.roll) {
+      await game.dice3d.showForRoll(initiatorRollResult.roll, game.user, true);
+    }
+
     // 再投对抗者的骰子
     const roll = new Roll(defenseDice.system.diceFormula);
     await roll.evaluate();
 
-    // 一起显示3D骰子动画
+    // 显示对抗者的骰子动画
     if (game.dice3d) {
-      const rolls = [roll];
-      if (initiatorRollResult.roll) {
-        rolls.unshift(initiatorRollResult.roll);
-      }
-      await game.dice3d.showForRoll(rolls, game.user, true);
+      await game.dice3d.showForRoll(roll, game.user, true);
     }
 
     // 计算守备BUFF加成（忍耐/破绽）
@@ -743,17 +746,18 @@ export default class CounterAreaApplication extends Application {
     // 先投发起者的骰子（如果还没投）
     const initiatorRollResult = await this._rollInitiatorDice();
 
+    // 显示发起者的骰子动画（如果有）
+    if (game.dice3d && initiatorRollResult.roll) {
+      await game.dice3d.showForRoll(initiatorRollResult.roll, game.user, true);
+    }
+
     // 再投对抗者的骰子
     const roll = new Roll(defenseDice.system.diceFormula);
     await roll.evaluate();
 
-    // 一起显示3D骰子动画
+    // 显示对抗者的骰子动画
     if (game.dice3d) {
-      const rolls = [roll];
-      if (initiatorRollResult.roll) {
-        rolls.unshift(initiatorRollResult.roll);
-      }
-      await game.dice3d.showForRoll(rolls, game.user, true);
+      await game.dice3d.showForRoll(roll, game.user, true);
     }
 
     // 计算守备BUFF加成（忍耐/破绽）
@@ -829,17 +833,18 @@ export default class CounterAreaApplication extends Application {
     // 先投发起者的骰子（如果还没投）
     const initiatorRollResult = await this._rollInitiatorDice();
 
+    // 显示发起者的骰子动画（如果有）
+    if (game.dice3d && initiatorRollResult.roll) {
+      await game.dice3d.showForRoll(initiatorRollResult.roll, game.user, true);
+    }
+
     // 再投对抗者的骰子
     const roll = new Roll(defenseDice.system.diceFormula);
     await roll.evaluate();
 
-    // 一起显示3D骰子动画
+    // 显示对抗者的骰子动画
     if (game.dice3d) {
-      const rolls = [roll];
-      if (initiatorRollResult.roll) {
-        rolls.unshift(initiatorRollResult.roll);
-      }
-      await game.dice3d.showForRoll(rolls, game.user, true);
+      await game.dice3d.showForRoll(roll, game.user, true);
     }
 
     // 计算守备BUFF加成（忍耐/破绽）
@@ -912,17 +917,18 @@ export default class CounterAreaApplication extends Application {
     // 先投发起者的骰子（如果还没投）
     const initiatorRollResult = await this._rollInitiatorDice();
 
+    // 显示发起者的骰子动画（如果有）
+    if (game.dice3d && initiatorRollResult.roll) {
+      await game.dice3d.showForRoll(initiatorRollResult.roll, game.user, true);
+    }
+
     // 再投对抗者的骰子
     const roll = new Roll(defenseDice.system.diceFormula);
     await roll.evaluate();
 
-    // 一起显示3D骰子动画
+    // 显示对抗者的骰子动画
     if (game.dice3d) {
-      const rolls = [roll];
-      if (initiatorRollResult.roll) {
-        rolls.unshift(initiatorRollResult.roll);
-      }
-      await game.dice3d.showForRoll(rolls, game.user, true);
+      await game.dice3d.showForRoll(roll, game.user, true);
     }
 
     // 计算守备BUFF加成（忍耐/破绽）
