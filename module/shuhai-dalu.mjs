@@ -240,8 +240,10 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     const button = event.currentTarget;
 
     const initiatorId = button.dataset.initiatorId;
-    const diceFormula = button.dataset.diceFormula;
+    const diceRoll = parseInt(button.dataset.diceRoll) || 0;
+    const buffBonus = parseInt(button.dataset.buffBonus) || 0;
     const adjustment = parseInt(button.dataset.adjustment) || 0;
+    const diceCategory = button.dataset.diceCategory || '';
 
     // 获取当前玩家的角色
     const actor = await getCurrentActor();
@@ -253,18 +255,80 @@ Hooks.on('renderChatMessage', (message, html, data) => {
       return;
     }
 
-    // 计算伤害（使用调整值作为基础伤害）
-    const damage = adjustment;
+    // 计算发起者的最终骰数
+    const baseDamage = diceRoll + buffBonus + adjustment;
+
+    // 计算抗性结果
+    let finalDamage = baseDamage;
+    let description = "";
+
+    // 获取承受者的防具
+    const armor = actor.items.get(actor.system.equipment.armor);
+
+    if (armor && armor.system.armorProperties) {
+      const props = armor.system.armorProperties;
+
+      // 检查抗性
+      if (diceCategory === '斩击') {
+        if (props.slashUp) {
+          finalDamage = Math.floor(finalDamage / 2);
+          description = `由于【斩击抗性】，受到伤害减半（${baseDamage} → ${finalDamage}）`;
+        } else if (props.slashDown) {
+          finalDamage = finalDamage * 2;
+          description = `由于【斩击弱性】，受到伤害加倍（${baseDamage} → ${finalDamage}）`;
+        }
+      } else if (diceCategory === '打击') {
+        if (props.bluntUp) {
+          finalDamage = Math.floor(finalDamage / 2);
+          description = `由于【打击抗性】，受到伤害减半（${baseDamage} → ${finalDamage}）`;
+        } else if (props.bluntDown) {
+          finalDamage = finalDamage * 2;
+          description = `由于【打击弱性】，受到伤害加倍（${baseDamage} → ${finalDamage}）`;
+        }
+      } else if (diceCategory === '突刺') {
+        if (props.pierceUp) {
+          finalDamage = Math.floor(finalDamage / 2);
+          description = `由于【突刺抗性】，受到伤害减半（${baseDamage} → ${finalDamage}）`;
+        } else if (props.pierceDown) {
+          finalDamage = finalDamage * 2;
+          description = `由于【突刺弱性】，受到伤害加倍（${baseDamage} → ${finalDamage}）`;
+        }
+      }
+    }
+
+    if (!description) {
+      description = `受到${finalDamage}点伤害`;
+    }
 
     // 应用伤害
-    const newHp = Math.max(0, actor.system.derived.hp.value - damage);
+    const newHp = Math.max(0, actor.system.derived.hp.value - finalDamage);
     await actor.update({ 'system.derived.hp.value': newHp });
+
+    // 重新获取更新后的角色数据
+    const updatedActor = game.actors.get(actor.id);
 
     // 发送消息
     ChatMessage.create({
       user: game.user.id,
       speaker: ChatMessage.getSpeaker({ actor: actor }),
-      content: `${actor.name} 选择承受，受到 ${damage} 点伤害！当前生命值：${newHp}/${actor.system.derived.hp.max}`
+      content: `
+        <div style="background: #0F0D1B; border: 2px solid #EBBD68; border-radius: 8px; padding: 16px; color: #EBBD68; font-family: 'Noto Sans SC', sans-serif;">
+          <h3 style="margin: 0 0 8px 0; color: #EBBD68; text-align: center;">选择承受</h3>
+          <div style="margin-bottom: 8px; text-align: center;">${actor.name} 选择承受攻击</div>
+          <div style="padding: 8px; background: rgba(235, 189, 104, 0.1); border-radius: 4px; margin-bottom: 8px;">
+            <div>发起者骰数: ${diceRoll}</div>
+            <div>BUFF加成: ${buffBonus}</div>
+            <div>调整值: ${adjustment}</div>
+            <div style="font-weight: bold; color: #f3c267;">总计: ${baseDamage}</div>
+          </div>
+          <div style="padding: 8px; background: rgba(235, 189, 104, 0.1); border-radius: 4px; margin-bottom: 8px;">
+            <div>${description}</div>
+          </div>
+          <div style="text-align: center; font-weight: bold;">
+            当前生命值: ${updatedActor.system.derived.hp.value}/${updatedActor.system.derived.hp.max}
+          </div>
+        </div>
+      `
     });
   });
 
