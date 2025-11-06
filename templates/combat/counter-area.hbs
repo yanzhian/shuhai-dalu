@@ -1,119 +1,228 @@
-<div class="counter-area-container">
+{{!-- 对抗面板 --}}
+<div class="counter-area-wrapper" style="background: #0F0D1B; color: #EBBD68; font-family: 'Noto Sans SC', sans-serif; padding: 16px; display: flex; flex-direction: column; gap: 12px; height: 100%; overflow-y: auto;">
 
-  {{!-- 挑战者信息 --}}
-  <div class="challenge-info-section">
-    <h2>对抗挑战</h2>
-    <div class="challenge-details">
-      <div class="challenger-info">
-        <span class="label">挑战者：</span>
-        <span class="value">{{challengeData.challengerName}}</span>
-      </div>
-      <div class="challenger-dice">
-        <span class="label">使用骰子：</span>
-        <span class="value">{{challengeData.diceName}}</span>
-      </div>
-      <div class="challenger-total">
-        <span class="label">骰数结果：</span>
-        <span class="value total-number">{{challengeData.total}}</span>
-      </div>
-    </div>
-    <p class="challenge-tip">选择你的骰子进行对抗！结果大于对手则对其造成你的骰数伤害，否则你受到对手的骰数伤害。</p>
+  {{!-- 顶部标题 --}}
+  <div class="counter-title" style="text-align: center; font-size: 24px; font-weight: bold; color: #EBBD68; padding: 8px; border-bottom: 2px solid #EBBD68; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+    拼点对抗
   </div>
 
-  {{!-- 资源状态 --}}
-  <div class="counter-resources-section">
-    <div class="extra-cost-group">
-      <span class="resource-label">额外Cost</span>
-      <div class="resource-buttons">
-        {{#each combatState.extraCost as |active index|}}
-          <button class="extra-cost-btn resource-btn {{#if active}}active{{/if}}" data-index="{{@index}}" type="button"></button>
-        {{/each}}
-      </div>
-    </div>
-    <div class="ex-resource-group">
-      <span class="resource-label">EX</span>
-      <div class="resource-buttons">
-        {{#each combatState.exResources as |active index|}}
-          <button class="ex-resource-btn resource-btn {{#if active}}active{{/if}}" data-index="{{@index}}" type="button">EX</button>
-        {{/each}}
-      </div>
-    </div>
-  </div>
+  {{!-- 第一部分：发起者信息 --}}
+  <div class="initiator-info-section" style="display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 2px solid #EBBD68; border-radius: 6px;">
 
-  {{!-- 战斗骰区域（只显示已激活的） --}}
-  <div class="counter-combat-dice-section">
-    <div class="section-header">已激活的战斗骰</div>
-    {{#if activeCombatDice.length}}
-      <div class="counter-dice-grid">
-        {{#each activeCombatDice as |dice index|}}
-          <div class="counter-dice-item">
-            <button class="combat-dice-counter-btn counter-btn" data-index="{{@index}}" type="button">
-              <div class="dice-image">
-                <img src="{{dice.img}}" alt="{{dice.name}}" />
-              </div>
-              <div class="dice-name">{{dice.name}}</div>
-              <div class="dice-formula">{{dice.dice}}</div>
-              <div class="counter-action">
-                <i class="fas fa-swords"></i> 对抗
-              </div>
-            </button>
-          </div>
+    {{!-- 发起者基本信息 --}}
+    <div class="initiator-basic" style="display: flex; gap: 16px; align-items: center;">
+      <div class="info-label" style="font-size: 14px; color: #EBBD68;">发起者</div>
+      <div class="info-value" style="font-size: 16px; font-weight: bold; color: #f3c267;">{{initiatorName}}</div>
+    </div>
+
+    {{!-- 骰数 --}}
+    <div class="initiator-dice-info" style="display: flex; gap: 16px; align-items: center;">
+      <div class="info-label" style="font-size: 14px; color: #EBBD68;">骰数</div>
+      <div class="info-value" style="font-size: 16px; font-weight: bold; color: #f3c267;">{{initiatorDiceFormula}}</div>
+    </div>
+
+    {{!-- 抗性 --}}
+    {{#if initiatorResistances}}
+    <div class="initiator-resistances" style="display: flex; gap: 16px; align-items: center;">
+      <div class="info-label" style="font-size: 14px; color: #EBBD68;">抗性</div>
+      <div class="resistance-badges" style="display: flex; gap: 6px;">
+        {{#each initiatorResistances as |resistance|}}
+          <span class="resistance-badge {{resistance.type}}" style="padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; {{#if (eq resistance.type 'up')}}background: #4a7c2c; color: #fff;{{else}}background: #c14545; color: #fff;{{/if}}">
+            {{resistance.name}}{{#if (eq resistance.type 'up')}}↑{{else}}↓{{/if}}
+          </span>
         {{/each}}
       </div>
-    {{else}}
-      <div class="no-dice-message">
-        <p>没有已激活的战斗骰！</p>
-        <p><small>请先在战斗区域激活战斗骰</small></p>
-      </div>
+    </div>
     {{/if}}
+
+    {{!-- 被动骰 --}}
+    <div class="initiator-passives" style="display: flex; gap: 8px; align-items: center;">
+      <div class="info-label" style="font-size: 14px; color: #EBBD68;">被动</div>
+      <div class="passive-buttons" style="display: flex; gap: 4px;">
+        {{#each initiatorPassives as |passive|}}
+          <button class="passive-btn" style="width: 36px; height: 24px; background: #EBBD68; color: #0F0D1B; border: none; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: default;">
+            被动
+          </button>
+        {{/each}}
+      </div>
+    </div>
+
+    {{!-- 状态条：生命值、侵蚀度、混乱值 --}}
+    <div class="initiator-status-bars" style="display: flex; gap: 8px;">
+      {{!-- 生命值 --}}
+      <div class="status-bar hp-bar" style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+        <div class="bar-progress" style="height: 27px; background: linear-gradient(90deg, #2d5016, #4a7c2c); border-radius: 4px; display: flex; align-items: center; justify-content: center; position: relative;">
+          <span class="bar-text" style="font-size: 13px; color: #EBBD68; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">
+            {{initiatorHp}}/{{initiatorHpMax}}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="initiator-status-bars-row" style="display: flex; gap: 8px;">
+      {{!-- 侵蚀度 --}}
+      <div class="status-bar erosion-bar" style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+        <div class="bar-progress" style="height: 27px; background: linear-gradient(90deg, #1a4d6d, #2e7da8); border-radius: 4px; display: flex; align-items: center; justify-content: center; position: relative;">
+          <span class="bar-text" style="font-size: 13px; color: #EBBD68; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">
+            {{initiatorErosion}}/{{initiatorErosionMax}}
+          </span>
+        </div>
+      </div>
+
+      {{!-- 混乱值 --}}
+      <div class="status-bar chaos-bar" style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+        <div class="bar-progress" style="height: 27px; background: linear-gradient(90deg, #8b4513, #cd853f); border-radius: 4px; display: flex; align-items: center; justify-content: center; position: relative;">
+          <span class="bar-text" style="font-size: 13px; color: #EBBD68; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">
+            {{initiatorChaos}}/{{initiatorChaosMax}}
+          </span>
+        </div>
+      </div>
+    </div>
   </div>
 
-  {{!-- 守备骰和触发骰 --}}
-  <div class="counter-special-dice-section">
-    <div class="section-header">守备骰 / 触发骰</div>
-    <div class="counter-dice-grid special-grid">
+  {{!-- 分割线 --}}
+  <div class="divider" style="height: 2px; background: #EBBD68;"></div>
+
+  {{!-- 第二部分：对抗者资源界面 --}}
+  <div class="counter-resources-section" style="display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 2px solid #EBBD68; border-radius: 6px;">
+
+    {{!-- Cost资源 --}}
+    <div class="resource-row" style="display: flex; align-items: center; gap: 12px;">
+      <span class="resource-label" style="font-size: 14px; font-weight: bold; color: #EBBD68; min-width: 48px;">Cost</span>
+      <div class="resource-circles" style="display: flex; gap: 6px;">
+        {{#each combatState.costResources as |active index|}}
+          <button class="resource-circle cost-circle {{#if active}}active{{/if}}"
+                  data-type="cost"
+                  data-index="{{@index}}"
+                  type="button"
+                  style="width: 20px; height: 20px; border: 2px solid #EBBD68; border-radius: 50%; background: {{#if active}}#EBBD68{{else}}transparent{{/if}}; cursor: pointer; transition: all 0.2s; padding: 0;">
+          </button>
+        {{/each}}
+      </div>
+    </div>
+
+    {{!-- EX资源 --}}
+    <div class="resource-row" style="display: flex; align-items: center; gap: 12px;">
+      <span class="resource-label" style="font-size: 14px; font-weight: bold; color: #EBBD68; min-width: 48px;">EX</span>
+      <div class="resource-circles" style="display: flex; gap: 6px;">
+        {{#each combatState.exResources as |active index|}}
+          <button class="resource-circle ex-circle {{#if active}}active{{/if}}"
+                  data-type="ex"
+                  data-index="{{@index}}"
+                  type="button"
+                  style="width: 20px; height: 20px; border: 2px solid #EBBD68; border-radius: 50%; background: {{#if active}}#EBBD68{{else}}transparent{{/if}}; cursor: pointer; transition: all 0.2s; padding: 0;">
+          </button>
+        {{/each}}
+      </div>
+    </div>
+  </div>
+
+  {{!-- 分割线 --}}
+  <div class="divider" style="height: 2px; background: #EBBD68;"></div>
+
+  {{!-- 第三部分：对抗者的战斗骰 --}}
+  <div class="counter-dice-section" style="display: flex; flex-direction: column; gap: 12px;">
+
+    {{!-- 战斗骰网格 --}}
+    <div class="counter-dice-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+
+      {{!-- 战斗骰1-6 --}}
+      {{#each combatDiceSlots as |slot index|}}
+        <div class="counter-dice-slot {{#unless slot.item}}empty{{/unless}}" data-index="{{@index}}" style="position: relative; aspect-ratio: 1; border: 2px solid #EBBD68; border-radius: 6px; background: {{#if slot.activated}}rgba(167, 124, 44, 0.3){{else}}transparent{{/if}}; display: flex; align-items: center; justify-content: center;">
+          {{#if slot.item}}
+            {{!-- 左上角费用 --}}
+            <div class="dice-cost-badge" style="position: absolute; top: 4px; left: 4px; width: 18px; height: 18px; background: #E1AA43; color: #0F0D1B; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; z-index: 2;">
+              {{slot.item.system.cost}}
+            </div>
+
+            {{!-- 右上角激活按钮 --}}
+            <button class="dice-activate-toggle {{#if slot.activated}}active{{/if}}"
+                    data-index="{{@index}}"
+                    type="button"
+                    style="position: absolute; top: 4px; right: 4px; width: 18px; height: 18px; background: {{#if slot.activated}}#E1AA43{{else}}transparent{{/if}}; border: 2px solid #E1AA43; border-radius: 50%; cursor: pointer; z-index: 2; padding: 0; transition: all 0.2s;">
+            </button>
+
+            {{!-- 右下角骰数 --}}
+            <div class="dice-count-badge" style="position: absolute; bottom: 4px; right: 4px; padding: 2px 6px; background: #E1AA43; color: #0F0D1B; border-radius: 3px; font-size: 10px; font-weight: bold; z-index: 2;">
+              {{slot.item.system.diceFormula}}
+            </div>
+
+            {{!-- 战斗骰图标 --}}
+            <button class="combat-dice-counter-btn"
+                    data-index="{{@index}}"
+                    type="button"
+                    title="{{slot.item.name}}&#10;{{slot.item.type}} {{slot.item.system.category}}&#10;{{slot.item.system.effect}}"
+                    style="width: 100%; height: 100%; background: transparent; border: none; cursor: pointer; padding: 4px; transition: all 0.2s;">
+              <img src="{{slot.item.img}}" alt="{{slot.item.name}}" style="width: 100%; height: 100%; object-fit: contain;" />
+            </button>
+          {{else}}
+            <div class="dice-slot-label" style="font-size: 11px; color: #EBBD68; text-align: center;">战斗骰{{add @index 1}}</div>
+          {{/if}}
+        </div>
+      {{/each}}
 
       {{!-- 守备骰 --}}
-      {{#if defenseDice}}
-        <div class="counter-dice-item">
-          <button class="defense-dice-counter-btn counter-btn" type="button">
-            <div class="dice-image">
-              <img src="{{defenseDice.img}}" alt="{{defenseDice.name}}" />
-            </div>
-            <div class="dice-name">{{defenseDice.name}}</div>
-            <div class="dice-formula">{{defenseDice.dice}}</div>
-            <div class="counter-action defense">
-              <i class="fas fa-shield-alt"></i> 守备对抗
-            </div>
+      <div class="counter-dice-slot {{#unless defenseDice}}empty{{/unless}}" style="position: relative; aspect-ratio: 1; border: 2px solid #EBBD68; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center;">
+        {{#if defenseDice}}
+          <div class="dice-cost-badge" style="position: absolute; top: 4px; left: 4px; width: 18px; height: 18px; background: #E1AA43; color: #0F0D1B; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; z-index: 2;">
+            {{defenseDice.system.cost}}
+          </div>
+
+          <div class="dice-count-badge" style="position: absolute; bottom: 4px; right: 4px; padding: 2px 6px; background: #E1AA43; color: #0F0D1B; border-radius: 3px; font-size: 10px; font-weight: bold; z-index: 2;">
+            {{defenseDice.system.diceFormula}}
+          </div>
+
+          <button class="defense-dice-counter-btn"
+                  type="button"
+                  title="{{defenseDice.name}}&#10;{{defenseDice.type}} {{defenseDice.system.category}}&#10;{{defenseDice.system.effect}}"
+                  style="width: 100%; height: 100%; background: transparent; border: none; cursor: pointer; padding: 4px; transition: all 0.2s;">
+            <img src="{{defenseDice.img}}" alt="{{defenseDice.name}}" style="width: 100%; height: 100%; object-fit: contain;" />
           </button>
-        </div>
-      {{else}}
-        <div class="counter-dice-item empty">
-          <div class="empty-slot">未装备守备骰</div>
-        </div>
-      {{/if}}
+        {{else}}
+          <div class="dice-slot-label" style="font-size: 11px; color: #EBBD68; text-align: center;">守备骰</div>
+        {{/if}}
+      </div>
 
       {{!-- 触发骰 --}}
-      {{#if triggerDice}}
-        <div class="counter-dice-item">
-          <button class="trigger-dice-counter-btn counter-btn {{#unless (hasEx combatState.exResources)}}disabled{{/unless}}" type="button">
-            <div class="dice-image">
-              <img src="{{triggerDice.img}}" alt="{{triggerDice.name}}" />
-            </div>
-            <div class="dice-name">{{triggerDice.name}}</div>
-            <div class="dice-formula">{{triggerDice.dice}}</div>
-            <div class="counter-action trigger">
-              <i class="fas fa-bolt"></i> 触发对抗（消耗1EX）
-            </div>
+      <div class="counter-dice-slot {{#unless triggerDice}}empty{{/unless}}" style="position: relative; aspect-ratio: 1; border: 2px solid #EBBD68; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center;">
+        {{#if triggerDice}}
+          <div class="dice-cost-badge" style="position: absolute; top: 4px; left: 4px; width: 18px; height: 18px; background: #E1AA43; color: #0F0D1B; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; z-index: 2;">
+            {{triggerDice.system.cost}}
+          </div>
+
+          <div class="dice-count-badge" style="position: absolute; bottom: 4px; right: 4px; padding: 2px 6px; background: #E1AA43; color: #0F0D1B; border-radius: 3px; font-size: 10px; font-weight: bold; z-index: 2;">
+            {{triggerDice.system.diceFormula}}
+          </div>
+
+          <button class="trigger-dice-counter-btn"
+                  type="button"
+                  title="{{triggerDice.name}}&#10;{{triggerDice.type}} {{triggerDice.system.category}}&#10;{{triggerDice.system.effect}}"
+                  style="width: 100%; height: 100%; background: transparent; border: none; cursor: pointer; padding: 4px; transition: all 0.2s;">
+            <img src="{{triggerDice.img}}" alt="{{triggerDice.name}}" style="width: 100%; height: 100%; object-fit: contain;" />
           </button>
-        </div>
-      {{else}}
-        <div class="counter-dice-item empty">
-          <div class="empty-slot">未装备触发骰</div>
-        </div>
-      {{/if}}
+        {{else}}
+          <div class="dice-slot-label" style="font-size: 11px; color: #EBBD68; text-align: center;">触发骰</div>
+        {{/if}}
+      </div>
 
     </div>
   </div>
 
 </div>
+
+<style>
+.counter-area-wrapper .resource-circle:hover,
+.counter-area-wrapper .dice-activate-toggle:hover {
+  transform: scale(1.1);
+}
+
+.counter-area-wrapper .combat-dice-counter-btn:hover,
+.counter-area-wrapper .defense-dice-counter-btn:hover,
+.counter-area-wrapper .trigger-dice-counter-btn:hover {
+  transform: scale(1.05);
+}
+
+.counter-area-wrapper .counter-dice-slot.empty {
+  opacity: 0.5;
+}
+</style>

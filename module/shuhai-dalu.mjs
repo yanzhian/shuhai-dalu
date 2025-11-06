@@ -182,7 +182,93 @@ async function getCurrentActor() {
  * 为聊天消息添加事件监听器
  */
 Hooks.on('renderChatMessage', (message, html, data) => {
-  // 战斗骰挑战按钮事件
+  // 新的对抗按钮事件（combat-dice-initiate.hbs）
+  html.find('.counter-btn').click(async (event) => {
+    event.preventDefault();
+    const button = event.currentTarget;
+
+    // 获取发起数据
+    const initiateData = {
+      initiatorId: button.dataset.initiatorId,
+      initiatorName: button.dataset.initiatorName,
+      diceId: button.dataset.diceId,
+      diceName: button.dataset.diceName,
+      diceFormula: button.dataset.diceFormula,
+      diceImg: button.dataset.diceImg,
+      diceCost: button.dataset.diceCost,
+      diceType: button.dataset.diceType,
+      diceCategory: button.dataset.diceCategory,
+      adjustment: button.dataset.adjustment,
+      targetId: button.dataset.targetId
+    };
+
+    // 检查是否是指定目标，如果是，验证当前玩家
+    if (initiateData.targetId) {
+      const currentActor = await getCurrentActor();
+      if (!currentActor) return;
+
+      if (currentActor.id !== initiateData.targetId) {
+        ui.notifications.warn("这个对抗不是针对你的！");
+        return;
+      }
+
+      // 打开对抗界面
+      const CounterAreaApplication = (await import('./applications/counter-area.mjs')).default;
+      const counterArea = new CounterAreaApplication(currentActor, initiateData);
+      counterArea.render(true);
+    } else {
+      // 没有指定目标，任何人都可以对抗
+      const actor = await getCurrentActor();
+      if (!actor) return;
+
+      // 防止自己对抗自己
+      if (actor.id === initiateData.initiatorId) {
+        ui.notifications.warn("你不能对抗自己！");
+        return;
+      }
+
+      // 打开对抗界面
+      const CounterAreaApplication = (await import('./applications/counter-area.mjs')).default;
+      const counterArea = new CounterAreaApplication(actor, initiateData);
+      counterArea.render(true);
+    }
+  });
+
+  // 承受按钮事件（combat-dice-initiate.hbs）
+  html.find('.accept-btn').click(async (event) => {
+    event.preventDefault();
+    const button = event.currentTarget;
+
+    const initiatorId = button.dataset.initiatorId;
+    const diceFormula = button.dataset.diceFormula;
+    const adjustment = parseInt(button.dataset.adjustment) || 0;
+
+    // 获取当前玩家的角色
+    const actor = await getCurrentActor();
+    if (!actor) return;
+
+    // 防止自己承受自己的攻击
+    if (actor.id === initiatorId) {
+      ui.notifications.warn("你不能承受自己的攻击！");
+      return;
+    }
+
+    // 计算伤害（使用调整值作为基础伤害）
+    const damage = adjustment;
+
+    // 应用伤害
+    const newHp = Math.max(0, actor.system.derived.hp.value - damage);
+    await actor.update({ 'system.derived.hp.value': newHp });
+
+    // 发送消息
+    ChatMessage.create({
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: actor }),
+      content: `${actor.name} 选择承受，受到 ${damage} 点伤害！当前生命值：${newHp}/${actor.system.derived.hp.max}`
+    });
+  });
+
+  // 旧的挑战按钮事件（兼容性保留）
   html.find('.challenge-btn').click(async (event) => {
     event.preventDefault();
     const button = event.currentTarget;
@@ -531,6 +617,8 @@ async function preloadHandlebarsTemplates() {
     "systems/shuhai-dalu/templates/chat/item-use.hbs",
     "systems/shuhai-dalu/templates/chat/item-card.hbs",
     "systems/shuhai-dalu/templates/chat/combat-dice-challenge.hbs",
+    "systems/shuhai-dalu/templates/chat/combat-dice-initiate.hbs",
+    "systems/shuhai-dalu/templates/chat/counter-result.hbs",
     "systems/shuhai-dalu/templates/chat/contest-result.hbs"
   ]);
 }
