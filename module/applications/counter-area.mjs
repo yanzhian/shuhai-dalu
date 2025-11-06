@@ -405,10 +405,20 @@ export default class CounterAreaApplication extends Application {
     const winner = initiatorWon ? initiator : this.actor;
     const baseDamage = initiatorWon ? initiatorResult : counterResult;
 
+    // 根据胜者决定攻击类型
+    let attackType;
+    if (initiatorWon) {
+      // 发起者赢了，使用发起者的攻击类型
+      attackType = this.initiateData.diceCategory;
+    } else {
+      // 对抗者赢了，使用对抗者的战斗骰攻击类型
+      attackType = dice.system.category || '';
+    }
+
     // 计算抗性结果
     const { finalDamage, description } = this._calculateDamage(
       baseDamage,
-      this.initiateData.diceCategory,
+      attackType,
       loser
     );
 
@@ -622,15 +632,15 @@ export default class CounterAreaApplication extends Application {
     if (dodgeSuccess) {
       resultMessage = `<div style="color: #4a7c2c; font-weight: bold;">${this.actor.name} 闪避成功！无视本次攻击</div>`;
     } else {
-      // 闪避失败，计算伤害
-      const { finalDamage: damage } = this._calculateDamage(
+      // 闪避失败，计算伤害（包含抗性）
+      const { finalDamage: damage, description } = this._calculateDamage(
         initiatorResult,
         this.initiateData.diceCategory,
         this.actor
       );
       finalDamage = damage;
       loserId = this.actor.id;
-      resultMessage = `<div style="color: #c14545; font-weight: bold;">${this.actor.name} 闪避失败！</div>`;
+      resultMessage = `<div style="color: #c14545; font-weight: bold;">${this.actor.name} 闪避失败！</div><div>${this.actor.name}${description}</div>`;
     }
 
     // 创建结果消息
@@ -884,7 +894,7 @@ export default class CounterAreaApplication extends Application {
                           parseInt(this.initiateData.adjustment);
 
     // 先计算原始伤害（包含抗性）
-    const { finalDamage: baseDamage } = this._calculateDamage(
+    const { finalDamage: baseDamage, description: damageDescription } = this._calculateDamage(
       initiatorTotal,
       this.initiateData.diceCategory,
       this.actor
@@ -893,8 +903,8 @@ export default class CounterAreaApplication extends Application {
     // 再减少防御值
     const finalDamage = Math.max(0, baseDamage - defenseValue);
 
-    // 创建结果消息
-    const resultDescription = `<div>${this.actor.name} 使用防御</div><div>原始伤害：${baseDamage}，防御减免：${defenseValue}</div><div style="color: #c14545; font-weight: bold;">最终伤害：${finalDamage}</div>`;
+    // 创建结果消息（包含抗性信息）
+    const resultDescription = `<div>${this.actor.name} 使用防御</div><div>${damageDescription}</div><div>防御减免：${defenseValue}</div><div style="color: #c14545; font-weight: bold;">最终伤害：${finalDamage}</div>`;
 
     const chatData = {
       user: game.user.id,
@@ -977,7 +987,7 @@ export default class CounterAreaApplication extends Application {
       resultDescription = `<div style="color: #4a7c2c; font-weight: bold;">${this.actor.name} 强化防御成功！完全抵挡了攻击</div>`;
     } else {
       // 防御失败，计算伤害（先算抗性，再减防御值）
-      const { finalDamage: baseDamage } = this._calculateDamage(
+      const { finalDamage: baseDamage, description: damageDescription } = this._calculateDamage(
         initiatorResult,
         this.initiateData.diceCategory,
         this.actor
@@ -985,7 +995,7 @@ export default class CounterAreaApplication extends Application {
 
       // 减少防御值
       finalDamage = Math.max(0, baseDamage - defenseResult);
-      resultDescription = `<div style="color: #c14545; font-weight: bold;">${this.actor.name} 强化防御失败</div><div>原始伤害：${baseDamage}，防御减免：${defenseResult}</div><div style="color: #c14545; font-weight: bold;">最终伤害：${finalDamage}</div>`;
+      resultDescription = `<div style="color: #c14545; font-weight: bold;">${this.actor.name} 强化防御失败</div><div>${damageDescription}</div><div>防御减免：${defenseResult}</div><div style="color: #c14545; font-weight: bold;">最终伤害：${finalDamage}</div>`;
     }
 
     // 创建结果消息
