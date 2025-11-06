@@ -675,7 +675,7 @@ export default class CombatAreaApplication extends Application {
   }
 
   /**
-   * 发起战斗骰挑战
+   * 发起战斗骰对抗
    */
   async _onInitiateCombatDice(event) {
     event.preventDefault();
@@ -700,76 +700,92 @@ export default class CombatAreaApplication extends Application {
 
     if (!item) return;
 
-    // 特殊处理：触发骰
-    if (item.type === 'triggerDice') {
-      // 检查是否有EX资源
-      const hasEx = this.combatState.exResources.some(ex => ex);
-      if (!hasEx) {
-        ui.notifications.warn("没有可用的EX资源");
-        return;
-      }
-
-      // 消耗1个EX资源
-      for (let i = 0; i < 3; i++) {
-        if (this.combatState.exResources[i]) {
-          this.combatState.exResources[i] = false;
-          break;
-        }
-      }
-      await this._saveCombatState();
-
-      // 发送效果消息
-      await this._sendChatMessage(`
-        <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
-          <h3 style="margin: 0 0 8px 0; color: #E1AA43;">触发: ${item.name}</h3>
-          <div style="color: #888; margin-bottom: 8px;">消耗1个EX资源</div>
-          <div style="color: #EBBD68;">${item.system.effect || '无特殊效果'}</div>
-        </div>
-      `);
-
-      this.render();
+    // 特殊处理：触发骰和守备骰不能主动发起
+    if (item.type === 'triggerDice' || item.type === 'defenseDice') {
+      ui.notifications.warn("触发骰和守备骰只能在对抗时使用");
       return;
     }
 
-    // 普通战斗骰：投骰并创建挑战
-    const formula = item.system.diceFormula || '1d6';
-    const roll = new Roll(formula);
-    await roll.evaluate();
-
-    // 显示 3D 骰子动画
-    if (game.dice3d) {
-      await game.dice3d.showForRoll(roll, game.user, true);
+    // 检查是否为战斗骰类型
+    if (item.type !== 'combatDice') {
+      ui.notifications.warn("只有战斗骰可以发起对抗");
+      return;
     }
 
-    // 创建挑战数据
-    const challengeData = {
-      challengerId: this.actor.id,
-      challengerName: this.actor.name,
+    // 请求调整值
+    const adjustment = await this._requestAdjustmentForInitiate();
+    if (adjustment === null) return; // 用户取消
+
+    // 获取选择的目标（如果有）
+    const targets = Array.from(game.user.targets);
+    const targetActor = targets.length > 0 ? targets[0].actor : null;
+
+    // 创建发起数据
+    const initiateData = {
+      initiatorId: this.actor.id,
+      initiatorName: this.actor.name,
       diceId: item.id,
       diceName: item.name,
-      total: roll.total,
-      messageId: null // 将由ChatMessage填充
+      diceFormula: item.system.diceFormula,
+      diceImg: item.img,
+      diceCost: item.system.cost || 0,
+      diceType: item.type,
+      diceCategory: item.system.category || '',
+      diceEffect: item.system.effect || '无特殊效果',
+      adjustment: adjustment,
+      targetId: targetActor ? targetActor.id : null,
+      targetName: targetActor ? targetActor.name : null
     };
 
-    // 创建挑战聊天卡片
+    // 创建发起对抗聊天卡片
     const chatData = {
       user: game.user.id,
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      content: await renderTemplate("systems/shuhai-dalu/templates/chat/combat-dice-challenge.hbs", {
-        actor: this.actor,
-        dice: item,
-        total: roll.total,
-        challengeData: challengeData
-      }),
+      content: await renderTemplate("systems/shuhai-dalu/templates/chat/combat-dice-initiate.hbs", initiateData),
       sound: CONFIG.sounds.dice,
       flags: {
         'shuhai-dalu': {
-          challengeData: challengeData
+          initiateData: initiateData
         }
       }
     };
 
     await ChatMessage.create(chatData);
+  }
+
+  /**
+   * 请求发起者的调整值
+   */
+  async _requestAdjustmentForInitiate() {
+    return new Promise((resolve) => {
+      new Dialog({
+        title: "输入调整值",
+        content: `
+          <form>
+            <div class="form-group">
+              <label>调整值:</label>
+              <input type="number" name="adjustment" value="0" style="width: 100%; padding: 0.5rem; background: #0F0D1B; border: 1px solid #EBBD68; color: #EBBD68; border-radius: 3px;"/>
+            </div>
+          </form>
+        `,
+        buttons: {
+          confirm: {
+            icon: '<i class="fas fa-check"></i>',
+            label: "确认",
+            callback: (html) => {
+              const adj = parseInt(html.find('[name="adjustment"]').val()) || 0;
+              resolve(adj);
+            }
+          },
+          cancel: {
+            icon: '<i class="fas fa-times"></i>',
+            label: "取消",
+            callback: () => resolve(null)
+          }
+        },
+        default: "confirm"
+      }).render(true);
+    });
   }
 
   /**
