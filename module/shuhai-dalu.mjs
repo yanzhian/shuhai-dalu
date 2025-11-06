@@ -233,10 +233,10 @@ Hooks.on('renderChatMessage', (message, html, data) => {
   // 结算伤害按钮事件（counter-result.hbs）
   html.find('.settle-damage-btn').click(async (event) => {
     event.preventDefault();
-    const button = $(event.currentTarget);
+    const button = event.currentTarget;
 
-    const loserId = button.data('loser-id');
-    const finalDamage = parseInt(button.data('final-damage')) || 0;
+    const loserId = button.dataset.loserId;
+    const finalDamage = parseInt(button.dataset.finalDamage) || 0;
 
     // 获取失败者角色（实时获取最新数据）
     const loser = game.actors.get(loserId);
@@ -258,8 +258,8 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     const updatedLoser = game.actors.get(loserId);
 
     // 禁用按钮
-    button.prop('disabled', true);
-    button.text('已结算');
+    button.disabled = true;
+    button.textContent = '已结算';
 
     // 刷新所有打开的角色表单
     if (updatedLoser.sheet && updatedLoser.sheet.rendered) {
