@@ -46,6 +46,12 @@ export default class CounterAreaApplication extends Application {
   async getData() {
     const context = await super.getData();
 
+    // 重新加载战斗状态（确保同步）
+    const savedState = this.actor.getFlag('shuhai-dalu', 'combatState');
+    if (savedState) {
+      this.combatState = savedState;
+    }
+
     context.actor = this.actor;
     context.system = this.actor.system;
     context.combatState = this.combatState;
