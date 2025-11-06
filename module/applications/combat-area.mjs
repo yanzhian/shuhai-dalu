@@ -722,15 +722,6 @@ export default class CombatAreaApplication extends Application {
     const adjustment = await this._requestAdjustmentForInitiate();
     if (adjustment === null) return; // 用户取消
 
-    // 发起者投骰
-    const roll = new Roll(item.system.diceFormula);
-    await roll.evaluate();
-
-    // 显示3D骰子动画
-    if (game.dice3d) {
-      await game.dice3d.showForRoll(roll, game.user, true);
-    }
-
     // 计算发起者的BUFF加成
     const buffBonus = this._calculateInitiatorBuffBonus();
 
@@ -738,7 +729,7 @@ export default class CombatAreaApplication extends Application {
     const targets = Array.from(game.user.targets);
     const targetActor = targets.length > 0 ? targets[0].actor : null;
 
-    // 创建发起数据
+    // 创建发起数据（不提前投骰，等对抗时再投）
     const initiateData = {
       initiatorId: this.actor.id,
       initiatorName: this.actor.name,
@@ -750,7 +741,7 @@ export default class CombatAreaApplication extends Application {
       diceType: item.type,
       diceCategory: item.system.category || '',
       diceEffect: item.system.effect || '无特殊效果',
-      diceRoll: roll.total,
+      diceRoll: null, // 不提前投骰
       buffBonus: buffBonus,
       adjustment: adjustment,
       targetId: targetActor ? targetActor.id : null,
