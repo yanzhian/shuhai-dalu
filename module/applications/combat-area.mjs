@@ -716,6 +716,18 @@ export default class CombatAreaApplication extends Application {
     const adjustment = await this._requestAdjustmentForInitiate();
     if (adjustment === null) return; // 用户取消
 
+    // 发起者投骰
+    const roll = new Roll(item.system.diceFormula);
+    await roll.evaluate();
+
+    // 显示3D骰子动画
+    if (game.dice3d) {
+      await game.dice3d.showForRoll(roll, game.user, true);
+    }
+
+    // 计算发起者的BUFF加成
+    const buffBonus = this._calculateInitiatorBuffBonus();
+
     // 获取选择的目标（如果有）
     const targets = Array.from(game.user.targets);
     const targetActor = targets.length > 0 ? targets[0].actor : null;
@@ -732,10 +744,19 @@ export default class CombatAreaApplication extends Application {
       diceType: item.type,
       diceCategory: item.system.category || '',
       diceEffect: item.system.effect || '无特殊效果',
+      diceRoll: roll.total,
+      buffBonus: buffBonus,
       adjustment: adjustment,
       targetId: targetActor ? targetActor.id : null,
       targetName: targetActor ? targetActor.name : null
     };
+
+    // 使用后解除激活状态
+    if (index !== undefined) {
+      this.combatState.activatedDice[index] = false;
+      await this._saveCombatState();
+      this.render();
+    }
 
     // 创建发起对抗聊天卡片
     const chatData = {
@@ -751,6 +772,28 @@ export default class CombatAreaApplication extends Application {
     };
 
     await ChatMessage.create(chatData);
+  }
+
+  /**
+   * 计算发起者的BUFF加成
+   */
+  _calculateInitiatorBuffBonus() {
+    let bonus = 0;
+
+    if (!this.combatState.buffs) return bonus;
+
+    for (const buff of this.combatState.buffs) {
+      if (buff.id === 'strong') {
+        // 强壮：骰数增加
+        bonus += buff.layers;
+      } else if (buff.id === 'weak') {
+        // 虚弱：骰数减少
+        bonus -= buff.layers;
+      }
+      // 可以添加更多BUFF效果
+    }
+
+    return bonus;
   }
 
   /**

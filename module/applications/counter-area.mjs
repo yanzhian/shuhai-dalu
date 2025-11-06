@@ -230,8 +230,8 @@ export default class CounterAreaApplication extends Application {
     const adjustment = await this._requestAdjustment();
     if (adjustment === null) return; // 用户取消
 
-    // 执行对抗
-    await this._performCounter(slot.item, adjustment);
+    // 执行对抗，传递diceIndex以便使用后解除激活
+    await this._performCounter(slot.item, adjustment, false, index);
   }
 
   /**
@@ -330,7 +330,7 @@ export default class CounterAreaApplication extends Application {
   /**
    * 执行对抗
    */
-  async _performCounter(dice, adjustment, consumedEx = false) {
+  async _performCounter(dice, adjustment, consumedEx = false, diceIndex = null) {
     // 投骰
     const roll = new Roll(dice.system.diceFormula);
     await roll.evaluate();
@@ -349,9 +349,10 @@ export default class CounterAreaApplication extends Application {
 
     // 发起者数据
     const initiator = game.actors.get(this.initiateData.initiatorId);
-    const initiatorRoll = parseInt(this.initiateData.adjustment) || 0; // 使用发起者的调整值作为基础骰数
-    const initiatorBuffBonus = 0; // TODO: 获取发起者的BUFF加成
-    const initiatorResult = initiatorRoll + initiatorBuffBonus;
+    const initiatorRoll = parseInt(this.initiateData.diceRoll) || 0;
+    const initiatorBuffBonus = parseInt(this.initiateData.buffBonus) || 0;
+    const initiatorAdjustment = parseInt(this.initiateData.adjustment) || 0;
+    const initiatorResult = initiatorRoll + initiatorBuffBonus + initiatorAdjustment;
 
     // 判断胜负
     const initiatorWon = initiatorResult > counterResult;
@@ -366,11 +367,22 @@ export default class CounterAreaApplication extends Application {
       loser
     );
 
-    // 应用伤害
+    // 应用伤害并重新获取最新的角色数据
     if (finalDamage > 0) {
       const newHp = Math.max(0, loser.system.derived.hp.value - finalDamage);
       await loser.update({ 'system.derived.hp.value': newHp });
     }
+
+    // 重新获取最新的loser数据
+    const updatedLoser = game.actors.get(loser.id);
+
+    // 使用后解除激活状态（对抗者）
+    if (diceIndex !== null && diceIndex >= 0 && diceIndex < 6) {
+      this.combatState.activatedDice[diceIndex] = false;
+    }
+
+    // 保存对抗者的状态（同步回combat-area）
+    await this._saveCombatState();
 
     // 创建结果消息
     const resultDescription = this._createResultDescription(
@@ -382,9 +394,9 @@ export default class CounterAreaApplication extends Application {
       counterRoll,
       initiatorBuffBonus,
       buffBonus,
-      parseInt(this.initiateData.adjustment) || 0,
+      initiatorAdjustment,
       adjustment,
-      loser,
+      updatedLoser,
       finalDamage,
       description
     );
@@ -401,7 +413,7 @@ export default class CounterAreaApplication extends Application {
         initiatorResult: initiatorResult,
         initiatorDiceRoll: initiatorRoll,
         initiatorBuff: initiatorBuffBonus,
-        initiatorAdjustment: parseInt(this.initiateData.adjustment) || 0,
+        initiatorAdjustment: initiatorAdjustment,
         counterName: this.actor.name,
         counterDiceImg: dice.img,
         counterDiceName: dice.name + (consumedEx ? "（消耗1EX）" : ""),
