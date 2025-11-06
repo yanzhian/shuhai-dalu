@@ -245,7 +245,56 @@ Hooks.on('renderChatMessage', (message, html, data) => {
       return;
     }
 
-    // 记录结算前的生命值
+    // 记录当前生命值
+    const hpBefore = loser.system.derived.hp.value;
+    const hpMax = loser.system.derived.hp.max;
+    const hpAfter = Math.max(0, hpBefore - finalDamage);
+
+    // 禁用按钮
+    button.disabled = true;
+    button.textContent = '已结算';
+
+    // 发送结算消息（包含承受伤害按钮）
+    ChatMessage.create({
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: loser }),
+      content: `
+        <div style="background: #0F0D1B; border: 2px solid #EBBD68; border-radius: 8px; padding: 12px; color: #EBBD68; text-align: center; font-family: 'Noto Sans SC', sans-serif;">
+          <div style="font-size: 18px; font-weight: bold; color: #E1AA43; margin-bottom: 8px;">伤害结算</div>
+          <div style="margin-bottom: 8px;"><strong>${loser.name}</strong> 将受到 <span style="color: #c14545; font-weight: bold;">${finalDamage}</span> 点伤害</div>
+          <div style="padding: 8px; background: rgba(235, 189, 104, 0.1); border-radius: 4px; margin-bottom: 12px;">
+            <div style="font-size: 14px; color: #EBBD68;">当前生命值: ${hpBefore}/${hpMax}</div>
+            <div style="font-size: 16px; font-weight: bold; color: ${hpAfter > 0 ? '#4a7c2c' : '#c14545'}; margin-top: 4px;">承受后: ${hpAfter}/${hpMax}</div>
+          </div>
+          <button class="apply-damage-btn"
+                  data-loser-id="${loserId}"
+                  data-final-damage="${finalDamage}"
+                  style="padding: 8px 24px; background: #c14545; color: #FFFFFF; border: none; border-radius: 4px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.2s;">
+            承受伤害
+          </button>
+        </div>
+      `
+    });
+
+    ui.notifications.info(`${loser.name} 的伤害已计算完成，点击【承受伤害】按钮确认`);
+  });
+
+  // 承受伤害按钮事件（从结算消息中点击）
+  html.find('.apply-damage-btn').click(async (event) => {
+    event.preventDefault();
+    const button = event.currentTarget;
+
+    const loserId = button.dataset.loserId;
+    const finalDamage = parseInt(button.dataset.finalDamage) || 0;
+
+    // 获取失败者角色
+    const loser = game.actors.get(loserId);
+    if (!loser) {
+      ui.notifications.error("无法找到失败者角色");
+      return;
+    }
+
+    // 记录伤害前的HP
     const hpBefore = loser.system.derived.hp.value;
     const hpMax = loser.system.derived.hp.max;
 
@@ -253,13 +302,15 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     const newHp = Math.max(0, hpBefore - finalDamage);
     await loser.update({ 'system.derived.hp.value': newHp });
 
-    // 重新获取更新后的角色数据（确保同步）
-    await new Promise(resolve => setTimeout(resolve, 100)); // 等待更新完成
+    // 等待更新完成
+    await new Promise(resolve => setTimeout(resolve, 100));
     const updatedLoser = game.actors.get(loserId);
 
     // 禁用按钮
     button.disabled = true;
-    button.textContent = '已结算';
+    button.textContent = '已承受';
+    button.style.background = '#888';
+    button.style.cursor = 'not-allowed';
 
     // 刷新所有打开的角色表单
     if (updatedLoser.sheet && updatedLoser.sheet.rendered) {
@@ -273,23 +324,23 @@ Hooks.on('renderChatMessage', (message, html, data) => {
       }
     });
 
-    // 发送结算消息
+    // 发送确认消息
     ChatMessage.create({
       user: game.user.id,
       speaker: ChatMessage.getSpeaker({ actor: updatedLoser }),
       content: `
-        <div style="background: #0F0D1B; border: 2px solid #EBBD68; border-radius: 8px; padding: 12px; color: #EBBD68; text-align: center;">
-          <div style="font-size: 18px; font-weight: bold; color: #E1AA43; margin-bottom: 8px;">伤害结算</div>
-          <div style="margin-bottom: 8px;"><strong>${updatedLoser.name}</strong> 受到 <span style="color: #c14545; font-weight: bold;">${finalDamage}</span> 点伤害</div>
-          <div style="padding: 8px; background: rgba(235, 189, 104, 0.1); border-radius: 4px;">
-            <div style="font-size: 14px; color: #EBBD68;">结算前: ${hpBefore}/${hpMax}</div>
-            <div style="font-size: 16px; font-weight: bold; color: #4a7c2c; margin-top: 4px;">结算后: ${updatedLoser.system.derived.hp.value}/${hpMax}</div>
+        <div style="background: #0F0D1B; border: 2px solid #c14545; border-radius: 8px; padding: 12px; color: #EBBD68; text-align: center; font-family: 'Noto Sans SC', sans-serif;">
+          <div style="font-size: 16px; font-weight: bold; color: #c14545; margin-bottom: 8px;">✓ 伤害已承受</div>
+          <div style="margin-bottom: 8px;"><strong>${updatedLoser.name}</strong> 受到了 <span style="color: #c14545; font-weight: bold;">${finalDamage}</span> 点伤害</div>
+          <div style="padding: 8px; background: rgba(193, 69, 69, 0.1); border-radius: 4px;">
+            <div style="font-size: 14px; color: #888;">伤害前: ${hpBefore}/${hpMax}</div>
+            <div style="font-size: 16px; font-weight: bold; color: ${updatedLoser.system.derived.hp.value > 0 ? '#EBBD68' : '#c14545'}; margin-top: 4px;">当前生命值: ${updatedLoser.system.derived.hp.value}/${hpMax}</div>
           </div>
         </div>
       `
     });
 
-    ui.notifications.info(`${updatedLoser.name} 受到 ${finalDamage} 点伤害，当前生命值 ${updatedLoser.system.derived.hp.value}/${hpMax}`);
+    ui.notifications.info(`${updatedLoser.name} 承受了 ${finalDamage} 点伤害，当前生命值: ${updatedLoser.system.derived.hp.value}/${hpMax}`);
   });
 
   // 承受按钮事件（combat-dice-initiate.hbs）
