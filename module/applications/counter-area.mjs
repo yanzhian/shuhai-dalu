@@ -409,10 +409,20 @@ export default class CounterAreaApplication extends Application {
     let attackType;
     if (initiatorWon) {
       // 发起者赢了，使用发起者的攻击类型
-      attackType = this.initiateData.diceCategory;
+      // 如果发起者的战斗骰没有设置 category，默认使用"打击"
+      attackType = this.initiateData.diceCategory || '打击';
     } else {
       // 对抗者赢了，使用对抗者的战斗骰攻击类型
-      attackType = dice.system.category || '';
+      // 如果对抗者的战斗骰没有设置 category，默认使用"打击"
+      attackType = dice.system.category || '打击';
+
+      // 调试输出
+      console.log('【调试】对抗者战斗骰信息:', {
+        name: dice.name,
+        category: dice.system.category,
+        attackType: attackType,
+        loser: loser.name
+      });
     }
 
     // 计算抗性结果
@@ -635,7 +645,7 @@ export default class CounterAreaApplication extends Application {
       // 闪避失败，计算伤害（包含抗性）
       const { finalDamage: damage, description } = this._calculateDamage(
         initiatorResult,
-        this.initiateData.diceCategory,
+        this.initiateData.diceCategory || '打击',
         this.actor
       );
       finalDamage = damage;
@@ -716,7 +726,7 @@ export default class CounterAreaApplication extends Application {
                           parseInt(this.initiateData.adjustment);
 
     // 从反击骰子的分类中提取攻击类型（例如"反击-斩击" → "斩击"）
-    const counterAttackType = this._extractAttackType(defenseDice.system.category);
+    const counterAttackType = this._extractAttackType(defenseDice.system.category) || '打击';
 
     // 计算反击伤害（考虑发起者的抗性）
     const { finalDamage: counterDamage, description: counterDescription } = this._calculateDamage(
@@ -728,7 +738,7 @@ export default class CounterAreaApplication extends Application {
     // 计算对抗者受到的伤害（考虑抗性）
     const { finalDamage: initiatorDamage, description: initiatorDescription } = this._calculateDamage(
       initiatorTotal,
-      this.initiateData.diceCategory,
+      this.initiateData.diceCategory || '打击',
       this.actor
     );
 
@@ -804,10 +814,10 @@ export default class CounterAreaApplication extends Application {
     let attackType;
     if (counterWon) {
       // 反击者赢了，使用反击骰子的攻击类型
-      attackType = this._extractAttackType(defenseDice.system.category);
+      attackType = this._extractAttackType(defenseDice.system.category) || '打击';
     } else {
       // 发起者赢了，使用发起者的攻击类型
-      attackType = this.initiateData.diceCategory;
+      attackType = this.initiateData.diceCategory || '打击';
     }
 
     // 计算抗性结果
@@ -896,7 +906,7 @@ export default class CounterAreaApplication extends Application {
     // 先计算原始伤害（包含抗性）
     const { finalDamage: baseDamage, description: damageDescription } = this._calculateDamage(
       initiatorTotal,
-      this.initiateData.diceCategory,
+      this.initiateData.diceCategory || '打击',
       this.actor
     );
 
@@ -989,7 +999,7 @@ export default class CounterAreaApplication extends Application {
       // 防御失败，计算伤害（先算抗性，再减防御值）
       const { finalDamage: baseDamage, description: damageDescription } = this._calculateDamage(
         initiatorResult,
-        this.initiateData.diceCategory,
+        this.initiateData.diceCategory || '打击',
         this.actor
       );
 
