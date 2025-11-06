@@ -273,26 +273,21 @@ export default class CounterAreaApplication extends Application {
 
     const category = defenseDice.system.category || '';
 
-    // 根据守备骰分类执行不同逻辑
-    switch(category) {
-      case '闪避':
-        await this._performDodge(defenseDice);
-        break;
-      case '反击':
-        await this._performCounterAttack(defenseDice);
-        break;
-      case '强化反击':
-        await this._performEnhancedCounterAttack(defenseDice);
-        break;
-      case '防御':
-        await this._performDefense(defenseDice);
-        break;
-      case '强化防御':
-        await this._performEnhancedDefense(defenseDice);
-        break;
-      default:
-        ui.notifications.warn(`未知的守备骰分类: ${category}`);
-        break;
+    // 根据守备骰分类执行不同逻辑（使用includes判断，支持【反击-斩击】等）
+    if (category.includes('闪避')) {
+      await this._performDodge(defenseDice);
+    } else if (category.includes('强化反击')) {
+      // 必须先检查强化反击，因为它也包含"反击"
+      await this._performEnhancedCounterAttack(defenseDice);
+    } else if (category.includes('反击')) {
+      await this._performCounterAttack(defenseDice);
+    } else if (category.includes('强化防御')) {
+      // 必须先检查强化防御，因为它也包含"防御"
+      await this._performEnhancedDefense(defenseDice);
+    } else if (category.includes('防御')) {
+      await this._performDefense(defenseDice);
+    } else {
+      ui.notifications.warn(`未知的守备骰分类: ${category}`);
     }
   }
 
@@ -673,8 +668,10 @@ export default class CounterAreaApplication extends Application {
       await game.dice3d.showForRoll(roll, game.user, true);
     }
 
-    // 反击伤害 = 骰数 + 调整值（不受BUFF影响）
-    const counterDamage = roll.total + adjustment;
+    // 计算守备BUFF加成（忍耐/破绽）
+    const buffBonus = this._calculateDefenseBuffBonus();
+    // 反击伤害 = 骰数 + BUFF + 调整值
+    const counterDamage = roll.total + buffBonus + adjustment;
 
     // 发起者数据
     const initiator = game.actors.get(this.initiateData.initiatorId);
@@ -698,6 +695,7 @@ export default class CounterAreaApplication extends Application {
         counterName: this.actor.name,
         defenseDiceName: defenseDice.name,
         counterDiceRoll: roll.total,
+        counterBuff: buffBonus,
         counterAdjustment: adjustment,
         counterDamage: counterDamage,
         initiatorTotal: initiatorTotal,
@@ -805,8 +803,10 @@ export default class CounterAreaApplication extends Application {
       await game.dice3d.showForRoll(roll, game.user, true);
     }
 
-    // 防御骰数
-    const defenseValue = roll.total + adjustment;
+    // 计算守备BUFF加成（忍耐/破绽）
+    const buffBonus = this._calculateDefenseBuffBonus();
+    // 防御骰数 = 骰数 + BUFF + 调整值
+    const defenseValue = roll.total + buffBonus + adjustment;
 
     // 发起者数据
     const initiator = game.actors.get(this.initiateData.initiatorId);
@@ -847,7 +847,7 @@ export default class CounterAreaApplication extends Application {
         counterDiceFormula: defenseDice.system.diceFormula,
         counterResult: defenseValue,
         counterDiceRoll: roll.total,
-        counterBuff: 0,
+        counterBuff: buffBonus,
         counterAdjustment: adjustment,
         initiatorWon: true,
         resultDescription: resultDescription,
