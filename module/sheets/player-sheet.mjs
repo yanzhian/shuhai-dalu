@@ -33,6 +33,9 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     context.flags = this.actor.flags;
     context.rollData = this.actor.getRollData();
 
+    // 调试：输出HP数据
+    console.log('【角色表】getData - 当前HP:', this.actor.system.derived.hp.value, '/', this.actor.system.derived.hp.max);
+
     // 锁定状态（默认为游玩模式，即锁定）
     context.isLocked = this.actor.getFlag('shuhai-dalu', 'isLocked') ?? true;
 
@@ -44,6 +47,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
     // 计算最大经验值
     context.maxExp = this._getMaxExpForLevel(context.system.level);
+
+    console.log('【角色表】getData - context.system.derived.hp:', context.system.derived.hp);
 
     return context;
   }
