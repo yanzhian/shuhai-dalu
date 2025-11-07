@@ -15,7 +15,8 @@ export default class ShuhaiActorSheet extends ActorSheet {
         initial: "attributes" 
       }],
       dragDrop: [
-        { dragSelector: ".item-icon-wrapper", dropSelector: null },  // 允许整个表单接受拖放
+        { dragSelector: ".item-icon-wrapper", dropSelector: ".inventory-list" },  // 物品栏拖放
+        { dragSelector: ".item-icon-wrapper", dropSelector: ".equipment-content" },  // 装备区拖放
         { dragSelector: ".item-row", dropSelector: ".equipment-slots" },
         { dragSelector: ".item-row", dropSelector: ".dice-slots" },
         { dragSelector: ".item-row", dropSelector: ".special-slots" },
