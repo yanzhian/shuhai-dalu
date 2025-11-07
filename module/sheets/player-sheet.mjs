@@ -337,6 +337,18 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   }
 
   /** @override */
+  _canDragStart(selector) {
+    console.log('书海大陆 | _canDragStart 被调用', { selector, isEditable: this.isEditable });
+    return this.isEditable;
+  }
+
+  /** @override */
+  _canDragDrop(selector) {
+    console.log('书海大陆 | _canDragDrop 被调用', { selector, isEditable: this.isEditable });
+    return true; // 允许所有拖放操作，包括从外部拖入
+  }
+
+  /** @override */
   _onDragStart(event) {
     const li = event.currentTarget;
     if ( event.target.classList.contains("content-link") ) return;
@@ -1196,7 +1208,15 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
   /** @override */
   async _onDrop(event) {
+    console.log('书海大陆 | _onDrop 被调用', {
+      target: event.target,
+      targetClassName: event.target.className,
+      targetClosestInventory: event.target.closest('.inventory-list'),
+      targetClosestSlot: event.target.closest('.slot-content')
+    });
+
     const data = TextEditor.getDragEventData(event);
+    console.log('书海大陆 | 拖放数据类型', data.type);
 
     if (data.type === "Item") {
       return this._onDropItem(event, data);
