@@ -1279,3 +1279,125 @@
     background: #c14545;
   }
 }
+
+/* Activity Editor 样式优化 */
+.shuhai-dalu.activity-editor .form-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.shuhai-dalu.activity-editor .form-group input[type="checkbox"] {
+  margin: 0;
+}
+
+.shuhai-dalu.activity-editor .dynamic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.shuhai-dalu.activity-editor .dynamic-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.shuhai-dalu.activity-editor .dynamic-row select {
+  flex: 1;
+  min-width: 100px;
+}
+
+.shuhai-dalu.activity-editor .dynamic-row input[type="number"] {
+  width: 70px;
+}
+
+.shuhai-dalu.activity-editor .remove-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: #c14545;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.shuhai-dalu.activity-editor .remove-btn:hover {
+  background: #a13535;
+}
+
+.shuhai-dalu.activity-editor .add-btn {
+  padding: 6px 12px;
+  background: #4a7c2c;
+  border: none;
+  border-radius: 4px;
+  color: #ECE4D6;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.shuhai-dalu.activity-editor .add-btn:hover {
+  background: #5a9c3c;
+}
+
+.shuhai-dalu.activity-editor .custom-effect-fields {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.shuhai-dalu.activity-editor .custom-effect-fields input[type="text"] {
+  flex: 1;
+}
+
+.shuhai-dalu.activity-editor .custom-effect-fields input[type="number"] {
+  width: 70px;
+}
+
+.shuhai-dalu.activity-editor .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #EBBD68;
+}
+
+.shuhai-dalu.activity-editor .cancel-btn,
+.shuhai-dalu.activity-editor .save-btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu.activity-editor .cancel-btn {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #EBBD68;
+  color: #EBBD68;
+}
+
+.shuhai-dalu.activity-editor .cancel-btn:hover {
+  background: rgba(235, 189, 104, 0.1);
+}
+
+.shuhai-dalu.activity-editor .save-btn {
+  background: #EBBD68;
+  color: #0F0D1B;
+}
+
+.shuhai-dalu.activity-editor .save-btn:hover {
+  background: #E1AA43;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(235, 189, 104, 0.3);
+}

@@ -22,36 +22,6 @@
     </select>
   </div>
 
-  {{!-- 消耗开关 --}}
-  <div class="form-group">
-    <label class="checkbox-label">
-      <input type="checkbox" name="hasConsume" {{#if activity.hasConsume}}checked{{/if}} />
-      <span>需要消耗</span>
-    </label>
-  </div>
-
-  {{!-- 消耗列表 --}}
-  {{#if activity.hasConsume}}
-    <div class="form-group consumes-section">
-      <label>消耗</label>
-      <div class="consumes-list">
-        {{#each activity.consumes as |consume idx|}}
-          <div class="consume-row" data-index="{{idx}}">
-            <select name="consumes.{{idx}}.buffId">
-              {{#each ../buffPresets as |buff|}}
-                <option value="{{buff.id}}" {{#if (eq buff.id consume.buffId)}}selected{{/if}}>{{buff.name}}</option>
-              {{/each}}
-            </select>
-            <input type="number" name="consumes.{{idx}}.layers" value="{{consume.layers}}" placeholder="层数" />
-            <input type="number" name="consumes.{{idx}}.strength" value="{{consume.strength}}" placeholder="强度" />
-            <button type="button" class="remove-consume-btn" data-index="{{idx}}"><i class="fas fa-times"></i></button>
-          </div>
-        {{/each}}
-        <button type="button" class="add-consume-btn"><i class="fas fa-plus"></i> 添加消耗</button>
-      </div>
-    </div>
-  {{/if}}
-
   {{!-- 目标选择 --}}
   <div class="form-group">
     <label>目标</label>
@@ -62,28 +32,56 @@
     </select>
   </div>
 
+  {{!-- 消耗列表 --}}
+  <div class="form-group">
+    <label>
+      <input type="checkbox" name="hasConsume" {{#if activity.hasConsume}}checked{{/if}} class="has-consume-checkbox" />
+      需要消耗
+    </label>
+    {{#if activity.hasConsume}}
+      <div class="dynamic-list consumes-list">
+        {{#each activity.consumes as |consume idx|}}
+          <div class="dynamic-row" data-index="{{idx}}">
+            <select name="consumes.{{idx}}.buffId">
+              {{#each ../buffPresets as |buff|}}
+                <option value="{{buff.id}}" {{#if (eq buff.id consume.buffId)}}selected{{/if}}>{{buff.name}}</option>
+              {{/each}}
+            </select>
+            <input type="number" name="consumes.{{idx}}.layers" value="{{consume.layers}}" placeholder="层数" />
+            <input type="number" name="consumes.{{idx}}.strength" value="{{consume.strength}}" placeholder="强度" />
+            <button type="button" class="remove-btn remove-consume-btn" data-index="{{idx}}"><i class="fas fa-times"></i></button>
+          </div>
+        {{/each}}
+        <button type="button" class="add-btn add-consume-btn"><i class="fas fa-plus"></i> 添加消耗</button>
+      </div>
+    {{/if}}
+  </div>
+
   {{!-- 效果添加 --}}
-  <div class="form-group effects-section">
+  <div class="form-group">
     <label>效果添加</label>
-    <div class="effects-list">
-      {{#each buffPresets as |buff|}}
-        <div class="effect-row">
-          <label class="checkbox-label">
-            <input type="checkbox" name="effects.{{buff.id}}.enabled" {{#if (lookup ../activity.effects buff.id)}}checked{{/if}} />
-            <span class="effect-name">{{buff.name}}</span>
-          </label>
-          <input type="number" name="effects.{{buff.id}}.layers" value="{{#if (lookup ../activity.effects buff.id)}}{{lookup (lookup ../activity.effects buff.id) 'layers'}}{{else}}{{buff.defaultLayers}}{{/if}}" placeholder="层数" />
-          <input type="number" name="effects.{{buff.id}}.strength" value="{{#if (lookup ../activity.effects buff.id)}}{{lookup (lookup ../activity.effects buff.id) 'strength'}}{{else}}{{buff.defaultStrength}}{{/if}}" placeholder="强度" />
+    <div class="dynamic-list effects-list">
+      {{#each activity.effectsList as |effect idx|}}
+        <div class="dynamic-row" data-index="{{idx}}">
+          <select name="effects.{{idx}}.buffId" class="effect-select">
+            {{#each ../buffPresets as |buff|}}
+              <option value="{{buff.id}}" {{#if (eq buff.id effect.buffId)}}selected{{/if}}>{{buff.name}}</option>
+            {{/each}}
+          </select>
+          <input type="number" name="effects.{{idx}}.layers" value="{{effect.layers}}" placeholder="层数" />
+          <input type="number" name="effects.{{idx}}.strength" value="{{effect.strength}}" placeholder="强度" />
+          <button type="button" class="remove-btn remove-effect-btn" data-index="{{idx}}"><i class="fas fa-times"></i></button>
         </div>
       {{/each}}
+      <button type="button" class="add-btn add-effect-btn"><i class="fas fa-plus"></i> 添加效果</button>
     </div>
   </div>
 
   {{!-- 自定义效果 --}}
-  <div class="form-group custom-effect-section">
-    <label class="checkbox-label">
-      <input type="checkbox" name="customEffect.enabled" {{#if activity.customEffect.enabled}}checked{{/if}} />
-      <span>其他效果</span>
+  <div class="form-group">
+    <label>
+      <input type="checkbox" name="customEffect.enabled" {{#if activity.customEffect.enabled}}checked{{/if}} class="custom-effect-checkbox" />
+      其他效果
     </label>
     {{#if activity.customEffect.enabled}}
       <div class="custom-effect-fields">
@@ -92,6 +90,12 @@
         <input type="number" name="customEffect.strength" value="{{activity.customEffect.strength}}" placeholder="强度" />
       </div>
     {{/if}}
+  </div>
+
+  {{!-- 保存和取消按钮 --}}
+  <div class="form-actions">
+    <button type="button" class="cancel-btn">取消</button>
+    <button type="submit" class="save-btn">保存</button>
   </div>
 
 </form>

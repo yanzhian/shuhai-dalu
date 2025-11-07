@@ -32,8 +32,49 @@ export default class ActivityEditor extends Application {
   constructor(item, activity = null, options = {}) {
     super(options);
     this.item = item;
-    this.activity = activity || this._getDefaultActivity();
-    this.activityId = activity?._id || foundry.utils.randomID();
+
+    if (activity) {
+      // 编辑现有activity
+      this.activityId = activity._id;
+      this.activity = foundry.utils.deepClone(activity);
+      // 将effects对象转换为effectsList数组
+      this.activity.effectsList = this._effectsToList(activity.effects || {});
+    } else {
+      // 创建新activity
+      this.activityId = foundry.utils.randomID();
+      this.activity = this._getDefaultActivity();
+    }
+  }
+
+  /**
+   * 将 effects 对象转换为列表
+   */
+  _effectsToList(effects) {
+    const list = [];
+    for (const [buffId, data] of Object.entries(effects)) {
+      list.push({
+        buffId: buffId,
+        layers: data.layers || 0,
+        strength: data.strength || 0
+      });
+    }
+    return list;
+  }
+
+  /**
+   * 将 effectsList 转换回 effects 对象
+   */
+  _listToEffects(effectsList) {
+    const effects = {};
+    for (const effect of effectsList) {
+      if (effect.buffId) {
+        effects[effect.buffId] = {
+          layers: parseInt(effect.layers) || 0,
+          strength: parseInt(effect.strength) || 0
+        };
+      }
+    }
+    return effects;
   }
 
   /**
@@ -41,13 +82,13 @@ export default class ActivityEditor extends Application {
    */
   _getDefaultActivity() {
     return {
-      _id: foundry.utils.randomID(),
+      _id: this.activityId,
       name: "",
       trigger: "onUse",
       hasConsume: false,
       consumes: [],
       target: "selected",
-      effects: {},
+      effectsList: [],
       customEffect: {
         enabled: false,
         name: "",
@@ -67,7 +108,8 @@ export default class ActivityEditor extends Application {
       title: "编辑活动",
       closeOnSubmit: false,
       submitOnChange: false,
-      submitOnClose: false
+      submitOnClose: false,
+      resizable: true
     });
   }
 
@@ -83,18 +125,34 @@ export default class ActivityEditor extends Application {
   activateListeners(html) {
     super.activateListeners(html);
 
-    // 添加/删除消耗
+    // 消耗管理
     html.find('.add-consume-btn').click(this._onAddConsume.bind(this));
     html.find('.remove-consume-btn').click(this._onRemoveConsume.bind(this));
 
-    // 保存按钮
-    html.find('button[type="submit"]').click(this._onSubmit.bind(this));
+    // 效果管理
+    html.find('.add-effect-btn').click(this._onAddEffect.bind(this));
+    html.find('.remove-effect-btn').click(this._onRemoveEffect.bind(this));
 
-    // hasConsume checkbox 变化时重新渲染
-    html.find('input[name="hasConsume"]').change(() => this.render());
+    // checkbox 变化时重新渲染
+    html.find('.has-consume-checkbox').change(async (e) => {
+      this.activity.hasConsume = e.target.checked;
+      this.render();
+    });
 
-    // customEffect.enabled checkbox 变化时重新渲染
-    html.find('input[name="customEffect.enabled"]').change(() => this.render());
+    html.find('.custom-effect-checkbox').change(async (e) => {
+      this.activity.customEffect.enabled = e.target.checked;
+      this.render();
+    });
+
+    // 保存和取消按钮
+    html.find('.save-btn').click(this._onSave.bind(this));
+    html.find('.cancel-btn').click(() => this.close());
+
+    // 阻止form默认提交
+    html.find('form').submit((e) => {
+      e.preventDefault();
+      this._onSave(e);
+    });
   }
 
   /**
@@ -121,9 +179,32 @@ export default class ActivityEditor extends Application {
   }
 
   /**
-   * 提交表单
+   * 添加效果
    */
-  async _onSubmit(event) {
+  _onAddEffect(event) {
+    event.preventDefault();
+    this.activity.effectsList.push({
+      buffId: 'strong',
+      layers: 1,
+      strength: 0
+    });
+    this.render();
+  }
+
+  /**
+   * 删除效果
+   */
+  _onRemoveEffect(event) {
+    event.preventDefault();
+    const index = parseInt($(event.currentTarget).data('index'));
+    this.activity.effectsList.splice(index, 1);
+    this.render();
+  }
+
+  /**
+   * 保存
+   */
+  async _onSave(event) {
     event.preventDefault();
 
     const form = this.element.find('form')[0];
@@ -131,18 +212,12 @@ export default class ActivityEditor extends Application {
 
     const formData = new FormDataExtended(form).object;
 
-    // 处理 effects
-    const effects = {};
-    if (formData.effects) {
-      for (const [buffId, buffData] of Object.entries(formData.effects)) {
-        if (buffData.enabled === true || buffData.enabled === 'on') {
-          effects[buffId] = {
-            layers: parseInt(buffData.layers) || 0,
-            strength: parseInt(buffData.strength) || 0
-          };
-        }
-      }
-    }
+    // 处理 consumes
+    const consumes = formData.consumes ? Object.values(formData.consumes) : [];
+
+    // 处理 effectsList
+    const effectsList = formData.effects ? Object.values(formData.effects) : [];
+    const effects = this._listToEffects(effectsList);
 
     // 构建 activity 数据
     const activityData = {
@@ -150,21 +225,21 @@ export default class ActivityEditor extends Application {
       name: formData.name || "",
       trigger: formData.trigger || "onUse",
       hasConsume: formData.hasConsume === true || formData.hasConsume === 'on',
-      consumes: formData.consumes ? Object.values(formData.consumes) : [],
+      consumes: consumes,
       target: formData.target || "selected",
       effects: effects,
-      customEffect: formData.customEffect || {
-        enabled: false,
-        name: "",
-        layers: 0,
-        strength: 0
+      customEffect: {
+        enabled: formData.customEffect?.enabled === true || formData.customEffect?.enabled === 'on',
+        name: formData.customEffect?.name || "",
+        layers: parseInt(formData.customEffect?.layers) || 0,
+        strength: parseInt(formData.customEffect?.strength) || 0
       }
     };
 
     console.log('【Activity保存】准备保存:', activityData);
 
     // 更新 item 的 activities
-    const activities = this.item.system.activities || {};
+    const activities = foundry.utils.deepClone(this.item.system.activities || {});
     activities[this.activityId] = activityData;
 
     await this.item.update({

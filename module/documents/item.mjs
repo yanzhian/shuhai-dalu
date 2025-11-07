@@ -12,9 +12,61 @@ export default class ShuhaiItem extends Item {
   prepareDerivedData() {
     const itemData = this;
     const systemData = itemData.system;
-    
+
+    // 迁移旧的 conditions 到新的 activities
+    this._migrateConditionsToActivities(systemData);
+
     // 验证数据
     this._validateItemData(itemData);
+  }
+
+  /**
+   * 迁移旧的 conditions 数组到新的 activities 对象
+   */
+  async _migrateConditionsToActivities(systemData) {
+    // 如果已经有 activities 或没有 conditions，跳过迁移
+    if (!systemData.conditions || systemData.conditions.length === 0) {
+      return;
+    }
+
+    // 如果 activities 已存在且不为空，跳过迁移
+    if (systemData.activities && Object.keys(systemData.activities).length > 0) {
+      return;
+    }
+
+    console.log('【数据迁移】发现旧的 conditions，开始迁移到 activities');
+
+    const activities = {};
+
+    for (let i = 0; i < systemData.conditions.length; i++) {
+      const condition = systemData.conditions[i];
+      const activityId = foundry.utils.randomID();
+
+      // 转换旧的 condition 到新的 activity 格式
+      activities[activityId] = {
+        _id: activityId,
+        name: `条件${i + 1}`,  // 默认名称
+        trigger: condition.trigger || 'onUse',
+        hasConsume: condition.hasConsume || false,
+        consumes: condition.consumes || [],
+        target: condition.target || 'selected',
+        effects: condition.effects || {},
+        customEffect: condition.customEffect || {
+          enabled: false,
+          name: '',
+          layers: 0,
+          strength: 0
+        }
+      };
+    }
+
+    console.log('【数据迁移】迁移完成，共迁移', Object.keys(activities).length, '个条件');
+
+    // 异步更新 item
+    this.update({
+      'system.activities': activities,
+      'system.conditions': []  // 清空旧的 conditions
+    });
   }
 
   /**
