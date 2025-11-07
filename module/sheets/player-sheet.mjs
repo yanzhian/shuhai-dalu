@@ -11,7 +11,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       height: 1180,
       tabs: [],
       dragDrop: [
-        { dragSelector: ".item-icon-wrapper[draggable]", dropSelector: ".slot-content" }
+        { dragSelector: ".item-icon-wrapper[draggable]", dropSelector: ".slot-content, .inventory-list" }
       ],
       scrollY: [".skills-section", ".equipment-section", ".inventory-list"]
     });
@@ -1206,49 +1206,95 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   }
 
   /**
-   * 处理物品拖放到装备槽
+   * 处理物品拖放到装备槽或物品栏
    */
   async _onDropItem(event, data) {
+    console.log('书海大陆 | _onDropItem 被调用', { event, data });
+
     const item = await Item.implementation.fromDropData(data);
     const itemData = item.toObject();
 
-    // 检查是否是从其他角色拖过来的
-    if (item.parent && item.parent.id !== this.actor.id) {
-      delete itemData._id;
-      return this.actor.createEmbeddedDocuments("Item", [itemData]);
-    }
+    console.log('书海大陆 | 拖放的物品', {
+      itemId: item.id,
+      itemName: item.name,
+      itemParent: item.parent?.id,
+      actorId: this.actor.id
+    });
 
-    // 检查拖放目标
+    // 检查拖放目标 - 优先检查是否拖放到装备槽
     const dropTarget = event.target.closest('.slot-content');
-    if (!dropTarget) {
-      return super._onDropItem(event, data);
-    }
 
-    const slotType = dropTarget.dataset.slot;
-    const slotIndex = dropTarget.dataset.slotIndex !== undefined ?
-      parseInt(dropTarget.dataset.slotIndex) : null;
+    if (dropTarget) {
+      // 拖放到装备槽的逻辑
+      console.log('书海大陆 | 拖放到装备槽', { dropTarget });
 
-    // 验证物品类型匹配槽位
-    if (!this._validateItemForSlot(item, slotType)) {
-      return false;
-    }
+      // 如果是从其他角色或 FVTT 侧边栏拖入，需要先创建物品副本
+      if (!item.parent || item.parent.id !== this.actor.id) {
+        console.log('书海大陆 | 从外部拖入物品到装备槽，先创建副本');
+        delete itemData._id;
+        const createdItems = await this.actor.createEmbeddedDocuments("Item", [itemData]);
 
-    // 特殊处理战斗骰槽位
-    if (slotType === 'combatDice') {
-      // 检查是否已经装备在其他战斗骰槽位
-      const currentCombatDice = this.actor.system.equipment.combatDice;
-      const existingIndex = currentCombatDice.findIndex(diceId => diceId === item.id);
+        if (createdItems && createdItems.length > 0) {
+          const newItem = createdItems[0];
+          console.log('书海大陆 | 创建物品副本成功，开始装备', { newItemId: newItem.id });
 
-      if (existingIndex !== -1 && existingIndex !== slotIndex) {
-        ui.notifications.warn("该战斗骰已经装备在其他槽位");
+          const slotType = dropTarget.dataset.slot;
+          const slotIndex = dropTarget.dataset.slotIndex !== undefined ?
+            parseInt(dropTarget.dataset.slotIndex) : null;
+
+          // 验证物品类型匹配槽位
+          if (!this._validateItemForSlot(newItem, slotType)) {
+            return false;
+          }
+
+          // 装备新创建的物品
+          await game.shuhai.equipItem(this.actor, newItem, slotType, slotIndex);
+        }
+
         return false;
       }
+
+      // 如果是从自己的物品栏拖入装备槽
+      const slotType = dropTarget.dataset.slot;
+      const slotIndex = dropTarget.dataset.slotIndex !== undefined ?
+        parseInt(dropTarget.dataset.slotIndex) : null;
+
+      // 验证物品类型匹配槽位
+      if (!this._validateItemForSlot(item, slotType)) {
+        return false;
+      }
+
+      // 特殊处理战斗骰槽位
+      if (slotType === 'combatDice') {
+        // 检查是否已经装备在其他战斗骰槽位
+        const currentCombatDice = this.actor.system.equipment.combatDice;
+        const existingIndex = currentCombatDice.findIndex(diceId => diceId === item.id);
+
+        if (existingIndex !== -1 && existingIndex !== slotIndex) {
+          ui.notifications.warn("该战斗骰已经装备在其他槽位");
+          return false;
+        }
+      }
+
+      // 装备物品到槽位
+      await game.shuhai.equipItem(this.actor, item, slotType, slotIndex);
+
+      return false;
+    } else {
+      // 拖放到物品栏的逻辑（没有找到 .slot-content）
+      console.log('书海大陆 | 拖放到物品栏或其他区域');
+
+      // 检查是否是从其他角色或外部拖入
+      if (!item.parent || item.parent.id !== this.actor.id) {
+        console.log('书海大陆 | 从外部拖入物品到物品栏，创建副本');
+        delete itemData._id;
+        return this.actor.createEmbeddedDocuments("Item", [itemData]);
+      }
+
+      // 如果是自己的物品在自己的物品栏内拖放，使用父类的默认排序逻辑
+      console.log('书海大陆 | 物品栏内部拖放，调用父类方法');
+      return super._onDropItem(event, data);
     }
-
-    // 装备物品到槽位
-    await game.shuhai.equipItem(this.actor, item, slotType, slotIndex);
-
-    return false;
   }
 
   /**
