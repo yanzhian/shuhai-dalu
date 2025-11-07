@@ -1,0 +1,806 @@
+/* ========================================
+   书海大陆 物品表单样式
+   底色: #0F0D1B
+   描边/金色: #EBBD68
+   ======================================== */
+
+.shuhai-dalu.item {
+  background: #0F0D1B;
+  color: #ECE4D6;
+  font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+}
+
+.shuhai-dalu.item form {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 12px;
+}
+
+/* ========== 编辑锁按钮 ========== */
+.item-lock-row {
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.item-lock-btn {
+  width: 16px;
+  height: 16px;
+  background: transparent;
+  border: 1px solid #EBBD68;
+  border-radius: 3px;
+  color: #EBBD68;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.item-lock-btn:hover {
+  background: rgba(235, 189, 104, 0.2);
+}
+
+.item-lock-btn.locked {
+  background: #EBBD68;
+  color: #0F0D1B;
+}
+
+/* ========== 基础信息区域 ========== */
+.item-basic-info {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #EBBD68;
+}
+
+.item-icon-section {
+  flex-shrink: 0;
+}
+
+.item-icon-wrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border: 2px solid #EBBD68;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.item-icon-wrapper:hover {
+  border-color: #E1AA43;
+  box-shadow: 0 0 8px rgba(235, 189, 104, 0.3);
+}
+
+.item-icon-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.item-info-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item-name-row input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid #EBBD68;
+  color: #EBBD68;
+  font-size: 24px;
+  font-weight: bold;
+  padding: 4px 0;
+  outline: none;
+}
+
+.item-name-row input:focus {
+  border-bottom-color: #E1AA43;
+}
+
+.item-type-category-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.item-type-category-row select,
+.item-type-category-row input {
+  width: 100%;
+  padding: 6px 8px;
+  background: rgba(235, 189, 104, 0.1);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  color: #ECE4D6;
+  font-size: 14px;
+  outline: none;
+}
+
+.item-type-category-row select:focus,
+.item-type-category-row input:focus {
+  border-color: #E1AA43;
+  background: rgba(235, 189, 104, 0.15);
+}
+
+.item-tags-row input {
+  width: 100%;
+  padding: 6px 8px;
+  background: rgba(235, 189, 104, 0.1);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  color: #ECE4D6;
+  font-size: 14px;
+  outline: none;
+}
+
+.item-tags-row input:focus {
+  border-color: #E1AA43;
+  background: rgba(235, 189, 104, 0.15);
+}
+
+/* ========== 属性信息区域 ========== */
+.item-properties-section {
+  flex-shrink: 0;
+  padding-top: 12px;
+  border-top: 2px solid #EBBD68;
+}
+
+.item-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.item-stat-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item-stat-field label {
+  font-size: 12px;
+  font-weight: bold;
+  color: #EBBD68;
+}
+
+.item-stat-field input {
+  padding: 6px 8px;
+  background: rgba(235, 189, 104, 0.1);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  color: #ECE4D6;
+  font-size: 14px;
+  outline: none;
+}
+
+.item-stat-field input:focus {
+  border-color: #E1AA43;
+  background: rgba(235, 189, 104, 0.15);
+}
+
+/* 防具属性 */
+.armor-properties-section {
+  padding: 8px;
+  background: rgba(235, 189, 104, 0.05);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+
+.armor-properties-section .section-title {
+  font-size: 12px;
+  font-weight: bold;
+  color: #EBBD68;
+  margin-bottom: 8px;
+}
+
+.armor-properties-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.armor-property-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.armor-property-item:hover {
+  background: rgba(235, 189, 104, 0.1);
+}
+
+.armor-property-item input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+.armor-property-item .property-label {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.armor-property-item .property-label.resist {
+  color: #4a7c2c;
+}
+
+.armor-property-item .property-label.weak {
+  color: #c14545;
+}
+
+/* ========== 标签页区域 ========== */
+.item-tabs-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-top: 12px;
+  border-top: 2px solid #EBBD68;
+}
+
+.item-tabs-nav {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid #EBBD68;
+  flex-shrink: 0;
+}
+
+.item-tab-btn {
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #EBBD68;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: -2px;
+}
+
+.item-tab-btn:hover {
+  background: rgba(235, 189, 104, 0.1);
+}
+
+.item-tab-btn.active {
+  border-bottom-color: #E1AA43;
+  background: rgba(235, 189, 104, 0.15);
+  color: #E1AA43;
+}
+
+.item-tabs-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 0;
+}
+
+.item-tab-pane {
+  display: none;
+  height: 100%;
+}
+
+.item-tab-pane.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== 效果描述标签页 ========== */
+.effect-description-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.effect-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.effect-toggle-btn {
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: 1px solid #EBBD68;
+  border-radius: 3px;
+  color: #EBBD68;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.effect-toggle-btn:hover {
+  background: rgba(235, 189, 104, 0.2);
+}
+
+.effect-toggle-btn.collapsed i {
+  transform: rotate(-90deg);
+}
+
+.effect-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: bold;
+  color: #EBBD68;
+  text-align: center;
+}
+
+.effect-edit-btn {
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: 1px solid #EBBD68;
+  border-radius: 3px;
+  color: #EBBD68;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.effect-edit-btn:hover {
+  background: rgba(235, 189, 104, 0.2);
+}
+
+.effect-edit-btn.active {
+  background: #EBBD68;
+  color: #0F0D1B;
+}
+
+.effect-content {
+  transition: all 0.3s ease;
+}
+
+.effect-content.collapsed {
+  display: none;
+}
+
+.effect-content textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 8px;
+  background: rgba(235, 189, 104, 0.1);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  color: #ECE4D6;
+  font-size: 13px;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+}
+
+.effect-content textarea:focus {
+  border-color: #E1AA43;
+  background: rgba(235, 189, 104, 0.15);
+}
+
+.effect-content textarea:disabled {
+  background: rgba(0, 0, 0, 0.2);
+  color: #999;
+  cursor: not-allowed;
+}
+
+/* ========== 条件触发标签页 ========== */
+.conditions-list-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.condition-item {
+  background: rgba(235, 189, 104, 0.05);
+  border: 1px solid #EBBD68;
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.condition-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.condition-toggle-btn {
+  width: 16px;
+  height: 16px;
+  background: transparent;
+  border: 1px solid #EBBD68;
+  border-radius: 3px;
+  color: #EBBD68;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.condition-toggle-btn:hover {
+  background: rgba(235, 189, 104, 0.2);
+}
+
+.condition-toggle-btn.collapsed i {
+  transform: rotate(-90deg);
+}
+
+.condition-name-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #EBBD68;
+  color: #EBBD68;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 2px 4px;
+  outline: none;
+}
+
+.condition-name-input:focus {
+  border-bottom-color: #E1AA43;
+}
+
+.condition-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.condition-action-btn {
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: 1px solid #EBBD68;
+  border-radius: 3px;
+  color: #EBBD68;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  transition: all 0.2s;
+}
+
+.condition-action-btn:hover {
+  background: rgba(235, 189, 104, 0.2);
+}
+
+.condition-action-btn.delete-btn:hover {
+  background: rgba(193, 69, 69, 0.3);
+  border-color: #c14545;
+  color: #c14545;
+}
+
+.condition-action-btn.use-btn:hover {
+  background: rgba(74, 124, 44, 0.3);
+  border-color: #4a7c2c;
+  color: #4a7c2c;
+}
+
+.condition-content {
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.3s ease;
+}
+
+.condition-content.collapsed {
+  display: none;
+}
+
+/* 触发时机 */
+.condition-trigger-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.condition-section-title {
+  font-size: 12px;
+  font-weight: bold;
+  color: #EBBD68;
+}
+
+.condition-trigger-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.trigger-option {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.trigger-option:hover {
+  background: rgba(235, 189, 104, 0.1);
+}
+
+.trigger-option input[type="radio"] {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+.trigger-option label {
+  font-size: 12px;
+  color: #ECE4D6;
+  cursor: pointer;
+}
+
+/* 消耗 */
+.condition-consumption-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.consumption-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.consumption-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.consumption-toggle label {
+  font-size: 13px;
+  color: #ECE4D6;
+  cursor: pointer;
+}
+
+.consumption-effects {
+  padding-left: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.consumption-effect-item {
+  padding: 4px 8px;
+  background: rgba(235, 189, 104, 0.1);
+  border: 1px solid #EBBD68;
+  border-radius: 3px;
+  font-size: 12px;
+  color: #ECE4D6;
+}
+
+/* 目标 */
+.condition-target-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.target-options {
+  display: flex;
+  gap: 8px;
+}
+
+.target-option {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.target-option:hover {
+  background: rgba(235, 189, 104, 0.1);
+}
+
+.target-option input[type="radio"] {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+.target-option label {
+  font-size: 12px;
+  color: #ECE4D6;
+  cursor: pointer;
+}
+
+/* 基础效果 */
+.condition-base-effects-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.base-effects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.base-effect-option {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.base-effect-option:hover {
+  background: rgba(235, 189, 104, 0.1);
+}
+
+.base-effect-option input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+.base-effect-option label {
+  font-size: 12px;
+  color: #ECE4D6;
+  cursor: pointer;
+  flex: 1;
+}
+
+.base-effect-inputs {
+  display: flex;
+  gap: 4px;
+}
+
+.base-effect-inputs input {
+  width: 40px;
+  padding: 2px 4px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #EBBD68;
+  border-radius: 2px;
+  color: #ECE4D6;
+  font-size: 11px;
+  text-align: center;
+  outline: none;
+}
+
+.base-effect-inputs input:focus {
+  border-color: #E1AA43;
+}
+
+.base-effect-inputs label {
+  font-size: 10px;
+  color: #888;
+}
+
+/* 其他效果 */
+.condition-custom-effect-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.custom-effect-fields {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 8px;
+}
+
+.custom-effect-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.custom-effect-field label {
+  font-size: 11px;
+  color: #EBBD68;
+}
+
+.custom-effect-field input {
+  padding: 4px 8px;
+  background: rgba(235, 189, 104, 0.1);
+  border: 1px solid #EBBD68;
+  border-radius: 3px;
+  color: #ECE4D6;
+  font-size: 12px;
+  outline: none;
+}
+
+.custom-effect-field input:focus {
+  border-color: #E1AA43;
+  background: rgba(235, 189, 104, 0.15);
+}
+
+/* 添加条件按钮 */
+.add-condition-btn {
+  width: 100%;
+  padding: 10px;
+  background: #EBBD68;
+  border: none;
+  border-radius: 4px;
+  color: #0F0D1B;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.add-condition-btn:hover {
+  background: #E1AA43;
+  transform: translateY(-1px);
+}
+
+/* ========== 滚动条样式 ========== */
+.shuhai-dalu.item ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.shuhai-dalu.item ::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.shuhai-dalu.item ::-webkit-scrollbar-thumb {
+  background: #EBBD68;
+  border-radius: 3px;
+}
+
+.shuhai-dalu.item ::-webkit-scrollbar-thumb:hover {
+  background: #E1AA43;
+}
+
+/* ========== 通用样式 ========== */
+.shuhai-dalu.item input:disabled,
+.shuhai-dalu.item select:disabled,
+.shuhai-dalu.item textarea:disabled,
+.shuhai-dalu.item button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+}
+
+.shuhai-dalu.item button:disabled:hover {
+  transform: none !important;
+}

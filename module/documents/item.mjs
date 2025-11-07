@@ -307,7 +307,7 @@ export default class ShuhaiItem extends Item {
 export class CombatDiceData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     const fields = foundry.data.fields;
-    
+
     return {
       category: new fields.StringField({
         required: true,
@@ -341,7 +341,31 @@ export class CombatDiceData extends foundry.abstract.TypeDataModel {
         initial: 0,
         min: 0,
         label: "星光消耗"
-      })
+      }),
+      // 条件触发系统
+      conditions: new fields.ArrayField(
+        new fields.SchemaField({
+          id: new fields.StringField({ initial: () => foundry.utils.randomID() }),
+          name: new fields.StringField({ initial: "新条件" }),
+          trigger: new fields.StringField({
+            initial: "onUse",
+            choices: ['onUse', 'onAttack', 'onCounter', 'onCounterSuccess', 'onCounterFailure', 'onHit', 'onDamaged', 'onTurnStart', 'onTurnEnd']
+          }),
+          needConsumption: new fields.BooleanField({ initial: false }),
+          consumptions: new fields.ArrayField(new fields.StringField()),
+          target: new fields.StringField({
+            initial: "selected",
+            choices: ['selected', 'self', 'multiple']
+          }),
+          baseEffects: new fields.ArrayField(new fields.StringField()),
+          customEffect: new fields.SchemaField({
+            name: new fields.StringField({ initial: "" }),
+            layers: new fields.NumberField({ initial: 0, min: 0 }),
+            strength: new fields.NumberField({ initial: 0, min: 0 })
+          })
+        }),
+        { initial: [] }
+      )
     };
   }
 }
@@ -352,7 +376,7 @@ export class CombatDiceData extends foundry.abstract.TypeDataModel {
 export class DefenseDiceData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     const fields = foundry.data.fields;
-    
+
     return {
       category: new fields.StringField({
         required: true,
@@ -386,7 +410,31 @@ export class DefenseDiceData extends foundry.abstract.TypeDataModel {
         initial: 0,
         min: 0,
         label: "星光消耗"
-      })
+      }),
+      // 条件触发系统
+      conditions: new fields.ArrayField(
+        new fields.SchemaField({
+          id: new fields.StringField({ initial: () => foundry.utils.randomID() }),
+          name: new fields.StringField({ initial: "新条件" }),
+          trigger: new fields.StringField({
+            initial: "onUse",
+            choices: ['onUse', 'onAttack', 'onCounter', 'onCounterSuccess', 'onCounterFailure', 'onHit', 'onDamaged', 'onTurnStart', 'onTurnEnd']
+          }),
+          needConsumption: new fields.BooleanField({ initial: false }),
+          consumptions: new fields.ArrayField(new fields.StringField()),
+          target: new fields.StringField({
+            initial: "selected",
+            choices: ['selected', 'self', 'multiple']
+          }),
+          baseEffects: new fields.ArrayField(new fields.StringField()),
+          customEffect: new fields.SchemaField({
+            name: new fields.StringField({ initial: "" }),
+            layers: new fields.NumberField({ initial: 0, min: 0 }),
+            strength: new fields.NumberField({ initial: 0, min: 0 })
+          })
+        }),
+        { initial: [] }
+      )
     };
   }
 }
@@ -397,7 +445,7 @@ export class DefenseDiceData extends foundry.abstract.TypeDataModel {
 export class TriggerDiceData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     const fields = foundry.data.fields;
-    
+
     return {
       category: new fields.StringField({
         required: true,
@@ -429,7 +477,31 @@ export class TriggerDiceData extends foundry.abstract.TypeDataModel {
         initial: 0,
         min: 0,
         label: "星光消耗"
-      })
+      }),
+      // 条件触发系统
+      conditions: new fields.ArrayField(
+        new fields.SchemaField({
+          id: new fields.StringField({ initial: () => foundry.utils.randomID() }),
+          name: new fields.StringField({ initial: "新条件" }),
+          trigger: new fields.StringField({
+            initial: "onUse",
+            choices: ['onUse', 'onAttack', 'onCounter', 'onCounterSuccess', 'onCounterFailure', 'onHit', 'onDamaged', 'onTurnStart', 'onTurnEnd']
+          }),
+          needConsumption: new fields.BooleanField({ initial: false }),
+          consumptions: new fields.ArrayField(new fields.StringField()),
+          target: new fields.StringField({
+            initial: "selected",
+            choices: ['selected', 'self', 'multiple']
+          }),
+          baseEffects: new fields.ArrayField(new fields.StringField()),
+          customEffect: new fields.SchemaField({
+            name: new fields.StringField({ initial: "" }),
+            layers: new fields.NumberField({ initial: 0, min: 0 }),
+            strength: new fields.NumberField({ initial: 0, min: 0 })
+          })
+        }),
+        { initial: [] }
+      )
     };
   }
 }
@@ -440,7 +512,7 @@ export class TriggerDiceData extends foundry.abstract.TypeDataModel {
 export class PassiveDiceData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     const fields = foundry.data.fields;
-    
+
     return {
       category: new fields.StringField({
         required: true,
@@ -468,7 +540,31 @@ export class PassiveDiceData extends foundry.abstract.TypeDataModel {
         initial: 0,
         min: 0,
         label: "星光消耗"
-      })
+      }),
+      // 条件触发系统
+      conditions: new fields.ArrayField(
+        new fields.SchemaField({
+          id: new fields.StringField({ initial: () => foundry.utils.randomID() }),
+          name: new fields.StringField({ initial: "新条件" }),
+          trigger: new fields.StringField({
+            initial: "onUse",
+            choices: ['onUse', 'onAttack', 'onCounter', 'onCounterSuccess', 'onCounterFailure', 'onHit', 'onDamaged', 'onTurnStart', 'onTurnEnd']
+          }),
+          needConsumption: new fields.BooleanField({ initial: false }),
+          consumptions: new fields.ArrayField(new fields.StringField()),
+          target: new fields.StringField({
+            initial: "selected",
+            choices: ['selected', 'self', 'multiple']
+          }),
+          baseEffects: new fields.ArrayField(new fields.StringField()),
+          customEffect: new fields.SchemaField({
+            name: new fields.StringField({ initial: "" }),
+            layers: new fields.NumberField({ initial: 0, min: 0 }),
+            strength: new fields.NumberField({ initial: 0, min: 0 })
+          })
+        }),
+        { initial: [] }
+      )
     };
   }
 }
@@ -510,7 +606,31 @@ export class WeaponData extends foundry.abstract.TypeDataModel {
         initial: 0,
         min: 0,
         label: "星光消耗"
-      })
+      }),
+      // 条件触发系统
+      conditions: new fields.ArrayField(
+        new fields.SchemaField({
+          id: new fields.StringField({ initial: () => foundry.utils.randomID() }),
+          name: new fields.StringField({ initial: "新条件" }),
+          trigger: new fields.StringField({
+            initial: "onUse",
+            choices: ['onUse', 'onAttack', 'onCounter', 'onCounterSuccess', 'onCounterFailure', 'onHit', 'onDamaged', 'onTurnStart', 'onTurnEnd']
+          }),
+          needConsumption: new fields.BooleanField({ initial: false }),
+          consumptions: new fields.ArrayField(new fields.StringField()),
+          target: new fields.StringField({
+            initial: "selected",
+            choices: ['selected', 'self', 'multiple']
+          }),
+          baseEffects: new fields.ArrayField(new fields.StringField()),
+          customEffect: new fields.SchemaField({
+            name: new fields.StringField({ initial: "" }),
+            layers: new fields.NumberField({ initial: 0, min: 0 }),
+            strength: new fields.NumberField({ initial: 0, min: 0 })
+          })
+        }),
+        { initial: [] }
+      )
     };
   }
 }
@@ -561,7 +681,31 @@ export class ArmorData extends foundry.abstract.TypeDataModel {
         slashDown: new fields.BooleanField({ initial: false, label: "斩击↓" }),
         pierceDown: new fields.BooleanField({ initial: false, label: "突刺↓" }),
         bluntDown: new fields.BooleanField({ initial: false, label: "打击↓" })
-      })
+      }),
+      // 条件触发系统
+      conditions: new fields.ArrayField(
+        new fields.SchemaField({
+          id: new fields.StringField({ initial: () => foundry.utils.randomID() }),
+          name: new fields.StringField({ initial: "新条件" }),
+          trigger: new fields.StringField({
+            initial: "onUse",
+            choices: ['onUse', 'onAttack', 'onCounter', 'onCounterSuccess', 'onCounterFailure', 'onHit', 'onDamaged', 'onTurnStart', 'onTurnEnd']
+          }),
+          needConsumption: new fields.BooleanField({ initial: false }),
+          consumptions: new fields.ArrayField(new fields.StringField()),
+          target: new fields.StringField({
+            initial: "selected",
+            choices: ['selected', 'self', 'multiple']
+          }),
+          baseEffects: new fields.ArrayField(new fields.StringField()),
+          customEffect: new fields.SchemaField({
+            name: new fields.StringField({ initial: "" }),
+            layers: new fields.NumberField({ initial: 0, min: 0 }),
+            strength: new fields.NumberField({ initial: 0, min: 0 })
+          })
+        }),
+        { initial: [] }
+      )
     };
   }
 }
@@ -598,7 +742,31 @@ export class ItemData extends foundry.abstract.TypeDataModel {
         initial: 1,
         min: 0,
         label: "数量"
-      })
+      }),
+      // 条件触发系统
+      conditions: new fields.ArrayField(
+        new fields.SchemaField({
+          id: new fields.StringField({ initial: () => foundry.utils.randomID() }),
+          name: new fields.StringField({ initial: "新条件" }),
+          trigger: new fields.StringField({
+            initial: "onUse",
+            choices: ['onUse', 'onAttack', 'onCounter', 'onCounterSuccess', 'onCounterFailure', 'onHit', 'onDamaged', 'onTurnStart', 'onTurnEnd']
+          }),
+          needConsumption: new fields.BooleanField({ initial: false }),
+          consumptions: new fields.ArrayField(new fields.StringField()),
+          target: new fields.StringField({
+            initial: "selected",
+            choices: ['selected', 'self', 'multiple']
+          }),
+          baseEffects: new fields.ArrayField(new fields.StringField()),
+          customEffect: new fields.SchemaField({
+            name: new fields.StringField({ initial: "" }),
+            layers: new fields.NumberField({ initial: 0, min: 0 }),
+            strength: new fields.NumberField({ initial: 0, min: 0 })
+          })
+        }),
+        { initial: [] }
+      )
     };
   }
 }
@@ -640,7 +808,31 @@ export class EquipmentData extends foundry.abstract.TypeDataModel {
         initial: 0,
         min: 0,
         label: "星光消耗"
-      })
+      }),
+      // 条件触发系统
+      conditions: new fields.ArrayField(
+        new fields.SchemaField({
+          id: new fields.StringField({ initial: () => foundry.utils.randomID() }),
+          name: new fields.StringField({ initial: "新条件" }),
+          trigger: new fields.StringField({
+            initial: "onUse",
+            choices: ['onUse', 'onAttack', 'onCounter', 'onCounterSuccess', 'onCounterFailure', 'onHit', 'onDamaged', 'onTurnStart', 'onTurnEnd']
+          }),
+          needConsumption: new fields.BooleanField({ initial: false }),
+          consumptions: new fields.ArrayField(new fields.StringField()),
+          target: new fields.StringField({
+            initial: "selected",
+            choices: ['selected', 'self', 'multiple']
+          }),
+          baseEffects: new fields.ArrayField(new fields.StringField()),
+          customEffect: new fields.SchemaField({
+            name: new fields.StringField({ initial: "" }),
+            layers: new fields.NumberField({ initial: 0, min: 0 }),
+            strength: new fields.NumberField({ initial: 0, min: 0 })
+          })
+        }),
+        { initial: [] }
+      )
     };
   }
 }
