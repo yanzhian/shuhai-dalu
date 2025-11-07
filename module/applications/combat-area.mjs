@@ -42,24 +42,6 @@ const BUFF_TYPES = {
       defaultLayers: 1,
       defaultStrength: 0
     },
-    {
-      id: 'advantage',
-      name: '优势',
-      type: 'positive',
-      description: '一回合内 骰至 等同于本效果层数的数值，取最大结果。',
-      icon: 'icons/svg/up.svg',
-      defaultLayers: 2,
-      defaultStrength: 0
-    },
-    {
-      id: 'dice_upgrade',
-      name: '面数增加',
-      type: 'positive',
-      description: '每层增加一个面数等级，面数等级为：4,6,8,10,12,20 面骰',
-      icon: 'icons/svg/d20.svg',
-      defaultLayers: 1,
-      defaultStrength: 0
-    }
   ],
 
   // 减益BUFF
@@ -100,24 +82,6 @@ const BUFF_TYPES = {
       defaultLayers: 1,
       defaultStrength: 0
     },
-    {
-      id: 'disadvantage',
-      name: '劣势',
-      type: 'negative',
-      description: '一回合内 骰至 等同于本效果层数的数值，取最小结果',
-      icon: 'icons/svg/down.svg',
-      defaultLayers: 2,
-      defaultStrength: 0
-    },
-    {
-      id: 'dice_downgrade',
-      name: '面数减少',
-      type: 'negative',
-      description: '每层减少一个面数等级，面数等级为：4,6,8,10,12,20 面骰',
-      icon: 'icons/svg/d20.svg',
-      defaultLayers: 1,
-      defaultStrength: 0
-    }
   ],
 
   // 效果BUFF
@@ -207,7 +171,7 @@ const BUFF_TYPES = {
       id: 'paralyze',
       name: '麻痹',
       type: 'effect',
-      description: '一回合内使骰子的变动值固定为0。每层影响1个骰子。',
+      description: '你的下一次攻击骰数结果/2。',
       icon: 'icons/svg/paralysis.svg',
       defaultLayers: 1,
       defaultStrength: 0
@@ -312,8 +276,8 @@ export default class CombatAreaApplication extends Application {
     // 准备被动骰槽位
     context.passiveDiceSlots = this._preparePassiveDiceSlots();
 
-    // 使用保存的速度值
-    context.speedValues = this.combatState.speedValues;
+    // 使用保存的速度值，并应用迅捷/束缚BUFF效果
+    context.speedValues = this._applySpeedModifiers(this.combatState.speedValues);
 
     return context;
   }
@@ -428,6 +392,31 @@ export default class CombatAreaApplication extends Application {
       Math.floor(Math.random() * diceSize) + 1 + bonus,
       Math.floor(Math.random() * diceSize) + 1 + bonus
     ];
+  }
+
+  /**
+   * 应用迅捷/束缚BUFF对速度值的修正
+   */
+  _applySpeedModifiers(baseSpeedValues) {
+    if (!baseSpeedValues) return [0, 0, 0];
+
+    let modifier = 0;
+
+    // 计算迅捷/束缚的修正值
+    if (this.combatState.buffs) {
+      for (const buff of this.combatState.buffs) {
+        if (buff.id === 'swift' && buff.layers > 0) {
+          // 迅捷：速度增加
+          modifier += buff.layers;
+        } else if (buff.id === 'bound' && buff.layers > 0) {
+          // 束缚：速度减少
+          modifier -= buff.layers;
+        }
+      }
+    }
+
+    // 应用修正（确保速度值不会小于0）
+    return baseSpeedValues.map(speed => Math.max(0, speed + modifier));
   }
 
   /** @override */
