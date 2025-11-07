@@ -836,3 +836,93 @@ export class EquipmentData extends foundry.abstract.TypeDataModel {
     };
   }
 }
+
+/**
+ * 物品卡数据模型 (支持条件触发系统)
+ */
+export class ItemCardData extends foundry.abstract.TypeDataModel {
+  static defineSchema() {
+    const fields = foundry.data.fields;
+
+    return {
+      itemType: new fields.StringField({
+        initial: "item",
+        label: "物品类型"
+      }),
+      category: new fields.StringField({
+        initial: "",
+        label: "分类"
+      }),
+      diceFormula: new fields.StringField({
+        initial: "",
+        label: "骰数公式"
+      }),
+      cost: new fields.StringField({
+        initial: "-",
+        label: "费用"
+      }),
+      tags: new fields.StringField({
+        initial: "",
+        label: "标签"
+      }),
+      effect: new fields.HTMLField({
+        initial: "",
+        label: "效果描述"
+      }),
+      quantity: new fields.NumberField({
+        initial: 1,
+        min: 0,
+        label: "数量"
+      }),
+      starlightCost: new fields.NumberField({
+        initial: 0,
+        min: 0,
+        label: "星光消耗"
+      }),
+      // 防具属性（如果是防具类型）
+      armorProperties: new fields.SchemaField({
+        slashUp: new fields.BooleanField({ initial: false, label: "斩击抗性" }),
+        pierceUp: new fields.BooleanField({ initial: false, label: "突刺抗性" }),
+        bluntUp: new fields.BooleanField({ initial: false, label: "打击抗性" }),
+        slashDown: new fields.BooleanField({ initial: false, label: "斩击弱性" }),
+        pierceDown: new fields.BooleanField({ initial: false, label: "突刺弱性" }),
+        bluntDown: new fields.BooleanField({ initial: false, label: "打击弱性" })
+      }),
+      // 条件触发数组
+      conditions: new fields.ArrayField(
+        new fields.SchemaField({
+          trigger: new fields.StringField({
+            initial: "onUse",
+            choices: ["onUse", "onAttack", "onCounter", "onCounterSuccess", "onCounterFail", "onHit", "onDamaged", "onTurnStart", "onTurnEnd"],
+            label: "触发时机"
+          }),
+          hasConsume: new fields.BooleanField({
+            initial: false,
+            label: "是否消耗"
+          }),
+          consumes: new fields.ArrayField(
+            new fields.SchemaField({
+              buffId: new fields.StringField({ initial: "", label: "BUFF ID" }),
+              layers: new fields.NumberField({ initial: 0, label: "层数" }),
+              strength: new fields.NumberField({ initial: 0, label: "强度" })
+            }),
+            { label: "消耗列表" }
+          ),
+          target: new fields.StringField({
+            initial: "selected",
+            choices: ["selected", "self", "multiple"],
+            label: "目标"
+          }),
+          effects: new fields.ObjectField({ label: "效果对象" }),
+          customEffect: new fields.SchemaField({
+            enabled: new fields.BooleanField({ initial: false, label: "启用自定义效果" }),
+            name: new fields.StringField({ initial: "", label: "效果名称" }),
+            layers: new fields.NumberField({ initial: 0, label: "层数" }),
+            strength: new fields.NumberField({ initial: 0, label: "强度" })
+          })
+        }),
+        { label: "条件列表" }
+      )
+    };
+  }
+}

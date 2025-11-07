@@ -1,0 +1,180 @@
+{{!-- 条件编辑器 Partial --}}
+<div class="condition-editor">
+
+  {{!-- 触发时机 --}}
+  <div class="trigger-timing-section">
+    <div class="timing-options">
+      <label class="timing-option {{#if (eq condition.trigger 'onUse')}}selected{{/if}}">
+        <input type="radio" name="conditions.{{index}}.trigger" value="onUse" {{#if (eq condition.trigger 'onUse')}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+        <span>使用时</span>
+      </label>
+      <label class="timing-option {{#if (eq condition.trigger 'onAttack')}}selected{{/if}}">
+        <input type="radio" name="conditions.{{index}}.trigger" value="onAttack" {{#if (eq condition.trigger 'onAttack')}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+        <span>攻击时</span>
+      </label>
+      <label class="timing-option {{#if (eq condition.trigger 'onCounter')}}selected{{/if}}">
+        <input type="radio" name="conditions.{{index}}.trigger" value="onCounter" {{#if (eq condition.trigger 'onCounter')}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+        <span>对抗时</span>
+      </label>
+      <label class="timing-option {{#if (eq condition.trigger 'onCounterSuccess')}}selected{{/if}}">
+        <input type="radio" name="conditions.{{index}}.trigger" value="onCounterSuccess" {{#if (eq condition.trigger 'onCounterSuccess')}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+        <span>对抗成功</span>
+      </label>
+      <label class="timing-option {{#if (eq condition.trigger 'onCounterFail')}}selected{{/if}}">
+        <input type="radio" name="conditions.{{index}}.trigger" value="onCounterFail" {{#if (eq condition.trigger 'onCounterFail')}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+        <span>对抗失败</span>
+      </label>
+      <label class="timing-option {{#if (eq condition.trigger 'onHit')}}selected{{/if}}">
+        <input type="radio" name="conditions.{{index}}.trigger" value="onHit" {{#if (eq condition.trigger 'onHit')}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+        <span>攻击命中</span>
+      </label>
+      <label class="timing-option {{#if (eq condition.trigger 'onDamaged')}}selected{{/if}}">
+        <input type="radio" name="conditions.{{index}}.trigger" value="onDamaged" {{#if (eq condition.trigger 'onDamaged')}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+        <span>受到伤害</span>
+      </label>
+      <label class="timing-option {{#if (eq condition.trigger 'onTurnStart')}}selected{{/if}}">
+        <input type="radio" name="conditions.{{index}}.trigger" value="onTurnStart" {{#if (eq condition.trigger 'onTurnStart')}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+        <span>回合开始</span>
+      </label>
+      <label class="timing-option {{#if (eq condition.trigger 'onTurnEnd')}}selected{{/if}}">
+        <input type="radio" name="conditions.{{index}}.trigger" value="onTurnEnd" {{#if (eq condition.trigger 'onTurnEnd')}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+        <span>回合结束</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="divider-small"></div>
+
+  {{!-- 消耗设置 --}}
+  <div class="consume-section">
+    <label class="consume-toggle">
+      <input type="checkbox" name="conditions.{{index}}.hasConsume" {{#if condition.hasConsume}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+      <span>消耗</span>
+    </label>
+
+    {{#if condition.hasConsume}}
+    <div class="consume-effects">
+      {{#each condition.consumes as |consume consumeIndex|}}
+      <div class="consume-item">
+        <select name="conditions.{{../index}}.consumes.{{@index}}.buffId" {{#if ../isLocked}}disabled{{/if}}>
+          <option value="charge" {{#if (eq consume.buffId 'charge')}}selected{{/if}}>充能</option>
+          <option value="ammo" {{#if (eq consume.buffId 'ammo')}}selected{{/if}}>弹药</option>
+          <option value="chant" {{#if (eq consume.buffId 'chant')}}selected{{/if}}>吟唱</option>
+          <option value="custom" {{#if (eq consume.buffId 'custom')}}selected{{/if}}>自定义</option>
+        </select>
+        <input type="number" name="conditions.{{../index}}.consumes.{{@index}}.layers" value="{{consume.layers}}" placeholder="层数" min="0" {{#if ../isLocked}}disabled{{/if}}/>
+        <input type="number" name="conditions.{{../index}}.consumes.{{@index}}.strength" value="{{consume.strength}}" placeholder="强度" min="0" {{#if ../isLocked}}disabled{{/if}}/>
+        {{#unless ../isLocked}}
+        <button type="button" class="remove-consume-btn" data-condition-index="{{../index}}" data-consume-index="{{@index}}">
+          <i class="fas fa-times"></i>
+        </button>
+        {{/unless}}
+      </div>
+      {{/each}}
+      {{#unless isLocked}}
+      <button type="button" class="add-consume-btn" data-condition-index="{{index}}">
+        <i class="fas fa-plus"></i> 添加消耗
+      </button>
+      {{/unless}}
+    </div>
+    {{/if}}
+  </div>
+
+  <div class="divider-small"></div>
+
+  {{!-- 目标选择 --}}
+  <div class="target-section">
+    <h4 class="section-title">目标</h4>
+    <div class="target-options">
+      <label class="target-option {{#if (eq condition.target 'selected')}}selected{{/if}}">
+        <input type="radio" name="conditions.{{index}}.target" value="selected" {{#if (eq condition.target 'selected')}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+        <span>选择的目标</span>
+      </label>
+      <label class="target-option {{#if (eq condition.target 'self')}}selected{{/if}}">
+        <input type="radio" name="conditions.{{index}}.target" value="self" {{#if (eq condition.target 'self')}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+        <span>自己</span>
+      </label>
+      <label class="target-option {{#if (eq condition.target 'multiple')}}selected{{/if}}">
+        <input type="radio" name="conditions.{{index}}.target" value="multiple" {{#if (eq condition.target 'multiple')}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+        <span>多个目标</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="divider-small"></div>
+
+  {{!-- 效果添加 --}}
+  <div class="effects-section">
+    <h4 class="section-title">效果添加</h4>
+
+    {{!-- 基础效果列表 --}}
+    <div class="base-effects-list">
+      {{#each ../buffPresets as |buff|}}
+      <div class="effect-item">
+        <label class="effect-checkbox">
+          <input type="checkbox"
+                 name="conditions.{{../index}}.effects.{{buff.id}}.enabled"
+                 {{#if (lookup condition.effects buff.id 'enabled')}}checked{{/if}}
+                 {{#if ../isLocked}}disabled{{/if}}/>
+          <span class="effect-name">{{buff.name}}</span>
+        </label>
+        {{#if (lookup condition.effects buff.id 'enabled')}}
+        <input type="number"
+               name="conditions.{{../index}}.effects.{{buff.id}}.layers"
+               value="{{lookup condition.effects buff.id 'layers'}}"
+               placeholder="层数"
+               min="0"
+               class="effect-input"
+               {{#if ../isLocked}}disabled{{/if}}/>
+        <input type="number"
+               name="conditions.{{../index}}.effects.{{buff.id}}.strength"
+               value="{{lookup condition.effects buff.id 'strength'}}"
+               placeholder="强度"
+               min="0"
+               class="effect-input"
+               {{#if ../isLocked}}disabled{{/if}}/>
+        {{/if}}
+      </div>
+      {{/each}}
+    </div>
+  </div>
+
+  <div class="divider-small"></div>
+
+  {{!-- 基础效果（自定义） --}}
+  <div class="custom-effects-section">
+    <h4 class="section-title">基础效果</h4>
+    <div class="custom-effect-item">
+      <label class="effect-checkbox">
+        <input type="checkbox"
+               name="conditions.{{index}}.customEffect.enabled"
+               {{#if condition.customEffect.enabled}}checked{{/if}}
+               {{#if isLocked}}disabled{{/if}}/>
+        <span>自定义</span>
+      </label>
+      {{#if condition.customEffect.enabled}}
+      <input type="text"
+             name="conditions.{{index}}.customEffect.name"
+             value="{{condition.customEffect.name}}"
+             placeholder="效果名称"
+             class="effect-input"
+             {{#if isLocked}}disabled{{/if}}/>
+      <input type="number"
+             name="conditions.{{index}}.customEffect.layers"
+             value="{{condition.customEffect.layers}}"
+             placeholder="层数"
+             min="0"
+             class="effect-input"
+             {{#if isLocked}}disabled{{/if}}/>
+      <input type="number"
+             name="conditions.{{index}}.customEffect.strength"
+             value="{{condition.customEffect.strength}}"
+             placeholder="强度"
+             min="0"
+             class="effect-input"
+             {{#if isLocked}}disabled{{/if}}/>
+      {{/if}}
+    </div>
+  </div>
+
+</div>

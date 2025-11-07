@@ -13,11 +13,13 @@ import ShuhaiItem, {
   WeaponData,
   ArmorData,
   ItemData,
-  EquipmentData
+  EquipmentData,
+  ItemCardData
 } from "./documents/item.mjs";
 import ShuhaiActorSheet from "./sheets/actor-sheet.mjs";
 import ShuhaiPlayerSheet from "./sheets/player-sheet.mjs";
 import ShuhaiItemSheet from "./sheets/item-sheet.mjs";
+import ItemCardSheet from "./sheets/item-card-sheet.mjs";
 
 /* -------------------------------------------- */
 /*  初始化钩子                                    */
@@ -56,34 +58,40 @@ Hooks.once('init', async function() {
   CONFIG.Item.dataModels.armor = ArmorData;
   CONFIG.Item.dataModels.item = ItemData;
   CONFIG.Item.dataModels.equipment = EquipmentData;
+  CONFIG.Item.dataModels.itemCard = ItemCardData;
   
   console.log('书海大陆 | 数据模型已注册');
   console.log('Actor 数据模型:', CONFIG.Actor.dataModels);
   console.log('Item 数据模型:', CONFIG.Item.dataModels);
   
-  // 注册角色表单
-  Actors.unregisterSheet("core", ActorSheet);
-  
+  // 注册角色表单（不取消核心表单，保留其他类型如Scene的表单）
   // ⭐ 注册 Player 角色表单（设为默认）
   Actors.registerSheet("shuhai-dalu", ShuhaiPlayerSheet, {
     types: ["character"],
     makeDefault: true,
     label: "书海大陆 - Player 角色卡"
   });
-  
+
   // 注册标准角色表单
   Actors.registerSheet("shuhai-dalu", ShuhaiActorSheet, {
     types: ["character"],
     makeDefault: false,
     label: "书海大陆 - 标准角色卡"
   });
-  
-  // 注册物品表单
-  Items.unregisterSheet("core", ItemSheet);
+
+  // 注册物品表单（不取消核心表单，保留其他类型的表单）
+  // 标准物品表单
   Items.registerSheet("shuhai-dalu", ShuhaiItemSheet, {
     types: ["combatDice", "shootDice", "defenseDice", "triggerDice", "passiveDice", "weapon", "armor", "item", "equipment"],
     makeDefault: true,
-    label: "SHUHAI.SheetLabel.Item"
+    label: "书海大陆 - 标准物品卡"
+  });
+
+  // ⭐ 物品卡表单（独立类型）
+  Items.registerSheet("shuhai-dalu", ItemCardSheet, {
+    types: ["itemCard"],
+    makeDefault: true,
+    label: "书海大陆 - 物品卡"
   });
   
   console.log('书海大陆 | 表单已注册');
@@ -970,6 +978,10 @@ async function preloadHandlebarsTemplates() {
 
     // 物品模板
     "systems/shuhai-dalu/templates/item/item-sheet.hbs",
+
+    // 物品卡模板
+    "systems/shuhai-dalu/templates/item-card/item-card-sheet.hbs",
+    "systems/shuhai-dalu/templates/item-card/condition-editor.hbs",
 
     // 战斗区域模板
     "systems/shuhai-dalu/templates/combat/combat-area.hbs",
