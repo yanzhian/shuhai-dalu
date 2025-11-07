@@ -140,4 +140,14 @@
     </label>
   </div>
 
+  {{!-- 保存按钮 --}}
+  {{#unless locked}}
+    <div class="condition-save-section">
+      <button type="button" class="save-condition-btn" data-condition-index="{{index}}">
+        <i class="fas fa-save"></i>
+        保存条件
+      </button>
+    </div>
+  {{/unless}}
+
 </div>

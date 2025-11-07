@@ -174,6 +174,7 @@ export default class ItemCardSheet extends ItemSheet {
     // 条件管理
     html.find('.item-card-add-condition-btn').click(this._onAddCondition.bind(this));
     html.find('.delete-condition-btn').click(this._onDeleteCondition.bind(this));
+    html.find('.save-condition-btn').click(this._onSaveCondition.bind(this));
 
     // 消耗管理
     html.find('.add-consume-btn').click(this._onAddConsume.bind(this));
@@ -248,6 +249,20 @@ export default class ItemCardSheet extends ItemSheet {
     conditions.push(newCondition);
 
     await this.item.update({'system.conditions': conditions});
+  }
+
+  /**
+   * 保存条件
+   */
+  async _onSaveCondition(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    // 保存整个表单数据
+    await this._saveFormData();
+
+    // 显示保存成功提示
+    ui.notifications.info("条件已保存");
   }
 
   /**

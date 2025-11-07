@@ -955,6 +955,44 @@
   opacity: 0.6;
 }
 
+/* 条件保存按钮 */
+.shuhai-dalu.item-card .condition-save-section {
+  display: flex;
+  justify-content: center;
+  padding-top: 12px;
+  margin-top: 12px;
+  border-top: 1px solid rgba(235, 189, 104, 0.2);
+}
+
+.shuhai-dalu.item-card .save-condition-btn {
+  padding: 8px 24px;
+  background: #4a7c2c;
+  border: none;
+  border-radius: 6px;
+  color: #ECE4D6;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.shuhai-dalu.item-card .save-condition-btn:hover {
+  background: #5a9c3c;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(74, 124, 44, 0.4);
+}
+
+.shuhai-dalu.item-card .save-condition-btn:active {
+  transform: translateY(0);
+}
+
+.shuhai-dalu.item-card .save-condition-btn i {
+  font-size: 12px;
+}
+
 /* ========================================
    底部操作按钮
    ======================================== */
