@@ -1,0 +1,86 @@
+<div class="item-card-condition-editor">
+
+  {{!-- 触发时机 --}}
+  <div class="item-card-trigger-section">
+    <h4 class="item-card-section-title">触发时机</h4>
+    <div class="item-card-trigger-options">
+      <label class="item-card-trigger-option {{#if (eq condition.trigger 'onUse')}}selected{{/if}}">
+        <input type="radio" name="system.conditions.{{index}}.trigger" value="onUse" {{#if (eq condition.trigger 'onUse')}}checked{{/if}} {{#if locked}}disabled{{/if}} />
+        <span>使用时</span>
+      </label>
+      <label class="item-card-trigger-option {{#if (eq condition.trigger 'onAttack')}}selected{{/if}}">
+        <input type="radio" name="system.conditions.{{index}}.trigger" value="onAttack" {{#if (eq condition.trigger 'onAttack')}}checked{{/if}} {{#if locked}}disabled{{/if}} />
+        <span>攻击时</span>
+      </label>
+      <label class="item-card-trigger-option {{#if (eq condition.trigger 'onCounter')}}selected{{/if}}">
+        <input type="radio" name="system.conditions.{{index}}.trigger" value="onCounter" {{#if (eq condition.trigger 'onCounter')}}checked{{/if}} {{#if locked}}disabled{{/if}} />
+        <span>对抗时</span>
+      </label>
+      <label class="item-card-trigger-option {{#if (eq condition.trigger 'onCounterSuccess')}}selected{{/if}}">
+        <input type="radio" name="system.conditions.{{index}}.trigger" value="onCounterSuccess" {{#if (eq condition.trigger 'onCounterSuccess')}}checked{{/if}} {{#if locked}}disabled{{/if}} />
+        <span>对抗成功</span>
+      </label>
+      <label class="item-card-trigger-option {{#if (eq condition.trigger 'onCounterFail')}}selected{{/if}}">
+        <input type="radio" name="system.conditions.{{index}}.trigger" value="onCounterFail" {{#if (eq condition.trigger 'onCounterFail')}}checked{{/if}} {{#if locked}}disabled{{/if}} />
+        <span>对抗失败</span>
+      </label>
+      <label class="item-card-trigger-option {{#if (eq condition.trigger 'onHit')}}selected{{/if}}">
+        <input type="radio" name="system.conditions.{{index}}.trigger" value="onHit" {{#if (eq condition.trigger 'onHit')}}checked{{/if}} {{#if locked}}disabled{{/if}} />
+        <span>攻击命中</span>
+      </label>
+      <label class="item-card-trigger-option {{#if (eq condition.trigger 'onDamaged')}}selected{{/if}}">
+        <input type="radio" name="system.conditions.{{index}}.trigger" value="onDamaged" {{#if (eq condition.trigger 'onDamaged')}}checked{{/if}} {{#if locked}}disabled{{/if}} />
+        <span>受到伤害</span>
+      </label>
+      <label class="item-card-trigger-option {{#if (eq condition.trigger 'onTurnStart')}}selected{{/if}}">
+        <input type="radio" name="system.conditions.{{index}}.trigger" value="onTurnStart" {{#if (eq condition.trigger 'onTurnStart')}}checked{{/if}} {{#if locked}}disabled{{/if}} />
+        <span>回合开始</span>
+      </label>
+      <label class="item-card-trigger-option {{#if (eq condition.trigger 'onTurnEnd')}}selected{{/if}}">
+        <input type="radio" name="system.conditions.{{index}}.trigger" value="onTurnEnd" {{#if (eq condition.trigger 'onTurnEnd')}}checked{{/if}} {{#if locked}}disabled{{/if}} />
+        <span>回合结束</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="item-card-divider-small"></div>
+
+  {{!-- 目标选择 --}}
+  <div class="item-card-target-section">
+    <h4 class="item-card-section-title">目标</h4>
+    <div class="item-card-target-options">
+      <label class="item-card-target-option {{#if (eq condition.target 'selected')}}selected{{/if}}">
+        <input type="radio" name="system.conditions.{{index}}.target" value="selected" {{#if (eq condition.target 'selected')}}checked{{/if}} {{#if locked}}disabled{{/if}} />
+        <span>选择的目标</span>
+      </label>
+      <label class="item-card-target-option {{#if (eq condition.target 'self')}}selected{{/if}}">
+        <input type="radio" name="system.conditions.{{index}}.target" value="self" {{#if (eq condition.target 'self')}}checked{{/if}} {{#if locked}}disabled{{/if}} />
+        <span>自己</span>
+      </label>
+      <label class="item-card-target-option {{#if (eq condition.target 'multiple')}}selected{{/if}}">
+        <input type="radio" name="system.conditions.{{index}}.target" value="multiple" {{#if (eq condition.target 'multiple')}}checked{{/if}} {{#if locked}}disabled{{/if}} />
+        <span>多个目标</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="item-card-divider-small"></div>
+
+  {{!-- 效果添加 (简化版，只列出常用BUFF) --}}
+  <div class="item-card-effects-section">
+    <h4 class="item-card-section-title">添加效果</h4>
+    <div class="item-card-effects-list">
+      {{#each ../buffPresets as |buff|}}
+        <div class="item-card-effect-item">
+          <label class="item-card-effect-checkbox">
+            <input type="checkbox" name="system.conditions.{{../index}}.effects.{{buff.id}}.enabled" {{#if (lookup ../../condition.effects buff.id)}}checked{{/if}} {{#if ../../locked}}disabled{{/if}} />
+            <span class="effect-name">{{buff.name}}</span>
+          </label>
+          <input type="number" name="system.conditions.{{../index}}.effects.{{buff.id}}.layers" value="{{#if (lookup ../../condition.effects buff.id)}}{{lookup (lookup ../../condition.effects buff.id) 'layers'}}{{else}}{{buff.defaultLayers}}{{/if}}" class="item-card-effect-input" placeholder="层数" {{#if ../../locked}}disabled{{/if}} />
+          <input type="number" name="system.conditions.{{../index}}.effects.{{buff.id}}.strength" value="{{#if (lookup ../../condition.effects buff.id)}}{{lookup (lookup ../../condition.effects buff.id) 'strength'}}{{else}}{{buff.defaultStrength}}{{/if}}" class="item-card-effect-input" placeholder="强度" {{#if ../../locked}}disabled{{/if}} />
+        </div>
+      {{/each}}
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,931 @@
+/* ========================================
+   书海大陆 物品卡样式
+   严格按照 item-07 ~ item-10 设计
+   ======================================== */
+
+.item-card {
+  background: #0F0D1B;
+  color: #ECE4D6;
+  font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  padding: 12px;
+  height: 100%;
+  overflow: hidden;
+}
+
+.item-card form {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========================================
+   主容器
+   ======================================== */
+.item-card-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  overflow: hidden;
+  background: #0F0D1B;
+  border: 2px solid #EBBD68;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+/* ========================================
+   编辑锁按钮
+   ======================================== */
+.item-card-lock {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  background: rgba(235, 189, 104, 0.95);
+  border: none;
+  border-radius: 3px;
+  color: #0F0D1B;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 0;
+}
+
+.item-card-lock:hover {
+  background: #E1AA43;
+  transform: scale(1.15);
+}
+
+.item-card-lock.locked {
+  background: rgba(220, 50, 50, 0.95);
+  color: #fff;
+}
+
+.item-card-lock.locked:hover {
+  background: rgba(200, 30, 30, 1);
+}
+
+/* ========================================
+   基础信息区域
+   ======================================== */
+.item-card-basic-info {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  position: relative;
+}
+
+/* 左侧：大图标 */
+.item-card-icon-large {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.item-card-icon-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border: 2px solid #EBBD68;
+  border-radius: 6px;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.item-card-icon-large img:hover {
+  border-color: #E1AA43;
+  transform: scale(1.02);
+}
+
+/* 右侧：名称、类型、分类、标签 */
+.item-card-info-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item-card-name-input {
+  font-size: 24px;
+  font-weight: bold;
+  color: #EBBD68;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid #EBBD68;
+  padding: 4px 0;
+  outline: none;
+  width: 100%;
+}
+
+.item-card-name-input:disabled {
+  border-bottom-color: transparent;
+  opacity: 1;
+}
+
+.item-card-meta-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.item-card-meta-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item-card-meta-field label {
+  font-size: 11px;
+  color: #EBBD68;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.item-card-meta-field input,
+.item-card-meta-field select {
+  font-size: 14px;
+  color: #ECE4D6;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  padding: 4px 8px;
+  outline: none;
+}
+
+.item-card-meta-field input:focus,
+.item-card-meta-field select:focus {
+  border-color: #E1AA43;
+}
+
+.item-card-meta-field input:disabled,
+.item-card-meta-field select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.item-card-tags-input {
+  grid-column: 1 / -1;
+}
+
+/* ========================================
+   属性行区域
+   ======================================== */
+.item-card-properties {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  padding: 8px 12px;
+  background: rgba(235, 189, 104, 0.1);
+  border: 1px solid #EBBD68;
+  border-radius: 6px;
+}
+
+.item-card-property {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #EBBD68;
+}
+
+.item-card-property i {
+  font-size: 16px;
+  color: #E1AA43;
+}
+
+.item-card-property label {
+  font-weight: bold;
+  color: #EBBD68;
+}
+
+.item-card-property input {
+  width: 80px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  color: #ECE4D6;
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.item-card-property input:focus {
+  outline: none;
+  border-color: #E1AA43;
+}
+
+.item-card-property input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.item-card-property .starlight-value {
+  color: #E1AA43;
+  font-weight: bold;
+}
+
+/* 防具属性 */
+.item-card-armor-properties {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.item-card-armor-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.item-card-armor-badge.resist {
+  background: #4a7c2c;
+}
+
+.item-card-armor-badge.weak {
+  background: #c14545;
+}
+
+/* ========================================
+   标签页系统
+   ======================================== */
+.item-card-tabs {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+  border-bottom: 2px solid #EBBD68;
+  padding-bottom: 0;
+}
+
+.item-card-tab {
+  padding: 8px 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid #EBBD68;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  color: #EBBD68;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  bottom: -2px;
+}
+
+.item-card-tab:hover {
+  background: rgba(235, 189, 104, 0.2);
+}
+
+.item-card-tab.active {
+  background: #EBBD68;
+  color: #0F0D1B;
+  border-bottom: 2px solid #EBBD68;
+}
+
+/* ========================================
+   标签页内容区域
+   ======================================== */
+.item-card-tab-content {
+  flex: 1;
+  overflow: hidden;
+  display: none;
+}
+
+.item-card-tab-content.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========================================
+   效果描述标签页
+   ======================================== */
+.item-card-effect-tab {
+  padding: 12px 0;
+}
+
+.item-card-effect-panel {
+  background: rgba(0, 0, 0, 0.2);
+  border: 2px solid #EBBD68;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.item-card-effect-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(235, 189, 104, 0.1);
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.item-card-effect-header:hover {
+  background: rgba(235, 189, 104, 0.2);
+}
+
+.item-card-effect-header .collapse-icon {
+  font-size: 12px;
+  color: #EBBD68;
+  transition: transform 0.3s;
+}
+
+.item-card-effect-header.collapsed .collapse-icon {
+  transform: rotate(-90deg);
+}
+
+.item-card-effect-header .panel-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: bold;
+  color: #EBBD68;
+}
+
+.item-card-effect-header .edit-btn {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  color: #EBBD68;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.item-card-effect-header .edit-btn:hover {
+  background: rgba(235, 189, 104, 0.2);
+  border-color: #E1AA43;
+}
+
+.item-card-effect-content {
+  padding: 12px;
+  transition: all 0.3s;
+}
+
+.item-card-effect-content.collapsed {
+  display: none;
+}
+
+.item-card-effect-display {
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  border-left: 3px solid #EBBD68;
+  color: #ECE4D6;
+  line-height: 1.6;
+  font-size: 13px;
+  min-height: 80px;
+}
+
+.item-card-effect-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  color: #ECE4D6;
+  font-size: 13px;
+  line-height: 1.6;
+  font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  resize: vertical;
+  outline: none;
+}
+
+.item-card-effect-textarea:focus {
+  border-color: #E1AA43;
+}
+
+/* ========================================
+   条件触发标签页
+   ======================================== */
+.item-card-conditions-tab {
+  padding: 12px 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.item-card-conditions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.item-card-condition-panel {
+  background: rgba(0, 0, 0, 0.2);
+  border: 2px solid #EBBD68;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.item-card-condition-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(235, 189, 104, 0.1);
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.item-card-condition-header:hover {
+  background: rgba(235, 189, 104, 0.2);
+}
+
+.item-card-condition-header .collapse-icon {
+  font-size: 12px;
+  color: #EBBD68;
+  transition: transform 0.3s;
+}
+
+.item-card-condition-header.collapsed .collapse-icon {
+  transform: rotate(-90deg);
+}
+
+.item-card-condition-header .condition-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: bold;
+  color: #EBBD68;
+}
+
+.item-card-condition-header .delete-condition-btn {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 1px solid #c14545;
+  border-radius: 4px;
+  color: #c14545;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.item-card-condition-header .delete-condition-btn:hover {
+  background: #c14545;
+  color: #fff;
+}
+
+.item-card-condition-content {
+  padding: 12px;
+  transition: all 0.3s;
+}
+
+.item-card-condition-content.collapsed {
+  display: none;
+}
+
+.item-card-add-condition-btn {
+  width: 100%;
+  padding: 12px;
+  background: #EBBD68;
+  border: none;
+  border-radius: 6px;
+  color: #0F0D1B;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.item-card-add-condition-btn:hover {
+  background: #E1AA43;
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   条件编辑器样式
+   ======================================== */
+.item-card-condition-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 小分割线 */
+.item-card-divider-small {
+  height: 1px;
+  background: #EBBD68;
+  opacity: 0.3;
+}
+
+/* 触发时机 */
+.item-card-trigger-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item-card-trigger-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.item-card-trigger-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid #EBBD68;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.item-card-trigger-option:hover {
+  background: rgba(235, 189, 104, 0.1);
+  border-color: #E1AA43;
+}
+
+.item-card-trigger-option.selected {
+  background: rgba(235, 189, 104, 0.2);
+  border-color: #E1AA43;
+}
+
+.item-card-trigger-option input[type="radio"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.item-card-trigger-option span {
+  font-size: 13px;
+  color: #ECE4D6;
+  font-weight: bold;
+}
+
+/* 消耗设置 */
+.item-card-consume-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item-card-consume-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.item-card-consume-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.item-card-consume-toggle span {
+  font-size: 14px;
+  font-weight: bold;
+  color: #EBBD68;
+}
+
+.item-card-consume-effects {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 26px;
+}
+
+.item-card-consume-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.item-card-consume-item select {
+  flex: 1;
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  color: #ECE4D6;
+  font-size: 13px;
+  outline: none;
+}
+
+.item-card-consume-item input[type="number"] {
+  width: 70px;
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  color: #ECE4D6;
+  text-align: center;
+  font-size: 13px;
+  outline: none;
+}
+
+.item-card-consume-item select:focus,
+.item-card-consume-item input[type="number"]:focus {
+  border-color: #E1AA43;
+}
+
+.item-card-remove-consume-btn {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 1px solid #c14545;
+  border-radius: 4px;
+  color: #c14545;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.item-card-remove-consume-btn:hover {
+  background: #c14545;
+  color: #fff;
+}
+
+.item-card-add-consume-btn {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px dashed #EBBD68;
+  border-radius: 4px;
+  color: #EBBD68;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.item-card-add-consume-btn:hover {
+  background: rgba(235, 189, 104, 0.1);
+  border-style: solid;
+}
+
+/* 目标选择 */
+.item-card-target-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item-card-section-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #EBBD68;
+  margin: 0;
+}
+
+.item-card-target-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.item-card-target-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid #EBBD68;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.item-card-target-option:hover {
+  background: rgba(235, 189, 104, 0.1);
+  border-color: #E1AA43;
+}
+
+.item-card-target-option.selected {
+  background: rgba(235, 189, 104, 0.2);
+  border-color: #E1AA43;
+}
+
+.item-card-target-option input[type="radio"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.item-card-target-option span {
+  font-size: 13px;
+  color: #ECE4D6;
+  font-weight: bold;
+}
+
+/* 效果添加 */
+.item-card-effects-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item-card-effects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.item-card-effect-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.item-card-effect-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  min-width: 100px;
+}
+
+.item-card-effect-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.item-card-effect-checkbox .effect-name {
+  font-size: 13px;
+  color: #ECE4D6;
+  font-weight: bold;
+}
+
+.item-card-effect-input {
+  width: 70px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  color: #ECE4D6;
+  text-align: center;
+  font-size: 12px;
+  outline: none;
+}
+
+.item-card-effect-input:focus {
+  border-color: #E1AA43;
+}
+
+/* 自定义效果 */
+.item-card-custom-effect-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item-card-custom-effect-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  flex-wrap: wrap;
+}
+
+.item-card-custom-effect-item .effect-input[type="text"] {
+  flex: 1;
+  min-width: 120px;
+  text-align: left;
+}
+
+/* ========================================
+   底部操作按钮
+   ======================================== */
+.item-card-footer-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  padding-top: 12px;
+  border-top: 2px solid #EBBD68;
+}
+
+.item-card-action-btn {
+  min-width: 100px;
+  height: 36px;
+  padding: 0 16px;
+  background: #EBBD68;
+  border: none;
+  border-radius: 6px;
+  color: #0F0D1B;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.item-card-action-btn:hover {
+  background: #E1AA43;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(235, 189, 104, 0.3);
+}
+
+.item-card-action-btn.secondary {
+  background: transparent;
+  border: 2px solid #EBBD68;
+  color: #EBBD68;
+}
+
+.item-card-action-btn.secondary:hover {
+  background: rgba(235, 189, 104, 0.2);
+}
+
+.item-card-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.item-card-action-btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* ========================================
+   滚动条样式
+   ======================================== */
+.item-card,
+.item-card * {
+  scrollbar-width: thin;
+  scrollbar-color: #EBBD68 transparent;
+}
+
+.item-card ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.item-card ::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.item-card ::-webkit-scrollbar-thumb {
+  background: #EBBD68;
+  border-radius: 3px;
+}
+
+.item-card ::-webkit-scrollbar-thumb:hover {
+  background: #E1AA43;
+}
+
+/* ========================================
+   禁用状态
+   ======================================== */
+.item-card input:disabled,
+.item-card select:disabled,
+.item-card textarea:disabled,
+.item-card button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed !important;
+}
+
+.item-card button:disabled:hover {
+  transform: none !important;
+}
