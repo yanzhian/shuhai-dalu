@@ -358,11 +358,19 @@ export default class ShuhaiItem extends Item {
       throw new Error('Activity 数据必须包含 _id');
     }
 
-    // 确保 activities 对象存在
-    const activities = this.system.activities || {};
+    console.log('【createActivity】开始创建 Activity:', activityData._id);
+    console.log('【createActivity】当前 activities:', this.system.activities);
+    console.log('【createActivity】Activity 数据:', activityData);
 
     // 使用点符号路径创建新的 activity
-    return this.update({ [`system.activities.${activityData._id}`]: activityData });
+    const updateData = { [`system.activities.${activityData._id}`]: activityData };
+    console.log('【createActivity】更新数据:', updateData);
+
+    const result = await this.update(updateData);
+    console.log('【createActivity】更新完成，结果:', result);
+    console.log('【createActivity】更新后的 activities:', this.system.activities);
+
+    return result;
   }
 
   /**
