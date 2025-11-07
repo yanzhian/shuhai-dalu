@@ -170,7 +170,9 @@ export default class ActivityEditor extends Application {
     const form = this.element?.find('form')[0];
     if (!form) return;
 
-    const formData = new foundry.applications.ux.FormDataExtended(form).object;
+    // 获取表单数据并手动展开
+    const formDataRaw = new foundry.applications.ux.FormDataExtended(form).object;
+    const formData = foundry.utils.expandObject(formDataRaw);
 
     // 更新基本字段
     if (formData.name !== undefined) this.activity.name = formData.name;
@@ -262,15 +264,12 @@ export default class ActivityEditor extends Application {
     }
 
     // 使用 Foundry V13+ 的命名空间版本
-    const formData = new foundry.applications.ux.FormDataExtended(form).object;
-    console.log('【Activity保存】原始表单数据:', formData);
-    console.log('【Activity保存】formData 的所有键:', Object.keys(formData));
+    const formDataRaw = new foundry.applications.ux.FormDataExtended(form).object;
+    console.log('【Activity保存】原始平面化数据:', formDataRaw);
 
-    // 检查是否有平面化的键（说明 expandObject 没有正常工作）
-    const flatEffectsKeys = Object.keys(formData).filter(k => k.startsWith('effects.'));
-    if (flatEffectsKeys.length > 0) {
-      console.error('【Activity保存】发现平面化的 effects 键，expandObject 可能有问题:', flatEffectsKeys);
-    }
+    // 在 Foundry V13 中需要手动展开对象
+    const formData = foundry.utils.expandObject(formDataRaw);
+    console.log('【Activity保存】展开后的表单数据:', formData);
 
     // 处理 consumes
     const consumes = formData.consumes ? Object.values(formData.consumes) : [];
@@ -278,7 +277,6 @@ export default class ActivityEditor extends Application {
 
     // 处理 effectsList
     console.log('【Activity保存】formData.effects:', formData.effects);
-    console.log('【Activity保存】formData.effects 类型:', typeof formData.effects, 'null?', formData.effects === null, 'undefined?', formData.effects === undefined);
     const effectsList = formData.effects ? Object.values(formData.effects) : [];
     console.log('【Activity保存】effectsList:', effectsList);
     const effects = this._listToEffects(effectsList);
