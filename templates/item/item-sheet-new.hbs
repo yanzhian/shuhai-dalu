@@ -1,0 +1,229 @@
+{{!-- 新版物品表单 - 基于设计图item-07到item-10 --}}
+<form class="{{cssClass}} item-sheet-new flexcol" autocomplete="off">
+
+  {{!-- 编辑锁 --}}
+  <div class="edit-lock-container">
+    <button type="button" class="edit-lock-btn {{#if isLocked}}locked{{/if}}" title="锁定/解锁编辑">
+      <i class="fas {{#if isLocked}}fa-lock{{else}}fa-lock-open{{/if}}"></i>
+    </button>
+  </div>
+
+  {{!-- 基础信息区域 --}}
+  <div class="basic-info-section">
+
+    {{!-- 左侧：大图标 --}}
+    <div class="item-icon-large">
+      {{#unless isLocked}}
+      <img src="{{item.img}}" data-edit="img" title="点击更换图标" class="clickable"/>
+      {{else}}
+      <img src="{{item.img}}" title="{{item.name}}"/>
+      {{/unless}}
+    </div>
+
+    {{!-- 右侧：名称、类型、分类、标签 --}}
+    <div class="item-info-right">
+      {{!-- 名称 --}}
+      <div class="item-name-row">
+        {{#unless isLocked}}
+        <input type="text" name="name" value="{{item.name}}" placeholder="物品名称" class="item-name-input"/>
+        {{else}}
+        <h2 class="item-name-display">{{item.name}}</h2>
+        {{/unless}}
+      </div>
+
+      {{!-- 类型和分类 --}}
+      <div class="item-meta-row">
+        <div class="meta-item">
+          {{#unless isLocked}}
+          <select name="type" class="item-type-select">
+            <option value="combatDice" {{#if (eq item.type "combatDice")}}selected{{/if}}>攻击骰</option>
+            <option value="defenseDice" {{#if (eq item.type "defenseDice")}}selected{{/if}}>守备骰</option>
+            <option value="triggerDice" {{#if (eq item.type "triggerDice")}}selected{{/if}}>触发骰</option>
+            <option value="passiveDice" {{#if (eq item.type "passiveDice")}}selected{{/if}}>被动骰</option>
+            <option value="armor" {{#if (eq item.type "armor")}}selected{{/if}}>防具</option>
+            <option value="weapon" {{#if (eq item.type "weapon")}}selected{{/if}}>武器</option>
+            <option value="equipment" {{#if (eq item.type "equipment")}}selected{{/if}}>装备</option>
+            <option value="item" {{#if (eq item.type "item")}}selected{{/if}}>物品</option>
+          </select>
+          {{else}}
+          <span class="meta-label">{{localizedType}}</span>
+          {{/unless}}
+        </div>
+
+        <span class="meta-separator">-</span>
+
+        <div class="meta-item">
+          {{#unless isLocked}}
+          <input type="text" name="system.category" value="{{system.category}}" placeholder="分类" class="category-input"/>
+          {{else}}
+          <span class="meta-label">{{system.category}}</span>
+          {{/unless}}
+        </div>
+      </div>
+
+      {{!-- 标签 --}}
+      <div class="item-tags-row">
+        {{#unless isLocked}}
+        <input type="text" name="system.tags" value="{{system.tags}}" placeholder="[标签1][标签2]" class="tags-input"/>
+        {{else}}
+        <span class="tags-display">{{system.tags}}</span>
+        {{/unless}}
+      </div>
+    </div>
+
+  </div>
+
+  {{!-- 分割线 --}}
+  <div class="divider"></div>
+
+  {{!-- 属性信息区域 --}}
+  <div class="properties-section">
+
+    {{!-- 骰数、费用、星光 --}}
+    <div class="properties-row">
+      {{#if showDiceFormula}}
+      <div class="property-item">
+        <i class="fas fa-dice"></i>
+        {{#unless isLocked}}
+        <input type="text" name="system.diceFormula" value="{{system.diceFormula}}" placeholder="1D6+3" class="property-input"/>
+        {{else}}
+        <span class="property-value">{{system.diceFormula}}</span>
+        {{/unless}}
+      </div>
+      {{/if}}
+
+      <div class="property-item">
+        <i class="fas fa-coins"></i>
+        {{#unless isLocked}}
+        <input type="text" name="system.cost" value="{{system.cost}}" placeholder="Cost:6" class="property-input"/>
+        {{else}}
+        <span class="property-value">Cost : {{system.cost}}</span>
+        {{/unless}}
+      </div>
+
+      {{#if showStarlightCost}}
+      <div class="property-item">
+        <i class="fas fa-star"></i>
+        {{#unless isLocked}}
+        <input type="number" name="system.starlightCost" value="{{system.starlightCost}}" min="0" class="property-input"/>
+        {{else}}
+        <span class="property-value">{{system.starlightCost}}</span>
+        {{/unless}}
+      </div>
+      {{/if}}
+    </div>
+
+    {{!-- 防具属性 --}}
+    {{#if showArmorProperties}}
+    <div class="armor-properties-row">
+      <span class="armor-label">防具属性：</span>
+      {{#unless isLocked}}
+      <div class="armor-checkboxes">
+        <label><input type="checkbox" name="system.armorProperties.slashUp" {{#if system.armorProperties.slashUp}}checked{{/if}}/><span class="resist">斩击↑</span></label>
+        <label><input type="checkbox" name="system.armorProperties.pierceUp" {{#if system.armorProperties.pierceUp}}checked{{/if}}/><span class="resist">突刺↑</span></label>
+        <label><input type="checkbox" name="system.armorProperties.bluntUp" {{#if system.armorProperties.bluntUp}}checked{{/if}}/><span class="resist">打击↑</span></label>
+        <label><input type="checkbox" name="system.armorProperties.slashDown" {{#if system.armorProperties.slashDown}}checked{{/if}}/><span class="weak">斩击↓</span></label>
+        <label><input type="checkbox" name="system.armorProperties.pierceDown" {{#if system.armorProperties.pierceDown}}checked{{/if}}/><span class="weak">突刺↓</span></label>
+        <label><input type="checkbox" name="system.armorProperties.bluntDown" {{#if system.armorProperties.bluntDown}}checked{{/if}}/><span class="weak">打击↓</span></label>
+      </div>
+      {{else}}
+      <div class="armor-display">
+        {{#if system.armorProperties.slashUp}}<span class="resist">斩击↑</span>{{/if}}
+        {{#if system.armorProperties.pierceUp}}<span class="resist">突刺↑</span>{{/if}}
+        {{#if system.armorProperties.bluntUp}}<span class="resist">打击↑</span>{{/if}}
+        {{#if system.armorProperties.slashDown}}<span class="weak">斩击↓</span>{{/if}}
+        {{#if system.armorProperties.pierceDown}}<span class="weak">突刺↓</span>{{/if}}
+        {{#if system.armorProperties.bluntDown}}<span class="weak">打击↓</span>{{/if}}
+      </div>
+      {{/unless}}
+    </div>
+    {{/if}}
+
+  </div>
+
+  {{!-- 分割线 --}}
+  <div class="divider"></div>
+
+  {{!-- 标签页区域 --}}
+  <div class="tabs-section">
+    <div class="tabs-header">
+      <button type="button" class="tab-btn {{#if (eq activeTab 'effect')}}active{{/if}}" data-tab="effect">
+        效果描述
+      </button>
+      <button type="button" class="tab-btn {{#if (eq activeTab 'conditions')}}active{{/if}}" data-tab="conditions">
+        条件触发
+      </button>
+    </div>
+
+    {{!-- 效果描述标签页 --}}
+    <div class="tab-content {{#if (eq activeTab 'effect')}}active{{/if}}" data-tab="effect">
+      <div class="effect-description-panel">
+        <div class="panel-header">
+          <button type="button" class="collapse-btn {{#unless effectCollapsed}}expanded{{/unless}}">
+            <i class="fas fa-caret-{{#unless effectCollapsed}}down{{else}}right{{/unless}}"></i>
+          </button>
+          <h3 class="panel-title">效果</h3>
+          {{#unless isLocked}}
+          <button type="button" class="edit-effect-btn" title="编辑效果描述">
+            <i class="fas fa-edit"></i>
+          </button>
+          {{/unless}}
+        </div>
+
+        <div class="panel-content {{#if effectCollapsed}}collapsed{{/if}}">
+          {{#unless isLocked}}
+          <textarea name="system.effect" rows="6" class="effect-textarea">{{system.effect}}</textarea>
+          {{else}}
+          <div class="effect-display">{{{enrichedEffect}}}</div>
+          {{/unless}}
+        </div>
+      </div>
+    </div>
+
+    {{!-- 条件触发标签页 --}}
+    <div class="tab-content {{#if (eq activeTab 'conditions')}}active{{/if}}" data-tab="conditions">
+      <div class="conditions-panel">
+
+        {{!-- 条件列表 --}}
+        {{#each conditions as |condition index|}}
+        <div class="condition-item" data-condition-index="{{@index}}">
+          <div class="condition-header">
+            <button type="button" class="collapse-btn {{#unless condition.collapsed}}expanded{{/unless}}">
+              <i class="fas fa-caret-{{#unless condition.collapsed}}down{{else}}right{{/unless}}"></i>
+            </button>
+            <h4 class="condition-title">条件{{add @index 1}}</h4>
+            <div class="condition-actions">
+              <button type="button" class="condition-delete-btn" data-condition-index="{{@index}}" title="删除条件">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="condition-content {{#if condition.collapsed}}collapsed{{/if}}">
+            {{> conditionEditor condition=condition index=@index isLocked=../isLocked}}
+          </div>
+        </div>
+        {{/each}}
+
+        {{!-- 添加条件按钮 --}}
+        {{#unless isLocked}}
+        <button type="button" class="add-condition-btn">
+          <i class="fas fa-plus"></i> 添加条件触发
+        </button>
+        {{/unless}}
+
+      </div>
+    </div>
+  </div>
+
+  {{!-- 底部按钮 --}}
+  <div class="action-buttons">
+    <button type="button" class="action-btn use-btn">
+      使用
+    </button>
+    <button type="button" class="action-btn chat-btn">
+      发送聊天
+    </button>
+  </div>
+
+</form>

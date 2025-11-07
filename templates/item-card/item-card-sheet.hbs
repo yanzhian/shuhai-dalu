@@ -1,0 +1,190 @@
+<form class="{{cssClass}}" autocomplete="off">
+  <div class="item-card-container">
+
+    {{!-- 编辑锁（独立一排） --}}
+    <div class="item-card-lock-row">
+      <button type="button" class="item-card-lock {{#if isLocked}}locked{{/if}}" title="{{#if isLocked}}解锁编辑{{else}}锁定编辑{{/if}}">
+        <i class="fas {{#if isLocked}}fa-lock{{else}}fa-lock-open{{/if}}"></i>
+      </button>
+    </div>
+
+    {{!-- 基础信息区域 --}}
+    <div class="item-card-basic-info">
+      {{!-- 左侧大图标 --}}
+      <div class="item-card-icon-large">
+        <img src="{{item.img}}" alt="{{item.name}}" data-edit="img" />
+      </div>
+
+      {{!-- 右侧信息：上中下布局 --}}
+      <div class="item-card-info-right">
+        {{!-- 上：名称 --}}
+        <input name="name" type="text" value="{{item.name}}" placeholder="物品名称" class="item-card-name-input" {{#if isLocked}}disabled{{/if}} />
+
+        {{!-- 中：类型（只读）、分类 --}}
+        <div class="item-card-type-category-row">
+          <span class="item-card-type-label">{{item.type}}</span>
+          <span class="item-card-separator">-</span>
+          {{#if categoryChoices}}
+            <select name="system.category" class="item-card-category-input" {{#if isLocked}}disabled{{/if}}>
+              {{#each categoryChoices}}
+                <option value="{{this}}" {{#if (eq this ../system.category)}}selected{{/if}}>{{this}}</option>
+              {{/each}}
+            </select>
+          {{else}}
+            <input name="system.category" type="text" value="{{system.category}}" placeholder="分类" class="item-card-category-input" {{#if isLocked}}disabled{{/if}} />
+          {{/if}}
+        </div>
+
+        {{!-- 下：标签 --}}
+        <input name="system.tags" type="text" value="{{system.tags}}" placeholder="[标签1][标签2]" class="item-card-tags-input" {{#if isLocked}}disabled{{/if}} />
+      </div>
+    </div>
+
+    {{!-- 分割线 --}}
+    <div class="item-card-divider"></div>
+
+    {{!-- 属性行（上下两行布局） --}}
+    <div class="item-card-properties-section">
+      {{!-- 上行：骰数、费用、星光 --}}
+      <div class="item-card-properties-row">
+        <div class="item-card-prop-item">
+          <i class="fas fa-dice-d6"></i>
+          <input name="system.diceFormula" type="text" value="{{system.diceFormula}}" placeholder="3D6+4" {{#if isLocked}}disabled{{/if}} />
+        </div>
+        <div class="item-card-prop-item">
+          <i class="fas fa-coins"></i>
+          <span class="prop-label">Cost :</span>
+          <input name="system.cost" type="text" value="{{system.cost}}" placeholder="6" {{#if isLocked}}disabled{{/if}} />
+        </div>
+        <div class="item-card-prop-item">
+          <i class="fas fa-star"></i>
+          <input name="system.starlightCost" type="number" value="{{system.starlightCost}}" placeholder="5" {{#if isLocked}}disabled{{/if}} />
+        </div>
+      </div>
+
+      {{!-- 下行：防具属性（如果item.type是armor则显示） --}}
+      {{#if (eq item.type "armor")}}
+        <div class="item-card-armor-row">
+          <span class="armor-label">防具属性：</span>
+          {{#if isLocked}}
+            {{!-- 锁定状态：只显示badges --}}
+            <div class="item-card-armor-badges">
+              {{#if system.armorProperties.slashUp}}<span class="armor-badge resist">斩击↑</span>{{/if}}
+              {{#if system.armorProperties.pierceUp}}<span class="armor-badge resist">突刺↑</span>{{/if}}
+              {{#if system.armorProperties.bluntUp}}<span class="armor-badge resist">打击↑</span>{{/if}}
+              {{#if system.armorProperties.slashDown}}<span class="armor-badge weak">斩击↓</span>{{/if}}
+              {{#if system.armorProperties.pierceDown}}<span class="armor-badge weak">突刺↓</span>{{/if}}
+              {{#if system.armorProperties.bluntDown}}<span class="armor-badge weak">打击↓</span>{{/if}}
+            </div>
+          {{else}}
+            {{!-- 未锁定状态：显示复选框 --}}
+            <div class="item-card-armor-checkboxes">
+              <label class="armor-checkbox resist">
+                <input type="checkbox" name="system.armorProperties.slashUp" {{#if system.armorProperties.slashUp}}checked{{/if}} />
+                <span>斩击↑</span>
+              </label>
+              <label class="armor-checkbox resist">
+                <input type="checkbox" name="system.armorProperties.pierceUp" {{#if system.armorProperties.pierceUp}}checked{{/if}} />
+                <span>突刺↑</span>
+              </label>
+              <label class="armor-checkbox resist">
+                <input type="checkbox" name="system.armorProperties.bluntUp" {{#if system.armorProperties.bluntUp}}checked{{/if}} />
+                <span>打击↑</span>
+              </label>
+              <label class="armor-checkbox weak">
+                <input type="checkbox" name="system.armorProperties.slashDown" {{#if system.armorProperties.slashDown}}checked{{/if}} />
+                <span>斩击↓</span>
+              </label>
+              <label class="armor-checkbox weak">
+                <input type="checkbox" name="system.armorProperties.pierceDown" {{#if system.armorProperties.pierceDown}}checked{{/if}} />
+                <span>突刺↓</span>
+              </label>
+              <label class="armor-checkbox weak">
+                <input type="checkbox" name="system.armorProperties.bluntDown" {{#if system.armorProperties.bluntDown}}checked{{/if}} />
+                <span>打击↓</span>
+              </label>
+            </div>
+          {{/if}}
+        </div>
+      {{/if}}
+    </div>
+
+    {{!-- 分割线 --}}
+    <div class="item-card-divider"></div>
+
+    {{!-- 效果描述区域 --}}
+    <div class="item-card-section">
+      <div class="item-card-effect-panel">
+        <div class="item-card-panel-header">
+          <i class="fas fa-chevron-down collapse-icon"></i>
+          <span class="panel-title">效果描述</span>
+          {{#unless isLocked}}
+            <button type="button" class="panel-edit-btn" title="编辑描述">
+              <i class="fas fa-edit"></i>
+            </button>
+          {{/unless}}
+        </div>
+        <div class="item-card-panel-content">
+          {{#if isLocked}}
+            <div class="effect-display">{{{enrichedEffect}}}</div>
+          {{else}}
+            <textarea name="system.effect" class="effect-textarea">{{system.effect}}</textarea>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+
+    {{!-- Activities 区域 --}}
+    <div class="item-card-section">
+      <div class="item-card-activities-list">
+        {{#each system.activities as |activity id|}}
+          <div class="item-card-activity-card" data-activity-id="{{id}}">
+            <div class="activity-header">
+              <div class="activity-info">
+                <span class="activity-name">{{activity.name}}</span>
+                <span class="activity-trigger">{{activity.trigger}}</span>
+              </div>
+              <div class="activity-actions">
+                {{#unless ../isLocked}}
+                  <button type="button" class="edit-activity-btn" data-activity-id="{{id}}" title="编辑">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button type="button" class="delete-activity-btn" data-activity-id="{{id}}" title="删除">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                {{/unless}}
+              </div>
+            </div>
+            <div class="activity-summary">
+              <span class="activity-target">目标: {{activity.target}}</span>
+              {{#if activity.hasConsume}}
+                <span class="activity-consume">消耗: {{activity.consumes.length}}项</span>
+              {{/if}}
+              <span class="activity-effects">效果: {{#each activity.effects}}{{@key}} {{/each}}</span>
+            </div>
+          </div>
+        {{/each}}
+      </div>
+
+      {{#unless isLocked}}
+        <button type="button" class="item-card-add-activity-btn">
+          <i class="fas fa-plus"></i>
+          添加新活动
+        </button>
+      {{/unless}}
+    </div>
+
+    {{!-- 底部按钮 --}}
+    <div class="item-card-footer-actions">
+      <button type="button" class="item-card-action-btn secondary item-chat-btn">
+        <i class="fas fa-comment"></i>
+        发送到聊天
+      </button>
+      <button type="button" class="item-card-action-btn item-use-btn">
+        <i class="fas fa-hand-sparkles"></i>
+        使用物品
+      </button>
+    </div>
+
+  </div>
+</form>

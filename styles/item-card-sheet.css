@@ -1,0 +1,1403 @@
+/* ========================================
+   书海大陆 物品卡样式
+   严格按照 item-07 ~ item-10 设计
+   ======================================== */
+
+/* Foundry窗口容器 */
+.shuhai-dalu.item-card.sheet {
+  background: #0F0D1B;
+}
+
+/* Form元素 */
+.shuhai-dalu.item-card form {
+  background: #0F0D1B;
+  color: #ECE4D6;
+  font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========================================
+   主容器
+   ======================================== */
+.shuhai-dalu.item-card .item-card-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #0F0D1B;
+  border: 2px solid #EBBD68;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+/* ========================================
+   编辑锁按钮（独立一排）
+   ======================================== */
+.shuhai-dalu.item-card .item-card-lock-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+}
+
+.shuhai-dalu.item-card .item-card-lock {
+  width: 16px;
+  height: 16px;
+  background: rgba(235, 189, 104, 0.95);
+  border: none;
+  border-radius: 3px;
+  color: #0F0D1B;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.shuhai-dalu.item-card .item-card-lock:hover {
+  background: #E1AA43;
+  transform: scale(1.15);
+}
+
+.shuhai-dalu.item-card .item-card-lock.locked {
+  background: rgba(220, 50, 50, 0.95);
+  color: #fff;
+}
+
+.shuhai-dalu.item-card .item-card-lock.locked:hover {
+  background: rgba(200, 30, 30, 1);
+}
+
+/* ========================================
+   基础信息区域
+   ======================================== */
+.shuhai-dalu.item-card .item-card-basic-info {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+}
+
+/* 左侧：大图标 */
+.shuhai-dalu.item-card .item-card-icon-large {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.shuhai-dalu.item-card .item-card-icon-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border: 2px solid #EBBD68;
+  border-radius: 6px;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu.item-card .item-card-icon-large img:hover {
+  border-color: #E1AA43;
+  transform: scale(1.02);
+}
+
+/* 右侧：名称、类型、分类、标签 */
+.shuhai-dalu.item-card .item-card-info-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+/* 名称输入框（上） */
+.shuhai-dalu.item-card .item-card-name-input {
+  font-size: 24px;
+  font-weight: bold;
+  color: #EBBD68;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid #EBBD68;
+  padding: 4px 0;
+  outline: none;
+  width: 100%;
+}
+
+.shuhai-dalu.item-card .item-card-name-input:focus {
+  border-bottom-color: #E1AA43;
+}
+
+.shuhai-dalu.item-card .item-card-name-input:disabled {
+  border-bottom-color: #EBBD68;
+  opacity: 1;
+}
+
+/* 类型-分类行（中） */
+.shuhai-dalu.item-card .item-card-type-category-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shuhai-dalu.item-card .item-card-type-label {
+  flex: 1;
+  font-size: 16px;
+  color: #EBBD68;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.shuhai-dalu.item-card .item-card-category-input {
+  flex: 1;
+  font-size: 16px;
+  color: #ECE4D6;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  /* padding: 6px 12px; */
+  outline: none;
+}
+
+.shuhai-dalu.item-card .item-card-category-input:focus {
+  border-color: #E1AA43;
+}
+
+.shuhai-dalu.item-card .item-card-category-input:disabled {
+  opacity: 0.7;
+}
+
+.shuhai-dalu.item-card .item-card-separator {
+  font-size: 18px;
+  color: #EBBD68;
+  font-weight: bold;
+}
+
+/* 标签输入框（下） */
+.shuhai-dalu.item-card .item-card-tags-input {
+  font-size: 14px;
+  color: #ECE4D6;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  padding: 6px 12px;
+  outline: none;
+}
+
+.shuhai-dalu.item-card .item-card-tags-input:focus {
+  border-color: #E1AA43;
+}
+
+.shuhai-dalu.item-card .item-card-tags-input:disabled {
+  opacity: 0.7;
+}
+
+/* ========================================
+   分割线
+   ======================================== */
+.shuhai-dalu.item-card .item-card-divider {
+  height: 2px;
+  background: #EBBD68;
+  opacity: 0.3;
+  flex-shrink: 0;
+}
+
+/* ========================================
+   属性区域
+   ======================================== */
+.shuhai-dalu.item-card .item-card-properties-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* 上行：骰数、费用、星光 */
+.shuhai-dalu.item-card .item-card-properties-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 12px;
+  background: rgba(235, 189, 104, 0.1);
+  border: 1px solid #EBBD68;
+  border-radius: 6px;
+}
+
+.shuhai-dalu.item-card .item-card-prop-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.shuhai-dalu.item-card .item-card-prop-item i {
+  font-size: 18px;
+  color: #EBBD68;
+}
+
+.shuhai-dalu.item-card .prop-label {
+  font-weight: bold;
+  color: #EBBD68;
+  font-size: 13px;
+}
+
+.shuhai-dalu.item-card .item-card-prop-item input {
+  width: 100px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  color: #ECE4D6;
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  outline: none;
+}
+
+.shuhai-dalu.item-card .item-card-prop-item input:focus {
+  border-color: #E1AA43;
+}
+
+.shuhai-dalu.item-card .item-card-prop-item input:disabled {
+  opacity: 0.7;
+}
+
+/* 下行：防具属性 */
+.shuhai-dalu.item-card .item-card-armor-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(235, 189, 104, 0.05);
+  border: 1px solid #EBBD68;
+  border-radius: 6px;
+}
+
+.shuhai-dalu.item-card .armor-label {
+  font-size: 13px;
+  font-weight: bold;
+  color: #EBBD68;
+}
+
+.shuhai-dalu.item-card .item-card-armor-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.shuhai-dalu.item-card .armor-badge {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.shuhai-dalu.item-card .armor-badge.resist {
+  background: #4a7c2c;
+}
+
+.shuhai-dalu.item-card .armor-badge.weak {
+  background: #c14545;
+}
+
+/* 防具属性复选框（编辑模式） */
+.shuhai-dalu.item-card .item-card-armor-checkboxes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.shuhai-dalu.item-card .armor-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s ease;
+}
+
+.shuhai-dalu.item-card .armor-checkbox.resist {
+  background: rgba(74, 124, 44, 0.2);
+  border: 1px solid #4a7c2c;
+}
+
+.shuhai-dalu.item-card .armor-checkbox.resist:hover {
+  background: rgba(74, 124, 44, 0.3);
+}
+
+.shuhai-dalu.item-card .armor-checkbox.weak {
+  background: rgba(193, 69, 69, 0.2);
+  border: 1px solid #c14545;
+}
+
+.shuhai-dalu.item-card .armor-checkbox.weak:hover {
+  background: rgba(193, 69, 69, 0.3);
+}
+
+.shuhai-dalu.item-card .armor-checkbox input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.shuhai-dalu.item-card .armor-checkbox span {
+  color: #ECE4D6;
+}
+
+/* ========================================
+   内容区域
+   ======================================== */
+.shuhai-dalu.item-card .item-card-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ========================================
+   面板通用样式（效果和条件共用）
+   ======================================== */
+.shuhai-dalu.item-card .item-card-effect-panel,
+.shuhai-dalu.item-card .item-card-condition-panel {
+  background: rgba(0, 0, 0, 0.2);
+  border: 2px solid #EBBD68;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.shuhai-dalu.item-card .item-card-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(235, 189, 104, 0.1);
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.shuhai-dalu.item-card .item-card-panel-header:hover {
+  background: rgba(235, 189, 104, 0.2);
+}
+
+.shuhai-dalu.item-card .item-card-panel-header .collapse-icon {
+  font-size: 12px;
+  color: #EBBD68;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.shuhai-dalu.item-card .item-card-panel-header .panel-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: bold;
+  color: #EBBD68;
+}
+
+.shuhai-dalu.item-card .panel-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.shuhai-dalu.item-card .panel-edit-btn,
+.shuhai-dalu.item-card .panel-action-btn {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  color: #EBBD68;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.shuhai-dalu.item-card .panel-edit-btn:hover,
+.shuhai-dalu.item-card .panel-action-btn:hover {
+  background: rgba(235, 189, 104, 0.2);
+  border-color: #E1AA43;
+}
+
+.shuhai-dalu.item-card .delete-condition-btn {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 1px solid #c14545;
+  border-radius: 4px;
+  color: #c14545;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.shuhai-dalu.item-card .delete-condition-btn:hover {
+  background: #c14545;
+  color: #fff;
+}
+
+.shuhai-dalu.item-card .item-card-panel-content {
+  padding: 12px;
+  transition: all 0.3s;
+}
+
+.shuhai-dalu.item-card .item-card-panel-content.collapsed {
+  display: none;
+}
+
+/* ========================================
+   效果描述标签页
+   ======================================== */
+.shuhai-dalu.item-card .effect-display {
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  border-left: 3px solid #EBBD68;
+  color: #ECE4D6;
+  line-height: 1.6;
+  font-size: 13px;
+  min-height: 80px;
+}
+
+.shuhai-dalu.item-card .effect-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  color: #ECE4D6;
+  font-size: 13px;
+  line-height: 1.6;
+  font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  resize: vertical;
+  outline: none;
+}
+
+.shuhai-dalu.item-card .effect-textarea:focus {
+  border-color: #E1AA43;
+}
+
+.shuhai-dalu.item-card .effect-textarea:disabled {
+  opacity: 0.7;
+}
+
+/* ========================================
+   条件触发标签页
+   ======================================== */
+.shuhai-dalu.item-card .item-card-conditions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.shuhai-dalu.item-card .item-card-add-condition-btn {
+  width: 100%;
+  padding: 12px;
+  background: #EBBD68;
+  border: none;
+  border-radius: 6px;
+  color: #0F0D1B;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.shuhai-dalu.item-card .item-card-add-condition-btn:hover {
+  background: #E1AA43;
+  transform: translateY(-2px);
+}
+
+.shuhai-dalu.item-card .item-card-add-condition-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ========================================
+   条件编辑器样式
+   ======================================== */
+.shuhai-dalu.item-card .condition-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 小分割线 */
+.shuhai-dalu.item-card .section-divider {
+  height: 1px;
+  background: #EBBD68;
+  opacity: 0.3;
+}
+
+/* 触发时机 */
+.shuhai-dalu.item-card .trigger-timing-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shuhai-dalu.item-card .timing-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.shuhai-dalu.item-card .timing-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid #EBBD68;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.shuhai-dalu.item-card .timing-option:hover {
+  background: rgba(235, 189, 104, 0.1);
+  border-color: #E1AA43;
+}
+
+.shuhai-dalu.item-card .timing-option.selected {
+  background: rgba(235, 189, 104, 0.2);
+  border-color: #E1AA43;
+}
+
+.shuhai-dalu.item-card .timing-option input[type="radio"] {
+  margin: 0;
+  cursor: pointer;
+  accent-color: #EBBD68;
+}
+
+.shuhai-dalu.item-card .timing-option span {
+  font-size: 13px;
+  color: #ECE4D6;
+  font-weight: bold;
+}
+
+.shuhai-dalu.item-card .timing-option:has(input:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 消耗设置 */
+.shuhai-dalu.item-card .consume-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shuhai-dalu.item-card .consume-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 2px solid #EBBD68;
+  border-radius: 6px;
+  transition: all 0.2s;
+  width: fit-content;
+}
+
+.shuhai-dalu.item-card .consume-toggle:hover {
+  background: rgba(235, 189, 104, 0.1);
+  border-color: #E1AA43;
+}
+
+.shuhai-dalu.item-card .consume-toggle.active {
+  background: rgba(235, 189, 104, 0.2);
+  border-color: #E1AA43;
+}
+
+.shuhai-dalu.item-card .consume-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #EBBD68;
+  margin: 0;
+}
+
+.shuhai-dalu.item-card .consume-toggle span {
+  font-size: 14px;
+  font-weight: bold;
+  color: #EBBD68;
+}
+
+.shuhai-dalu.item-card .consume-toggle:has(input:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.shuhai-dalu.item-card .consumes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 12px;
+  border-left: 2px solid rgba(235, 189, 104, 0.3);
+  margin-left: 20px;
+}
+
+.shuhai-dalu.item-card .consume-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.shuhai-dalu.item-card .consume-effect-select {
+  flex: 1;
+  min-width: 120px;
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  color: #ECE4D6;
+  font-size: 13px;
+  outline: none;
+}
+
+.shuhai-dalu.item-card .consume-layers-input,
+.shuhai-dalu.item-card .consume-strength-input {
+  width: 60px;
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  color: #ECE4D6;
+  text-align: center;
+  font-size: 13px;
+  outline: none;
+}
+
+.shuhai-dalu.item-card .consume-unit {
+  font-size: 12px;
+  color: #EBBD68;
+  font-weight: bold;
+}
+
+.shuhai-dalu.item-card .consume-effect-select:focus,
+.shuhai-dalu.item-card .consume-layers-input:focus,
+.shuhai-dalu.item-card .consume-strength-input:focus {
+  border-color: #E1AA43;
+}
+
+.shuhai-dalu.item-card .consume-effect-select:disabled,
+.shuhai-dalu.item-card .consume-layers-input:disabled,
+.shuhai-dalu.item-card .consume-strength-input:disabled {
+  opacity: 0.6;
+}
+
+.shuhai-dalu.item-card .remove-consume-btn {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 1px solid #c14545;
+  border-radius: 4px;
+  color: #c14545;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.shuhai-dalu.item-card .remove-consume-btn:hover {
+  background: #c14545;
+  color: #fff;
+}
+
+.shuhai-dalu.item-card .add-consume-btn {
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px dashed #EBBD68;
+  border-radius: 4px;
+  color: #EBBD68;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu.item-card .add-consume-btn:hover {
+  background: rgba(235, 189, 104, 0.1);
+  border-style: solid;
+}
+
+.shuhai-dalu.item-card .add-consume-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 目标选择 */
+.shuhai-dalu.item-card .target-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shuhai-dalu.item-card .section-label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #EBBD68;
+}
+
+.shuhai-dalu.item-card .target-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.shuhai-dalu.item-card .target-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid #EBBD68;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.shuhai-dalu.item-card .target-option:hover {
+  background: rgba(235, 189, 104, 0.1);
+  border-color: #E1AA43;
+}
+
+.shuhai-dalu.item-card .target-option.selected {
+  background: rgba(235, 189, 104, 0.2);
+  border-color: #E1AA43;
+}
+
+.shuhai-dalu.item-card .target-option input[type="radio"] {
+  margin: 0;
+  cursor: pointer;
+  accent-color: #EBBD68;
+}
+
+.shuhai-dalu.item-card .target-option span {
+  font-size: 13px;
+  color: #ECE4D6;
+  font-weight: bold;
+}
+
+.shuhai-dalu.item-card .target-option:has(input:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 效果添加 */
+.shuhai-dalu.item-card .effects-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shuhai-dalu.item-card .section-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #EBBD68;
+  padding: 4px 0;
+}
+
+.shuhai-dalu.item-card .effects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.shuhai-dalu.item-card .effect-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  transition: all 0.2s;
+  cursor: pointer;
+  user-select: none;
+}
+
+.shuhai-dalu.item-card .effect-item:hover {
+  background: rgba(235, 189, 104, 0.05);
+}
+
+.shuhai-dalu.item-card .effect-item.selected {
+  background: rgba(235, 189, 104, 0.1);
+  border: 1px solid rgba(235, 189, 104, 0.3);
+}
+
+.shuhai-dalu.item-card .effect-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #EBBD68;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.shuhai-dalu.item-card .effect-item .effect-name {
+  min-width: 60px;
+  font-size: 13px;
+  color: #ECE4D6;
+  font-weight: bold;
+}
+
+.shuhai-dalu.item-card .effect-layers-input,
+.shuhai-dalu.item-card .effect-strength-input {
+  width: 60px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  color: #ECE4D6;
+  text-align: center;
+  font-size: 12px;
+  outline: none;
+}
+
+.shuhai-dalu.item-card .effect-unit {
+  font-size: 12px;
+  color: #EBBD68;
+  font-weight: bold;
+}
+
+.shuhai-dalu.item-card .effect-layers-input:focus,
+.shuhai-dalu.item-card .effect-strength-input:focus {
+  border-color: #E1AA43;
+}
+
+.shuhai-dalu.item-card .effect-layers-input:disabled,
+.shuhai-dalu.item-card .effect-strength-input:disabled {
+  opacity: 0.6;
+}
+
+.shuhai-dalu.item-card .effect-item:has(input:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 自定义效果 */
+.shuhai-dalu.item-card .custom-effect-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shuhai-dalu.item-card .custom-effect-name-input {
+  flex: 1;
+  min-width: 120px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  color: #ECE4D6;
+  font-size: 12px;
+  outline: none;
+  text-align: left;
+}
+
+.shuhai-dalu.item-card .custom-effect-name-input:focus {
+  border-color: #E1AA43;
+}
+
+.shuhai-dalu.item-card .custom-effect-name-input:disabled {
+  opacity: 0.6;
+}
+
+/* 条件保存按钮 */
+.shuhai-dalu.item-card .condition-save-section {
+  display: flex;
+  justify-content: center;
+  padding-top: 12px;
+  margin-top: 12px;
+  border-top: 1px solid rgba(235, 189, 104, 0.2);
+}
+
+.shuhai-dalu.item-card .save-condition-btn {
+  padding: 8px 24px;
+  background: #4a7c2c;
+  border: none;
+  border-radius: 6px;
+  color: #ECE4D6;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.shuhai-dalu.item-card .save-condition-btn:hover {
+  background: #5a9c3c;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(74, 124, 44, 0.4);
+}
+
+.shuhai-dalu.item-card .save-condition-btn:active {
+  transform: translateY(0);
+}
+
+.shuhai-dalu.item-card .save-condition-btn i {
+  font-size: 12px;
+}
+
+/* ========================================
+   底部操作按钮
+   ======================================== */
+.shuhai-dalu.item-card .item-card-footer-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  padding-top: 12px;
+  border-top: 2px solid #EBBD68;
+}
+
+.shuhai-dalu.item-card .item-card-action-btn {
+  min-width: 120px;
+  height: 40px;
+  padding: 0 20px;
+  background: #EBBD68;
+  border: none;
+  border-radius: 6px;
+  color: #0F0D1B;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.shuhai-dalu.item-card .item-card-action-btn:hover {
+  background: #E1AA43;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(235, 189, 104, 0.3);
+}
+
+.shuhai-dalu.item-card .item-card-action-btn.secondary {
+  background: transparent;
+  border: 2px solid #EBBD68;
+  color: #EBBD68;
+}
+
+.shuhai-dalu.item-card .item-card-action-btn.secondary:hover {
+  background: rgba(235, 189, 104, 0.2);
+  transform: translateY(-2px);
+}
+
+.shuhai-dalu.item-card .item-card-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.shuhai-dalu.item-card .item-card-action-btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* ========================================
+   滚动条样式
+   ======================================== */
+.shuhai-dalu.item-card,
+.shuhai-dalu.item-card * {
+  scrollbar-width: thin;
+  scrollbar-color: #EBBD68 rgba(0, 0, 0, 0.2);
+}
+
+.shuhai-dalu.item-card ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.shuhai-dalu.item-card ::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.shuhai-dalu.item-card ::-webkit-scrollbar-thumb {
+  background: #EBBD68;
+  border-radius: 3px;
+}
+
+.shuhai-dalu.item-card ::-webkit-scrollbar-thumb:hover {
+  background: #E1AA43;
+}
+
+/* ========================================
+   通用禁用状态
+   ======================================== */
+.shuhai-dalu.item-card input:disabled,
+.shuhai-dalu.item-card select:disabled,
+.shuhai-dalu.item-card textarea:disabled,
+.shuhai-dalu.item-card button:disabled {
+  cursor: not-allowed !important;
+}
+
+/* ========================================
+   Activities 列表
+   ======================================== */
+.shuhai-dalu.item-card .item-card-activities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shuhai-dalu.item-card .item-card-activity-card {
+  background: rgba(0, 0, 0, 0.2);
+  border: 2px solid #EBBD68;
+  border-radius: 6px;
+  padding: 12px;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu.item-card .item-card-activity-card:hover {
+  background: rgba(235, 189, 104, 0.05);
+  border-color: #E1AA43;
+}
+
+.shuhai-dalu.item-card .activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.shuhai-dalu.item-card .activity-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.shuhai-dalu.item-card .activity-name {
+  font-size: 14px;
+  font-weight: bold;
+  color: #EBBD68;
+}
+
+.shuhai-dalu.item-card .activity-trigger {
+  font-size: 12px;
+  color: #ECE4D6;
+  opacity: 0.8;
+}
+
+.shuhai-dalu.item-card .activity-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.shuhai-dalu.item-card .edit-activity-btn,
+.shuhai-dalu.item-card .delete-activity-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  color: #EBBD68;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shuhai-dalu.item-card .edit-activity-btn:hover {
+  background: rgba(235, 189, 104, 0.2);
+  border-color: #E1AA43;
+}
+
+.shuhai-dalu.item-card .delete-activity-btn:hover {
+  background: rgba(193, 69, 69, 0.2);
+  border-color: #c14545;
+  color: #c14545;
+}
+
+.shuhai-dalu.item-card .activity-summary {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: #ECE4D6;
+  opacity: 0.7;
+}
+
+.shuhai-dalu.item-card .item-card-add-activity-btn {
+  width: 100%;
+  padding: 10px;
+  background: rgba(74, 124, 44, 0.2);
+  border: 2px dashed #4a7c2c;
+  border-radius: 6px;
+  color: #4a7c2c;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.shuhai-dalu.item-card .item-card-add-activity-btn:hover {
+  background: rgba(74, 124, 44, 0.3);
+  border-color: #5a9c3c;
+  color: #5a9c3c;
+}
+
+/* ========================================
+   Activity Editor 对话框样式
+   ======================================== */
+.shuhai-dalu.activity-editor {
+  .window-content {
+    padding: 15px;
+    background: #0F0D1B;
+  }
+
+  .activity-editor-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+    font-weight: bold;
+    color: #EBBD68;
+  }
+
+  .form-group input[type="text"],
+  .form-group input[type="number"],
+  .form-group select {
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #EBBD68;
+    border-radius: 4px;
+    color: #ECE4D6;
+    font-size: 13px;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+
+  .checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+
+  .consumes-list,
+  .effects-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .consume-row,
+  .effect-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .add-consume-btn,
+  .remove-consume-btn {
+    padding: 4px 8px;
+    background: #4a7c2c;
+    border: none;
+    border-radius: 4px;
+    color: #ECE4D6;
+    font-size: 11px;
+    cursor: pointer;
+  }
+
+  .remove-consume-btn {
+    background: #c14545;
+  }
+}
+
+/* Activity Editor 样式优化 */
+.shuhai-dalu.activity-editor .form-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.shuhai-dalu.activity-editor .form-group input[type="checkbox"] {
+  margin: 0;
+}
+
+.shuhai-dalu.activity-editor .dynamic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.shuhai-dalu.activity-editor .dynamic-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.shuhai-dalu.activity-editor .dynamic-row select {
+  flex: 1;
+  min-width: 100px;
+}
+
+.shuhai-dalu.activity-editor .dynamic-row input[type="number"] {
+  width: 70px;
+}
+
+.shuhai-dalu.activity-editor .remove-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: #c14545;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.shuhai-dalu.activity-editor .remove-btn:hover {
+  background: #a13535;
+}
+
+.shuhai-dalu.activity-editor .add-btn {
+  padding: 6px 12px;
+  background: #4a7c2c;
+  border: none;
+  border-radius: 4px;
+  color: #ECE4D6;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.shuhai-dalu.activity-editor .add-btn:hover {
+  background: #5a9c3c;
+}
+
+.shuhai-dalu.activity-editor .custom-effect-fields {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.shuhai-dalu.activity-editor .custom-effect-fields input[type="text"] {
+  flex: 1;
+}
+
+.shuhai-dalu.activity-editor .custom-effect-fields input[type="number"] {
+  width: 70px;
+}
+
+.shuhai-dalu.activity-editor .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #EBBD68;
+}
+
+.shuhai-dalu.activity-editor .cancel-btn,
+.shuhai-dalu.activity-editor .save-btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu.activity-editor .cancel-btn {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #EBBD68;
+  color: #EBBD68;
+}
+
+.shuhai-dalu.activity-editor .cancel-btn:hover {
+  background: rgba(235, 189, 104, 0.1);
+}
+
+.shuhai-dalu.activity-editor .save-btn {
+  background: #EBBD68;
+  color: #0F0D1B;
+}
+
+.shuhai-dalu.activity-editor .save-btn:hover {
+  background: #E1AA43;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(235, 189, 104, 0.3);
+}
