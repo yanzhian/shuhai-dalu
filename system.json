@@ -56,9 +56,6 @@
       },
       "equipment": {
         "htmlFields": ["effect"]
-      },
-      "itemCard": {
-        "htmlFields": ["effect"]
       }
     }
   },

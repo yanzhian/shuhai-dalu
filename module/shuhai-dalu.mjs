@@ -13,8 +13,7 @@ import ShuhaiItem, {
   WeaponData,
   ArmorData,
   ItemData,
-  EquipmentData,
-  ItemCardData
+  EquipmentData
 } from "./documents/item.mjs";
 import ShuhaiActorSheet from "./sheets/actor-sheet.mjs";
 import ShuhaiPlayerSheet from "./sheets/player-sheet.mjs";
@@ -58,7 +57,6 @@ Hooks.once('init', async function() {
   CONFIG.Item.dataModels.armor = ArmorData;
   CONFIG.Item.dataModels.item = ItemData;
   CONFIG.Item.dataModels.equipment = EquipmentData;
-  CONFIG.Item.dataModels.itemCard = ItemCardData;
   
   console.log('书海大陆 | 数据模型已注册');
   console.log('Actor 数据模型:', CONFIG.Actor.dataModels);
@@ -80,18 +78,18 @@ Hooks.once('init', async function() {
   });
 
   // 注册物品表单（不取消核心表单，保留其他类型的表单）
-  // 标准物品表单
-  Items.registerSheet("shuhai-dalu", ShuhaiItemSheet, {
+  // 新物品卡表单（默认）- 适用于所有9种物品类型
+  Items.registerSheet("shuhai-dalu", ItemCardSheet, {
     types: ["combatDice", "shootDice", "defenseDice", "triggerDice", "passiveDice", "weapon", "armor", "item", "equipment"],
     makeDefault: true,
-    label: "书海大陆 - 标准物品卡"
+    label: "书海大陆 - 物品卡"
   });
 
-  // ⭐ 物品卡表单（独立类型）
-  Items.registerSheet("shuhai-dalu", ItemCardSheet, {
-    types: ["itemCard"],
-    makeDefault: true,
-    label: "书海大陆 - 物品卡"
+  // 旧版标准物品表单（备用）
+  Items.registerSheet("shuhai-dalu", ShuhaiItemSheet, {
+    types: ["combatDice", "shootDice", "defenseDice", "triggerDice", "passiveDice", "weapon", "armor", "item", "equipment"],
+    makeDefault: false,
+    label: "书海大陆 - 标准物品卡（旧版）"
   });
   
   console.log('书海大陆 | 表单已注册');
