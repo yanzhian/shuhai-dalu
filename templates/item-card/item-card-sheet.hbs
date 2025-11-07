@@ -1,0 +1,139 @@
+<form class="{{cssClass}} item-card" autocomplete="off">
+  <div class="item-card-container">
+
+    {{!-- 编辑锁 --}}
+    <button type="button" class="item-card-lock {{#if isLocked}}locked{{/if}}" title="{{#if isLocked}}解锁编辑{{else}}锁定编辑{{/if}}">
+      <i class="fas {{#if isLocked}}fa-lock{{else}}fa-lock-open{{/if}}"></i>
+    </button>
+
+    {{!-- 基础信息区域 --}}
+    <div class="item-card-basic-info">
+      {{!-- 左侧大图标 --}}
+      <div class="item-card-icon-large">
+        <img src="{{item.img}}" alt="{{item.name}}" data-edit="img" />
+      </div>
+
+      {{!-- 右侧信息 --}}
+      <div class="item-card-info-right">
+        <input name="name" type="text" value="{{item.name}}" placeholder="物品名称" class="item-card-name-input" {{#if isLocked}}disabled{{/if}} />
+
+        <div class="item-card-meta-row">
+          <div class="item-card-meta-field">
+            <label>类型</label>
+            <select name="system.itemType" {{#if isLocked}}disabled{{/if}}>
+              <option value="item" {{#if (eq system.itemType "item")}}selected{{/if}}>物品</option>
+              <option value="weapon" {{#if (eq system.itemType "weapon")}}selected{{/if}}>武器</option>
+              <option value="armor" {{#if (eq system.itemType "armor")}}selected{{/if}}>防具</option>
+              <option value="equipment" {{#if (eq system.itemType "equipment")}}selected{{/if}}>装备</option>
+            </select>
+          </div>
+
+          <div class="item-card-meta-field">
+            <label>分类</label>
+            <input name="system.category" type="text" value="{{system.category}}" {{#if isLocked}}disabled{{/if}} />
+          </div>
+        </div>
+
+        <div class="item-card-meta-field item-card-tags-input">
+          <label>标签</label>
+          <input name="system.tags" type="text" value="{{system.tags}}" {{#if isLocked}}disabled{{/if}} />
+        </div>
+      </div>
+    </div>
+
+    {{!-- 属性行 --}}
+    <div class="item-card-properties">
+      <div class="item-card-property">
+        <label>骰数</label>
+        <input name="system.diceFormula" type="text" value="{{system.diceFormula}}" {{#if isLocked}}disabled{{/if}} />
+      </div>
+      <div class="item-card-property">
+        <label>费用</label>
+        <input name="system.cost" type="text" value="{{system.cost}}" {{#if isLocked}}disabled{{/if}} />
+      </div>
+      <div class="item-card-property">
+        <label>星光</label>
+        <input name="system.starlightCost" type="number" value="{{system.starlightCost}}" {{#if isLocked}}disabled{{/if}} />
+      </div>
+
+      {{!-- 防具属性 --}}
+      {{#if (eq system.itemType "armor")}}
+        <div class="item-card-armor-properties">
+          {{#if system.armorProperties.slashUp}}<span class="item-card-armor-badge resist">斩击↑</span>{{/if}}
+          {{#if system.armorProperties.pierceUp}}<span class="item-card-armor-badge resist">突刺↑</span>{{/if}}
+          {{#if system.armorProperties.bluntUp}}<span class="item-card-armor-badge resist">打击↑</span>{{/if}}
+          {{#if system.armorProperties.slashDown}}<span class="item-card-armor-badge weak">斩击↓</span>{{/if}}
+          {{#if system.armorProperties.pierceDown}}<span class="item-card-armor-badge weak">突刺↓</span>{{/if}}
+          {{#if system.armorProperties.bluntDown}}<span class="item-card-armor-badge weak">打击↓</span>{{/if}}
+        </div>
+      {{/if}}
+    </div>
+
+    {{!-- 标签页 --}}
+    <div class="item-card-tabs">
+      <div class="item-card-tab active" data-tab="effect">效果描述</div>
+      <div class="item-card-tab" data-tab="conditions">条件触发</div>
+    </div>
+
+    {{!-- 效果描述标签页 --}}
+    <div class="item-card-tab-content active" data-tab="effect">
+      <div class="item-card-effect-tab">
+        <div class="item-card-effect-panel">
+          <div class="item-card-effect-header">
+            <i class="fas fa-chevron-down collapse-icon"></i>
+            <span class="panel-title">效果</span>
+          </div>
+          <div class="item-card-effect-content">
+            {{#if isLocked}}
+              <div class="item-card-effect-display">{{{enrichedEffect}}}</div>
+            {{else}}
+              <textarea name="system.effect" class="item-card-effect-textarea">{{system.effect}}</textarea>
+            {{/if}}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {{!-- 条件触发标签页 --}}
+    <div class="item-card-tab-content" data-tab="conditions">
+      <div class="item-card-conditions-tab">
+        <div class="item-card-conditions-list">
+          {{#each system.conditions as |condition index|}}
+            <div class="item-card-condition-panel" data-index="{{index}}">
+              <div class="item-card-condition-header">
+                <i class="fas fa-chevron-down collapse-icon"></i>
+                <span class="condition-title">条件 {{add index 1}}</span>
+                {{#unless ../isLocked}}
+                  <button type="button" class="delete-condition-btn" title="删除条件"><i class="fas fa-times"></i></button>
+                {{/unless}}
+              </div>
+              <div class="item-card-condition-content">
+                {{> systems/shuhai-dalu/templates/item-card/condition-editor.hbs condition=condition index=index locked=../isLocked}}
+              </div>
+            </div>
+          {{/each}}
+        </div>
+
+        {{#unless isLocked}}
+          <button type="button" class="item-card-add-condition-btn">
+            <i class="fas fa-plus"></i>
+            添加条件
+          </button>
+        {{/unless}}
+      </div>
+    </div>
+
+    {{!-- 底部按钮 --}}
+    <div class="item-card-footer-actions">
+      <button type="button" class="item-card-action-btn secondary item-chat-btn">
+        <i class="fas fa-comment"></i>
+        发送到聊天
+      </button>
+      <button type="button" class="item-card-action-btn item-use-btn">
+        <i class="fas fa-hand-sparkles"></i>
+        使用物品
+      </button>
+    </div>
+
+  </div>
+</form>

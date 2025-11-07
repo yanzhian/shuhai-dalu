@@ -13,12 +13,13 @@ import ShuhaiItem, {
   WeaponData,
   ArmorData,
   ItemData,
-  EquipmentData
+  EquipmentData,
+  ItemCardData
 } from "./documents/item.mjs";
 import ShuhaiActorSheet from "./sheets/actor-sheet.mjs";
 import ShuhaiPlayerSheet from "./sheets/player-sheet.mjs";
 import ShuhaiItemSheet from "./sheets/item-sheet.mjs";
-import ShuhaiItemSheetNew from "./sheets/item-sheet-new.mjs";
+import ItemCardSheet from "./sheets/item-card-sheet.mjs";
 
 /* -------------------------------------------- */
 /*  初始化钩子                                    */
@@ -57,14 +58,13 @@ Hooks.once('init', async function() {
   CONFIG.Item.dataModels.armor = ArmorData;
   CONFIG.Item.dataModels.item = ItemData;
   CONFIG.Item.dataModels.equipment = EquipmentData;
+  CONFIG.Item.dataModels.itemCard = ItemCardData;
   
   console.log('书海大陆 | 数据模型已注册');
   console.log('Actor 数据模型:', CONFIG.Actor.dataModels);
   console.log('Item 数据模型:', CONFIG.Item.dataModels);
   
-  // 注册角色表单（不取消核心表单注册，避免影响其他文档类型）
-  // Actors.unregisterSheet("core", ActorSheet);  // ❌ 不要取消注册核心表单
-
+  // 注册角色表单（不取消核心表单，保留其他类型如Scene的表单）
   // ⭐ 注册 Player 角色表单（设为默认）
   Actors.registerSheet("shuhai-dalu", ShuhaiPlayerSheet, {
     types: ["character"],
@@ -79,21 +79,19 @@ Hooks.once('init', async function() {
     label: "书海大陆 - 标准角色卡"
   });
 
-  // 注册物品表单（不取消核心表单注册，避免影响其他文档类型）
-  // Items.unregisterSheet("core", ItemSheet);  // ❌ 不要取消注册核心表单
-
-  // 注册标准物品表单
+  // 注册物品表单（不取消核心表单，保留其他类型的表单）
+  // 标准物品表单
   Items.registerSheet("shuhai-dalu", ShuhaiItemSheet, {
     types: ["combatDice", "shootDice", "defenseDice", "triggerDice", "passiveDice", "weapon", "armor", "item", "equipment"],
-    makeDefault: false,
+    makeDefault: true,
     label: "书海大陆 - 标准物品卡"
   });
 
-  // ⭐ 注册新物品表单（设为默认）
-  Items.registerSheet("shuhai-dalu", ShuhaiItemSheetNew, {
-    types: ["combatDice", "shootDice", "defenseDice", "triggerDice", "passiveDice", "weapon", "armor", "item", "equipment"],
+  // ⭐ 物品卡表单（独立类型）
+  Items.registerSheet("shuhai-dalu", ItemCardSheet, {
+    types: ["itemCard"],
     makeDefault: true,
-    label: "书海大陆 - 条件触发物品卡"
+    label: "书海大陆 - 物品卡"
   });
   
   console.log('书海大陆 | 表单已注册');
@@ -920,16 +918,6 @@ Hooks.once('init', function() {
     return (item && item.system.category) ? item.system.category : '';
   });
 
-  // 嵌套属性查找helper
-  Handlebars.registerHelper('lookup', function(obj, key, nestedKey) {
-    if (!obj || !key) return undefined;
-    const value = obj[key];
-    if (nestedKey && value) {
-      return value[nestedKey];
-    }
-    return value;
-  });
-
   // 获取物品tooltip（悬停提示）
   Handlebars.registerHelper('getItemTooltip', function(itemId, options) {
     if (!itemId) return '';
@@ -984,8 +972,10 @@ async function preloadHandlebarsTemplates() {
 
     // 物品模板
     "systems/shuhai-dalu/templates/item/item-sheet.hbs",
-    "systems/shuhai-dalu/templates/item/item-sheet-new.hbs",
-    "systems/shuhai-dalu/templates/item/partials/condition-editor.hbs",
+
+    // 物品卡模板
+    "systems/shuhai-dalu/templates/item-card/item-card-sheet.hbs",
+    "systems/shuhai-dalu/templates/item-card/condition-editor.hbs",
 
     // 战斗区域模板
     "systems/shuhai-dalu/templates/combat/combat-area.hbs",

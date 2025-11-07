@@ -21,7 +21,7 @@
     "styles/player-sheet.css",
     "styles/combat-area.css",
     "styles/counter-area.css",
-    "styles/item-sheet-new.css"
+    "styles/item-card.css"
   ],
   "documentTypes": {
     "Actor": {
@@ -55,6 +55,9 @@
         "htmlFields": ["effect"]
       },
       "equipment": {
+        "htmlFields": ["effect"]
+      },
+      "itemCard": {
         "htmlFields": ["effect"]
       }
     }
