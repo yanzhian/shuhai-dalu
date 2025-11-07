@@ -133,14 +133,22 @@ export default class ActivityEditor extends Application {
     html.find('.add-effect-btn').click(this._onAddEffect.bind(this));
     html.find('.remove-effect-btn').click(this._onRemoveEffect.bind(this));
 
-    // checkbox 变化时重新渲染
+    // checkbox 变化时先保存表单状态再重新渲染
     html.find('.has-consume-checkbox').change(async (e) => {
+      // 先读取并保存当前表单数据
+      this._updateActivityFromForm();
+      // 更新 checkbox 状态
       this.activity.hasConsume = e.target.checked;
+      // 重新渲染
       this.render();
     });
 
     html.find('.custom-effect-checkbox').change(async (e) => {
+      // 先读取并保存当前表单数据
+      this._updateActivityFromForm();
+      // 更新 checkbox 状态
       this.activity.customEffect.enabled = e.target.checked;
+      // 重新渲染
       this.render();
     });
 
@@ -153,6 +161,44 @@ export default class ActivityEditor extends Application {
       e.preventDefault();
       this._onSave(e);
     });
+  }
+
+  /**
+   * 从表单更新 activity 数据（不包括 checkbox）
+   */
+  _updateActivityFromForm() {
+    const form = this.element?.find('form')[0];
+    if (!form) return;
+
+    const formData = new FormDataExtended(form).object;
+
+    // 更新基本字段
+    if (formData.name !== undefined) this.activity.name = formData.name;
+    if (formData.trigger !== undefined) this.activity.trigger = formData.trigger;
+    if (formData.target !== undefined) this.activity.target = formData.target;
+
+    // 更新 consumes
+    if (formData.consumes) {
+      this.activity.consumes = Object.values(formData.consumes);
+    }
+
+    // 更新 effectsList
+    if (formData.effects) {
+      this.activity.effectsList = Object.values(formData.effects);
+    }
+
+    // 更新 customEffect（但不更新 enabled，那个由 checkbox 控制）
+    if (formData.customEffect) {
+      if (formData.customEffect.name !== undefined) {
+        this.activity.customEffect.name = formData.customEffect.name;
+      }
+      if (formData.customEffect.layers !== undefined) {
+        this.activity.customEffect.layers = formData.customEffect.layers;
+      }
+      if (formData.customEffect.strength !== undefined) {
+        this.activity.customEffect.strength = formData.customEffect.strength;
+      }
+    }
   }
 
   /**
@@ -206,18 +252,26 @@ export default class ActivityEditor extends Application {
    */
   async _onSave(event) {
     event.preventDefault();
+    console.log('【Activity保存】开始保存流程');
 
     const form = this.element.find('form')[0];
-    if (!form) return;
+    if (!form) {
+      console.error('【Activity保存】找不到表单');
+      ui.notifications.error("保存失败：找不到表单");
+      return;
+    }
 
     const formData = new FormDataExtended(form).object;
+    console.log('【Activity保存】原始表单数据:', formData);
 
     // 处理 consumes
     const consumes = formData.consumes ? Object.values(formData.consumes) : [];
+    console.log('【Activity保存】处理后的 consumes:', consumes);
 
     // 处理 effectsList
     const effectsList = formData.effects ? Object.values(formData.effects) : [];
     const effects = this._listToEffects(effectsList);
+    console.log('【Activity保存】处理后的 effects:', effects);
 
     // 构建 activity 数据
     const activityData = {
@@ -236,17 +290,27 @@ export default class ActivityEditor extends Application {
       }
     };
 
-    console.log('【Activity保存】准备保存:', activityData);
+    console.log('【Activity保存】构建的 activityData:', activityData);
 
-    // 更新 item 的 activities
-    const activities = foundry.utils.deepClone(this.item.system.activities || {});
-    activities[this.activityId] = activityData;
+    try {
+      // 更新 item 的 activities
+      const activities = foundry.utils.deepClone(this.item.system.activities || {});
+      console.log('【Activity保存】当前 activities:', activities);
 
-    await this.item.update({
-      'system.activities': activities
-    });
+      activities[this.activityId] = activityData;
+      console.log('【Activity保存】更新后的 activities:', activities);
 
-    ui.notifications.info("活动已保存");
-    this.close();
+      const updateData = {'system.activities': activities};
+      console.log('【Activity保存】准备更新 item，数据:', updateData);
+
+      await this.item.update(updateData);
+      console.log('【Activity保存】item.update 完成');
+
+      ui.notifications.info("活动已保存");
+      this.close();
+    } catch (error) {
+      console.error('【Activity保存】保存失败:', error);
+      ui.notifications.error("保存失败: " + error.message);
+    }
   }
 }
