@@ -94,8 +94,7 @@ export default class ItemCardSheet extends ItemSheet {
     html.find('.item-card-tab').click(this._onTabChange.bind(this));
 
     // 面板折叠
-    html.find('.item-card-effect-header').click(this._onTogglePanel.bind(this));
-    html.find('.item-card-condition-header').click(this._onTogglePanel.bind(this));
+    html.find('.item-card-panel-header').click(this._onTogglePanel.bind(this));
 
     // 只在可编辑状态添加以下监听器
     if (!this.isEditable) return;
@@ -103,6 +102,10 @@ export default class ItemCardSheet extends ItemSheet {
     // 条件管理
     html.find('.item-card-add-condition-btn').click(this._onAddCondition.bind(this));
     html.find('.delete-condition-btn').click(this._onDeleteCondition.bind(this));
+
+    // 消耗管理
+    html.find('.add-consume-btn').click(this._onAddConsume.bind(this));
+    html.find('.remove-consume-btn').click(this._onRemoveConsume.bind(this));
 
     // 使用/聊天按钮
     html.find('.item-use-btn').click(this._onItemUse.bind(this));
@@ -143,11 +146,17 @@ export default class ItemCardSheet extends ItemSheet {
   _onTogglePanel(event) {
     event.preventDefault();
     const header = $(event.currentTarget);
-    const panel = header.closest('.item-card-effect-panel, .item-card-condition-panel');
-    const content = panel.find('.item-card-effect-content, .item-card-condition-content').first();
+    const content = header.next('.item-card-panel-content');
+    const icon = header.find('.collapse-icon');
 
-    header.toggleClass('collapsed');
     content.toggleClass('collapsed');
+
+    // 切换图标方向
+    if (content.hasClass('collapsed')) {
+      icon.removeClass('fa-chevron-down').addClass('fa-chevron-right');
+    } else {
+      icon.removeClass('fa-chevron-right').addClass('fa-chevron-down');
+    }
   }
 
   /**
@@ -197,6 +206,47 @@ export default class ItemCardSheet extends ItemSheet {
     if (!confirm) return;
 
     conditions.splice(conditionIndex, 1);
+
+    await this.item.update({
+      'system.conditions': conditions
+    });
+  }
+
+  /**
+   * 添加消耗
+   */
+  async _onAddConsume(event) {
+    event.preventDefault();
+
+    const conditionIndex = parseInt($(event.currentTarget).data('condition-index'));
+    const conditions = [...this.item.system.conditions];
+
+    if (!conditions[conditionIndex].consumes) {
+      conditions[conditionIndex].consumes = [];
+    }
+
+    conditions[conditionIndex].consumes.push({
+      buffId: 'charge',
+      layers: 1,
+      strength: 0
+    });
+
+    await this.item.update({
+      'system.conditions': conditions
+    });
+  }
+
+  /**
+   * 移除消耗
+   */
+  async _onRemoveConsume(event) {
+    event.preventDefault();
+
+    const conditionIndex = parseInt($(event.currentTarget).data('condition-index'));
+    const consumeIndex = parseInt($(event.currentTarget).data('consume-index'));
+    const conditions = [...this.item.system.conditions];
+
+    conditions[conditionIndex].consumes.splice(consumeIndex, 1);
 
     await this.item.update({
       'system.conditions': conditions

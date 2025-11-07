@@ -7,7 +7,7 @@
   background: #0F0D1B;
   color: #ECE4D6;
   font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
-  padding: 12px;
+  padding: 0;
   height: 100%;
   overflow: hidden;
 }
@@ -26,7 +26,8 @@
   flex-direction: column;
   gap: 12px;
   height: 100%;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   background: #0F0D1B;
   border: 2px solid #EBBD68;
   border-radius: 8px;
@@ -34,12 +35,16 @@
 }
 
 /* ========================================
-   编辑锁按钮
+   编辑锁按钮（独立一排）
    ======================================== */
+.item-card-lock-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+}
+
 .item-card-lock {
-  position: absolute;
-  top: 12px;
-  left: 12px;
   width: 16px;
   height: 16px;
   background: rgba(235, 189, 104, 0.95);
@@ -52,7 +57,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
   padding: 0;
 }
 
@@ -80,7 +84,6 @@
   padding: 12px;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 6px;
-  position: relative;
 }
 
 /* 左侧：大图标 */
@@ -113,9 +116,11 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  justify-content: space-between;
 }
 
+/* 名称输入框（上） */
 .item-card-name-input {
   font-size: 24px;
   font-weight: bold;
@@ -128,90 +133,120 @@
   width: 100%;
 }
 
+.item-card-name-input:focus {
+  border-bottom-color: #E1AA43;
+}
+
 .item-card-name-input:disabled {
-  border-bottom-color: transparent;
+  border-bottom-color: #EBBD68;
   opacity: 1;
 }
 
-.item-card-meta-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+/* 类型-分类行（中） */
+.item-card-type-category-row {
+  display: flex;
+  align-items: center;
   gap: 8px;
 }
 
-.item-card-meta-field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.item-card-type-input,
+.item-card-category-input {
+  flex: 1;
+  font-size: 16px;
+  color: #ECE4D6;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  padding: 6px 12px;
+  outline: none;
 }
 
-.item-card-meta-field label {
-  font-size: 11px;
+.item-card-type-input:focus,
+.item-card-category-input:focus {
+  border-color: #E1AA43;
+}
+
+.item-card-type-input:disabled,
+.item-card-category-input:disabled {
+  opacity: 0.7;
+}
+
+.item-card-separator {
+  font-size: 18px;
   color: #EBBD68;
   font-weight: bold;
-  text-transform: uppercase;
 }
 
-.item-card-meta-field input,
-.item-card-meta-field select {
+/* 标签输入框（下） */
+.item-card-tags-input {
   font-size: 14px;
   color: #ECE4D6;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid #EBBD68;
   border-radius: 4px;
-  padding: 4px 8px;
+  padding: 6px 12px;
   outline: none;
 }
 
-.item-card-meta-field input:focus,
-.item-card-meta-field select:focus {
+.item-card-tags-input:focus {
   border-color: #E1AA43;
 }
 
-.item-card-meta-field input:disabled,
-.item-card-meta-field select:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.item-card-tags-input {
-  grid-column: 1 / -1;
+.item-card-tags-input:disabled {
+  opacity: 0.7;
 }
 
 /* ========================================
-   属性行区域
+   分割线
    ======================================== */
-.item-card-properties {
+.item-card-divider {
+  height: 2px;
+  background: #EBBD68;
+  opacity: 0.3;
+  flex-shrink: 0;
+}
+
+/* ========================================
+   属性区域
+   ======================================== */
+.item-card-properties-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* 上行：骰数、费用、星光 */
+.item-card-properties-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
+  gap: 16px;
   padding: 8px 12px;
   background: rgba(235, 189, 104, 0.1);
   border: 1px solid #EBBD68;
   border-radius: 6px;
 }
 
-.item-card-property {
+.item-card-prop-item {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-size: 14px;
+}
+
+.item-card-prop-item i {
+  font-size: 18px;
   color: #EBBD68;
 }
 
-.item-card-property i {
-  font-size: 16px;
-  color: #E1AA43;
-}
-
-.item-card-property label {
+.prop-label {
   font-weight: bold;
   color: #EBBD68;
+  font-size: 13px;
 }
 
-.item-card-property input {
-  width: 80px;
+.item-card-prop-item input {
+  width: 100px;
   padding: 4px 8px;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid #EBBD68;
@@ -220,44 +255,53 @@
   text-align: center;
   font-size: 14px;
   font-weight: bold;
+  outline: none;
 }
 
-.item-card-property input:focus {
-  outline: none;
+.item-card-prop-item input:focus {
   border-color: #E1AA43;
 }
 
-.item-card-property input:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.item-card-prop-item input:disabled {
+  opacity: 0.7;
 }
 
-.item-card-property .starlight-value {
-  color: #E1AA43;
+/* 下行：防具属性 */
+.item-card-armor-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(235, 189, 104, 0.05);
+  border: 1px solid #EBBD68;
+  border-radius: 6px;
+}
+
+.armor-label {
+  font-size: 13px;
   font-weight: bold;
+  color: #EBBD68;
 }
 
-/* 防具属性 */
-.item-card-armor-properties {
+.item-card-armor-badges {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
-  margin-left: auto;
 }
 
-.item-card-armor-badge {
-  padding: 4px 8px;
+.armor-badge {
+  padding: 4px 10px;
   border-radius: 4px;
   font-size: 12px;
   font-weight: bold;
   color: #fff;
 }
 
-.item-card-armor-badge.resist {
+.armor-badge.resist {
   background: #4a7c2c;
 }
 
-.item-card-armor-badge.weak {
+.armor-badge.weak {
   background: #c14545;
 }
 
@@ -304,60 +348,63 @@
   flex: 1;
   overflow: hidden;
   display: none;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 0;
 }
 
 .item-card-tab-content.active {
   display: flex;
-  flex-direction: column;
 }
 
 /* ========================================
-   效果描述标签页
+   面板通用样式（效果和条件共用）
    ======================================== */
-.item-card-effect-tab {
-  padding: 12px 0;
-}
-
-.item-card-effect-panel {
+.item-card-effect-panel,
+.item-card-condition-panel {
   background: rgba(0, 0, 0, 0.2);
   border: 2px solid #EBBD68;
   border-radius: 6px;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
-.item-card-effect-header {
+.item-card-panel-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   background: rgba(235, 189, 104, 0.1);
   cursor: pointer;
   transition: all 0.2s;
   user-select: none;
 }
 
-.item-card-effect-header:hover {
+.item-card-panel-header:hover {
   background: rgba(235, 189, 104, 0.2);
 }
 
-.item-card-effect-header .collapse-icon {
+.item-card-panel-header .collapse-icon {
   font-size: 12px;
   color: #EBBD68;
-  transition: transform 0.3s;
+  transition: transform 0.2s;
+  flex-shrink: 0;
 }
 
-.item-card-effect-header.collapsed .collapse-icon {
-  transform: rotate(-90deg);
-}
-
-.item-card-effect-header .panel-title {
+.item-card-panel-header .panel-title {
   flex: 1;
   font-size: 14px;
   font-weight: bold;
   color: #EBBD68;
 }
 
-.item-card-effect-header .edit-btn {
+.panel-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.panel-edit-btn,
+.panel-action-btn {
   width: 24px;
   height: 24px;
   background: transparent;
@@ -370,23 +417,51 @@
   justify-content: center;
   font-size: 12px;
   transition: all 0.2s;
+  flex-shrink: 0;
+  padding: 0;
 }
 
-.item-card-effect-header .edit-btn:hover {
+.panel-edit-btn:hover,
+.panel-action-btn:hover {
   background: rgba(235, 189, 104, 0.2);
   border-color: #E1AA43;
 }
 
-.item-card-effect-content {
+.delete-condition-btn {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 1px solid #c14545;
+  border-radius: 4px;
+  color: #c14545;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.delete-condition-btn:hover {
+  background: #c14545;
+  color: #fff;
+}
+
+.item-card-panel-content {
   padding: 12px;
   transition: all 0.3s;
 }
 
-.item-card-effect-content.collapsed {
+.item-card-panel-content.collapsed {
   display: none;
 }
 
-.item-card-effect-display {
+/* ========================================
+   效果描述标签页
+   ======================================== */
+.effect-display {
   padding: 12px;
   background: rgba(0, 0, 0, 0.3);
   border-radius: 4px;
@@ -397,7 +472,7 @@
   min-height: 80px;
 }
 
-.item-card-effect-textarea {
+.effect-textarea {
   width: 100%;
   min-height: 120px;
   padding: 12px;
@@ -412,91 +487,23 @@
   outline: none;
 }
 
-.item-card-effect-textarea:focus {
+.effect-textarea:focus {
   border-color: #E1AA43;
+}
+
+.effect-textarea:disabled {
+  opacity: 0.7;
 }
 
 /* ========================================
    条件触发标签页
    ======================================== */
-.item-card-conditions-tab {
-  padding: 12px 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
 .item-card-conditions-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.item-card-condition-panel {
-  background: rgba(0, 0, 0, 0.2);
-  border: 2px solid #EBBD68;
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.item-card-condition-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: rgba(235, 189, 104, 0.1);
-  cursor: pointer;
-  transition: all 0.2s;
-  user-select: none;
-}
-
-.item-card-condition-header:hover {
-  background: rgba(235, 189, 104, 0.2);
-}
-
-.item-card-condition-header .collapse-icon {
-  font-size: 12px;
-  color: #EBBD68;
-  transition: transform 0.3s;
-}
-
-.item-card-condition-header.collapsed .collapse-icon {
-  transform: rotate(-90deg);
-}
-
-.item-card-condition-header .condition-title {
+  overflow-y: auto;
   flex: 1;
-  font-size: 14px;
-  font-weight: bold;
-  color: #EBBD68;
-}
-
-.item-card-condition-header .delete-condition-btn {
-  width: 24px;
-  height: 24px;
-  background: transparent;
-  border: 1px solid #c14545;
-  border-radius: 4px;
-  color: #c14545;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  transition: all 0.2s;
-}
-
-.item-card-condition-header .delete-condition-btn:hover {
-  background: #c14545;
-  color: #fff;
-}
-
-.item-card-condition-content {
-  padding: 12px;
-  transition: all 0.3s;
-}
-
-.item-card-condition-content.collapsed {
-  display: none;
 }
 
 .item-card-add-condition-btn {
@@ -514,7 +521,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-top: 12px;
+  flex-shrink: 0;
 }
 
 .item-card-add-condition-btn:hover {
@@ -522,36 +529,42 @@
   transform: translateY(-2px);
 }
 
+.item-card-add-condition-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* ========================================
    条件编辑器样式
    ======================================== */
-.item-card-condition-editor {
+.condition-editor {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
 /* 小分割线 */
-.item-card-divider-small {
+.section-divider {
   height: 1px;
   background: #EBBD68;
   opacity: 0.3;
 }
 
 /* 触发时机 */
-.item-card-trigger-section {
+.trigger-timing-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.item-card-trigger-options {
+.timing-options {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-.item-card-trigger-option {
+.timing-option {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -564,71 +577,106 @@
   user-select: none;
 }
 
-.item-card-trigger-option:hover {
+.timing-option:hover {
   background: rgba(235, 189, 104, 0.1);
   border-color: #E1AA43;
 }
 
-.item-card-trigger-option.selected {
+.timing-option.selected {
   background: rgba(235, 189, 104, 0.2);
   border-color: #E1AA43;
 }
 
-.item-card-trigger-option input[type="radio"] {
+.timing-option input[type="radio"] {
   margin: 0;
   cursor: pointer;
+  accent-color: #EBBD68;
 }
 
-.item-card-trigger-option span {
+.timing-option span {
   font-size: 13px;
   color: #ECE4D6;
   font-weight: bold;
 }
 
+.timing-option:has(input:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* 消耗设置 */
-.item-card-consume-section {
+.consume-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.item-card-consume-toggle {
+.consume-toggle {
   display: flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
   user-select: none;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 2px solid #EBBD68;
+  border-radius: 6px;
+  transition: all 0.2s;
+  width: fit-content;
 }
 
-.item-card-consume-toggle input[type="checkbox"] {
+.consume-toggle:hover {
+  background: rgba(235, 189, 104, 0.1);
+  border-color: #E1AA43;
+}
+
+.consume-toggle.active {
+  background: rgba(235, 189, 104, 0.2);
+  border-color: #E1AA43;
+}
+
+.consume-toggle input[type="checkbox"] {
   width: 18px;
   height: 18px;
   cursor: pointer;
+  accent-color: #EBBD68;
+  margin: 0;
 }
 
-.item-card-consume-toggle span {
+.consume-toggle span {
   font-size: 14px;
   font-weight: bold;
   color: #EBBD68;
 }
 
-.item-card-consume-effects {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding-left: 26px;
+.consume-toggle:has(input:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.item-card-consume-item {
+.consumes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 12px;
+  border-left: 2px solid rgba(235, 189, 104, 0.3);
+  margin-left: 20px;
+}
+
+.consume-item {
   display: flex;
   align-items: center;
   gap: 6px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
 }
 
-.item-card-consume-item select {
+.consume-effect-select {
   flex: 1;
+  min-width: 120px;
   padding: 6px 8px;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.4);
   border: 1px solid #EBBD68;
   border-radius: 4px;
   color: #ECE4D6;
@@ -636,10 +684,11 @@
   outline: none;
 }
 
-.item-card-consume-item input[type="number"] {
-  width: 70px;
+.consume-layers-input,
+.consume-strength-input {
+  width: 60px;
   padding: 6px 8px;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.4);
   border: 1px solid #EBBD68;
   border-radius: 4px;
   color: #ECE4D6;
@@ -648,12 +697,25 @@
   outline: none;
 }
 
-.item-card-consume-item select:focus,
-.item-card-consume-item input[type="number"]:focus {
+.consume-unit {
+  font-size: 12px;
+  color: #EBBD68;
+  font-weight: bold;
+}
+
+.consume-effect-select:focus,
+.consume-layers-input:focus,
+.consume-strength-input:focus {
   border-color: #E1AA43;
 }
 
-.item-card-remove-consume-btn {
+.consume-effect-select:disabled,
+.consume-layers-input:disabled,
+.consume-strength-input:disabled {
+  opacity: 0.6;
+}
+
+.remove-consume-btn {
   width: 24px;
   height: 24px;
   background: transparent;
@@ -664,23 +726,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 14px;
   transition: all 0.2s;
+  flex-shrink: 0;
+  padding: 0;
 }
 
-.item-card-remove-consume-btn:hover {
+.remove-consume-btn:hover {
   background: #c14545;
   color: #fff;
 }
 
-.item-card-add-consume-btn {
-  padding: 6px 12px;
+.add-consume-btn {
+  padding: 8px 12px;
   background: transparent;
   border: 1px dashed #EBBD68;
   border-radius: 4px;
   color: #EBBD68;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: bold;
   display: flex;
   align-items: center;
@@ -689,32 +753,36 @@
   transition: all 0.2s;
 }
 
-.item-card-add-consume-btn:hover {
+.add-consume-btn:hover {
   background: rgba(235, 189, 104, 0.1);
   border-style: solid;
 }
 
+.add-consume-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* 目标选择 */
-.item-card-target-section {
+.target-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.item-card-section-title {
+.section-label {
   font-size: 14px;
   font-weight: bold;
   color: #EBBD68;
-  margin: 0;
 }
 
-.item-card-target-options {
+.target-options {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-.item-card-target-option {
+.target-option {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -727,72 +795,93 @@
   user-select: none;
 }
 
-.item-card-target-option:hover {
+.target-option:hover {
   background: rgba(235, 189, 104, 0.1);
   border-color: #E1AA43;
 }
 
-.item-card-target-option.selected {
+.target-option.selected {
   background: rgba(235, 189, 104, 0.2);
   border-color: #E1AA43;
 }
 
-.item-card-target-option input[type="radio"] {
+.target-option input[type="radio"] {
   margin: 0;
   cursor: pointer;
+  accent-color: #EBBD68;
 }
 
-.item-card-target-option span {
+.target-option span {
   font-size: 13px;
   color: #ECE4D6;
   font-weight: bold;
 }
 
+.target-option:has(input:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* 效果添加 */
-.item-card-effects-section {
+.effects-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.item-card-effects-list {
+.section-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #EBBD68;
+  padding: 4px 0;
+}
+
+.effects-list {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.item-card-effect-item {
+.effect-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px;
+  gap: 8px;
+  padding: 8px;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 4px;
-}
-
-.item-card-effect-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  transition: all 0.2s;
   cursor: pointer;
   user-select: none;
-  min-width: 100px;
 }
 
-.item-card-effect-checkbox input[type="checkbox"] {
+.effect-item:hover {
+  background: rgba(235, 189, 104, 0.05);
+}
+
+.effect-item.selected {
+  background: rgba(235, 189, 104, 0.1);
+  border: 1px solid rgba(235, 189, 104, 0.3);
+}
+
+.effect-item input[type="checkbox"] {
   width: 16px;
   height: 16px;
   cursor: pointer;
+  accent-color: #EBBD68;
+  margin: 0;
+  flex-shrink: 0;
 }
 
-.item-card-effect-checkbox .effect-name {
+.effect-item .effect-name {
+  min-width: 60px;
   font-size: 13px;
   color: #ECE4D6;
   font-weight: bold;
 }
 
-.item-card-effect-input {
-  width: 70px;
+.effect-layers-input,
+.effect-strength-input {
+  width: 60px;
   padding: 4px 8px;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid #EBBD68;
@@ -803,31 +892,53 @@
   outline: none;
 }
 
-.item-card-effect-input:focus {
+.effect-unit {
+  font-size: 12px;
+  color: #EBBD68;
+  font-weight: bold;
+}
+
+.effect-layers-input:focus,
+.effect-strength-input:focus {
   border-color: #E1AA43;
 }
 
+.effect-layers-input:disabled,
+.effect-strength-input:disabled {
+  opacity: 0.6;
+}
+
+.effect-item:has(input:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* 自定义效果 */
-.item-card-custom-effect-section {
+.custom-effect-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.item-card-custom-effect-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-  flex-wrap: wrap;
-}
-
-.item-card-custom-effect-item .effect-input[type="text"] {
+.custom-effect-name-input {
   flex: 1;
   min-width: 120px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  color: #ECE4D6;
+  font-size: 12px;
+  outline: none;
   text-align: left;
+}
+
+.custom-effect-name-input:focus {
+  border-color: #E1AA43;
+}
+
+.custom-effect-name-input:disabled {
+  opacity: 0.6;
 }
 
 /* ========================================
@@ -843,9 +954,9 @@
 }
 
 .item-card-action-btn {
-  min-width: 100px;
-  height: 36px;
-  padding: 0 16px;
+  min-width: 120px;
+  height: 40px;
+  padding: 0 20px;
   background: #EBBD68;
   border: none;
   border-radius: 6px;
@@ -857,7 +968,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .item-card-action-btn:hover {
@@ -874,6 +985,7 @@
 
 .item-card-action-btn.secondary:hover {
   background: rgba(235, 189, 104, 0.2);
+  transform: translateY(-2px);
 }
 
 .item-card-action-btn:disabled {
@@ -893,7 +1005,7 @@
 .item-card,
 .item-card * {
   scrollbar-width: thin;
-  scrollbar-color: #EBBD68 transparent;
+  scrollbar-color: #EBBD68 rgba(0, 0, 0, 0.2);
 }
 
 .item-card ::-webkit-scrollbar {
@@ -916,16 +1028,11 @@
 }
 
 /* ========================================
-   禁用状态
+   通用禁用状态
    ======================================== */
 .item-card input:disabled,
 .item-card select:disabled,
 .item-card textarea:disabled,
 .item-card button:disabled {
-  opacity: 0.6;
   cursor: not-allowed !important;
-}
-
-.item-card button:disabled:hover {
-  transform: none !important;
 }
