@@ -119,13 +119,30 @@ export default class ItemCardSheet extends ItemSheet {
 
     await super._render(force, options);
 
-    // 恢复滚动位置
+    // 恢复滚动位置 - 需要等待DOM完全渲染
     if (this._scrollPositions.main !== undefined) {
-      const container = this.element.find('.item-card-container');
-      if (container.length) {
-        container.scrollTop(this._scrollPositions.main);
-      }
+      setTimeout(() => {
+        const container = this.element.find('.item-card-container');
+        if (container.length) {
+          container.scrollTop(this._scrollPositions.main);
+        }
+      }, 0);
     }
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * 获取当前表单数据（手动收集）
+   */
+  _getCurrentFormData() {
+    if (!this.element || !this.element.length) return {};
+
+    const form = this.element.find('form')[0];
+    if (!form) return {};
+
+    const formData = new FormDataExtended(form).object;
+    return formData;
   }
 
   /* -------------------------------------------- */
@@ -164,9 +181,15 @@ export default class ItemCardSheet extends ItemSheet {
   async _onToggleLock(event) {
     event.preventDefault();
 
-    // 先提交当前表单，保存所有未保存的输入
-    await this._onSubmit(event, {preventClose: true, preventRender: true});
+    // 收集当前表单数据
+    const formData = this._getCurrentFormData();
 
+    // 先保存表单数据
+    if (Object.keys(formData).length > 0) {
+      await this.item.update(formData);
+    }
+
+    // 再切换锁定状态
     const currentLock = this.item.getFlag('shuhai-dalu', 'isLocked') || false;
     await this.item.setFlag('shuhai-dalu', 'isLocked', !currentLock);
     this.render();
@@ -198,9 +221,10 @@ export default class ItemCardSheet extends ItemSheet {
     event.preventDefault();
     event.stopPropagation();
 
-    // 先提交当前表单，保存所有未保存的输入
-    await this._onSubmit(event, {preventClose: true, preventRender: true});
+    // 收集当前表单数据
+    const formData = this._getCurrentFormData();
 
+    // 添加新条件
     const conditions = [...(this.item.system.conditions || [])];
     const newCondition = {
       trigger: 'onUse',
@@ -218,9 +242,13 @@ export default class ItemCardSheet extends ItemSheet {
 
     conditions.push(newCondition);
 
-    await this.item.update({
+    // 合并表单数据和新条件一起更新
+    const updateData = {
+      ...formData,
       'system.conditions': conditions
-    });
+    };
+
+    await this.item.update(updateData);
   }
 
   /**
@@ -241,15 +269,20 @@ export default class ItemCardSheet extends ItemSheet {
 
     if (!confirm) return;
 
-    // 先提交当前表单，保存所有未保存的输入
-    await this._onSubmit(event, {preventClose: true, preventRender: true});
+    // 收集当前表单数据
+    const formData = this._getCurrentFormData();
 
+    // 删除指定条件
     const conditions = [...(this.item.system.conditions || [])];
     conditions.splice(conditionIndex, 1);
 
-    await this.item.update({
+    // 合并表单数据和修改后的条件一起更新
+    const updateData = {
+      ...formData,
       'system.conditions': conditions
-    });
+    };
+
+    await this.item.update(updateData);
   }
 
   /**
@@ -259,8 +292,8 @@ export default class ItemCardSheet extends ItemSheet {
     event.preventDefault();
     event.stopPropagation();
 
-    // 先提交当前表单，保存所有未保存的输入
-    await this._onSubmit(event, {preventClose: true, preventRender: true});
+    // 收集当前表单数据
+    const formData = this._getCurrentFormData();
 
     const conditionIndex = parseInt($(event.currentTarget).data('condition-index'));
     const conditions = [...(this.item.system.conditions || [])];
@@ -275,9 +308,13 @@ export default class ItemCardSheet extends ItemSheet {
       strength: 0
     });
 
-    await this.item.update({
+    // 合并表单数据和修改后的条件一起更新
+    const updateData = {
+      ...formData,
       'system.conditions': conditions
-    });
+    };
+
+    await this.item.update(updateData);
   }
 
   /**
@@ -287,8 +324,8 @@ export default class ItemCardSheet extends ItemSheet {
     event.preventDefault();
     event.stopPropagation();
 
-    // 先提交当前表单，保存所有未保存的输入
-    await this._onSubmit(event, {preventClose: true, preventRender: true});
+    // 收集当前表单数据
+    const formData = this._getCurrentFormData();
 
     const conditionIndex = parseInt($(event.currentTarget).data('condition-index'));
     const consumeIndex = parseInt($(event.currentTarget).data('consume-index'));
@@ -296,9 +333,13 @@ export default class ItemCardSheet extends ItemSheet {
 
     conditions[conditionIndex].consumes.splice(consumeIndex, 1);
 
-    await this.item.update({
+    // 合并表单数据和修改后的条件一起更新
+    const updateData = {
+      ...formData,
       'system.conditions': conditions
-    });
+    };
+
+    await this.item.update(updateData);
   }
 
   /**
