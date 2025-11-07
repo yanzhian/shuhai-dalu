@@ -24,7 +24,15 @@
         <div class="item-card-type-category-row">
           <span class="item-card-type-label">{{item.type}}</span>
           <span class="item-card-separator">-</span>
-          <input name="system.category" type="text" value="{{system.category}}" placeholder="分类" class="item-card-category-input" {{#if isLocked}}disabled{{/if}} />
+          {{#if categoryChoices}}
+            <select name="system.category" class="item-card-category-input" {{#if isLocked}}disabled{{/if}}>
+              {{#each categoryChoices}}
+                <option value="{{this}}" {{#if (eq this ../system.category)}}selected{{/if}}>{{this}}</option>
+              {{/each}}
+            </select>
+          {{else}}
+            <input name="system.category" type="text" value="{{system.category}}" placeholder="分类" class="item-card-category-input" {{#if isLocked}}disabled{{/if}} />
+          {{/if}}
         </div>
 
         {{!-- 下：标签 --}}
@@ -58,14 +66,45 @@
       {{#if (eq item.type "armor")}}
         <div class="item-card-armor-row">
           <span class="armor-label">防具属性：</span>
-          <div class="item-card-armor-badges">
-            {{#if system.armorProperties.slashUp}}<span class="armor-badge resist">斩击↑</span>{{/if}}
-            {{#if system.armorProperties.pierceUp}}<span class="armor-badge resist">突刺↑</span>{{/if}}
-            {{#if system.armorProperties.bluntUp}}<span class="armor-badge resist">打击↑</span>{{/if}}
-            {{#if system.armorProperties.slashDown}}<span class="armor-badge weak">斩击↓</span>{{/if}}
-            {{#if system.armorProperties.pierceDown}}<span class="armor-badge weak">突刺↓</span>{{/if}}
-            {{#if system.armorProperties.bluntDown}}<span class="armor-badge weak">打击↓</span>{{/if}}
-          </div>
+          {{#if isLocked}}
+            {{!-- 锁定状态：只显示badges --}}
+            <div class="item-card-armor-badges">
+              {{#if system.armorProperties.slashUp}}<span class="armor-badge resist">斩击↑</span>{{/if}}
+              {{#if system.armorProperties.pierceUp}}<span class="armor-badge resist">突刺↑</span>{{/if}}
+              {{#if system.armorProperties.bluntUp}}<span class="armor-badge resist">打击↑</span>{{/if}}
+              {{#if system.armorProperties.slashDown}}<span class="armor-badge weak">斩击↓</span>{{/if}}
+              {{#if system.armorProperties.pierceDown}}<span class="armor-badge weak">突刺↓</span>{{/if}}
+              {{#if system.armorProperties.bluntDown}}<span class="armor-badge weak">打击↓</span>{{/if}}
+            </div>
+          {{else}}
+            {{!-- 未锁定状态：显示复选框 --}}
+            <div class="item-card-armor-checkboxes">
+              <label class="armor-checkbox resist">
+                <input type="checkbox" name="system.armorProperties.slashUp" {{#if system.armorProperties.slashUp}}checked{{/if}} />
+                <span>斩击↑</span>
+              </label>
+              <label class="armor-checkbox resist">
+                <input type="checkbox" name="system.armorProperties.pierceUp" {{#if system.armorProperties.pierceUp}}checked{{/if}} />
+                <span>突刺↑</span>
+              </label>
+              <label class="armor-checkbox resist">
+                <input type="checkbox" name="system.armorProperties.bluntUp" {{#if system.armorProperties.bluntUp}}checked{{/if}} />
+                <span>打击↑</span>
+              </label>
+              <label class="armor-checkbox weak">
+                <input type="checkbox" name="system.armorProperties.slashDown" {{#if system.armorProperties.slashDown}}checked{{/if}} />
+                <span>斩击↓</span>
+              </label>
+              <label class="armor-checkbox weak">
+                <input type="checkbox" name="system.armorProperties.pierceDown" {{#if system.armorProperties.pierceDown}}checked{{/if}} />
+                <span>突刺↓</span>
+              </label>
+              <label class="armor-checkbox weak">
+                <input type="checkbox" name="system.armorProperties.bluntDown" {{#if system.armorProperties.bluntDown}}checked{{/if}} />
+                <span>打击↓</span>
+              </label>
+            </div>
+          {{/if}}
         </div>
       {{/if}}
     </div>

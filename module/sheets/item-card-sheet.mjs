@@ -34,8 +34,8 @@ export default class ItemCardSheet extends ItemSheet {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ["shuhai-dalu", "sheet", "item", "item-card"],
-      width: 700,
-      height: 800,
+      width: 520,
+      height: 630,
       tabs: []
     });
   }
@@ -78,7 +78,24 @@ export default class ItemCardSheet extends ItemSheet {
     // 编辑锁状态
     context.isLocked = this.item.getFlag('shuhai-dalu', 'isLocked') || false;
 
+    // 根据类型添加category选项
+    context.categoryChoices = this._getCategoryChoices(this.item.type);
+
     return context;
+  }
+
+  /**
+   * 获取分类选项
+   */
+  _getCategoryChoices(itemType) {
+    const choices = {
+      'combatDice': ['打击', '突刺', '斩击'],
+      'shootDice': ['打击', '突刺', '斩击'],
+      'defenseDice': ['闪避', '反击-斩击', '反击-突刺', '反击-打击', '强化反击-斩击', '强化反击-突刺', '强化反击-打击', '防御', '强化防御'],
+      'triggerDice': ['EX'],
+      'passiveDice': ['道具', '标签']
+    };
+    return choices[itemType] || null;
   }
 
   /* -------------------------------------------- */
@@ -164,6 +181,7 @@ export default class ItemCardSheet extends ItemSheet {
    */
   async _onAddCondition(event) {
     event.preventDefault();
+    event.stopPropagation();
 
     const conditions = this.item.system.conditions || [];
     const newCondition = {
@@ -192,6 +210,7 @@ export default class ItemCardSheet extends ItemSheet {
    */
   async _onDeleteCondition(event) {
     event.preventDefault();
+    event.stopPropagation();
 
     const conditionIndex = parseInt($(event.currentTarget).closest('.item-card-condition-panel').data('index'));
     const conditions = this.item.system.conditions || [];
@@ -217,6 +236,7 @@ export default class ItemCardSheet extends ItemSheet {
    */
   async _onAddConsume(event) {
     event.preventDefault();
+    event.stopPropagation();
 
     const conditionIndex = parseInt($(event.currentTarget).data('condition-index'));
     const conditions = [...this.item.system.conditions];
@@ -241,6 +261,7 @@ export default class ItemCardSheet extends ItemSheet {
    */
   async _onRemoveConsume(event) {
     event.preventDefault();
+    event.stopPropagation();
 
     const conditionIndex = parseInt($(event.currentTarget).data('condition-index'));
     const consumeIndex = parseInt($(event.currentTarget).data('consume-index'));
