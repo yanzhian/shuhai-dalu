@@ -591,6 +591,24 @@ export default class CounterAreaApplication extends Application {
       description = `受到${finalDamage}点伤害`;
     }
 
+    // 应用守护/易损 BUFF 效果
+    const targetCombatState = actualTarget.getFlag('shuhai-dalu', 'combatState');
+    if (targetCombatState && targetCombatState.buffs) {
+      for (const buff of targetCombatState.buffs) {
+        if (buff.id === 'guard' && buff.layers > 0) {
+          // 守护：减少伤害
+          const damageReduction = buff.layers;
+          finalDamage = Math.max(0, finalDamage - damageReduction);
+          description += `\n由于【守护 ${buff.layers}层】，伤害减少${damageReduction}点`;
+        } else if (buff.id === 'vulnerable' && buff.layers > 0) {
+          // 易损：增加伤害
+          const damageIncrease = buff.layers;
+          finalDamage = finalDamage + damageIncrease;
+          description += `\n由于【易损 ${buff.layers}层】，伤害增加${damageIncrease}点`;
+        }
+      }
+    }
+
     return { finalDamage, description };
   }
 

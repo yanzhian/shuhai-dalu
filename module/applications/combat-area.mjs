@@ -276,8 +276,8 @@ export default class CombatAreaApplication extends Application {
     // 准备被动骰槽位
     context.passiveDiceSlots = this._preparePassiveDiceSlots();
 
-    // 使用保存的速度值
-    context.speedValues = this.combatState.speedValues;
+    // 使用保存的速度值，并应用迅捷/束缚BUFF效果
+    context.speedValues = this._applySpeedModifiers(this.combatState.speedValues);
 
     return context;
   }
@@ -392,6 +392,31 @@ export default class CombatAreaApplication extends Application {
       Math.floor(Math.random() * diceSize) + 1 + bonus,
       Math.floor(Math.random() * diceSize) + 1 + bonus
     ];
+  }
+
+  /**
+   * 应用迅捷/束缚BUFF对速度值的修正
+   */
+  _applySpeedModifiers(baseSpeedValues) {
+    if (!baseSpeedValues) return [0, 0, 0];
+
+    let modifier = 0;
+
+    // 计算迅捷/束缚的修正值
+    if (this.combatState.buffs) {
+      for (const buff of this.combatState.buffs) {
+        if (buff.id === 'swift' && buff.layers > 0) {
+          // 迅捷：速度增加
+          modifier += buff.layers;
+        } else if (buff.id === 'bound' && buff.layers > 0) {
+          // 束缚：速度减少
+          modifier -= buff.layers;
+        }
+      }
+    }
+
+    // 应用修正（确保速度值不会小于0）
+    return baseSpeedValues.map(speed => Math.max(0, speed + modifier));
   }
 
   /** @override */
