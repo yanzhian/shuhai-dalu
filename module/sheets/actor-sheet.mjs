@@ -15,10 +15,9 @@ export default class ShuhaiActorSheet extends ActorSheet {
         initial: "attributes" 
       }],
       dragDrop: [
-        { dragSelector: ".item-row", dropSelector: ".equipment-slots" },
-        { dragSelector: ".item-row", dropSelector: ".dice-slots" },
-        { dragSelector: ".item-row", dropSelector: ".special-slots" },
-        { dragSelector: ".item-row", dropSelector: ".passive-slots" }
+        { dragSelector: null, dropSelector: ".inventory-list" },  // 允许拖到物品栏
+        { dragSelector: null, dropSelector: ".slot-content" },  // 允许拖到装备槽
+        { dragSelector: ".item-icon-wrapper", dropSelector: null }  // 允许物品栏内物品拖到任意位置
       ],
       scrollY: [".biography", ".inventory-list", ".skills", ".equipment"]
     });
@@ -115,34 +114,34 @@ export default class ShuhaiActorSheet extends ActorSheet {
   /** @override */
   activateListeners(html) {
     super.activateListeners(html);
-    
+
     // 只在拥有权限时添加监听器
     if (!this.isEditable) return;
-    
+
     // === 属性相关 ===
     html.find('.attr-roll').click(this._onAttributeRoll.bind(this));
     html.find('.corruption-check').click(this._onCorruptionCheck.bind(this));
     html.find('.long-rest').click(this._onLongRest.bind(this));
     html.find('.roll-speed').click(this._onRollSpeed.bind(this));
-    
+
     // === 技能相关 ===
     html.find('.skill-increase').click(this._onSkillIncrease.bind(this));
     html.find('.skill-decrease').click(this._onSkillDecrease.bind(this));
     html.find('.skill-roll').click(this._onSkillRoll.bind(this));
-    
+
     // === 装备相关 ===
     html.find('.unequip-btn').click(this._onUnequip.bind(this));
     html.find('.use-dice-btn').click(this._onUseDice.bind(this));
-    
+
     // === 物品相关 ===
     html.find('.create-item-btn').click(this._onItemCreate.bind(this));
     html.find('.item-edit').click(this._onItemEdit.bind(this));
     html.find('.item-delete').click(this._onItemDelete.bind(this));
     html.find('.item-use').click(this._onItemUse.bind(this));
-    
+
     // === 拖放 ===
     const dragHandler = ev => this._onDragStart(ev);
-    html.find('.item-row').each((i, li) => {
+    html.find('.item-icon-wrapper').each((i, li) => {
       li.setAttribute("draggable", true);
       li.addEventListener("dragstart", dragHandler, false);
     });
@@ -441,43 +440,85 @@ export default class ShuhaiActorSheet extends ActorSheet {
 
   /** @override */
   async _onDrop(event) {
+    console.log('【拖放】_onDrop 触发', event.target);
     const data = TextEditor.getDragEventData(event);
     const actor = this.actor;
-    
+
     // 处理物品拖放
     if (data.type === "Item") {
+      console.log('【拖放】检测到物品拖放');
       return this._onDropItem(event, data);
     }
-    
+
     return super._onDrop(event);
   }
 
   /**
-   * 处理物品拖放到装备槽
+   * 处理物品拖放
    */
   async _onDropItem(event, data) {
+    console.log('【拖放】_onDropItem 开始处理');
     const item = await Item.implementation.fromDropData(data);
     const itemData = item.toObject();
-    
-    // 检查是否是从其他角色拖过来的
-    if (item.parent && item.parent.id !== this.actor.id) {
-      // 从其他角色拖过来，创建副本
-      delete itemData._id;
-      return this.actor.createEmbeddedDocuments("Item", [itemData]);
-    }
-    
-    // 检查拖放目标
+    console.log('【拖放】物品数据:', item.name, '来源:', item.parent ? item.parent.name : '物品侧边栏');
+
+    // 检查拖放目标是否是装备槽
     const dropTarget = event.target.closest('.slot-content');
-    if (!dropTarget) {
-      return super._onDropItem(event, data);
+    const inventoryTarget = event.target.closest('.inventory-list');
+    console.log('【拖放】拖放目标 - 装备槽:', !!dropTarget, '物品栏:', !!inventoryTarget);
+
+    // 情况1：物品没有 parent（从物品侧边栏拖来）
+    if (!item.parent) {
+      console.log('【拖放】情况1: 从 FVTT 侧边栏拖来');
+      // 如果拖到装备槽，创建物品并装备
+      if (dropTarget) {
+        console.log('【拖放】拖到装备槽，创建并装备');
+        const newItem = await this.actor.createEmbeddedDocuments("Item", [itemData]);
+        const slotType = dropTarget.dataset.slot;
+        const slotIndex = dropTarget.dataset.slotIndex !== undefined ? parseInt(dropTarget.dataset.slotIndex) : null;
+        await game.shuhai.equipItem(this.actor, newItem[0], slotType, slotIndex);
+        return false;
+      }
+      // 如果拖到物品栏区域，只创建物品
+      console.log('【拖放】拖到物品栏，只创建物品');
+      const result = await this.actor.createEmbeddedDocuments("Item", [itemData]);
+      console.log('【拖放】物品创建成功:', result);
+      return result;
     }
-    
-    const slotType = dropTarget.dataset.slot;
-    const slotIndex = dropTarget.dataset.slotIndex !== undefined ? parseInt(dropTarget.dataset.slotIndex) : null;
-    
-    // 装备物品到槽位
-    await game.shuhai.equipItem(this.actor, item, slotType, slotIndex);
-    
+
+    // 情况2：物品来自其他角色，创建副本
+    if (item.parent.id !== this.actor.id) {
+      console.log('【拖放】情况2: 从其他角色拖来');
+      delete itemData._id;
+      // 如果拖到装备槽，创建副本并装备
+      if (dropTarget) {
+        console.log('【拖放】拖到装备槽，创建副本并装备');
+        const newItem = await this.actor.createEmbeddedDocuments("Item", [itemData]);
+        const slotType = dropTarget.dataset.slot;
+        const slotIndex = dropTarget.dataset.slotIndex !== undefined ? parseInt(dropTarget.dataset.slotIndex) : null;
+        await game.shuhai.equipItem(this.actor, newItem[0], slotType, slotIndex);
+        return false;
+      }
+      // 如果拖到物品栏区域，只创建副本
+      console.log('【拖放】拖到物品栏，创建副本');
+      const result = await this.actor.createEmbeddedDocuments("Item", [itemData]);
+      console.log('【拖放】副本创建成功:', result);
+      return result;
+    }
+
+    // 情况3：物品已经属于当前角色
+    console.log('【拖放】情况3: 角色自己的物品');
+    if (dropTarget) {
+      // 拖到装备槽，装备物品
+      console.log('【拖放】拖到装备槽，装备物品');
+      const slotType = dropTarget.dataset.slot;
+      const slotIndex = dropTarget.dataset.slotIndex !== undefined ? parseInt(dropTarget.dataset.slotIndex) : null;
+      await game.shuhai.equipItem(this.actor, item, slotType, slotIndex);
+      return false;
+    }
+
+    // 物品已经在角色上，拖到物品栏区域，不做任何操作
+    console.log('【拖放】角色自己的物品拖到物品栏，不做操作');
     return false;
   }
 }
