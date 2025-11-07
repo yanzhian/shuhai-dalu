@@ -4,12 +4,12 @@
    ======================================== */
 
 /* Foundry窗口容器 */
-.item-card.sheet {
+.shuhai-dalu.item-card.sheet {
   background: #0F0D1B;
 }
 
 /* Form元素 */
-.item-card form {
+.shuhai-dalu.item-card form {
   background: #0F0D1B;
   color: #ECE4D6;
   font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
@@ -23,7 +23,7 @@
 /* ========================================
    主容器
    ======================================== */
-.item-card .item-card-container {
+.shuhai-dalu.item-card .item-card-container {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -39,14 +39,14 @@
 /* ========================================
    编辑锁按钮（独立一排）
    ======================================== */
-.item-card .item-card-lock-row {
+.shuhai-dalu.item-card .item-card-lock-row {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   flex-shrink: 0;
 }
 
-.item-card .item-card-lock {
+.shuhai-dalu.item-card .item-card-lock {
   width: 16px;
   height: 16px;
   background: rgba(235, 189, 104, 0.95);
@@ -62,24 +62,24 @@
   padding: 0;
 }
 
-.item-card .item-card-lock:hover {
+.shuhai-dalu.item-card .item-card-lock:hover {
   background: #E1AA43;
   transform: scale(1.15);
 }
 
-.item-card .item-card-lock.locked {
+.shuhai-dalu.item-card .item-card-lock.locked {
   background: rgba(220, 50, 50, 0.95);
   color: #fff;
 }
 
-.item-card .item-card-lock.locked:hover {
+.shuhai-dalu.item-card .item-card-lock.locked:hover {
   background: rgba(200, 30, 30, 1);
 }
 
 /* ========================================
    基础信息区域
    ======================================== */
-.item-card .item-card-basic-info {
+.shuhai-dalu.item-card .item-card-basic-info {
   display: flex;
   gap: 12px;
   flex-shrink: 0;
@@ -89,14 +89,14 @@
 }
 
 /* 左侧：大图标 */
-.item-card .item-card-icon-large {
+.shuhai-dalu.item-card .item-card-icon-large {
   width: 120px;
   height: 120px;
   flex-shrink: 0;
   position: relative;
 }
 
-.item-card .item-card-icon-large img {
+.shuhai-dalu.item-card .item-card-icon-large img {
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -108,13 +108,13 @@
   transition: all 0.2s;
 }
 
-.item-card .item-card-icon-large img:hover {
+.shuhai-dalu.item-card .item-card-icon-large img:hover {
   border-color: #E1AA43;
   transform: scale(1.02);
 }
 
 /* 右侧：名称、类型、分类、标签 */
-.item-card .item-card-info-right {
+.shuhai-dalu.item-card .item-card-info-right {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -123,7 +123,7 @@
 }
 
 /* 名称输入框（上） */
-.item-card .item-card-name-input {
+.shuhai-dalu.item-card .item-card-name-input {
   font-size: 24px;
   font-weight: bold;
   color: #EBBD68;
@@ -135,23 +135,23 @@
   width: 100%;
 }
 
-.item-card .item-card-name-input:focus {
+.shuhai-dalu.item-card .item-card-name-input:focus {
   border-bottom-color: #E1AA43;
 }
 
-.item-card .item-card-name-input:disabled {
+.shuhai-dalu.item-card .item-card-name-input:disabled {
   border-bottom-color: #EBBD68;
   opacity: 1;
 }
 
 /* 类型-分类行（中） */
-.item-card .item-card-type-category-row {
+.shuhai-dalu.item-card .item-card-type-category-row {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.item-card .item-card-type-label {
+.shuhai-dalu.item-card .item-card-type-label {
   flex: 1;
   font-size: 16px;
   color: #EBBD68;
@@ -159,7 +159,7 @@
   text-transform: capitalize;
 }
 
-.item-card .item-card-category-input {
+.shuhai-dalu.item-card .item-card-category-input {
   flex: 1;
   font-size: 16px;
   color: #ECE4D6;
@@ -170,22 +170,22 @@
   outline: none;
 }
 
-.item-card .item-card-category-input:focus {
+.shuhai-dalu.item-card .item-card-category-input:focus {
   border-color: #E1AA43;
 }
 
-.item-card .item-card-category-input:disabled {
+.shuhai-dalu.item-card .item-card-category-input:disabled {
   opacity: 0.7;
 }
 
-.item-card .item-card-separator {
+.shuhai-dalu.item-card .item-card-separator {
   font-size: 18px;
   color: #EBBD68;
   font-weight: bold;
 }
 
 /* 标签输入框（下） */
-.item-card .item-card-tags-input {
+.shuhai-dalu.item-card .item-card-tags-input {
   font-size: 14px;
   color: #ECE4D6;
   background: rgba(0, 0, 0, 0.3);
@@ -195,18 +195,18 @@
   outline: none;
 }
 
-.item-card .item-card-tags-input:focus {
+.shuhai-dalu.item-card .item-card-tags-input:focus {
   border-color: #E1AA43;
 }
 
-.item-card .item-card-tags-input:disabled {
+.shuhai-dalu.item-card .item-card-tags-input:disabled {
   opacity: 0.7;
 }
 
 /* ========================================
    分割线
    ======================================== */
-.item-card .item-card-divider {
+.shuhai-dalu.item-card .item-card-divider {
   height: 2px;
   background: #EBBD68;
   opacity: 0.3;
@@ -216,7 +216,7 @@
 /* ========================================
    属性区域
    ======================================== */
-.item-card .item-card-properties-section {
+.shuhai-dalu.item-card .item-card-properties-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -224,7 +224,7 @@
 }
 
 /* 上行：骰数、费用、星光 */
-.item-card .item-card-properties-row {
+.shuhai-dalu.item-card .item-card-properties-row {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -234,25 +234,25 @@
   border-radius: 6px;
 }
 
-.item-card .item-card-prop-item {
+.shuhai-dalu.item-card .item-card-prop-item {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 14px;
 }
 
-.item-card .item-card-prop-item i {
+.shuhai-dalu.item-card .item-card-prop-item i {
   font-size: 18px;
   color: #EBBD68;
 }
 
-.item-card .prop-label {
+.shuhai-dalu.item-card .prop-label {
   font-weight: bold;
   color: #EBBD68;
   font-size: 13px;
 }
 
-.item-card .item-card-prop-item input {
+.shuhai-dalu.item-card .item-card-prop-item input {
   width: 100px;
   padding: 4px 8px;
   background: rgba(0, 0, 0, 0.3);
@@ -265,16 +265,16 @@
   outline: none;
 }
 
-.item-card .item-card-prop-item input:focus {
+.shuhai-dalu.item-card .item-card-prop-item input:focus {
   border-color: #E1AA43;
 }
 
-.item-card .item-card-prop-item input:disabled {
+.shuhai-dalu.item-card .item-card-prop-item input:disabled {
   opacity: 0.7;
 }
 
 /* 下行：防具属性 */
-.item-card .item-card-armor-row {
+.shuhai-dalu.item-card .item-card-armor-row {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -284,19 +284,19 @@
   border-radius: 6px;
 }
 
-.item-card .armor-label {
+.shuhai-dalu.item-card .armor-label {
   font-size: 13px;
   font-weight: bold;
   color: #EBBD68;
 }
 
-.item-card .item-card-armor-badges {
+.shuhai-dalu.item-card .item-card-armor-badges {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
 }
 
-.item-card .armor-badge {
+.shuhai-dalu.item-card .armor-badge {
   padding: 4px 10px;
   border-radius: 4px;
   font-size: 12px;
@@ -304,18 +304,18 @@
   color: #fff;
 }
 
-.item-card .armor-badge.resist {
+.shuhai-dalu.item-card .armor-badge.resist {
   background: #4a7c2c;
 }
 
-.item-card .armor-badge.weak {
+.shuhai-dalu.item-card .armor-badge.weak {
   background: #c14545;
 }
 
 /* ========================================
    标签页系统
    ======================================== */
-.item-card .item-card-tabs {
+.shuhai-dalu.item-card .item-card-tabs {
   display: flex;
   gap: 4px;
   flex-shrink: 0;
@@ -323,7 +323,7 @@
   padding-bottom: 0;
 }
 
-.item-card .item-card-tab {
+.shuhai-dalu.item-card .item-card-tab {
   padding: 8px 20px;
   background: rgba(0, 0, 0, 0.3);
   border: 2px solid #EBBD68;
@@ -338,11 +338,11 @@
   bottom: -2px;
 }
 
-.item-card .item-card-tab:hover {
+.shuhai-dalu.item-card .item-card-tab:hover {
   background: rgba(235, 189, 104, 0.2);
 }
 
-.item-card .item-card-tab.active {
+.shuhai-dalu.item-card .item-card-tab.active {
   background: #EBBD68;
   color: #0F0D1B;
   border-bottom: 2px solid #EBBD68;
@@ -351,7 +351,7 @@
 /* ========================================
    标签页内容区域
    ======================================== */
-.item-card .item-card-tab-content {
+.shuhai-dalu.item-card .item-card-tab-content {
   flex: 1;
   overflow: hidden;
   display: none;
@@ -360,15 +360,15 @@
   padding: 12px 0;
 }
 
-.item-card .item-card-tab-content.active {
+.shuhai-dalu.item-card .item-card-tab-content.active {
   display: flex;
 }
 
 /* ========================================
    面板通用样式（效果和条件共用）
    ======================================== */
-.item-card .item-card-effect-panel,
-.item-card .item-card-condition-panel {
+.shuhai-dalu.item-card .item-card-effect-panel,
+.shuhai-dalu.item-card .item-card-condition-panel {
   background: rgba(0, 0, 0, 0.2);
   border: 2px solid #EBBD68;
   border-radius: 6px;
@@ -376,7 +376,7 @@
   flex-shrink: 0;
 }
 
-.item-card .item-card-panel-header {
+.shuhai-dalu.item-card .item-card-panel-header {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -387,31 +387,31 @@
   user-select: none;
 }
 
-.item-card .item-card-panel-header:hover {
+.shuhai-dalu.item-card .item-card-panel-header:hover {
   background: rgba(235, 189, 104, 0.2);
 }
 
-.item-card .item-card-panel-header .collapse-icon {
+.shuhai-dalu.item-card .item-card-panel-header .collapse-icon {
   font-size: 12px;
   color: #EBBD68;
   transition: transform 0.2s;
   flex-shrink: 0;
 }
 
-.item-card .item-card-panel-header .panel-title {
+.shuhai-dalu.item-card .item-card-panel-header .panel-title {
   flex: 1;
   font-size: 14px;
   font-weight: bold;
   color: #EBBD68;
 }
 
-.item-card .panel-actions {
+.shuhai-dalu.item-card .panel-actions {
   display: flex;
   gap: 6px;
 }
 
-.item-card .panel-edit-btn,
-.item-card .panel-action-btn {
+.shuhai-dalu.item-card .panel-edit-btn,
+.shuhai-dalu.item-card .panel-action-btn {
   width: 24px;
   height: 24px;
   background: transparent;
@@ -428,13 +428,13 @@
   padding: 0;
 }
 
-.item-card .panel-edit-btn:hover,
-.item-card .panel-action-btn:hover {
+.shuhai-dalu.item-card .panel-edit-btn:hover,
+.shuhai-dalu.item-card .panel-action-btn:hover {
   background: rgba(235, 189, 104, 0.2);
   border-color: #E1AA43;
 }
 
-.item-card .delete-condition-btn {
+.shuhai-dalu.item-card .delete-condition-btn {
   width: 24px;
   height: 24px;
   background: transparent;
@@ -451,24 +451,24 @@
   padding: 0;
 }
 
-.item-card .delete-condition-btn:hover {
+.shuhai-dalu.item-card .delete-condition-btn:hover {
   background: #c14545;
   color: #fff;
 }
 
-.item-card .item-card-panel-content {
+.shuhai-dalu.item-card .item-card-panel-content {
   padding: 12px;
   transition: all 0.3s;
 }
 
-.item-card .item-card-panel-content.collapsed {
+.shuhai-dalu.item-card .item-card-panel-content.collapsed {
   display: none;
 }
 
 /* ========================================
    效果描述标签页
    ======================================== */
-.item-card .effect-display {
+.shuhai-dalu.item-card .effect-display {
   padding: 12px;
   background: rgba(0, 0, 0, 0.3);
   border-radius: 4px;
@@ -479,7 +479,7 @@
   min-height: 80px;
 }
 
-.item-card .effect-textarea {
+.shuhai-dalu.item-card .effect-textarea {
   width: 100%;
   min-height: 120px;
   padding: 12px;
@@ -494,18 +494,18 @@
   outline: none;
 }
 
-.item-card .effect-textarea:focus {
+.shuhai-dalu.item-card .effect-textarea:focus {
   border-color: #E1AA43;
 }
 
-.item-card .effect-textarea:disabled {
+.shuhai-dalu.item-card .effect-textarea:disabled {
   opacity: 0.7;
 }
 
 /* ========================================
    条件触发标签页
    ======================================== */
-.item-card .item-card-conditions-list {
+.shuhai-dalu.item-card .item-card-conditions-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -513,7 +513,7 @@
   flex: 1;
 }
 
-.item-card .item-card-add-condition-btn {
+.shuhai-dalu.item-card .item-card-add-condition-btn {
   width: 100%;
   padding: 12px;
   background: #EBBD68;
@@ -531,12 +531,12 @@
   flex-shrink: 0;
 }
 
-.item-card .item-card-add-condition-btn:hover {
+.shuhai-dalu.item-card .item-card-add-condition-btn:hover {
   background: #E1AA43;
   transform: translateY(-2px);
 }
 
-.item-card .item-card-add-condition-btn:disabled {
+.shuhai-dalu.item-card .item-card-add-condition-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
@@ -545,33 +545,33 @@
 /* ========================================
    条件编辑器样式
    ======================================== */
-.item-card .condition-editor {
+.shuhai-dalu.item-card .condition-editor {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
 /* 小分割线 */
-.item-card .section-divider {
+.shuhai-dalu.item-card .section-divider {
   height: 1px;
   background: #EBBD68;
   opacity: 0.3;
 }
 
 /* 触发时机 */
-.item-card .trigger-timing-section {
+.shuhai-dalu.item-card .trigger-timing-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.item-card .timing-options {
+.shuhai-dalu.item-card .timing-options {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-.item-card .timing-option {
+.shuhai-dalu.item-card .timing-option {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -584,41 +584,41 @@
   user-select: none;
 }
 
-.item-card .timing-option:hover {
+.shuhai-dalu.item-card .timing-option:hover {
   background: rgba(235, 189, 104, 0.1);
   border-color: #E1AA43;
 }
 
-.item-card .timing-option.selected {
+.shuhai-dalu.item-card .timing-option.selected {
   background: rgba(235, 189, 104, 0.2);
   border-color: #E1AA43;
 }
 
-.item-card .timing-option input[type="radio"] {
+.shuhai-dalu.item-card .timing-option input[type="radio"] {
   margin: 0;
   cursor: pointer;
   accent-color: #EBBD68;
 }
 
-.item-card .timing-option span {
+.shuhai-dalu.item-card .timing-option span {
   font-size: 13px;
   color: #ECE4D6;
   font-weight: bold;
 }
 
-.item-card .timing-option:has(input:disabled) {
+.shuhai-dalu.item-card .timing-option:has(input:disabled) {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
 /* 消耗设置 */
-.item-card .consume-section {
+.shuhai-dalu.item-card .consume-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.item-card .consume-toggle {
+.shuhai-dalu.item-card .consume-toggle {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -632,17 +632,17 @@
   width: fit-content;
 }
 
-.item-card .consume-toggle:hover {
+.shuhai-dalu.item-card .consume-toggle:hover {
   background: rgba(235, 189, 104, 0.1);
   border-color: #E1AA43;
 }
 
-.item-card .consume-toggle.active {
+.shuhai-dalu.item-card .consume-toggle.active {
   background: rgba(235, 189, 104, 0.2);
   border-color: #E1AA43;
 }
 
-.item-card .consume-toggle input[type="checkbox"] {
+.shuhai-dalu.item-card .consume-toggle input[type="checkbox"] {
   width: 18px;
   height: 18px;
   cursor: pointer;
@@ -650,18 +650,18 @@
   margin: 0;
 }
 
-.item-card .consume-toggle span {
+.shuhai-dalu.item-card .consume-toggle span {
   font-size: 14px;
   font-weight: bold;
   color: #EBBD68;
 }
 
-.item-card .consume-toggle:has(input:disabled) {
+.shuhai-dalu.item-card .consume-toggle:has(input:disabled) {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.item-card .consumes-list {
+.shuhai-dalu.item-card .consumes-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -670,7 +670,7 @@
   margin-left: 20px;
 }
 
-.item-card .consume-item {
+.shuhai-dalu.item-card .consume-item {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -679,7 +679,7 @@
   border-radius: 4px;
 }
 
-.item-card .consume-effect-select {
+.shuhai-dalu.item-card .consume-effect-select {
   flex: 1;
   min-width: 120px;
   padding: 6px 8px;
@@ -691,8 +691,8 @@
   outline: none;
 }
 
-.item-card .consume-layers-input,
-.item-card .consume-strength-input {
+.shuhai-dalu.item-card .consume-layers-input,
+.shuhai-dalu.item-card .consume-strength-input {
   width: 60px;
   padding: 6px 8px;
   background: rgba(0, 0, 0, 0.4);
@@ -704,25 +704,25 @@
   outline: none;
 }
 
-.item-card .consume-unit {
+.shuhai-dalu.item-card .consume-unit {
   font-size: 12px;
   color: #EBBD68;
   font-weight: bold;
 }
 
-.consume-effect-select:focus,
-.item-card .consume-layers-input:focus,
-.item-card .consume-strength-input:focus {
+.shuhai-dalu.item-card .consume-effect-select:focus,
+.shuhai-dalu.item-card .consume-layers-input:focus,
+.shuhai-dalu.item-card .consume-strength-input:focus {
   border-color: #E1AA43;
 }
 
-.consume-effect-select:disabled,
-.item-card .consume-layers-input:disabled,
-.item-card .consume-strength-input:disabled {
+.shuhai-dalu.item-card .consume-effect-select:disabled,
+.shuhai-dalu.item-card .consume-layers-input:disabled,
+.shuhai-dalu.item-card .consume-strength-input:disabled {
   opacity: 0.6;
 }
 
-.item-card .remove-consume-btn {
+.shuhai-dalu.item-card .remove-consume-btn {
   width: 24px;
   height: 24px;
   background: transparent;
@@ -739,12 +739,12 @@
   padding: 0;
 }
 
-.item-card .remove-consume-btn:hover {
+.shuhai-dalu.item-card .remove-consume-btn:hover {
   background: #c14545;
   color: #fff;
 }
 
-.item-card .add-consume-btn {
+.shuhai-dalu.item-card .add-consume-btn {
   padding: 8px 12px;
   background: transparent;
   border: 1px dashed #EBBD68;
@@ -760,36 +760,36 @@
   transition: all 0.2s;
 }
 
-.item-card .add-consume-btn:hover {
+.shuhai-dalu.item-card .add-consume-btn:hover {
   background: rgba(235, 189, 104, 0.1);
   border-style: solid;
 }
 
-.item-card .add-consume-btn:disabled {
+.shuhai-dalu.item-card .add-consume-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* 目标选择 */
-.item-card .target-section {
+.shuhai-dalu.item-card .target-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.item-card .section-label {
+.shuhai-dalu.item-card .section-label {
   font-size: 14px;
   font-weight: bold;
   color: #EBBD68;
 }
 
-.item-card .target-options {
+.shuhai-dalu.item-card .target-options {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-.item-card .target-option {
+.shuhai-dalu.item-card .target-option {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -802,54 +802,54 @@
   user-select: none;
 }
 
-.item-card .target-option:hover {
+.shuhai-dalu.item-card .target-option:hover {
   background: rgba(235, 189, 104, 0.1);
   border-color: #E1AA43;
 }
 
-.item-card .target-option.selected {
+.shuhai-dalu.item-card .target-option.selected {
   background: rgba(235, 189, 104, 0.2);
   border-color: #E1AA43;
 }
 
-.item-card .target-option input[type="radio"] {
+.shuhai-dalu.item-card .target-option input[type="radio"] {
   margin: 0;
   cursor: pointer;
   accent-color: #EBBD68;
 }
 
-.item-card .target-option span {
+.shuhai-dalu.item-card .target-option span {
   font-size: 13px;
   color: #ECE4D6;
   font-weight: bold;
 }
 
-.item-card .target-option:has(input:disabled) {
+.shuhai-dalu.item-card .target-option:has(input:disabled) {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
 /* 效果添加 */
-.item-card .effects-section {
+.shuhai-dalu.item-card .effects-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.item-card .section-title {
+.shuhai-dalu.item-card .section-title {
   font-size: 14px;
   font-weight: bold;
   color: #EBBD68;
   padding: 4px 0;
 }
 
-.item-card .effects-list {
+.shuhai-dalu.item-card .effects-list {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.item-card .effect-item {
+.shuhai-dalu.item-card .effect-item {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -861,16 +861,16 @@
   user-select: none;
 }
 
-.item-card .effect-item:hover {
+.shuhai-dalu.item-card .effect-item:hover {
   background: rgba(235, 189, 104, 0.05);
 }
 
-.item-card .effect-item.selected {
+.shuhai-dalu.item-card .effect-item.selected {
   background: rgba(235, 189, 104, 0.1);
   border: 1px solid rgba(235, 189, 104, 0.3);
 }
 
-.item-card .effect-item input[type="checkbox"] {
+.shuhai-dalu.item-card .effect-item input[type="checkbox"] {
   width: 16px;
   height: 16px;
   cursor: pointer;
@@ -879,15 +879,15 @@
   flex-shrink: 0;
 }
 
-.item-card .effect-item .effect-name {
+.shuhai-dalu.item-card .effect-item .effect-name {
   min-width: 60px;
   font-size: 13px;
   color: #ECE4D6;
   font-weight: bold;
 }
 
-.item-card .effect-layers-input,
-.item-card .effect-strength-input {
+.shuhai-dalu.item-card .effect-layers-input,
+.shuhai-dalu.item-card .effect-strength-input {
   width: 60px;
   padding: 4px 8px;
   background: rgba(0, 0, 0, 0.3);
@@ -899,35 +899,35 @@
   outline: none;
 }
 
-.item-card .effect-unit {
+.shuhai-dalu.item-card .effect-unit {
   font-size: 12px;
   color: #EBBD68;
   font-weight: bold;
 }
 
-.item-card .effect-layers-input:focus,
-.item-card .effect-strength-input:focus {
+.shuhai-dalu.item-card .effect-layers-input:focus,
+.shuhai-dalu.item-card .effect-strength-input:focus {
   border-color: #E1AA43;
 }
 
-.item-card .effect-layers-input:disabled,
-.item-card .effect-strength-input:disabled {
+.shuhai-dalu.item-card .effect-layers-input:disabled,
+.shuhai-dalu.item-card .effect-strength-input:disabled {
   opacity: 0.6;
 }
 
-.item-card .effect-item:has(input:disabled) {
+.shuhai-dalu.item-card .effect-item:has(input:disabled) {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
 /* 自定义效果 */
-.item-card .custom-effect-section {
+.shuhai-dalu.item-card .custom-effect-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.item-card .custom-effect-name-input {
+.shuhai-dalu.item-card .custom-effect-name-input {
   flex: 1;
   min-width: 120px;
   padding: 4px 8px;
@@ -940,18 +940,18 @@
   text-align: left;
 }
 
-.item-card .custom-effect-name-input:focus {
+.shuhai-dalu.item-card .custom-effect-name-input:focus {
   border-color: #E1AA43;
 }
 
-.item-card .custom-effect-name-input:disabled {
+.shuhai-dalu.item-card .custom-effect-name-input:disabled {
   opacity: 0.6;
 }
 
 /* ========================================
    底部操作按钮
    ======================================== */
-.item-card .item-card-footer-actions {
+.shuhai-dalu.item-card .item-card-footer-actions {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
@@ -960,7 +960,7 @@
   border-top: 2px solid #EBBD68;
 }
 
-.item-card .item-card-action-btn {
+.shuhai-dalu.item-card .item-card-action-btn {
   min-width: 120px;
   height: 40px;
   padding: 0 20px;
@@ -978,30 +978,30 @@
   gap: 8px;
 }
 
-.item-card .item-card-action-btn:hover {
+.shuhai-dalu.item-card .item-card-action-btn:hover {
   background: #E1AA43;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(235, 189, 104, 0.3);
 }
 
-.item-card .item-card-action-btn.secondary {
+.shuhai-dalu.item-card .item-card-action-btn.secondary {
   background: transparent;
   border: 2px solid #EBBD68;
   color: #EBBD68;
 }
 
-.item-card .item-card-action-btn.secondary:hover {
+.shuhai-dalu.item-card .item-card-action-btn.secondary:hover {
   background: rgba(235, 189, 104, 0.2);
   transform: translateY(-2px);
 }
 
-.item-card .item-card-action-btn:disabled {
+.shuhai-dalu.item-card .item-card-action-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
 }
 
-.item-card .item-card-action-btn:disabled:hover {
+.shuhai-dalu.item-card .item-card-action-btn:disabled:hover {
   transform: none;
   box-shadow: none;
 }
@@ -1009,37 +1009,37 @@
 /* ========================================
    滚动条样式
    ======================================== */
-.item-card .item-card,
-.item-card * {
+.shuhai-dalu.item-card,
+.shuhai-dalu.item-card * {
   scrollbar-width: thin;
   scrollbar-color: #EBBD68 rgba(0, 0, 0, 0.2);
 }
 
-.item-card ::-webkit-scrollbar {
+.shuhai-dalu.item-card ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
-.item-card ::-webkit-scrollbar-track {
+.shuhai-dalu.item-card ::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 3px;
 }
 
-.item-card ::-webkit-scrollbar-thumb {
+.shuhai-dalu.item-card ::-webkit-scrollbar-thumb {
   background: #EBBD68;
   border-radius: 3px;
 }
 
-.item-card ::-webkit-scrollbar-thumb:hover {
+.shuhai-dalu.item-card ::-webkit-scrollbar-thumb:hover {
   background: #E1AA43;
 }
 
 /* ========================================
    通用禁用状态
    ======================================== */
-.item-card input:disabled,
-.item-card select:disabled,
-.item-card textarea:disabled,
-.item-card button:disabled {
+.shuhai-dalu.item-card input:disabled,
+.shuhai-dalu.item-card select:disabled,
+.shuhai-dalu.item-card textarea:disabled,
+.shuhai-dalu.item-card button:disabled {
   cursor: not-allowed !important;
 }
