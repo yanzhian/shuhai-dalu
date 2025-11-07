@@ -62,25 +62,25 @@ Hooks.once('init', async function() {
   console.log('Actor 数据模型:', CONFIG.Actor.dataModels);
   console.log('Item 数据模型:', CONFIG.Item.dataModels);
   
-  // 注册角色表单
-  Actors.unregisterSheet("core", ActorSheet);
-  
+  // 注册角色表单（不取消核心表单注册，避免影响其他文档类型）
+  // Actors.unregisterSheet("core", ActorSheet);  // ❌ 不要取消注册核心表单
+
   // ⭐ 注册 Player 角色表单（设为默认）
   Actors.registerSheet("shuhai-dalu", ShuhaiPlayerSheet, {
     types: ["character"],
     makeDefault: true,
     label: "书海大陆 - Player 角色卡"
   });
-  
+
   // 注册标准角色表单
   Actors.registerSheet("shuhai-dalu", ShuhaiActorSheet, {
     types: ["character"],
     makeDefault: false,
     label: "书海大陆 - 标准角色卡"
   });
-  
-  // 注册物品表单
-  Items.unregisterSheet("core", ItemSheet);
+
+  // 注册物品表单（不取消核心表单注册，避免影响其他文档类型）
+  // Items.unregisterSheet("core", ItemSheet);  // ❌ 不要取消注册核心表单
 
   // 注册标准物品表单
   Items.registerSheet("shuhai-dalu", ShuhaiItemSheet, {
