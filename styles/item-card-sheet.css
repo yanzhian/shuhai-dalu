@@ -363,55 +363,12 @@
 }
 
 /* ========================================
-   标签页系统
+   内容区域
    ======================================== */
-.shuhai-dalu.item-card .item-card-tabs {
+.shuhai-dalu.item-card .item-card-section {
   display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-  border-bottom: 2px solid #EBBD68;
-  padding-bottom: 0;
-}
-
-.shuhai-dalu.item-card .item-card-tab {
-  padding: 8px 20px;
-  background: rgba(0, 0, 0, 0.3);
-  border: 2px solid #EBBD68;
-  border-bottom: none;
-  border-radius: 6px 6px 0 0;
-  color: #EBBD68;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s;
-  position: relative;
-  bottom: -2px;
-}
-
-.shuhai-dalu.item-card .item-card-tab:hover {
-  background: rgba(235, 189, 104, 0.2);
-}
-
-.shuhai-dalu.item-card .item-card-tab.active {
-  background: #EBBD68;
-  color: #0F0D1B;
-  border-bottom: 2px solid #EBBD68;
-}
-
-/* ========================================
-   标签页内容区域
-   ======================================== */
-.shuhai-dalu.item-card .item-card-tab-content {
-  flex: 1;
-  overflow: hidden;
-  display: none;
   flex-direction: column;
   gap: 12px;
-  padding: 12px 0;
-}
-
-.shuhai-dalu.item-card .item-card-tab-content.active {
-  display: flex;
 }
 
 /* ========================================

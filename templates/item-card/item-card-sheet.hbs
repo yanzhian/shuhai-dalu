@@ -112,18 +112,12 @@
     {{!-- 分割线 --}}
     <div class="item-card-divider"></div>
 
-    {{!-- 标签页 --}}
-    <div class="item-card-tabs">
-      <div class="item-card-tab active" data-tab="effect">效果描述</div>
-      <div class="item-card-tab" data-tab="conditions">条件触发</div>
-    </div>
-
-    {{!-- 效果描述标签页 --}}
-    <div class="item-card-tab-content active" data-tab="effect">
+    {{!-- 效果描述区域 --}}
+    <div class="item-card-section">
       <div class="item-card-effect-panel">
         <div class="item-card-panel-header">
           <i class="fas fa-chevron-down collapse-icon"></i>
-          <span class="panel-title">效果</span>
+          <span class="panel-title">效果描述</span>
           {{#unless isLocked}}
             <button type="button" class="panel-edit-btn" title="编辑描述">
               <i class="fas fa-edit"></i>
@@ -140,8 +134,8 @@
       </div>
     </div>
 
-    {{!-- 条件触发标签页 --}}
-    <div class="item-card-tab-content" data-tab="conditions">
+    {{!-- 条件触发区域 --}}
+    <div class="item-card-section">
       <div class="item-card-conditions-list">
         {{#each system.conditions as |condition index|}}
           <div class="item-card-condition-panel" data-index="{{index}}">

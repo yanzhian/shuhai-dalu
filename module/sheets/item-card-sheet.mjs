@@ -107,9 +107,6 @@ export default class ItemCardSheet extends ItemSheet {
     // 编辑锁
     html.find('.item-card-lock').click(this._onToggleLock.bind(this));
 
-    // 标签页切换
-    html.find('.item-card-tab').click(this._onTabChange.bind(this));
-
     // 面板折叠
     html.find('.item-card-panel-header').click(this._onTogglePanel.bind(this));
 
@@ -139,22 +136,6 @@ export default class ItemCardSheet extends ItemSheet {
     const currentLock = this.item.getFlag('shuhai-dalu', 'isLocked') || false;
     await this.item.setFlag('shuhai-dalu', 'isLocked', !currentLock);
     this.render();
-  }
-
-  /**
-   * 标签页切换
-   */
-  _onTabChange(event) {
-    event.preventDefault();
-    const tab = $(event.currentTarget);
-    const tabName = tab.data('tab');
-
-    tab.siblings('.item-card-tab').removeClass('active');
-    tab.addClass('active');
-
-    const content = this.element.find(`.item-card-tab-content`);
-    content.removeClass('active');
-    this.element.find(`.item-card-tab-content[data-tab="${tabName}"]`).addClass('active');
   }
 
   /**
