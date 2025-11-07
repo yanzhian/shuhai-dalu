@@ -198,15 +198,21 @@ export default class ItemCardSheet extends ItemSheet {
           // 处理effects对象
           const effects = {};
           if (condition.effects) {
+            console.log(`【处理数据】条件${i}的effects原始数据:`, condition.effects);
             for (const [buffId, buffData] of Object.entries(condition.effects)) {
-              if (buffData.enabled) {
+              console.log(`【处理数据】  buff ${buffId}:`, buffData, `enabled=${buffData.enabled}, type=${typeof buffData.enabled}`);
+              // checkbox 的值可能是字符串 "on" 或布尔值
+              const isEnabled = buffData.enabled === true || buffData.enabled === 'on' || buffData.enabled === 'true';
+              if (isEnabled) {
                 effects[buffId] = {
                   enabled: true,
                   layers: parseInt(buffData.layers) || 0,
                   strength: parseInt(buffData.strength) || 0
                 };
+                console.log(`【处理数据】  添加 buff ${buffId}:`, effects[buffId]);
               }
             }
+            console.log(`【处理数据】条件${i}的effects处理后:`, effects);
           }
 
           const processedCondition = {
