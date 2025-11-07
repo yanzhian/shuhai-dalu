@@ -113,6 +113,101 @@ Hooks.once('ready', async function() {
 });
 
 /* -------------------------------------------- */
+/*  宏快捷栏拖放处理                               */
+/* -------------------------------------------- */
+
+/**
+ * 处理战斗骰拖放到宏快捷栏
+ */
+Hooks.on('hotbarDrop', async (bar, data, slot) => {
+  // 检查是否是从战斗区域拖放的物品
+  if (data.type === 'Item' && data.fromCombatArea) {
+    // 获取物品
+    const item = await Item.implementation.fromDropData(data);
+
+    if (!item) {
+      ui.notifications.error("无法找到物品！");
+      return false;
+    }
+
+    const actorId = item.parent?.id;
+    const itemId = item.id;
+    const diceIndex = data.diceIndex;
+
+    if (!actorId) {
+      ui.notifications.error("物品必须属于某个角色！");
+      return false;
+    }
+
+    // 创建宏命令
+    const command = `
+// 使用战斗骰: ${item.name}
+const actor = game.actors.get("${actorId}");
+if (!actor) {
+  ui.notifications.error("找不到角色！");
+  return;
+}
+
+// 动态导入战斗区域
+const CombatAreaModule = await import("systems/shuhai-dalu/module/applications/combat-area.mjs");
+const CombatAreaApp = CombatAreaModule.default;
+
+// 查找是否已经打开战斗区域
+let app = Object.values(ui.windows).find(w =>
+  w.constructor.name === 'CombatAreaApplication' && w.actor.id === actor.id
+);
+
+// 如果没有打开，创建新的
+if (!app) {
+  app = new CombatAreaApp(actor);
+  app.render(true);
+}
+
+// 模拟点击战斗骰按钮
+const diceIndex = ${diceIndex};
+setTimeout(() => {
+  app._onInitiateCombatDice({
+    preventDefault: () => {},
+    currentTarget: { dataset: { index: diceIndex } }
+  });
+}, 200);
+`.trim();
+
+    // 创建或更新宏
+    let macro = game.macros.find(m =>
+      m.name === item.name &&
+      m.flags?.['shuhai-dalu']?.actorId === actorId &&
+      m.flags?.['shuhai-dalu']?.itemId === itemId
+    );
+
+    if (!macro) {
+      macro = await Macro.create({
+        name: item.name,
+        type: "script",
+        img: item.img,
+        command: command,
+        flags: {
+          'shuhai-dalu': {
+            type: 'combatDice',
+            actorId: actorId,
+            itemId: itemId,
+            diceIndex: diceIndex
+          }
+        }
+      });
+    }
+
+    // 将宏添加到快捷栏
+    game.user.assignHotbarMacro(macro, slot);
+
+    ui.notifications.info(`已将 ${item.name} 添加到快捷栏！`);
+    return false; // 阻止默认行为
+  }
+
+  return true; // 允许其他类型的拖放
+});
+
+/* -------------------------------------------- */
 /*  Actor创建钩子 - 初始化新角色HP                */
 /* -------------------------------------------- */
 

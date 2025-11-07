@@ -480,38 +480,10 @@ export default class CombatAreaApplication extends Application {
     const item = this.actor.items.get(itemId);
     if (!item) return;
 
-    // 创建宏命令
-    const macroCommand = `
-// 使用战斗骰: ${item.name}
-const actor = game.actors.get("${actorId}");
-if (!actor) {
-  ui.notifications.error("找不到角色！");
-  return;
-}
-
-// 打开战斗区域（如果未打开）
-const CombatAreaApp = await import("systems/shuhai-dalu/module/applications/combat-area.mjs");
-const app = new CombatAreaApp.default(actor);
-
-// 模拟点击战斗骰按钮
-const diceIndex = ${diceIndex};
-await app._onInitiateCombatDice({ preventDefault: () => {}, currentTarget: { dataset: { index: diceIndex } } });
-`.trim();
-
-    // 设置拖动数据 - 创建宏
-    const dragData = {
-      type: "Macro",
-      name: `${item.name}`,
-      img: item.img,
-      command: macroCommand,
-      flags: {
-        'shuhai-dalu': {
-          actorId: actorId,
-          itemId: itemId,
-          diceIndex: diceIndex
-        }
-      }
-    };
+    // 使用 Item 类型的拖动数据，并添加自定义标识
+    const dragData = item.toDragData();
+    dragData.fromCombatArea = true;
+    dragData.diceIndex = diceIndex;
 
     event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
   }
