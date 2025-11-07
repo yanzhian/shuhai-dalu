@@ -18,6 +18,7 @@ import ShuhaiItem, {
 import ShuhaiActorSheet from "./sheets/actor-sheet.mjs";
 import ShuhaiPlayerSheet from "./sheets/player-sheet.mjs";
 import ShuhaiItemSheet from "./sheets/item-sheet.mjs";
+import ShuhaiItemSheetNew from "./sheets/item-sheet-new.mjs";
 
 /* -------------------------------------------- */
 /*  初始化钩子                                    */
@@ -80,10 +81,19 @@ Hooks.once('init', async function() {
   
   // 注册物品表单
   Items.unregisterSheet("core", ItemSheet);
+
+  // 注册标准物品表单
   Items.registerSheet("shuhai-dalu", ShuhaiItemSheet, {
     types: ["combatDice", "shootDice", "defenseDice", "triggerDice", "passiveDice", "weapon", "armor", "item", "equipment"],
+    makeDefault: false,
+    label: "书海大陆 - 标准物品卡"
+  });
+
+  // ⭐ 注册新物品表单（设为默认）
+  Items.registerSheet("shuhai-dalu", ShuhaiItemSheetNew, {
+    types: ["combatDice", "shootDice", "defenseDice", "triggerDice", "passiveDice", "weapon", "armor", "item", "equipment"],
     makeDefault: true,
-    label: "SHUHAI.SheetLabel.Item"
+    label: "书海大陆 - 条件触发物品卡"
   });
   
   console.log('书海大陆 | 表单已注册');
@@ -910,6 +920,16 @@ Hooks.once('init', function() {
     return (item && item.system.category) ? item.system.category : '';
   });
 
+  // 嵌套属性查找helper
+  Handlebars.registerHelper('lookup', function(obj, key, nestedKey) {
+    if (!obj || !key) return undefined;
+    const value = obj[key];
+    if (nestedKey && value) {
+      return value[nestedKey];
+    }
+    return value;
+  });
+
   // 获取物品tooltip（悬停提示）
   Handlebars.registerHelper('getItemTooltip', function(itemId, options) {
     if (!itemId) return '';
@@ -964,6 +984,8 @@ async function preloadHandlebarsTemplates() {
 
     // 物品模板
     "systems/shuhai-dalu/templates/item/item-sheet.hbs",
+    "systems/shuhai-dalu/templates/item/item-sheet-new.hbs",
+    "systems/shuhai-dalu/templates/item/partials/condition-editor.hbs",
 
     // 战斗区域模板
     "systems/shuhai-dalu/templates/combat/combat-area.hbs",
