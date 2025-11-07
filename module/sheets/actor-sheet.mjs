@@ -15,6 +15,7 @@ export default class ShuhaiActorSheet extends ActorSheet {
         initial: "attributes" 
       }],
       dragDrop: [
+        { dragSelector: ".item-icon-wrapper", dropSelector: null },  // 允许整个表单接受拖放
         { dragSelector: ".item-row", dropSelector: ".equipment-slots" },
         { dragSelector: ".item-row", dropSelector: ".dice-slots" },
         { dragSelector: ".item-row", dropSelector: ".special-slots" },
@@ -453,31 +454,54 @@ export default class ShuhaiActorSheet extends ActorSheet {
   }
 
   /**
-   * 处理物品拖放到装备槽
+   * 处理物品拖放
    */
   async _onDropItem(event, data) {
     const item = await Item.implementation.fromDropData(data);
     const itemData = item.toObject();
-    
-    // 检查是否是从其他角色拖过来的
-    if (item.parent && item.parent.id !== this.actor.id) {
-      // 从其他角色拖过来，创建副本
-      delete itemData._id;
+
+    // 检查拖放目标是否是装备槽
+    const dropTarget = event.target.closest('.slot-content');
+
+    // 情况1：物品没有 parent（从物品侧边栏拖来）
+    if (!item.parent) {
+      // 如果拖到装备槽，创建物品并装备
+      if (dropTarget) {
+        const newItem = await this.actor.createEmbeddedDocuments("Item", [itemData]);
+        const slotType = dropTarget.dataset.slot;
+        const slotIndex = dropTarget.dataset.slotIndex !== undefined ? parseInt(dropTarget.dataset.slotIndex) : null;
+        await game.shuhai.equipItem(this.actor, newItem[0], slotType, slotIndex);
+        return false;
+      }
+      // 如果拖到物品栏区域，只创建物品
       return this.actor.createEmbeddedDocuments("Item", [itemData]);
     }
-    
-    // 检查拖放目标
-    const dropTarget = event.target.closest('.slot-content');
-    if (!dropTarget) {
-      return super._onDropItem(event, data);
+
+    // 情况2：物品来自其他角色，创建副本
+    if (item.parent.id !== this.actor.id) {
+      delete itemData._id;
+      // 如果拖到装备槽，创建副本并装备
+      if (dropTarget) {
+        const newItem = await this.actor.createEmbeddedDocuments("Item", [itemData]);
+        const slotType = dropTarget.dataset.slot;
+        const slotIndex = dropTarget.dataset.slotIndex !== undefined ? parseInt(dropTarget.dataset.slotIndex) : null;
+        await game.shuhai.equipItem(this.actor, newItem[0], slotType, slotIndex);
+        return false;
+      }
+      // 如果拖到物品栏区域，只创建副本
+      return this.actor.createEmbeddedDocuments("Item", [itemData]);
     }
-    
-    const slotType = dropTarget.dataset.slot;
-    const slotIndex = dropTarget.dataset.slotIndex !== undefined ? parseInt(dropTarget.dataset.slotIndex) : null;
-    
-    // 装备物品到槽位
-    await game.shuhai.equipItem(this.actor, item, slotType, slotIndex);
-    
+
+    // 情况3：物品已经属于当前角色
+    if (dropTarget) {
+      // 拖到装备槽，装备物品
+      const slotType = dropTarget.dataset.slot;
+      const slotIndex = dropTarget.dataset.slotIndex !== undefined ? parseInt(dropTarget.dataset.slotIndex) : null;
+      await game.shuhai.equipItem(this.actor, item, slotType, slotIndex);
+      return false;
+    }
+
+    // 物品已经在角色上，拖到物品栏区域，不做任何操作
     return false;
   }
 }
