@@ -42,24 +42,6 @@ const BUFF_TYPES = {
       defaultLayers: 1,
       defaultStrength: 0
     },
-    {
-      id: 'advantage',
-      name: '优势',
-      type: 'positive',
-      description: '一回合内 骰至 等同于本效果层数的数值，取最大结果。',
-      icon: 'icons/svg/up.svg',
-      defaultLayers: 2,
-      defaultStrength: 0
-    },
-    {
-      id: 'dice_upgrade',
-      name: '面数增加',
-      type: 'positive',
-      description: '每层增加一个面数等级，面数等级为：4,6,8,10,12,20 面骰',
-      icon: 'icons/svg/d20.svg',
-      defaultLayers: 1,
-      defaultStrength: 0
-    }
   ],
 
   // 减益BUFF
@@ -100,24 +82,6 @@ const BUFF_TYPES = {
       defaultLayers: 1,
       defaultStrength: 0
     },
-    {
-      id: 'disadvantage',
-      name: '劣势',
-      type: 'negative',
-      description: '一回合内 骰至 等同于本效果层数的数值，取最小结果',
-      icon: 'icons/svg/down.svg',
-      defaultLayers: 2,
-      defaultStrength: 0
-    },
-    {
-      id: 'dice_downgrade',
-      name: '面数减少',
-      type: 'negative',
-      description: '每层减少一个面数等级，面数等级为：4,6,8,10,12,20 面骰',
-      icon: 'icons/svg/d20.svg',
-      defaultLayers: 1,
-      defaultStrength: 0
-    }
   ],
 
   // 效果BUFF
@@ -207,7 +171,7 @@ const BUFF_TYPES = {
       id: 'paralyze',
       name: '麻痹',
       type: 'effect',
-      description: '一回合内使骰子的变动值固定为0。每层影响1个骰子。',
+      description: '你的下一次攻击骰数结果/2。',
       icon: 'icons/svg/paralysis.svg',
       defaultLayers: 1,
       defaultStrength: 0
