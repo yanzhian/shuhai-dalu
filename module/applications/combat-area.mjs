@@ -440,6 +440,9 @@ export default class CombatAreaApplication extends Application {
     html.find('.dice-activate-toggle').click(this._onToggleDiceActivation.bind(this));
     html.find('.combat-dice-initiate-btn').click(this._onInitiateCombatDice.bind(this));
 
+    // 战斗骰拖动到宏栏
+    html.find('.combat-dice-initiate-btn[draggable="true"]').on('dragstart', this._onDragStart.bind(this));
+
     // 装备使用按钮
     html.find('.equipment-use-btn').click(this._onEquipmentUse.bind(this));
 
@@ -462,6 +465,56 @@ export default class CombatAreaApplication extends Application {
   /* -------------------------------------------- */
   /*  事件处理器                                    */
   /* -------------------------------------------- */
+
+  /**
+   * 拖动战斗骰到宏栏
+   */
+  _onDragStart(event) {
+    const button = event.currentTarget;
+    const itemId = button.dataset.itemId;
+    const actorId = button.dataset.actorId;
+    const diceIndex = button.dataset.index;
+
+    if (!itemId || !actorId) return;
+
+    const item = this.actor.items.get(itemId);
+    if (!item) return;
+
+    // 创建宏命令
+    const macroCommand = `
+// 使用战斗骰: ${item.name}
+const actor = game.actors.get("${actorId}");
+if (!actor) {
+  ui.notifications.error("找不到角色！");
+  return;
+}
+
+// 打开战斗区域（如果未打开）
+const CombatAreaApp = await import("systems/shuhai-dalu/module/applications/combat-area.mjs");
+const app = new CombatAreaApp.default(actor);
+
+// 模拟点击战斗骰按钮
+const diceIndex = ${diceIndex};
+await app._onInitiateCombatDice({ preventDefault: () => {}, currentTarget: { dataset: { index: diceIndex } } });
+`.trim();
+
+    // 设置拖动数据 - 创建宏
+    const dragData = {
+      type: "Macro",
+      name: `${item.name}`,
+      img: item.img,
+      command: macroCommand,
+      flags: {
+        'shuhai-dalu': {
+          actorId: actorId,
+          itemId: itemId,
+          diceIndex: diceIndex
+        }
+      }
+    };
+
+    event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+  }
 
   /**
    * 切换锁定状态

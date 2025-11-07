@@ -111,7 +111,13 @@
                 <i class="fas fa-circle"></i>
               </button>
               <div class="dice-count-badge">{{slot.item.system.diceFormula}}</div>
-              <button class="combat-dice-initiate-btn" data-index="{{@index}}" type="button" title="{{slot.item.name}}&#10;{{slot.item.type}} {{slot.item.system.category}}&#10;{{slot.item.system.effect}}">
+              <button class="combat-dice-initiate-btn"
+                      data-index="{{@index}}"
+                      data-item-id="{{slot.item._id}}"
+                      data-actor-id="{{actor.id}}"
+                      draggable="true"
+                      type="button"
+                      title="{{slot.item.name}}&#10;{{slot.item.type}} {{slot.item.system.category}}&#10;{{slot.item.system.effect}}">
                 <img src="{{slot.item.img}}" alt="{{slot.item.name}}" />
               </button>
             {{else}}
