@@ -109,6 +109,11 @@ export default class ItemCardSheet extends ItemSheet {
 
   /** @override */
   async _render(force, options) {
+    // 确保 _scrollPositions 存在
+    if (!this._scrollPositions) {
+      this._scrollPositions = {};
+    }
+
     // 保存滚动位置
     if (this.element && this.element.length) {
       const container = this.element.find('.item-card-container');
@@ -120,7 +125,7 @@ export default class ItemCardSheet extends ItemSheet {
     await super._render(force, options);
 
     // 恢复滚动位置 - 使用 requestAnimationFrame 确保 DOM 完全渲染
-    if (this._scrollPositions.main !== undefined && this._scrollPositions.main > 0) {
+    if (this._scrollPositions && this._scrollPositions.main !== undefined && this._scrollPositions.main > 0) {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           const container = this.element?.find('.item-card-container');
@@ -135,7 +140,7 @@ export default class ItemCardSheet extends ItemSheet {
   /* -------------------------------------------- */
 
   /**
-   * 保存当前表单数据（不触发渲染）
+   * 保存当前表单数据
    */
   async _saveFormData() {
     if (!this.element || !this.element.length) return;
@@ -143,17 +148,71 @@ export default class ItemCardSheet extends ItemSheet {
     const form = this.element.find('form')[0];
     if (!form) return;
 
-    // 使用标准的 submit 事件，但阻止渲染
-    const event = new Event('submit', { bubbles: true, cancelable: true });
     try {
-      await this._onSubmit(event, {
-        updateData: null,
-        preventClose: true,
-        preventRender: true
-      });
+      // 手动收集表单数据
+      const formData = new FormDataExtended(form).object;
+
+      // 使用 _updateObject 处理数据（包括 conditions 的特殊处理）
+      const updateData = await this._getUpdateData(formData);
+
+      // 更新 item（会触发渲染，但滚动位置会被保存和恢复）
+      if (updateData && Object.keys(updateData).length > 0) {
+        await this.item.update(updateData);
+      }
     } catch(err) {
       console.error('Error saving form data:', err);
     }
+  }
+
+  /**
+   * 处理表单数据（与 _updateObject 相同的逻辑）
+   */
+  async _getUpdateData(formData) {
+    const expanded = foundry.utils.expandObject(formData);
+
+    // 处理conditions数组（与 _updateObject 相同的逻辑）
+    if (expanded.system?.conditions) {
+      const conditions = [];
+      const conditionsObj = expanded.system.conditions;
+
+      for (let i = 0; i < 100; i++) {
+        if (conditionsObj[i]) {
+          const condition = conditionsObj[i];
+
+          // 处理effects对象
+          const effects = {};
+          if (condition.effects) {
+            for (const [buffId, buffData] of Object.entries(condition.effects)) {
+              if (buffData.enabled) {
+                effects[buffId] = {
+                  enabled: true,
+                  layers: parseInt(buffData.layers) || 0,
+                  strength: parseInt(buffData.strength) || 0
+                };
+              }
+            }
+          }
+
+          conditions.push({
+            trigger: condition.trigger || 'onUse',
+            hasConsume: condition.hasConsume || false,
+            consumes: condition.consumes || [],
+            target: condition.target || 'selected',
+            effects: effects,
+            customEffect: condition.customEffect || {
+              enabled: false,
+              name: '',
+              layers: 0,
+              strength: 0
+            }
+          });
+        }
+      }
+
+      expanded.system.conditions = conditions;
+    }
+
+    return expanded;
   }
 
   /* -------------------------------------------- */
@@ -227,8 +286,12 @@ export default class ItemCardSheet extends ItemSheet {
     event.preventDefault();
     event.stopPropagation();
 
-    // 先保存表单数据
-    await this._saveFormData();
+    const form = this.element.find('form')[0];
+    if (!form) return;
+
+    // 手动收集表单数据并处理
+    const formData = new FormDataExtended(form).object;
+    const updateData = await this._getUpdateData(formData);
 
     // 添加新条件
     const conditions = [...(this.item.system.conditions || [])];
@@ -247,8 +310,9 @@ export default class ItemCardSheet extends ItemSheet {
     };
 
     conditions.push(newCondition);
+    updateData['system.conditions'] = conditions;
 
-    await this.item.update({'system.conditions': conditions});
+    await this.item.update(updateData);
   }
 
   /**
@@ -283,14 +347,19 @@ export default class ItemCardSheet extends ItemSheet {
 
     if (!confirm) return;
 
-    // 先保存表单数据
-    await this._saveFormData();
+    const form = this.element.find('form')[0];
+    if (!form) return;
+
+    // 手动收集表单数据并处理
+    const formData = new FormDataExtended(form).object;
+    const updateData = await this._getUpdateData(formData);
 
     // 删除指定条件
     const conditions = [...(this.item.system.conditions || [])];
     conditions.splice(conditionIndex, 1);
+    updateData['system.conditions'] = conditions;
 
-    await this.item.update({'system.conditions': conditions});
+    await this.item.update(updateData);
   }
 
   /**
@@ -300,8 +369,12 @@ export default class ItemCardSheet extends ItemSheet {
     event.preventDefault();
     event.stopPropagation();
 
-    // 先保存表单数据
-    await this._saveFormData();
+    const form = this.element.find('form')[0];
+    if (!form) return;
+
+    // 手动收集表单数据并处理
+    const formData = new FormDataExtended(form).object;
+    const updateData = await this._getUpdateData(formData);
 
     const conditionIndex = parseInt($(event.currentTarget).data('condition-index'));
     const conditions = [...(this.item.system.conditions || [])];
@@ -316,7 +389,8 @@ export default class ItemCardSheet extends ItemSheet {
       strength: 0
     });
 
-    await this.item.update({'system.conditions': conditions});
+    updateData['system.conditions'] = conditions;
+    await this.item.update(updateData);
   }
 
   /**
@@ -326,8 +400,12 @@ export default class ItemCardSheet extends ItemSheet {
     event.preventDefault();
     event.stopPropagation();
 
-    // 先保存表单数据
-    await this._saveFormData();
+    const form = this.element.find('form')[0];
+    if (!form) return;
+
+    // 手动收集表单数据并处理
+    const formData = new FormDataExtended(form).object;
+    const updateData = await this._getUpdateData(formData);
 
     const conditionIndex = parseInt($(event.currentTarget).data('condition-index'));
     const consumeIndex = parseInt($(event.currentTarget).data('consume-index'));
@@ -335,7 +413,8 @@ export default class ItemCardSheet extends ItemSheet {
 
     conditions[conditionIndex].consumes.splice(consumeIndex, 1);
 
-    await this.item.update({'system.conditions': conditions});
+    updateData['system.conditions'] = conditions;
+    await this.item.update(updateData);
   }
 
   /**
