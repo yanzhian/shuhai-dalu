@@ -42,7 +42,7 @@ export default class ItemCardSheet extends ItemSheet {
       width: 520,
       height: 630,
       tabs: [],
-      submitOnChange: true,
+      submitOnChange: false,  // 禁用自动提交
       closeOnSubmit: false
     });
   }
@@ -110,39 +110,50 @@ export default class ItemCardSheet extends ItemSheet {
   /** @override */
   async _render(force, options) {
     // 保存滚动位置
-    if (this.element.length) {
+    if (this.element && this.element.length) {
       const container = this.element.find('.item-card-container');
-      if (container.length) {
+      if (container && container.length) {
         this._scrollPositions.main = container.scrollTop();
       }
     }
 
     await super._render(force, options);
 
-    // 恢复滚动位置 - 需要等待DOM完全渲染
-    if (this._scrollPositions.main !== undefined) {
-      setTimeout(() => {
-        const container = this.element.find('.item-card-container');
-        if (container.length) {
-          container.scrollTop(this._scrollPositions.main);
-        }
-      }, 0);
+    // 恢复滚动位置 - 使用 requestAnimationFrame 确保 DOM 完全渲染
+    if (this._scrollPositions.main !== undefined && this._scrollPositions.main > 0) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const container = this.element?.find('.item-card-container');
+          if (container && container.length) {
+            container.scrollTop(this._scrollPositions.main);
+          }
+        });
+      });
     }
   }
 
   /* -------------------------------------------- */
 
   /**
-   * 获取当前表单数据（手动收集）
+   * 保存当前表单数据（不触发渲染）
    */
-  _getCurrentFormData() {
-    if (!this.element || !this.element.length) return {};
+  async _saveFormData() {
+    if (!this.element || !this.element.length) return;
 
     const form = this.element.find('form')[0];
-    if (!form) return {};
+    if (!form) return;
 
-    const formData = new FormDataExtended(form).object;
-    return formData;
+    // 使用标准的 submit 事件，但阻止渲染
+    const event = new Event('submit', { bubbles: true, cancelable: true });
+    try {
+      await this._onSubmit(event, {
+        updateData: null,
+        preventClose: true,
+        preventRender: true
+      });
+    } catch(err) {
+      console.error('Error saving form data:', err);
+    }
   }
 
   /* -------------------------------------------- */
@@ -181,18 +192,12 @@ export default class ItemCardSheet extends ItemSheet {
   async _onToggleLock(event) {
     event.preventDefault();
 
-    // 收集当前表单数据
-    const formData = this._getCurrentFormData();
-
     // 先保存表单数据
-    if (Object.keys(formData).length > 0) {
-      await this.item.update(formData);
-    }
+    await this._saveFormData();
 
-    // 再切换锁定状态
+    // 再切换锁定状态（会自动触发渲染）
     const currentLock = this.item.getFlag('shuhai-dalu', 'isLocked') || false;
     await this.item.setFlag('shuhai-dalu', 'isLocked', !currentLock);
-    this.render();
   }
 
   /**
@@ -221,8 +226,8 @@ export default class ItemCardSheet extends ItemSheet {
     event.preventDefault();
     event.stopPropagation();
 
-    // 收集当前表单数据
-    const formData = this._getCurrentFormData();
+    // 先保存表单数据
+    await this._saveFormData();
 
     // 添加新条件
     const conditions = [...(this.item.system.conditions || [])];
@@ -242,13 +247,7 @@ export default class ItemCardSheet extends ItemSheet {
 
     conditions.push(newCondition);
 
-    // 合并表单数据和新条件一起更新
-    const updateData = {
-      ...formData,
-      'system.conditions': conditions
-    };
-
-    await this.item.update(updateData);
+    await this.item.update({'system.conditions': conditions});
   }
 
   /**
@@ -269,20 +268,14 @@ export default class ItemCardSheet extends ItemSheet {
 
     if (!confirm) return;
 
-    // 收集当前表单数据
-    const formData = this._getCurrentFormData();
+    // 先保存表单数据
+    await this._saveFormData();
 
     // 删除指定条件
     const conditions = [...(this.item.system.conditions || [])];
     conditions.splice(conditionIndex, 1);
 
-    // 合并表单数据和修改后的条件一起更新
-    const updateData = {
-      ...formData,
-      'system.conditions': conditions
-    };
-
-    await this.item.update(updateData);
+    await this.item.update({'system.conditions': conditions});
   }
 
   /**
@@ -292,8 +285,8 @@ export default class ItemCardSheet extends ItemSheet {
     event.preventDefault();
     event.stopPropagation();
 
-    // 收集当前表单数据
-    const formData = this._getCurrentFormData();
+    // 先保存表单数据
+    await this._saveFormData();
 
     const conditionIndex = parseInt($(event.currentTarget).data('condition-index'));
     const conditions = [...(this.item.system.conditions || [])];
@@ -308,13 +301,7 @@ export default class ItemCardSheet extends ItemSheet {
       strength: 0
     });
 
-    // 合并表单数据和修改后的条件一起更新
-    const updateData = {
-      ...formData,
-      'system.conditions': conditions
-    };
-
-    await this.item.update(updateData);
+    await this.item.update({'system.conditions': conditions});
   }
 
   /**
@@ -324,8 +311,8 @@ export default class ItemCardSheet extends ItemSheet {
     event.preventDefault();
     event.stopPropagation();
 
-    // 收集当前表单数据
-    const formData = this._getCurrentFormData();
+    // 先保存表单数据
+    await this._saveFormData();
 
     const conditionIndex = parseInt($(event.currentTarget).data('condition-index'));
     const consumeIndex = parseInt($(event.currentTarget).data('consume-index'));
@@ -333,13 +320,7 @@ export default class ItemCardSheet extends ItemSheet {
 
     conditions[conditionIndex].consumes.splice(consumeIndex, 1);
 
-    // 合并表单数据和修改后的条件一起更新
-    const updateData = {
-      ...formData,
-      'system.conditions': conditions
-    };
-
-    await this.item.update(updateData);
+    await this.item.update({'system.conditions': conditions});
   }
 
   /**
