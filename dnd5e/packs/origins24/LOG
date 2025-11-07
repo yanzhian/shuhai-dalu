@@ -1,0 +1,8 @@
+2025/11/07-20:18:13.002 f20c Recovering log #130
+2025/11/07-20:18:13.004 f20c Delete type=0 #130
+2025/11/07-20:18:13.004 f20c Delete type=3 #128
+2025/11/07-20:21:49.133 198f0 Level-0 table #135: started
+2025/11/07-20:21:49.133 198f0 Level-0 table #135: 0 bytes OK
+2025/11/07-20:21:49.134 198f0 Delete type=0 #133
+2025/11/07-20:21:49.137 198f0 Manual compaction at level-0 from '!folders!2Bw096HjE0HyGMwM' @ 72057594037927935 : 1 .. '!items.effects!phbsptStonecunni.SAbuNo2AO3XXtkdv' @ 0 : 0; will stop at (end)
+2025/11/07-20:21:49.137 198f0 Manual compaction at level-1 from '!folders!2Bw096HjE0HyGMwM' @ 72057594037927935 : 1 .. '!items.effects!phbsptStonecunni.SAbuNo2AO3XXtkdv' @ 0 : 0; will stop at (end)

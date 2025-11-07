@@ -1,0 +1,8 @@
+2025/11/07-20:18:12.977 144a8 Recovering log #131
+2025/11/07-20:18:12.979 144a8 Delete type=0 #131
+2025/11/07-20:18:12.979 144a8 Delete type=3 #129
+2025/11/07-20:21:49.136 198f0 Level-0 table #136: started
+2025/11/07-20:21:49.136 198f0 Level-0 table #136: 0 bytes OK
+2025/11/07-20:21:49.137 198f0 Delete type=0 #134
+2025/11/07-20:21:49.137 198f0 Manual compaction at level-0 from '!folders!1A8WFP1GVZkKdxii' @ 72057594037927935 : 1 .. '!journal.pages!xxt7YT2t76JxNTel.9iCIjvYzMdxWPtd1' @ 0 : 0; will stop at (end)
+2025/11/07-20:21:49.137 198f0 Manual compaction at level-1 from '!folders!1A8WFP1GVZkKdxii' @ 72057594037927935 : 1 .. '!journal.pages!xxt7YT2t76JxNTel.9iCIjvYzMdxWPtd1' @ 0 : 0; will stop at (end)

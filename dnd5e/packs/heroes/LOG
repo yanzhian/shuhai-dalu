@@ -1,0 +1,8 @@
+2025/11/07-20:18:12.830 182b4 Recovering log #130
+2025/11/07-20:18:12.833 182b4 Delete type=0 #130
+2025/11/07-20:18:12.833 182b4 Delete type=3 #128
+2025/11/07-20:21:49.115 198f0 Level-0 table #135: started
+2025/11/07-20:21:49.115 198f0 Level-0 table #135: 0 bytes OK
+2025/11/07-20:21:49.117 198f0 Delete type=0 #133
+2025/11/07-20:21:49.120 198f0 Manual compaction at level-0 from '!actors!125qFnXvT9z0iOic' @ 72057594037927935 : 1 .. '!actors.items.effects!xVmbM44RXyI2Eqq3.PCcIZTkaRF749Y4z.1QhUB3231btaCO0b' @ 0 : 0; will stop at (end)
+2025/11/07-20:21:49.120 198f0 Manual compaction at level-1 from '!actors!125qFnXvT9z0iOic' @ 72057594037927935 : 1 .. '!actors.items.effects!xVmbM44RXyI2Eqq3.PCcIZTkaRF749Y4z.1QhUB3231btaCO0b' @ 0 : 0; will stop at (end)

@@ -1,0 +1,8 @@
+2025/11/07-14:52:11.028 1f770 Recovering log #126
+2025/11/07-14:52:11.030 1f770 Delete type=0 #126
+2025/11/07-14:52:11.031 1f770 Delete type=3 #124
+2025/11/07-15:42:08.832 1518 Level-0 table #131: started
+2025/11/07-15:42:08.832 1518 Level-0 table #131: 0 bytes OK
+2025/11/07-15:42:08.833 1518 Delete type=0 #129
+2025/11/07-15:42:08.837 1518 Manual compaction at level-0 from '!tables!4ryVFV5LPHPzRKxl' @ 72057594037927935 : 1 .. '!tables.results!ypk2L9feVwTx0QVj.zW1HUUNLqwmOfFgg' @ 0 : 0; will stop at (end)
+2025/11/07-15:42:08.837 1518 Manual compaction at level-1 from '!tables!4ryVFV5LPHPzRKxl' @ 72057594037927935 : 1 .. '!tables.results!ypk2L9feVwTx0QVj.zW1HUUNLqwmOfFgg' @ 0 : 0; will stop at (end)
