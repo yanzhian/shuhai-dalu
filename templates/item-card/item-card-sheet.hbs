@@ -20,9 +20,9 @@
         {{!-- 上：名称 --}}
         <input name="name" type="text" value="{{item.name}}" placeholder="物品名称" class="item-card-name-input" {{#if isLocked}}disabled{{/if}} />
 
-        {{!-- 中：类型、分类（两列） --}}
+        {{!-- 中：类型（只读）、分类 --}}
         <div class="item-card-type-category-row">
-          <input name="system.itemType" type="text" value="{{system.itemType}}" placeholder="类型" class="item-card-type-input" {{#if isLocked}}disabled{{/if}} />
+          <span class="item-card-type-label">{{item.type}}</span>
           <span class="item-card-separator">-</span>
           <input name="system.category" type="text" value="{{system.category}}" placeholder="分类" class="item-card-category-input" {{#if isLocked}}disabled{{/if}} />
         </div>
@@ -54,8 +54,8 @@
         </div>
       </div>
 
-      {{!-- 下行：防具属性（仅防具类型显示） --}}
-      {{#if (eq system.itemType "防具")}}
+      {{!-- 下行：防具属性（如果item.type是armor则显示） --}}
+      {{#if (eq item.type "armor")}}
         <div class="item-card-armor-row">
           <span class="armor-label">防具属性：</span>
           <div class="item-card-armor-badges">
