@@ -338,13 +338,11 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
   /** @override */
   _canDragStart(selector) {
-    console.log('书海大陆 | _canDragStart 被调用', { selector, isEditable: this.isEditable });
     return this.isEditable;
   }
 
   /** @override */
   _canDragDrop(selector) {
-    console.log('书海大陆 | _canDragDrop 被调用', { selector, isEditable: this.isEditable });
     return true; // 允许所有拖放操作，包括从外部拖入
   }
 
@@ -368,8 +366,6 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     // 设置拖动数据
     const dragData = item.toDragData();
     event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
-
-    console.log('书海大陆 | 开始拖动物品', { itemId, item: item.name });
   }
 
   /* -------------------------------------------- */
@@ -1208,15 +1204,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
   /** @override */
   async _onDrop(event) {
-    console.log('书海大陆 | _onDrop 被调用', {
-      target: event.target,
-      targetClassName: event.target.className,
-      targetClosestInventory: event.target.closest('.inventory-list'),
-      targetClosestSlot: event.target.closest('.slot-content')
-    });
-
     const data = TextEditor.getDragEventData(event);
-    console.log('书海大陆 | 拖放数据类型', data.type);
 
     if (data.type === "Item") {
       return this._onDropItem(event, data);
@@ -1229,34 +1217,21 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    * 处理物品拖放到装备槽或物品栏
    */
   async _onDropItem(event, data) {
-    console.log('书海大陆 | _onDropItem 被调用', { event, data });
-
     const item = await Item.implementation.fromDropData(data);
     const itemData = item.toObject();
-
-    console.log('书海大陆 | 拖放的物品', {
-      itemId: item.id,
-      itemName: item.name,
-      itemParent: item.parent?.id,
-      actorId: this.actor.id
-    });
 
     // 检查拖放目标 - 优先检查是否拖放到装备槽
     const dropTarget = event.target.closest('.slot-content');
 
     if (dropTarget) {
       // 拖放到装备槽的逻辑
-      console.log('书海大陆 | 拖放到装备槽', { dropTarget });
-
       // 如果是从其他角色或 FVTT 侧边栏拖入，需要先创建物品副本
       if (!item.parent || item.parent.id !== this.actor.id) {
-        console.log('书海大陆 | 从外部拖入物品到装备槽，先创建副本');
         delete itemData._id;
         const createdItems = await this.actor.createEmbeddedDocuments("Item", [itemData]);
 
         if (createdItems && createdItems.length > 0) {
           const newItem = createdItems[0];
-          console.log('书海大陆 | 创建物品副本成功，开始装备', { newItemId: newItem.id });
 
           const slotType = dropTarget.dataset.slot;
           const slotIndex = dropTarget.dataset.slotIndex !== undefined ?
@@ -1302,17 +1277,13 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       return false;
     } else {
       // 拖放到物品栏的逻辑（没有找到 .slot-content）
-      console.log('书海大陆 | 拖放到物品栏或其他区域');
-
       // 检查是否是从其他角色或外部拖入
       if (!item.parent || item.parent.id !== this.actor.id) {
-        console.log('书海大陆 | 从外部拖入物品到物品栏，创建副本');
         delete itemData._id;
         return this.actor.createEmbeddedDocuments("Item", [itemData]);
       }
 
       // 如果是自己的物品在自己的物品栏内拖放，使用父类的默认排序逻辑
-      console.log('书海大陆 | 物品栏内部拖放，调用父类方法');
       return super._onDropItem(event, data);
     }
   }
