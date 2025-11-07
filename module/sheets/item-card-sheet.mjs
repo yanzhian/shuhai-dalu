@@ -30,13 +30,20 @@ const BUFF_PRESETS = [
 
 export default class ItemCardSheet extends ItemSheet {
 
+  constructor(...args) {
+    super(...args);
+    this._scrollPositions = {};
+  }
+
   /** @override */
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ["shuhai-dalu", "sheet", "item", "item-card"],
       width: 520,
       height: 630,
-      tabs: []
+      tabs: [],
+      submitOnChange: true,
+      closeOnSubmit: false
     });
   }
 
@@ -101,6 +108,29 @@ export default class ItemCardSheet extends ItemSheet {
   /* -------------------------------------------- */
 
   /** @override */
+  async _render(force, options) {
+    // 保存滚动位置
+    if (this.element.length) {
+      const container = this.element.find('.item-card-container');
+      if (container.length) {
+        this._scrollPositions.main = container.scrollTop();
+      }
+    }
+
+    await super._render(force, options);
+
+    // 恢复滚动位置
+    if (this._scrollPositions.main !== undefined) {
+      const container = this.element.find('.item-card-container');
+      if (container.length) {
+        container.scrollTop(this._scrollPositions.main);
+      }
+    }
+  }
+
+  /* -------------------------------------------- */
+
+  /** @override */
   activateListeners(html) {
     super.activateListeners(html);
 
@@ -133,6 +163,10 @@ export default class ItemCardSheet extends ItemSheet {
    */
   async _onToggleLock(event) {
     event.preventDefault();
+
+    // 先提交当前表单，保存所有未保存的输入
+    await this._onSubmit(event, {preventClose: true, preventRender: true});
+
     const currentLock = this.item.getFlag('shuhai-dalu', 'isLocked') || false;
     await this.item.setFlag('shuhai-dalu', 'isLocked', !currentLock);
     this.render();
@@ -164,7 +198,10 @@ export default class ItemCardSheet extends ItemSheet {
     event.preventDefault();
     event.stopPropagation();
 
-    const conditions = this.item.system.conditions || [];
+    // 先提交当前表单，保存所有未保存的输入
+    await this._onSubmit(event, {preventClose: true, preventRender: true});
+
+    const conditions = [...(this.item.system.conditions || [])];
     const newCondition = {
       trigger: 'onUse',
       hasConsume: false,
@@ -194,7 +231,6 @@ export default class ItemCardSheet extends ItemSheet {
     event.stopPropagation();
 
     const conditionIndex = parseInt($(event.currentTarget).closest('.item-card-condition-panel').data('index'));
-    const conditions = this.item.system.conditions || [];
 
     const confirm = await Dialog.confirm({
       title: "删除条件",
@@ -205,6 +241,10 @@ export default class ItemCardSheet extends ItemSheet {
 
     if (!confirm) return;
 
+    // 先提交当前表单，保存所有未保存的输入
+    await this._onSubmit(event, {preventClose: true, preventRender: true});
+
+    const conditions = [...(this.item.system.conditions || [])];
     conditions.splice(conditionIndex, 1);
 
     await this.item.update({
@@ -219,8 +259,11 @@ export default class ItemCardSheet extends ItemSheet {
     event.preventDefault();
     event.stopPropagation();
 
+    // 先提交当前表单，保存所有未保存的输入
+    await this._onSubmit(event, {preventClose: true, preventRender: true});
+
     const conditionIndex = parseInt($(event.currentTarget).data('condition-index'));
-    const conditions = [...this.item.system.conditions];
+    const conditions = [...(this.item.system.conditions || [])];
 
     if (!conditions[conditionIndex].consumes) {
       conditions[conditionIndex].consumes = [];
@@ -244,9 +287,12 @@ export default class ItemCardSheet extends ItemSheet {
     event.preventDefault();
     event.stopPropagation();
 
+    // 先提交当前表单，保存所有未保存的输入
+    await this._onSubmit(event, {preventClose: true, preventRender: true});
+
     const conditionIndex = parseInt($(event.currentTarget).data('condition-index'));
     const consumeIndex = parseInt($(event.currentTarget).data('consume-index'));
-    const conditions = [...this.item.system.conditions];
+    const conditions = [...(this.item.system.conditions || [])];
 
     conditions[conditionIndex].consumes.splice(consumeIndex, 1);
 
