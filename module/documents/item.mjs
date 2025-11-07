@@ -351,7 +351,12 @@ export class CombatDiceData extends foundry.abstract.TypeDataModel {
         pierceDown: new fields.BooleanField({ initial: false, label: "突刺弱性" }),
         bluntDown: new fields.BooleanField({ initial: false, label: "打击弱性" })
       }),
-      // 条件触发数组
+      // Activities 系统（替代旧的 conditions 数组）
+      activities: new fields.ObjectField({
+        initial: {},
+        label: "活动列表"
+      }),
+      // 条件触发数组（已废弃，保留用于数据迁移）
       conditions: new fields.ArrayField(
         new fields.SchemaField({
           trigger: new fields.StringField({
@@ -440,7 +445,12 @@ export class DefenseDiceData extends foundry.abstract.TypeDataModel {
         pierceDown: new fields.BooleanField({ initial: false, label: "突刺弱性" }),
         bluntDown: new fields.BooleanField({ initial: false, label: "打击弱性" })
       }),
-      // 条件触发数组
+      // Activities 系统（替代旧的 conditions 数组）
+      activities: new fields.ObjectField({
+        initial: {},
+        label: "活动列表"
+      }),
+      // 条件触发数组（已废弃，保留用于数据迁移）
       conditions: new fields.ArrayField(
         new fields.SchemaField({
           trigger: new fields.StringField({
@@ -772,7 +782,12 @@ export class ArmorData extends foundry.abstract.TypeDataModel {
         pierceDown: new fields.BooleanField({ initial: false, label: "突刺↓" }),
         bluntDown: new fields.BooleanField({ initial: false, label: "打击↓" })
       }),
-      // 条件触发数组
+      // Activities 系统（替代旧的 conditions 数组）
+      activities: new fields.ObjectField({
+        initial: {},
+        label: "活动列表"
+      }),
+      // 条件触发数组（已废弃，保留用于数据迁移）
       conditions: new fields.ArrayField(
         new fields.SchemaField({
           trigger: new fields.StringField({
@@ -1021,7 +1036,12 @@ export class ItemCardData extends foundry.abstract.TypeDataModel {
         pierceDown: new fields.BooleanField({ initial: false, label: "突刺弱性" }),
         bluntDown: new fields.BooleanField({ initial: false, label: "打击弱性" })
       }),
-      // 条件触发数组
+      // Activities 系统（替代旧的 conditions 数组）
+      activities: new fields.ObjectField({
+        initial: {},
+        label: "活动列表"
+      }),
+      // 条件触发数组（已废弃，保留用于数据迁移）
       conditions: new fields.ArrayField(
         new fields.SchemaField({
           trigger: new fields.StringField({

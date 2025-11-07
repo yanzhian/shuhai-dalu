@@ -1088,3 +1088,194 @@
 .shuhai-dalu.item-card button:disabled {
   cursor: not-allowed !important;
 }
+
+/* ========================================
+   Activities 列表
+   ======================================== */
+.shuhai-dalu.item-card .item-card-activities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shuhai-dalu.item-card .item-card-activity-card {
+  background: rgba(0, 0, 0, 0.2);
+  border: 2px solid #EBBD68;
+  border-radius: 6px;
+  padding: 12px;
+  transition: all 0.2s;
+}
+
+.shuhai-dalu.item-card .item-card-activity-card:hover {
+  background: rgba(235, 189, 104, 0.05);
+  border-color: #E1AA43;
+}
+
+.shuhai-dalu.item-card .activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.shuhai-dalu.item-card .activity-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.shuhai-dalu.item-card .activity-name {
+  font-size: 14px;
+  font-weight: bold;
+  color: #EBBD68;
+}
+
+.shuhai-dalu.item-card .activity-trigger {
+  font-size: 12px;
+  color: #ECE4D6;
+  opacity: 0.8;
+}
+
+.shuhai-dalu.item-card .activity-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.shuhai-dalu.item-card .edit-activity-btn,
+.shuhai-dalu.item-card .delete-activity-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  color: #EBBD68;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shuhai-dalu.item-card .edit-activity-btn:hover {
+  background: rgba(235, 189, 104, 0.2);
+  border-color: #E1AA43;
+}
+
+.shuhai-dalu.item-card .delete-activity-btn:hover {
+  background: rgba(193, 69, 69, 0.2);
+  border-color: #c14545;
+  color: #c14545;
+}
+
+.shuhai-dalu.item-card .activity-summary {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: #ECE4D6;
+  opacity: 0.7;
+}
+
+.shuhai-dalu.item-card .item-card-add-activity-btn {
+  width: 100%;
+  padding: 10px;
+  background: rgba(74, 124, 44, 0.2);
+  border: 2px dashed #4a7c2c;
+  border-radius: 6px;
+  color: #4a7c2c;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.shuhai-dalu.item-card .item-card-add-activity-btn:hover {
+  background: rgba(74, 124, 44, 0.3);
+  border-color: #5a9c3c;
+  color: #5a9c3c;
+}
+
+/* ========================================
+   Activity Editor 对话框样式
+   ======================================== */
+.shuhai-dalu.activity-editor {
+  .window-content {
+    padding: 15px;
+    background: #0F0D1B;
+  }
+
+  .activity-editor-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+    font-weight: bold;
+    color: #EBBD68;
+  }
+
+  .form-group input[type="text"],
+  .form-group input[type="number"],
+  .form-group select {
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #EBBD68;
+    border-radius: 4px;
+    color: #ECE4D6;
+    font-size: 13px;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+
+  .checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+
+  .consumes-list,
+  .effects-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .consume-row,
+  .effect-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .add-consume-btn,
+  .remove-consume-btn {
+    padding: 4px 8px;
+    background: #4a7c2c;
+    border: none;
+    border-radius: 4px;
+    color: #ECE4D6;
+    font-size: 11px;
+    cursor: pointer;
+  }
+
+  .remove-consume-btn {
+    background: #c14545;
+  }
+}

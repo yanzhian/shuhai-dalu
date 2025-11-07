@@ -134,33 +134,42 @@
       </div>
     </div>
 
-    {{!-- 条件触发区域 --}}
+    {{!-- Activities 区域 --}}
     <div class="item-card-section">
-      <div class="item-card-conditions-list">
-        {{#each system.conditions as |condition index|}}
-          <div class="item-card-condition-panel" data-index="{{index}}">
-            <div class="item-card-panel-header">
-              <i class="fas fa-chevron-right collapse-icon"></i>
-              <span class="panel-title">条件{{add index 1}}</span>
-              <div class="panel-actions">
+      <div class="item-card-activities-list">
+        {{#each system.activities as |activity id|}}
+          <div class="item-card-activity-card" data-activity-id="{{id}}">
+            <div class="activity-header">
+              <div class="activity-info">
+                <span class="activity-name">{{activity.name}}</span>
+                <span class="activity-trigger">{{activity.trigger}}</span>
+              </div>
+              <div class="activity-actions">
                 {{#unless ../isLocked}}
-                  <button type="button" class="panel-action-btn delete-condition-btn" title="删除条件">
+                  <button type="button" class="edit-activity-btn" data-activity-id="{{id}}" title="编辑">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button type="button" class="delete-activity-btn" data-activity-id="{{id}}" title="删除">
                     <i class="fas fa-trash"></i>
                   </button>
                 {{/unless}}
               </div>
             </div>
-            <div class="item-card-panel-content collapsed">
-              {{> systems/shuhai-dalu/templates/item-card/condition-editor.hbs condition=condition index=index locked=../isLocked buffPresets=../buffPresets}}
+            <div class="activity-summary">
+              <span class="activity-target">目标: {{activity.target}}</span>
+              {{#if activity.hasConsume}}
+                <span class="activity-consume">消耗: {{activity.consumes.length}}项</span>
+              {{/if}}
+              <span class="activity-effects">效果: {{#each activity.effects}}{{@key}} {{/each}}</span>
             </div>
           </div>
         {{/each}}
       </div>
 
       {{#unless isLocked}}
-        <button type="button" class="item-card-add-condition-btn">
+        <button type="button" class="item-card-add-activity-btn">
           <i class="fas fa-plus"></i>
-          添加条件触发
+          添加新活动
         </button>
       {{/unless}}
     </div>

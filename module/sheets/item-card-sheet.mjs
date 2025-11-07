@@ -1,7 +1,9 @@
 /**
  * 书海大陆物品卡表单
- * 支持条件触发系统的独立物品类型
+ * 支持 Activities 系统
  */
+
+import ActivityEditor from './activity-editor.mjs';
 
 // BUFF预设列表
 const BUFF_PRESETS = [
@@ -68,12 +70,9 @@ export default class ItemCardSheet extends ItemSheet {
     context.system = itemData.system;
     context.flags = itemData.flags;
 
-    // BUFF预设
-    context.buffPresets = BUFF_PRESETS;
-
-    // 确保conditions数组存在
-    if (!context.system.conditions) {
-      context.system.conditions = [];
+    // 确保 activities 对象存在
+    if (!context.system.activities) {
+      context.system.activities = {};
     }
 
     // 富文本编辑器
@@ -257,18 +256,14 @@ export default class ItemCardSheet extends ItemSheet {
     // 只在可编辑状态添加以下监听器
     if (!this.isEditable) return;
 
-    // 条件管理
-    html.find('.item-card-add-condition-btn').click(this._onAddCondition.bind(this));
-    html.find('.delete-condition-btn').click(this._onDeleteCondition.bind(this));
-    html.find('.save-condition-btn').click(this._onSaveCondition.bind(this));
-
-    // 消耗管理
-    html.find('.add-consume-btn').click(this._onAddConsume.bind(this));
-    html.find('.remove-consume-btn').click(this._onRemoveConsume.bind(this));
+    // Activities 管理
+    html.find('.item-card-add-activity-btn').click(this._onAddActivity.bind(this));
+    html.find('.edit-activity-btn').click(this._onEditActivity.bind(this));
+    html.find('.delete-activity-btn').click(this._onDeleteActivity.bind(this));
 
     // 使用/聊天按钮
     html.find('.item-use-btn').click(this._onItemUse.bind(this));
-    html.find('.item-chat-btn').click(this._onItemChat.bind(this));
+    html.find('.item-card-action-btn secondary item-chat-btn').click(this._onItemChat.bind(this));
   }
 
   /* -------------------------------------------- */
@@ -449,6 +444,62 @@ export default class ItemCardSheet extends ItemSheet {
 
     updateData['system.conditions'] = conditions;
     await this.item.update(updateData);
+  }
+
+  /**
+   * 添加 Activity
+   */
+  async _onAddActivity(event) {
+    event.preventDefault();
+    const editor = new ActivityEditor(this.item);
+    editor.render(true);
+  }
+
+  /**
+   * 编辑 Activity
+   */
+  async _onEditActivity(event) {
+    event.preventDefault();
+    const activityId = $(event.currentTarget).data('activity-id');
+    const activity = this.item.system.activities?.[activityId];
+
+    if (!activity) {
+      ui.notifications.error("找不到该活动");
+      return;
+    }
+
+    const editor = new ActivityEditor(this.item, activity);
+    editor.render(true);
+  }
+
+  /**
+   * 删除 Activity
+   */
+  async _onDeleteActivity(event) {
+    event.preventDefault();
+    const activityId = $(event.currentTarget).data('activity-id');
+    const activity = this.item.system.activities?.[activityId];
+
+    if (!activity) return;
+
+    const confirm = await Dialog.confirm({
+      title: "删除活动",
+      content: `<p>确定要删除活动 "${activity.name}" 吗？</p>`,
+      yes: () => true,
+      no: () => false
+    });
+
+    if (!confirm) return;
+
+    // 复制 activities 对象并删除指定活动
+    const activities = { ...(this.item.system.activities || {}) };
+    delete activities[activityId];
+
+    await this.item.update({
+      'system.activities': activities
+    });
+
+    ui.notifications.info("活动已删除");
   }
 
   /**

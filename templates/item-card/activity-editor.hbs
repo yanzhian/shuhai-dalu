@@ -1,0 +1,97 @@
+<form class="activity-editor-form">
+
+  {{!-- Activity 名称 --}}
+  <div class="form-group">
+    <label>活动名称</label>
+    <input type="text" name="name" value="{{activity.name}}" placeholder="例如：攻击命中时-燃烧效果" />
+  </div>
+
+  {{!-- 触发时机 --}}
+  <div class="form-group">
+    <label>触发时机</label>
+    <select name="trigger">
+      <option value="onUse" {{#if (eq activity.trigger "onUse")}}selected{{/if}}>使用时</option>
+      <option value="onAttack" {{#if (eq activity.trigger "onAttack")}}selected{{/if}}>攻击时</option>
+      <option value="onCounter" {{#if (eq activity.trigger "onCounter")}}selected{{/if}}>对抗时</option>
+      <option value="onCounterSuccess" {{#if (eq activity.trigger "onCounterSuccess")}}selected{{/if}}>对抗成功</option>
+      <option value="onCounterFail" {{#if (eq activity.trigger "onCounterFail")}}selected{{/if}}>对抗失败</option>
+      <option value="onHit" {{#if (eq activity.trigger "onHit")}}selected{{/if}}>攻击命中</option>
+      <option value="onDamaged" {{#if (eq activity.trigger "onDamaged")}}selected{{/if}}>受到伤害</option>
+      <option value="onTurnStart" {{#if (eq activity.trigger "onTurnStart")}}selected{{/if}}>回合开始</option>
+      <option value="onTurnEnd" {{#if (eq activity.trigger "onTurnEnd")}}selected{{/if}}>回合结束</option>
+    </select>
+  </div>
+
+  {{!-- 消耗开关 --}}
+  <div class="form-group">
+    <label class="checkbox-label">
+      <input type="checkbox" name="hasConsume" {{#if activity.hasConsume}}checked{{/if}} />
+      <span>需要消耗</span>
+    </label>
+  </div>
+
+  {{!-- 消耗列表 --}}
+  {{#if activity.hasConsume}}
+    <div class="form-group consumes-section">
+      <label>消耗</label>
+      <div class="consumes-list">
+        {{#each activity.consumes as |consume idx|}}
+          <div class="consume-row" data-index="{{idx}}">
+            <select name="consumes.{{idx}}.buffId">
+              {{#each ../buffPresets as |buff|}}
+                <option value="{{buff.id}}" {{#if (eq buff.id consume.buffId)}}selected{{/if}}>{{buff.name}}</option>
+              {{/each}}
+            </select>
+            <input type="number" name="consumes.{{idx}}.layers" value="{{consume.layers}}" placeholder="层数" />
+            <input type="number" name="consumes.{{idx}}.strength" value="{{consume.strength}}" placeholder="强度" />
+            <button type="button" class="remove-consume-btn" data-index="{{idx}}"><i class="fas fa-times"></i></button>
+          </div>
+        {{/each}}
+        <button type="button" class="add-consume-btn"><i class="fas fa-plus"></i> 添加消耗</button>
+      </div>
+    </div>
+  {{/if}}
+
+  {{!-- 目标选择 --}}
+  <div class="form-group">
+    <label>目标</label>
+    <select name="target">
+      <option value="selected" {{#if (eq activity.target "selected")}}selected{{/if}}>选择的目标</option>
+      <option value="self" {{#if (eq activity.target "self")}}selected{{/if}}>自己</option>
+      <option value="multiple" {{#if (eq activity.target "multiple")}}selected{{/if}}>多个目标</option>
+    </select>
+  </div>
+
+  {{!-- 效果添加 --}}
+  <div class="form-group effects-section">
+    <label>效果添加</label>
+    <div class="effects-list">
+      {{#each buffPresets as |buff|}}
+        <div class="effect-row">
+          <label class="checkbox-label">
+            <input type="checkbox" name="effects.{{buff.id}}.enabled" {{#if (lookup ../activity.effects buff.id)}}checked{{/if}} />
+            <span class="effect-name">{{buff.name}}</span>
+          </label>
+          <input type="number" name="effects.{{buff.id}}.layers" value="{{#if (lookup ../activity.effects buff.id)}}{{lookup (lookup ../activity.effects buff.id) 'layers'}}{{else}}{{buff.defaultLayers}}{{/if}}" placeholder="层数" />
+          <input type="number" name="effects.{{buff.id}}.strength" value="{{#if (lookup ../activity.effects buff.id)}}{{lookup (lookup ../activity.effects buff.id) 'strength'}}{{else}}{{buff.defaultStrength}}{{/if}}" placeholder="强度" />
+        </div>
+      {{/each}}
+    </div>
+  </div>
+
+  {{!-- 自定义效果 --}}
+  <div class="form-group custom-effect-section">
+    <label class="checkbox-label">
+      <input type="checkbox" name="customEffect.enabled" {{#if activity.customEffect.enabled}}checked{{/if}} />
+      <span>其他效果</span>
+    </label>
+    {{#if activity.customEffect.enabled}}
+      <div class="custom-effect-fields">
+        <input type="text" name="customEffect.name" value="{{activity.customEffect.name}}" placeholder="效果名称" />
+        <input type="number" name="customEffect.layers" value="{{activity.customEffect.layers}}" placeholder="层数" />
+        <input type="number" name="customEffect.strength" value="{{activity.customEffect.strength}}" placeholder="强度" />
+      </div>
+    {{/if}}
+  </div>
+
+</form>
