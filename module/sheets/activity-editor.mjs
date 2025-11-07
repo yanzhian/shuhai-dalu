@@ -170,7 +170,7 @@ export default class ActivityEditor extends Application {
     const form = this.element?.find('form')[0];
     if (!form) return;
 
-    const formData = new FormDataExtended(form).object;
+    const formData = new foundry.applications.ux.FormDataExtended(form).object;
 
     // 更新基本字段
     if (formData.name !== undefined) this.activity.name = formData.name;
@@ -261,7 +261,8 @@ export default class ActivityEditor extends Application {
       return;
     }
 
-    const formData = new FormDataExtended(form).object;
+    // 使用 Foundry V13+ 的命名空间版本
+    const formData = new foundry.applications.ux.FormDataExtended(form).object;
     console.log('【Activity保存】原始表单数据:', formData);
 
     // 处理 consumes
@@ -269,7 +270,9 @@ export default class ActivityEditor extends Application {
     console.log('【Activity保存】处理后的 consumes:', consumes);
 
     // 处理 effectsList
+    console.log('【Activity保存】formData.effects:', formData.effects);
     const effectsList = formData.effects ? Object.values(formData.effects) : [];
+    console.log('【Activity保存】effectsList:', effectsList);
     const effects = this._listToEffects(effectsList);
     console.log('【Activity保存】处理后的 effects:', effects);
 
