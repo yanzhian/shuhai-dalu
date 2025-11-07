@@ -143,24 +143,37 @@ export default class ItemCardSheet extends ItemSheet {
    * 保存当前表单数据
    */
   async _saveFormData() {
-    if (!this.element || !this.element.length) return;
+    if (!this.element || !this.element.length) {
+      console.log('【保存表单】element不存在');
+      return;
+    }
 
     const form = this.element.find('form')[0];
-    if (!form) return;
+    if (!form) {
+      console.log('【保存表单】form不存在');
+      return;
+    }
 
     try {
       // 手动收集表单数据
       const formData = new FormDataExtended(form).object;
+      console.log('【保存表单】原始表单数据:', formData);
 
       // 使用 _updateObject 处理数据（包括 conditions 的特殊处理）
       const updateData = await this._getUpdateData(formData);
+      console.log('【保存表单】处理后的数据:', updateData);
 
       // 更新 item（会触发渲染，但滚动位置会被保存和恢复）
       if (updateData && Object.keys(updateData).length > 0) {
+        console.log('【保存表单】开始更新item');
         await this.item.update(updateData);
+        console.log('【保存表单】item更新完成');
+      } else {
+        console.log('【保存表单】没有需要更新的数据');
       }
     } catch(err) {
-      console.error('Error saving form data:', err);
+      console.error('【保存表单】错误:', err);
+      throw err;
     }
   }
 
@@ -169,15 +182,18 @@ export default class ItemCardSheet extends ItemSheet {
    */
   async _getUpdateData(formData) {
     const expanded = foundry.utils.expandObject(formData);
+    console.log('【处理数据】展开后的数据:', expanded);
 
     // 处理conditions数组（与 _updateObject 相同的逻辑）
     if (expanded.system?.conditions) {
+      console.log('【处理数据】发现conditions，原始:', expanded.system.conditions);
       const conditions = [];
       const conditionsObj = expanded.system.conditions;
 
       for (let i = 0; i < 100; i++) {
         if (conditionsObj[i]) {
           const condition = conditionsObj[i];
+          console.log(`【处理数据】处理条件${i}:`, condition);
 
           // 处理effects对象
           const effects = {};
@@ -193,7 +209,7 @@ export default class ItemCardSheet extends ItemSheet {
             }
           }
 
-          conditions.push({
+          const processedCondition = {
             trigger: condition.trigger || 'onUse',
             hasConsume: condition.hasConsume || false,
             consumes: condition.consumes || [],
@@ -205,11 +221,16 @@ export default class ItemCardSheet extends ItemSheet {
               layers: 0,
               strength: 0
             }
-          });
+          };
+          console.log(`【处理数据】条件${i}处理后:`, processedCondition);
+          conditions.push(processedCondition);
         }
       }
 
+      console.log('【处理数据】所有条件处理完成，总数:', conditions.length);
       expanded.system.conditions = conditions;
+    } else {
+      console.log('【处理数据】没有发现conditions');
     }
 
     return expanded;
@@ -322,11 +343,18 @@ export default class ItemCardSheet extends ItemSheet {
     event.preventDefault();
     event.stopPropagation();
 
-    // 保存整个表单数据
-    await this._saveFormData();
+    console.log('【条件保存】开始保存');
 
-    // 显示保存成功提示
-    ui.notifications.info("条件已保存");
+    // 保存整个表单数据
+    try {
+      await this._saveFormData();
+      console.log('【条件保存】保存成功');
+      // 显示保存成功提示
+      ui.notifications.info("条件已保存");
+    } catch(err) {
+      console.error('【条件保存】保存失败:', err);
+      ui.notifications.error("条件保存失败: " + err.message);
+    }
   }
 
   /**
