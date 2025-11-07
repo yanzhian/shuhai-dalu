@@ -950,6 +950,12 @@ Hooks.once('init', function() {
 
     return parts.join('\n');
   });
+
+  // 检查数组是否包含某个值
+  Handlebars.registerHelper('includes', function(array, value) {
+    if (!Array.isArray(array)) return false;
+    return array.includes(value);
+  });
 });
 
 /* -------------------------------------------- */
