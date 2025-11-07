@@ -32,6 +32,7 @@ export default class ActivityEditor extends Application {
   constructor(item, activity = null, options = {}) {
     super(options);
     this.item = item;
+    this.isNew = !activity;  // 标记是否为新建模式
 
     if (activity) {
       // 编辑现有activity
@@ -302,11 +303,16 @@ export default class ActivityEditor extends Application {
     console.log('【Activity保存】构建的 activityData:', activityData);
 
     try {
-      // 使用 Item 的 updateActivity 方法，使用点符号路径更新
-      // 这是 DND5e 的做法，不替换整个 activities 对象
-      console.log('【Activity保存】调用 item.updateActivity');
-      await this.item.updateActivity(this.activityId, activityData);
-      console.log('【Activity保存】updateActivity 完成');
+      // 根据是新建还是编辑，调用不同的方法
+      if (this.isNew) {
+        console.log('【Activity保存】调用 item.createActivity（新建）');
+        await this.item.createActivity(activityData);
+        console.log('【Activity保存】createActivity 完成');
+      } else {
+        console.log('【Activity保存】调用 item.updateActivity（编辑）');
+        await this.item.updateActivity(this.activityId, activityData);
+        console.log('【Activity保存】updateActivity 完成');
+      }
 
       ui.notifications.info("活动已保存");
       this.close();

@@ -349,6 +349,23 @@ export default class ShuhaiItem extends Item {
   }
 
   /**
+   * 创建新的 Activity
+   * @param {object} activityData  Activity 数据（必须包含 _id）
+   * @returns {Promise<Item>}      更新后的 Item
+   */
+  async createActivity(activityData) {
+    if (!activityData._id) {
+      throw new Error('Activity 数据必须包含 _id');
+    }
+
+    // 确保 activities 对象存在
+    const activities = this.system.activities || {};
+
+    // 使用点符号路径创建新的 activity
+    return this.update({ [`system.activities.${activityData._id}`]: activityData });
+  }
+
+  /**
    * 更新指定 ID 的 Activity
    * 参考 DND5e 的实现方式，使用点符号路径更新
    * @param {string} id        Activity 的 ID
@@ -356,7 +373,9 @@ export default class ShuhaiItem extends Item {
    * @returns {Promise<Item>}  更新后的 Item
    */
   async updateActivity(id, updates) {
-    if (!this.system.activities) return this;
+    if (!this.system.activities) {
+      throw new Error('此 Item 不支持 Activities');
+    }
     if (!this.system.activities[id]) {
       throw new Error(`Activity ID ${id} 未找到`);
     }
