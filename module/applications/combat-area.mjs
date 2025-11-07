@@ -440,9 +440,6 @@ export default class CombatAreaApplication extends Application {
     html.find('.dice-activate-toggle').click(this._onToggleDiceActivation.bind(this));
     html.find('.combat-dice-initiate-btn').click(this._onInitiateCombatDice.bind(this));
 
-    // 战斗骰拖动到宏栏
-    html.find('.combat-dice-initiate-btn[draggable="true"]').on('dragstart', this._onDragStart.bind(this));
-
     // 装备使用按钮
     html.find('.equipment-use-btn').click(this._onEquipmentUse.bind(this));
 
@@ -465,28 +462,6 @@ export default class CombatAreaApplication extends Application {
   /* -------------------------------------------- */
   /*  事件处理器                                    */
   /* -------------------------------------------- */
-
-  /**
-   * 拖动战斗骰到宏栏
-   */
-  _onDragStart(event) {
-    const button = event.currentTarget;
-    const itemId = button.dataset.itemId;
-    const actorId = button.dataset.actorId;
-    const diceIndex = button.dataset.index;
-
-    if (!itemId || !actorId) return;
-
-    const item = this.actor.items.get(itemId);
-    if (!item) return;
-
-    // 使用 Item 类型的拖动数据，并添加自定义标识
-    const dragData = item.toDragData();
-    dragData.fromCombatArea = true;
-    dragData.diceIndex = diceIndex;
-
-    event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
-  }
 
   /**
    * 切换锁定状态
