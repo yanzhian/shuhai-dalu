@@ -1,280 +1,358 @@
 <form class="{{cssClass}} flexcol" autocomplete="off">
-  {{!-- 物品头部 --}}
-  <header class="sheet-header">
-    <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}" width="100" height="100"/>
-    <div class="header-fields">
-      <h1 class="charname">
-        <input name="name" type="text" value="{{item.name}}" placeholder="物品名称"/>
-      </h1>
-      <div class="item-subtitle">
-        <span class="item-type">{{item.type}}</span>
+  {{!-- 编辑锁 --}}
+  <div class="item-lock-row">
+    <button type="button" class="item-lock-btn {{#if isLocked}}locked{{/if}}" title="{{#if isLocked}}解锁编辑{{else}}锁定编辑{{/if}}">
+      <i class="fas fa-{{#if isLocked}}lock{{else}}lock-open{{/if}}"></i>
+    </button>
+  </div>
+
+  {{!-- 基础信息区域 --}}
+  <div class="item-basic-info">
+    {{!-- 图标 --}}
+    <div class="item-icon-section">
+      <div class="item-icon-wrapper" data-edit="img" title="{{item.name}}">
+        <img src="{{item.img}}" alt="{{item.name}}"/>
       </div>
     </div>
-  </header>
 
-  {{!-- 物品属性 --}}
-  <div class="sheet-body">
-    {{!-- 基础属性 --}}
-    <div class="form-group">
-      <label>分类</label>
-      {{#if allowCustomCategory}}
-      <input type="text" name="system.category" value="{{system.category}}" placeholder="例如: 太刀, 弓箭, 藤甲, 子弹..."/>
-      <p class="hint">可以自由填写物品分类</p>
-      {{else}}
-      <select name="system.category">
-        {{#each categories as |cat|}}
-        <option value="{{cat.value}}" {{#if (eq ../system.category cat.value)}}selected{{/if}}>
-          {{cat.label}}
-        </option>
-        {{/each}}
-      </select>
+    {{!-- 信息 --}}
+    <div class="item-info-section">
+      {{!-- 名称 --}}
+      <div class="item-name-row">
+        <input name="name" type="text" value="{{item.name}}" placeholder="物品名称" {{#if isLocked}}disabled{{/if}}/>
+      </div>
+
+      {{!-- 类型和分类 --}}
+      <div class="item-type-category-row">
+        <div>
+          <span style="font-size: 12px; color: #EBBD68;">类型: {{item.type}}</span>
+        </div>
+        <div>
+          {{#if allowCustomCategory}}
+          <input type="text" name="system.category" value="{{system.category}}" placeholder="分类" {{#if isLocked}}disabled{{/if}}/>
+          {{else}}
+          <select name="system.category" {{#if isLocked}}disabled{{/if}}>
+            {{#each categories as |cat|}}
+            <option value="{{cat.value}}" {{#if (eq ../system.category cat.value)}}selected{{/if}}>
+              {{cat.label}}
+            </option>
+            {{/each}}
+          </select>
+          {{/if}}
+        </div>
+      </div>
+
+      {{!-- 标签 --}}
+      <div class="item-tags-row">
+        <input type="text" name="system.tags" value="{{system.tags}}" placeholder="标签（逗号分隔）" {{#if isLocked}}disabled{{/if}}/>
+      </div>
+    </div>
+  </div>
+
+  {{!-- 属性信息区域 --}}
+  <div class="item-properties-section">
+    <div class="item-stats-row">
+      {{!-- 骰数 --}}
+      {{#if showDiceFormula}}
+      <div class="item-stat-field">
+        <label>骰数</label>
+        <input type="text" name="system.diceFormula" value="{{system.diceFormula}}" placeholder="1d6+3" {{#if isLocked}}disabled{{/if}}/>
+      </div>
       {{/if}}
-    </div>
 
-    {{#if showDiceFormula}}
-    <div class="form-group">
-      <label>骰数</label>
-      <input type="text" name="system.diceFormula" value="{{system.diceFormula}}" placeholder="例如: 1d6+3"/>
-      <p class="hint">支持格式: 1d6+3, 2d4, 1d8+2, 或 ★ ▼ O 等特殊符号</p>
-    </div>
-    {{/if}}
+      {{!-- 费用 --}}
+      <div class="item-stat-field">
+        <label>费用</label>
+        <input type="text" name="system.cost" value="{{system.cost}}" placeholder="-" {{#if isLocked}}disabled{{/if}}/>
+      </div>
 
-    <div class="form-group">
-      <label>费用</label>
-      <input type="text" name="system.cost" value="{{system.cost}}" placeholder="例如: 10, Cost:50, San:3, -"/>
-      <p class="hint">格式: 数字、Cost:数字、San:数字、或 - 表示无消耗</p>
-    </div>
-
-    {{#if showQuantity}}
-    <div class="form-group">
-      <label>数量</label>
-      <input type="number" name="system.quantity" value="{{system.quantity}}" data-dtype="Number" min="0"/>
-    </div>
-    {{/if}}
-
-    {{#if showStarlightCost}}
-    <div class="form-group">
-      <label>星光消耗</label>
-      <input type="number" name="system.starlightCost" value="{{system.starlightCost}}" data-dtype="Number" min="0"/>
-      <p class="hint">装备时消耗的星光数量</p>
-    </div>
-    {{/if}}
-
-    <div class="form-group">
-      <label>标签</label>
-      <input type="text" name="system.tags" value="{{system.tags}}" placeholder="用逗号分隔多个标签"/>
+      {{!-- 星光 --}}
+      {{#if showStarlightCost}}
+      <div class="item-stat-field">
+        <label>星光</label>
+        <input type="number" name="system.starlightCost" value="{{system.starlightCost}}" min="0" {{#if isLocked}}disabled{{/if}}/>
+      </div>
+      {{/if}}
     </div>
 
     {{!-- 防具属性 --}}
     {{#if showArmorProperties}}
-    <div class="form-group armor-properties">
-      <label>防具属性</label>
-      <div class="properties-grid">
-        <label class="checkbox-label">
-          <input type="checkbox" name="system.armorProperties.slashUp" {{#if system.armorProperties.slashUp}}checked{{/if}}/>
-          <span class="resist">斩击↑</span>
+    <div class="armor-properties-section">
+      <div class="section-title">防具属性</div>
+      <div class="armor-properties-grid">
+        <label class="armor-property-item">
+          <input type="checkbox" name="system.armorProperties.slashUp" {{#if system.armorProperties.slashUp}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+          <span class="property-label resist">斩击↑</span>
         </label>
-        <label class="checkbox-label">
-          <input type="checkbox" name="system.armorProperties.pierceUp" {{#if system.armorProperties.pierceUp}}checked{{/if}}/>
-          <span class="resist">突刺↑</span>
+        <label class="armor-property-item">
+          <input type="checkbox" name="system.armorProperties.pierceUp" {{#if system.armorProperties.pierceUp}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+          <span class="property-label resist">突刺↑</span>
         </label>
-        <label class="checkbox-label">
-          <input type="checkbox" name="system.armorProperties.bluntUp" {{#if system.armorProperties.bluntUp}}checked{{/if}}/>
-          <span class="resist">打击↑</span>
+        <label class="armor-property-item">
+          <input type="checkbox" name="system.armorProperties.bluntUp" {{#if system.armorProperties.bluntUp}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+          <span class="property-label resist">打击↑</span>
         </label>
-        <label class="checkbox-label">
-          <input type="checkbox" name="system.armorProperties.slashDown" {{#if system.armorProperties.slashDown}}checked{{/if}}/>
-          <span class="weak">斩击↓</span>
+        <label class="armor-property-item">
+          <input type="checkbox" name="system.armorProperties.slashDown" {{#if system.armorProperties.slashDown}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+          <span class="property-label weak">斩击↓</span>
         </label>
-        <label class="checkbox-label">
-          <input type="checkbox" name="system.armorProperties.pierceDown" {{#if system.armorProperties.pierceDown}}checked{{/if}}/>
-          <span class="weak">突刺↓</span>
+        <label class="armor-property-item">
+          <input type="checkbox" name="system.armorProperties.pierceDown" {{#if system.armorProperties.pierceDown}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+          <span class="property-label weak">突刺↓</span>
         </label>
-        <label class="checkbox-label">
-          <input type="checkbox" name="system.armorProperties.bluntDown" {{#if system.armorProperties.bluntDown}}checked{{/if}}/>
-          <span class="weak">打击↓</span>
+        <label class="armor-property-item">
+          <input type="checkbox" name="system.armorProperties.bluntDown" {{#if system.armorProperties.bluntDown}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+          <span class="property-label weak">打击↓</span>
         </label>
       </div>
     </div>
     {{/if}}
+  </div>
 
-    {{!-- 效果描述 --}}
-    <div class="form-group">
-      <label>效果描述</label>
-      <textarea name="system.effect" rows="4" placeholder="描述物品的效果...">{{system.effect}}</textarea>
-    </div>
+  {{!-- 标签页区域 --}}
+  <div class="item-tabs-section">
+    <nav class="item-tabs-nav">
+      <button type="button" class="item-tab-btn active" data-tab="effect">效果描述</button>
+      <button type="button" class="item-tab-btn" data-tab="conditions">条件触发</button>
+    </nav>
 
-    {{!-- 操作按钮 --}}
-    <div class="form-group actions">
-      <button type="button" class="item-use">
-        <i class="fas fa-play"></i> 使用
-      </button>
-      <button type="button" class="item-chat">
-        <i class="fas fa-comment"></i> 发送到聊天
-      </button>
+    <div class="item-tabs-content">
+      {{!-- 效果描述标签页 --}}
+      <div class="item-tab-pane active" data-tab="effect">
+        <div class="effect-description-section">
+          <div class="effect-header">
+            <button type="button" class="effect-toggle-btn" title="展开/折叠">
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="effect-title">效果</div>
+            <button type="button" class="effect-edit-btn {{#unless isLocked}}active{{/unless}}" title="编辑描述">
+              <i class="fas fa-pen"></i>
+            </button>
+          </div>
+          <div class="effect-content">
+            <textarea name="system.effect" placeholder="描述物品的效果..." {{#if isLocked}}disabled{{/if}}>{{system.effect}}</textarea>
+          </div>
+        </div>
+      </div>
+
+      {{!-- 条件触发标签页 --}}
+      <div class="item-tab-pane" data-tab="conditions">
+        <div class="conditions-list-section">
+          {{#each system.conditions as |condition idx|}}
+          <div class="condition-item" data-condition-id="{{condition.id}}" data-condition-idx="{{idx}}">
+            <div class="condition-header">
+              <button type="button" class="condition-toggle-btn" title="展开/折叠">
+                <i class="fas fa-chevron-down"></i>
+              </button>
+              <input type="text" class="condition-name-input"
+                     name="system.conditions.{{idx}}.name"
+                     value="{{condition.name}}"
+                     placeholder="条件名称"
+                     {{#if ../isLocked}}disabled{{/if}}/>
+              <div class="condition-actions">
+                <button type="button" class="condition-action-btn delete-btn" title="删除" {{#if ../isLocked}}disabled{{/if}}>
+                  <i class="fas fa-trash"></i>
+                </button>
+                <button type="button" class="condition-action-btn use-btn" title="使用">
+                  <i class="fas fa-play"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="condition-content">
+              {{!-- 触发时机 --}}
+              <div class="condition-trigger-section">
+                <div class="condition-section-title">触发时机</div>
+                <div class="condition-trigger-options">
+                  <label class="trigger-option">
+                    <input type="radio" name="system.conditions.{{idx}}.trigger" value="onUse" {{#if (eq condition.trigger "onUse")}}checked{{/if}} {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>使用时</span>
+                  </label>
+                  <label class="trigger-option">
+                    <input type="radio" name="system.conditions.{{idx}}.trigger" value="onAttack" {{#if (eq condition.trigger "onAttack")}}checked{{/if}} {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>攻击时</span>
+                  </label>
+                  <label class="trigger-option">
+                    <input type="radio" name="system.conditions.{{idx}}.trigger" value="onCounter" {{#if (eq condition.trigger "onCounter")}}checked{{/if}} {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>对抗时</span>
+                  </label>
+                  <label class="trigger-option">
+                    <input type="radio" name="system.conditions.{{idx}}.trigger" value="onCounterSuccess" {{#if (eq condition.trigger "onCounterSuccess")}}checked{{/if}} {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>对抗成功</span>
+                  </label>
+                  <label class="trigger-option">
+                    <input type="radio" name="system.conditions.{{idx}}.trigger" value="onCounterFailure" {{#if (eq condition.trigger "onCounterFailure")}}checked{{/if}} {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>对抗失败</span>
+                  </label>
+                  <label class="trigger-option">
+                    <input type="radio" name="system.conditions.{{idx}}.trigger" value="onHit" {{#if (eq condition.trigger "onHit")}}checked{{/if}} {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>攻击命中</span>
+                  </label>
+                  <label class="trigger-option">
+                    <input type="radio" name="system.conditions.{{idx}}.trigger" value="onDamaged" {{#if (eq condition.trigger "onDamaged")}}checked{{/if}} {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>受到伤害</span>
+                  </label>
+                  <label class="trigger-option">
+                    <input type="radio" name="system.conditions.{{idx}}.trigger" value="onTurnStart" {{#if (eq condition.trigger "onTurnStart")}}checked{{/if}} {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>回合开始</span>
+                  </label>
+                  <label class="trigger-option">
+                    <input type="radio" name="system.conditions.{{idx}}.trigger" value="onTurnEnd" {{#if (eq condition.trigger "onTurnEnd")}}checked{{/if}} {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>回合结束</span>
+                  </label>
+                </div>
+              </div>
+
+              {{!-- 消耗 --}}
+              <div class="condition-consumption-section">
+                <div class="consumption-toggle">
+                  <input type="checkbox" id="need-consumption-{{idx}}" name="system.conditions.{{idx}}.needConsumption" {{#if condition.needConsumption}}checked{{/if}} {{#if ../isLocked}}disabled{{/if}}/>
+                  <label for="need-consumption-{{idx}}">需要消耗</label>
+                </div>
+                {{#if condition.needConsumption}}
+                <div class="consumption-effects">
+                  <div class="condition-section-title" style="width: 100%;">消耗效果（开发中）</div>
+                </div>
+                {{/if}}
+              </div>
+
+              {{!-- 目标 --}}
+              <div class="condition-target-section">
+                <div class="condition-section-title">目标</div>
+                <div class="target-options">
+                  <label class="target-option">
+                    <input type="radio" name="system.conditions.{{idx}}.target" value="selected" {{#if (eq condition.target "selected")}}checked{{/if}} {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>选择的目标</span>
+                  </label>
+                  <label class="target-option">
+                    <input type="radio" name="system.conditions.{{idx}}.target" value="self" {{#if (eq condition.target "self")}}checked{{/if}} {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>自己</span>
+                  </label>
+                  <label class="target-option">
+                    <input type="radio" name="system.conditions.{{idx}}.target" value="multiple" {{#if (eq condition.target "multiple")}}checked{{/if}} {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>多个目标</span>
+                  </label>
+                </div>
+              </div>
+
+              {{!-- 基础效果 --}}
+              <div class="condition-base-effects-section">
+                <div class="condition-section-title">基础效果（多选）</div>
+                <div class="base-effects-grid">
+                  <label class="base-effect-option">
+                    <input type="checkbox" class="base-effect-checkbox" value="rupture"
+                           data-condition-idx="{{idx}}"
+                           {{#if (includes condition.baseEffects "rupture")}}checked{{/if}}
+                           {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>破裂</span>
+                  </label>
+                  <label class="base-effect-option">
+                    <input type="checkbox" class="base-effect-checkbox" value="sinking"
+                           data-condition-idx="{{idx}}"
+                           {{#if (includes condition.baseEffects "sinking")}}checked{{/if}}
+                           {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>沉沦</span>
+                  </label>
+                  <label class="base-effect-option">
+                    <input type="checkbox" class="base-effect-checkbox" value="bleeding"
+                           data-condition-idx="{{idx}}"
+                           {{#if (includes condition.baseEffects "bleeding")}}checked{{/if}}
+                           {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>流血</span>
+                  </label>
+                  <label class="base-effect-option">
+                    <input type="checkbox" class="base-effect-checkbox" value="burn"
+                           data-condition-idx="{{idx}}"
+                           {{#if (includes condition.baseEffects "burn")}}checked{{/if}}
+                           {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>燃烧</span>
+                  </label>
+                  <label class="base-effect-option">
+                    <input type="checkbox" class="base-effect-checkbox" value="breath"
+                           data-condition-idx="{{idx}}"
+                           {{#if (includes condition.baseEffects "breath")}}checked{{/if}}
+                           {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>呼吸</span>
+                  </label>
+                  <label class="base-effect-option">
+                    <input type="checkbox" class="base-effect-checkbox" value="charge"
+                           data-condition-idx="{{idx}}"
+                           {{#if (includes condition.baseEffects "charge")}}checked{{/if}}
+                           {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>充能</span>
+                  </label>
+                  <label class="base-effect-option">
+                    <input type="checkbox" class="base-effect-checkbox" value="tremor"
+                           data-condition-idx="{{idx}}"
+                           {{#if (includes condition.baseEffects "tremor")}}checked{{/if}}
+                           {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>震颤</span>
+                  </label>
+                  <label class="base-effect-option">
+                    <input type="checkbox" class="base-effect-checkbox" value="moan"
+                           data-condition-idx="{{idx}}"
+                           {{#if (includes condition.baseEffects "moan")}}checked{{/if}}
+                           {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>呻吟</span>
+                  </label>
+                  <label class="base-effect-option">
+                    <input type="checkbox" class="base-effect-checkbox" value="medicine"
+                           data-condition-idx="{{idx}}"
+                           {{#if (includes condition.baseEffects "medicine")}}checked{{/if}}
+                           {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>携药</span>
+                  </label>
+                  <label class="base-effect-option">
+                    <input type="checkbox" class="base-effect-checkbox" value="paralysis"
+                           data-condition-idx="{{idx}}"
+                           {{#if (includes condition.baseEffects "paralysis")}}checked{{/if}}
+                           {{#if ../isLocked}}disabled{{/if}}/>
+                    <span>麻痹</span>
+                  </label>
+                </div>
+              </div>
+
+              {{!-- 其他效果 --}}
+              <div class="condition-custom-effect-section">
+                <div class="condition-section-title">其他效果（自定义）</div>
+                <div class="custom-effect-fields">
+                  <div class="custom-effect-field">
+                    <label>效果名称</label>
+                    <input type="text" name="system.conditions.{{idx}}.customEffect.name"
+                           value="{{condition.customEffect.name}}"
+                           placeholder="自定义效果"
+                           {{#if ../isLocked}}disabled{{/if}}/>
+                  </div>
+                  <div class="custom-effect-field">
+                    <label>层数</label>
+                    <input type="number" name="system.conditions.{{idx}}.customEffect.layers"
+                           value="{{condition.customEffect.layers}}"
+                           min="0"
+                           {{#if ../isLocked}}disabled{{/if}}/>
+                  </div>
+                  <div class="custom-effect-field">
+                    <label>强度</label>
+                    <input type="number" name="system.conditions.{{idx}}.customEffect.strength"
+                           value="{{condition.customEffect.strength}}"
+                           min="0"
+                           {{#if ../isLocked}}disabled{{/if}}/>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {{/each}}
+
+          {{!-- 添加条件按钮 --}}
+          <button type="button" class="add-condition-btn" {{#if isLocked}}disabled{{/if}}>
+            <i class="fas fa-plus"></i>
+            <span>添加条件触发</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </form>
 
-<style>
-.shuhai-dalu.item {
-  background: #2a2a2a;
-  color: #e0e0e0;
-}
-
-.shuhai-dalu.item .sheet-header {
-  display: flex;
-  gap: 1rem;
-  padding: 1rem;
-  background: #1e1e1e;
-  border-bottom: 2px solid #3a3a3a;
-}
-
-.shuhai-dalu.item .profile-img {
-  border: 2px solid #4a4a4a;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.shuhai-dalu.item .header-fields {
-  flex: 1;
-}
-
-.shuhai-dalu.item .charname {
-  margin: 0 0 0.5rem 0;
-}
-
-.shuhai-dalu.item .charname input {
-  width: 100%;
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid #4a4a4a;
-  color: #e0e0e0;
-  font-size: 1.5rem;
-  font-weight: bold;
-  padding: 0.25rem 0;
-}
-
-.shuhai-dalu.item .item-subtitle {
-  color: #999;
-  font-size: 0.875rem;
-}
-
-.shuhai-dalu.item .sheet-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1rem;
-}
-
-.shuhai-dalu.item .form-group {
-  margin-bottom: 1rem;
-}
-
-.shuhai-dalu.item .form-group label {
-  display: block;
-  font-weight: bold;
-  color: #bbb;
-  margin-bottom: 0.25rem;
-  font-size: 0.875rem;
-}
-
-.shuhai-dalu.item .form-group input[type="text"],
-.shuhai-dalu.item .form-group input[type="number"],
-.shuhai-dalu.item .form-group select {
-  width: 100%;
-  padding: 0.5rem;
-  background: #333;
-  border: 1px solid #4a4a4a;
-  border-radius: 4px;
-  color: #e0e0e0;
-}
-
-.shuhai-dalu.item .form-group input:focus,
-.shuhai-dalu.item .form-group select:focus {
-  outline: none;
-  border-color: #3498db;
-}
-
-.shuhai-dalu.item .hint {
-  margin: 0.25rem 0 0 0;
-  font-size: 0.75rem;
-  color: #888;
-}
-
-.shuhai-dalu.item .properties-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
-}
-
-.shuhai-dalu.item .checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  background: #333;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.shuhai-dalu.item .checkbox-label:hover {
-  background: #3a3a3a;
-}
-
-.shuhai-dalu.item .checkbox-label input[type="checkbox"] {
-  width: auto;
-  margin: 0;
-}
-
-.shuhai-dalu.item .checkbox-label .resist {
-  color: #2ecc71;
-  font-weight: bold;
-}
-
-.shuhai-dalu.item .checkbox-label .weak {
-  color: #e74c3c;
-  font-weight: bold;
-}
-
-.shuhai-dalu.item .form-group.description {
-  margin-top: 1.5rem;
-}
-
-.shuhai-dalu.item .form-group.actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid #3a3a3a;
-}
-
-.shuhai-dalu.item .form-group.actions button {
-  flex: 1;
-  padding: 0.75rem;
-  border: none;
-  border-radius: 4px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.shuhai-dalu.item .item-use {
-  background: #2ecc71;
-  color: white;
-}
-
-.shuhai-dalu.item .item-use:hover {
-  background: #27ae60;
-  transform: translateY(-2px);
-}
-
-.shuhai-dalu.item .item-chat {
-  background: #3498db;
-  color: white;
-}
-
-.shuhai-dalu.item .item-chat:hover {
-  background: #2980b9;
-  transform: translateY(-2px);
-}
-</style>
+{{!-- 引入CSS样式 --}}
+<link rel="stylesheet" href="systems/shuhai-dalu/styles/item-sheet.css"/>
