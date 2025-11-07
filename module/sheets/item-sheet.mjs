@@ -338,6 +338,11 @@ export default class ShuhaiItemSheet extends ItemSheet {
     // 展平嵌套的条件数据
     const expandedData = foundry.utils.expandObject(formData);
 
+    // 过滤掉空的或无效的 img 字段，防止覆盖现有的图片路径
+    if (expandedData.img === "" || expandedData.img === null || expandedData.img === undefined) {
+      delete expandedData.img;
+    }
+
     // 确保conditions是数组
     if (expandedData.system?.conditions) {
       // 将条件对象转换为数组
