@@ -293,18 +293,11 @@ export default class ActivityEditor extends Application {
     console.log('【Activity保存】构建的 activityData:', activityData);
 
     try {
-      // 更新 item 的 activities
-      const activities = foundry.utils.deepClone(this.item.system.activities || {});
-      console.log('【Activity保存】当前 activities:', activities);
-
-      activities[this.activityId] = activityData;
-      console.log('【Activity保存】更新后的 activities:', activities);
-
-      const updateData = {'system.activities': activities};
-      console.log('【Activity保存】准备更新 item，数据:', updateData);
-
-      await this.item.update(updateData);
-      console.log('【Activity保存】item.update 完成');
+      // 使用 Item 的 updateActivity 方法，使用点符号路径更新
+      // 这是 DND5e 的做法，不替换整个 activities 对象
+      console.log('【Activity保存】调用 item.updateActivity');
+      await this.item.updateActivity(this.activityId, activityData);
+      console.log('【Activity保存】updateActivity 完成');
 
       ui.notifications.info("活动已保存");
       this.close();

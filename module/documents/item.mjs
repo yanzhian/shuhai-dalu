@@ -347,6 +347,35 @@ export default class ShuhaiItem extends Item {
 
     ChatMessage.create(messageData);
   }
+
+  /**
+   * 更新指定 ID 的 Activity
+   * 参考 DND5e 的实现方式，使用点符号路径更新
+   * @param {string} id        Activity 的 ID
+   * @param {object} updates   要更新的数据
+   * @returns {Promise<Item>}  更新后的 Item
+   */
+  async updateActivity(id, updates) {
+    if (!this.system.activities) return this;
+    if (!this.system.activities[id]) {
+      throw new Error(`Activity ID ${id} 未找到`);
+    }
+    // 使用点符号路径更新特定的 activity，而不是替换整个 activities 对象
+    return this.update({ [`system.activities.${id}`]: updates });
+  }
+
+  /**
+   * 删除指定 ID 的 Activity
+   * @param {string} id        Activity 的 ID
+   * @returns {Promise<Item>}  更新后的 Item
+   */
+  async deleteActivity(id) {
+    if (!this.system.activities || !this.system.activities[id]) {
+      return this;
+    }
+    // 使用 Foundry 的删除语法：`-=key` 表示删除这个键
+    return this.update({ [`system.activities.-=${id}`]: null });
+  }
 }
 
 /**

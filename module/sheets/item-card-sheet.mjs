@@ -491,13 +491,8 @@ export default class ItemCardSheet extends ItemSheet {
 
     if (!confirm) return;
 
-    // 复制 activities 对象并删除指定活动
-    const activities = { ...(this.item.system.activities || {}) };
-    delete activities[activityId];
-
-    await this.item.update({
-      'system.activities': activities
-    });
+    // 使用 Item 的 deleteActivity 方法
+    await this.item.deleteActivity(activityId);
 
     ui.notifications.info("活动已删除");
   }
