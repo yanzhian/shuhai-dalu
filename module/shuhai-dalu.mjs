@@ -497,7 +497,6 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     const button = event.currentTarget;
 
     const initiatorId = button.dataset.initiatorId;
-    const diceRoll = parseInt(button.dataset.diceRoll) || 0;
     const buffBonus = parseInt(button.dataset.buffBonus) || 0;
     const adjustment = parseInt(button.dataset.adjustment) || 0;
     const diceCategory = button.dataset.diceCategory || '';
@@ -510,6 +509,37 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     if (actor.id === initiatorId) {
       ui.notifications.warn("你不能承受自己的攻击！");
       return;
+    }
+
+    // 从聊天消息的flags中获取完整的发起数据
+    const messageId = $(button).closest('.message').data('messageId');
+    const chatMessage = game.messages.get(messageId);
+
+    if (!chatMessage || !chatMessage.flags['shuhai-dalu']?.initiateData) {
+      ui.notifications.error("无法获取发起数据");
+      return;
+    }
+
+    const initiateData = chatMessage.flags['shuhai-dalu'].initiateData;
+
+    // 如果发起者还没投骰，现在投
+    let diceRoll = initiateData.diceRoll;
+    if (diceRoll === null || diceRoll === undefined) {
+      const roll = new Roll(initiateData.diceFormula);
+      await roll.evaluate();
+
+      // 显示3D骰子动画
+      if (game.dice3d) {
+        await game.dice3d.showForRoll(roll, game.user, true);
+      }
+
+      diceRoll = roll.total;
+
+      // 更新聊天消息中的 diceRoll
+      await chatMessage.setFlag('shuhai-dalu', 'initiateData', {
+        ...initiateData,
+        diceRoll: diceRoll
+      });
     }
 
     // 计算发起者的最终骰数

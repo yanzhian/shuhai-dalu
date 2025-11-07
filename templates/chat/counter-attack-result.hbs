@@ -31,8 +31,19 @@
   {{!-- 详细信息 --}}
   <div class="details" style="padding: 12px; background: rgba(235, 189, 104, 0.1); border-radius: 6px; margin-bottom: 12px; font-size: 13px; line-height: 1.8;">
     <div><strong>{{counterName}}</strong> 使用了 <span style="color: #E1AA43; font-weight: bold;">{{defenseDiceName}}</span>（反击）</div>
-    <div>反击骰数：{{counterDiceRoll}} + {{counterBuff}} (BUFF) + {{counterAdjustment}} (调整) = <span style="color: #E1AA43; font-weight: bold;">{{counterDamage}}</span></div>
-    <div>攻击伤害：{{initiatorTotal}} = <span style="color: #c14545; font-weight: bold;">{{initiatorDamage}}</span></div>
+
+    {{!-- 反击伤害计算 --}}
+    <div style="margin-top: 8px; padding: 8px; background: rgba(193, 69, 69, 0.15); border-radius: 4px;">
+      <div style="color: #E1AA43; font-weight: bold; margin-bottom: 4px;">反击伤害（{{counterAttackType}}）：</div>
+      <div>基础伤害：{{counterDiceRoll}} + {{counterBuff}} (BUFF) + {{counterAdjustment}} (调整) = {{counterBaseDamage}}</div>
+      <div style="color: #c14545; font-weight: bold;">{{counterDescription}}</div>
+    </div>
+
+    {{!-- 攻击伤害计算 --}}
+    <div style="margin-top: 8px; padding: 8px; background: rgba(193, 69, 69, 0.15); border-radius: 4px;">
+      <div style="color: #E1AA43; font-weight: bold; margin-bottom: 4px;">攻击伤害（{{initiatorAttackType}}）：</div>
+      <div>{{initiatorDescription}}</div>
+    </div>
   </div>
 
   {{!-- 扣血按钮区域 --}}

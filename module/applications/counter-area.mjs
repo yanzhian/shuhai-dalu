@@ -371,17 +371,18 @@ export default class CounterAreaApplication extends Application {
     // 先投发起者的骰子（如果还没投）
     const initiatorRollResult = await this._rollInitiatorDice();
 
+    // 显示发起者的骰子动画（如果有）
+    if (game.dice3d && initiatorRollResult.roll) {
+      await game.dice3d.showForRoll(initiatorRollResult.roll, game.user, true);
+    }
+
     // 再投对抗者的骰子
     const roll = new Roll(dice.system.diceFormula);
     await roll.evaluate();
 
-    // 一起显示3D骰子动画
+    // 显示对抗者的骰子动画
     if (game.dice3d) {
-      const rolls = [roll];
-      if (initiatorRollResult.roll) {
-        rolls.unshift(initiatorRollResult.roll); // 发起者的骰子在前
-      }
-      await game.dice3d.showForRoll(rolls, game.user, true);
+      await game.dice3d.showForRoll(roll, game.user, true);
     }
 
     // 计算BUFF加成
@@ -404,10 +405,30 @@ export default class CounterAreaApplication extends Application {
     const winner = initiatorWon ? initiator : this.actor;
     const baseDamage = initiatorWon ? initiatorResult : counterResult;
 
+    // 根据胜者决定攻击类型
+    let attackType;
+    if (initiatorWon) {
+      // 发起者赢了，使用发起者的攻击类型
+      // 如果发起者的战斗骰没有设置 category，默认使用"打击"
+      attackType = this.initiateData.diceCategory || '打击';
+    } else {
+      // 对抗者赢了，使用对抗者的战斗骰攻击类型
+      // 如果对抗者的战斗骰没有设置 category，默认使用"打击"
+      attackType = dice.system.category || '打击';
+
+      // 调试输出
+      console.log('【调试】对抗者战斗骰信息:', {
+        name: dice.name,
+        category: dice.system.category,
+        attackType: attackType,
+        loser: loser.name
+      });
+    }
+
     // 计算抗性结果
     const { finalDamage, description } = this._calculateDamage(
       baseDamage,
-      this.initiateData.diceCategory,
+      attackType,
       loser
     );
 
@@ -503,8 +524,35 @@ export default class CounterAreaApplication extends Application {
     let finalDamage = baseDamage;
     let description = "";
 
+    // 优先从场景中的 Token 获取装备信息
+    let actualTarget = target;
+
+    // 尝试找到场景中对应的 Token
+    const token = canvas.tokens?.placeables.find(t => t.actor?.id === target.id);
+    if (token && token.actor) {
+      actualTarget = token.actor;
+      console.log('【调试】使用 Token 的装备数据:', {
+        actorName: target.name,
+        tokenId: token.id,
+        hasArmor: !!actualTarget.system.equipment.armor
+      });
+    } else {
+      console.log('【调试】使用 Actor 的装备数据:', {
+        actorName: target.name,
+        hasArmor: !!actualTarget.system.equipment.armor
+      });
+    }
+
     // 获取目标的防具
-    const armor = target.items.get(target.system.equipment.armor);
+    const armor = actualTarget.items.get(actualTarget.system.equipment.armor);
+
+    console.log('【调试】抗性计算:', {
+      target: actualTarget.name,
+      damageCategory: damageCategory,
+      baseDamage: baseDamage,
+      hasArmor: !!armor,
+      armorName: armor?.name
+    });
 
     if (armor && armor.system.armorProperties) {
       const props = armor.system.armorProperties;
@@ -587,17 +635,18 @@ export default class CounterAreaApplication extends Application {
     // 先投发起者的骰子（如果还没投）
     const initiatorRollResult = await this._rollInitiatorDice();
 
+    // 显示发起者的骰子动画（如果有）
+    if (game.dice3d && initiatorRollResult.roll) {
+      await game.dice3d.showForRoll(initiatorRollResult.roll, game.user, true);
+    }
+
     // 再投对抗者的骰子
     const roll = new Roll(defenseDice.system.diceFormula);
     await roll.evaluate();
 
-    // 一起显示3D骰子动画
+    // 显示对抗者的骰子动画
     if (game.dice3d) {
-      const rolls = [roll];
-      if (initiatorRollResult.roll) {
-        rolls.unshift(initiatorRollResult.roll);
-      }
-      await game.dice3d.showForRoll(rolls, game.user, true);
+      await game.dice3d.showForRoll(roll, game.user, true);
     }
 
     // 计算守备BUFF加成（忍耐/破绽）
@@ -620,15 +669,15 @@ export default class CounterAreaApplication extends Application {
     if (dodgeSuccess) {
       resultMessage = `<div style="color: #4a7c2c; font-weight: bold;">${this.actor.name} 闪避成功！无视本次攻击</div>`;
     } else {
-      // 闪避失败，计算伤害
-      const { finalDamage: damage } = this._calculateDamage(
+      // 闪避失败，计算伤害（包含抗性）
+      const { finalDamage: damage, description } = this._calculateDamage(
         initiatorResult,
-        this.initiateData.diceCategory,
+        this.initiateData.diceCategory || '打击',
         this.actor
       );
       finalDamage = damage;
       loserId = this.actor.id;
-      resultMessage = `<div style="color: #c14545; font-weight: bold;">${this.actor.name} 闪避失败！</div>`;
+      resultMessage = `<div style="color: #c14545; font-weight: bold;">${this.actor.name} 闪避失败！</div><div>${this.actor.name}${description}</div>`;
     }
 
     // 创建结果消息
@@ -678,23 +727,24 @@ export default class CounterAreaApplication extends Application {
     // 先投发起者的骰子（如果还没投）
     const initiatorRollResult = await this._rollInitiatorDice();
 
+    // 显示发起者的骰子动画（如果有）
+    if (game.dice3d && initiatorRollResult.roll) {
+      await game.dice3d.showForRoll(initiatorRollResult.roll, game.user, true);
+    }
+
     // 再投对抗者的骰子
     const roll = new Roll(defenseDice.system.diceFormula);
     await roll.evaluate();
 
-    // 一起显示3D骰子动画
+    // 显示对抗者的骰子动画
     if (game.dice3d) {
-      const rolls = [roll];
-      if (initiatorRollResult.roll) {
-        rolls.unshift(initiatorRollResult.roll);
-      }
-      await game.dice3d.showForRoll(rolls, game.user, true);
+      await game.dice3d.showForRoll(roll, game.user, true);
     }
 
     // 计算守备BUFF加成（忍耐/破绽）
     const buffBonus = this._calculateDefenseBuffBonus();
-    // 反击伤害 = 骰数 + BUFF + 调整值
-    const counterDamage = roll.total + buffBonus + adjustment;
+    // 反击基础伤害 = 骰数 + BUFF + 调整值
+    const counterBaseDamage = roll.total + buffBonus + adjustment;
 
     // 发起者数据
     const initiator = game.actors.get(this.initiateData.initiatorId);
@@ -702,10 +752,20 @@ export default class CounterAreaApplication extends Application {
                           parseInt(this.initiateData.buffBonus) +
                           parseInt(this.initiateData.adjustment);
 
+    // 从反击骰子的分类中提取攻击类型（例如"反击-斩击" → "斩击"）
+    const counterAttackType = this._extractAttackType(defenseDice.system.category) || '打击';
+
+    // 计算反击伤害（考虑发起者的抗性）
+    const { finalDamage: counterDamage, description: counterDescription } = this._calculateDamage(
+      counterBaseDamage,
+      counterAttackType,
+      initiator
+    );
+
     // 计算对抗者受到的伤害（考虑抗性）
-    const { finalDamage: initiatorDamage } = this._calculateDamage(
+    const { finalDamage: initiatorDamage, description: initiatorDescription } = this._calculateDamage(
       initiatorTotal,
-      this.initiateData.diceCategory,
+      this.initiateData.diceCategory || '打击',
       this.actor
     );
 
@@ -720,9 +780,14 @@ export default class CounterAreaApplication extends Application {
         counterDiceRoll: roll.total,
         counterBuff: buffBonus,
         counterAdjustment: adjustment,
+        counterBaseDamage: counterBaseDamage,
         counterDamage: counterDamage,
+        counterDescription: counterDescription,
+        counterAttackType: counterAttackType || '无属性',
         initiatorTotal: initiatorTotal,
-        initiatorDamage: initiatorDamage
+        initiatorDamage: initiatorDamage,
+        initiatorDescription: initiatorDescription,
+        initiatorAttackType: this.initiateData.diceCategory || '无属性'
       }),
       sound: CONFIG.sounds.dice,
       type: CONST.CHAT_MESSAGE_TYPES.ROLL,
@@ -743,17 +808,18 @@ export default class CounterAreaApplication extends Application {
     // 先投发起者的骰子（如果还没投）
     const initiatorRollResult = await this._rollInitiatorDice();
 
+    // 显示发起者的骰子动画（如果有）
+    if (game.dice3d && initiatorRollResult.roll) {
+      await game.dice3d.showForRoll(initiatorRollResult.roll, game.user, true);
+    }
+
     // 再投对抗者的骰子
     const roll = new Roll(defenseDice.system.diceFormula);
     await roll.evaluate();
 
-    // 一起显示3D骰子动画
+    // 显示对抗者的骰子动画
     if (game.dice3d) {
-      const rolls = [roll];
-      if (initiatorRollResult.roll) {
-        rolls.unshift(initiatorRollResult.roll);
-      }
-      await game.dice3d.showForRoll(rolls, game.user, true);
+      await game.dice3d.showForRoll(roll, game.user, true);
     }
 
     // 计算守备BUFF加成（忍耐/破绽）
@@ -771,10 +837,20 @@ export default class CounterAreaApplication extends Application {
     const loser = counterWon ? initiator : this.actor;
     const baseDamage = counterWon ? counterResult : initiatorResult;
 
+    // 根据胜者决定攻击类型
+    let attackType;
+    if (counterWon) {
+      // 反击者赢了，使用反击骰子的攻击类型
+      attackType = this._extractAttackType(defenseDice.system.category) || '打击';
+    } else {
+      // 发起者赢了，使用发起者的攻击类型
+      attackType = this.initiateData.diceCategory || '打击';
+    }
+
     // 计算抗性结果
     const { finalDamage, description } = this._calculateDamage(
       baseDamage,
-      this.initiateData.diceCategory,
+      attackType,
       loser
     );
 
@@ -829,17 +905,18 @@ export default class CounterAreaApplication extends Application {
     // 先投发起者的骰子（如果还没投）
     const initiatorRollResult = await this._rollInitiatorDice();
 
+    // 显示发起者的骰子动画（如果有）
+    if (game.dice3d && initiatorRollResult.roll) {
+      await game.dice3d.showForRoll(initiatorRollResult.roll, game.user, true);
+    }
+
     // 再投对抗者的骰子
     const roll = new Roll(defenseDice.system.diceFormula);
     await roll.evaluate();
 
-    // 一起显示3D骰子动画
+    // 显示对抗者的骰子动画
     if (game.dice3d) {
-      const rolls = [roll];
-      if (initiatorRollResult.roll) {
-        rolls.unshift(initiatorRollResult.roll);
-      }
-      await game.dice3d.showForRoll(rolls, game.user, true);
+      await game.dice3d.showForRoll(roll, game.user, true);
     }
 
     // 计算守备BUFF加成（忍耐/破绽）
@@ -854,17 +931,17 @@ export default class CounterAreaApplication extends Application {
                           parseInt(this.initiateData.adjustment);
 
     // 先计算原始伤害（包含抗性）
-    const { finalDamage: baseDamage } = this._calculateDamage(
+    const { finalDamage: baseDamage, description: damageDescription } = this._calculateDamage(
       initiatorTotal,
-      this.initiateData.diceCategory,
+      this.initiateData.diceCategory || '打击',
       this.actor
     );
 
     // 再减少防御值
     const finalDamage = Math.max(0, baseDamage - defenseValue);
 
-    // 创建结果消息
-    const resultDescription = `<div>${this.actor.name} 使用防御</div><div>原始伤害：${baseDamage}，防御减免：${defenseValue}</div><div style="color: #c14545; font-weight: bold;">最终伤害：${finalDamage}</div>`;
+    // 创建结果消息（包含抗性信息）
+    const resultDescription = `<div>${this.actor.name} 使用防御</div><div>${damageDescription}</div><div>防御减免：${defenseValue}</div><div style="color: #c14545; font-weight: bold;">最终伤害：${finalDamage}</div>`;
 
     const chatData = {
       user: game.user.id,
@@ -912,17 +989,18 @@ export default class CounterAreaApplication extends Application {
     // 先投发起者的骰子（如果还没投）
     const initiatorRollResult = await this._rollInitiatorDice();
 
+    // 显示发起者的骰子动画（如果有）
+    if (game.dice3d && initiatorRollResult.roll) {
+      await game.dice3d.showForRoll(initiatorRollResult.roll, game.user, true);
+    }
+
     // 再投对抗者的骰子
     const roll = new Roll(defenseDice.system.diceFormula);
     await roll.evaluate();
 
-    // 一起显示3D骰子动画
+    // 显示对抗者的骰子动画
     if (game.dice3d) {
-      const rolls = [roll];
-      if (initiatorRollResult.roll) {
-        rolls.unshift(initiatorRollResult.roll);
-      }
-      await game.dice3d.showForRoll(rolls, game.user, true);
+      await game.dice3d.showForRoll(roll, game.user, true);
     }
 
     // 计算守备BUFF加成（忍耐/破绽）
@@ -946,15 +1024,15 @@ export default class CounterAreaApplication extends Application {
       resultDescription = `<div style="color: #4a7c2c; font-weight: bold;">${this.actor.name} 强化防御成功！完全抵挡了攻击</div>`;
     } else {
       // 防御失败，计算伤害（先算抗性，再减防御值）
-      const { finalDamage: baseDamage } = this._calculateDamage(
+      const { finalDamage: baseDamage, description: damageDescription } = this._calculateDamage(
         initiatorResult,
-        this.initiateData.diceCategory,
+        this.initiateData.diceCategory || '打击',
         this.actor
       );
 
       // 减少防御值
       finalDamage = Math.max(0, baseDamage - defenseResult);
-      resultDescription = `<div style="color: #c14545; font-weight: bold;">${this.actor.name} 强化防御失败</div><div>原始伤害：${baseDamage}，防御减免：${defenseResult}</div><div style="color: #c14545; font-weight: bold;">最终伤害：${finalDamage}</div>`;
+      resultDescription = `<div style="color: #c14545; font-weight: bold;">${this.actor.name} 强化防御失败</div><div>${damageDescription}</div><div>防御减免：${defenseResult}</div><div style="color: #c14545; font-weight: bold;">最终伤害：${finalDamage}</div>`;
     }
 
     // 创建结果消息
@@ -1013,6 +1091,27 @@ export default class CounterAreaApplication extends Application {
     }
 
     return bonus;
+  }
+
+  /**
+   * 从骰子分类中提取攻击类型
+   * 例如："反击-斩击" → "斩击"
+   *      "强化反击-打击" → "打击"
+   *      "反击" → ""
+   */
+  _extractAttackType(category) {
+    if (!category) return '';
+
+    // 分割字符串，例如 "反击-斩击" 分割为 ["反击", "斩击"]
+    const parts = category.split('-');
+
+    // 如果有第二部分，就是攻击类型
+    if (parts.length > 1) {
+      return parts[1].trim();
+    }
+
+    // 否则没有特定攻击类型
+    return '';
   }
 
   /**
