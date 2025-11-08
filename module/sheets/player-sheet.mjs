@@ -11,7 +11,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       height: 1180,
       tabs: [],
       dragDrop: [
-        { dragSelector: ".item-icon-wrapper[draggable]", dropSelector: ".slot-content" }
+        { dragSelector: ".item-icon-wrapper[draggable]", dropSelector: ".slot-content, .inventory-list" }
       ],
       scrollY: [".skills-section", ".equipment-section", ".inventory-list"]
     });
@@ -33,9 +33,6 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     context.flags = this.actor.flags;
     context.rollData = this.actor.getRollData();
 
-    // 调试：输出HP数据
-    console.log('【角色表】getData - 当前HP:', this.actor.system.derived.hp.value, '/', this.actor.system.derived.hp.max);
-
     // 锁定状态（默认为游玩模式，即锁定）
     context.isLocked = this.actor.getFlag('shuhai-dalu', 'isLocked') ?? true;
 
@@ -47,8 +44,6 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
     // 计算最大经验值
     context.maxExp = this._getMaxExpForLevel(context.system.level);
-
-    console.log('【角色表】getData - context.system.derived.hp:', context.system.derived.hp);
 
     return context;
   }
@@ -137,16 +132,6 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
         isEquipped: isEquipped
       };
     });
-
-    console.log('书海大陆 | 准备物品数据', {
-      itemCount: context.items.length,
-      firstItem: context.items[0] ? {
-        id: context.items[0]._id,
-        name: context.items[0].name,
-        type: context.items[0].type,
-        isEquipped: context.items[0].isEquipped
-      } : null
-    });
   }
 
   /**
@@ -174,12 +159,6 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   activateListeners(html) {
     super.activateListeners(html);
 
-    console.log('书海大陆 | Player Sheet 激活监听器', {
-      isEditable: this.isEditable,
-      itemButtons: html.find('.item-use-btn').length,
-      iconWrappers: html.find('.item-icon-wrapper').length
-    });
-
     // 游玩/编辑模式切换 - 总是可用
     html.find('.lock-btn').click(this._onToggleLock.bind(this));
 
@@ -201,7 +180,6 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
     // 以下功能需要编辑权限
     if (!this.isEditable) {
-      console.warn('书海大陆 | 角色卡不可编辑，跳过事件监听器绑定');
       return;
     }
 
@@ -240,8 +218,6 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     html.find('.favorite-filter-btn').click(this._onFavoriteFilter.bind(this));
     html.find('.advanced-filter-btn').click(this._onAdvancedFilter.bind(this));
     html.find('.sort-btn').click(this._onSortItems.bind(this));
-
-    console.log('书海大陆 | Player Sheet 事件监听器绑定完成');
   }
 
   /**
@@ -337,6 +313,16 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   }
 
   /** @override */
+  _canDragStart(selector) {
+    return this.isEditable;
+  }
+
+  /** @override */
+  _canDragDrop(selector) {
+    return true; // 允许所有拖放操作，包括从外部拖入
+  }
+
+  /** @override */
   _onDragStart(event) {
     const li = event.currentTarget;
     if ( event.target.classList.contains("content-link") ) return;
@@ -356,8 +342,6 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     // 设置拖动数据
     const dragData = item.toDragData();
     event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
-
-    console.log('书海大陆 | 开始拖动物品', { itemId, item: item.name });
   }
 
   /* -------------------------------------------- */
@@ -648,8 +632,6 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
               };
             }
 
-            console.log('书海大陆 | 创建物品', itemData);
-
             const cls = getDocumentClass("Item");
             const item = await cls.create(itemData, { parent: this.actor });
 
@@ -711,13 +693,10 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    * 使用物品
    */
   async _onItemUse(event) {
-    console.log('书海大陆 | 使用物品按钮被点击');
     event.preventDefault();
     event.stopPropagation();
     const itemId = event.currentTarget.dataset.itemId;
     const item = this.actor.items.get(itemId);
-
-    console.log('书海大陆 | 使用物品', { itemId, item: item?.name });
 
     if (item) {
       await item.use();
@@ -728,13 +707,10 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    * 编辑物品
    */
   _onItemEdit(event) {
-    console.log('书海大陆 | 编辑物品按钮被点击');
     event.preventDefault();
     event.stopPropagation();
     const itemId = event.currentTarget.dataset.itemId;
     const item = this.actor.items.get(itemId);
-
-    console.log('书海大陆 | 编辑物品', { itemId, item: item?.name });
 
     if (item) {
       item.sheet.render(true);
@@ -745,13 +721,10 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    * 删除物品
    */
   async _onItemDelete(event) {
-    console.log('书海大陆 | 删除物品按钮被点击');
     event.preventDefault();
     event.stopPropagation();
     const itemId = event.currentTarget.dataset.itemId;
     const item = this.actor.items.get(itemId);
-
-    console.log('书海大陆 | 删除物品', { itemId, item: item?.name });
 
     if (!item) return;
 
@@ -950,14 +923,11 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   * 单击物品图标：编辑物品信息
    */
   _onItemIconClick(event) {
-    console.log('书海大陆 | 物品图标被单击');
     event.preventDefault();
     event.stopPropagation();
 
     const itemId = event.currentTarget.dataset.itemId;
     const item = this.actor.items.get(itemId);
-
-    console.log('书海大陆 | 单击图标', { itemId, item: item?.name });
 
     if (item) {
       item.sheet.render(true);
@@ -1206,49 +1176,78 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   }
 
   /**
-   * 处理物品拖放到装备槽
+   * 处理物品拖放到装备槽或物品栏
    */
   async _onDropItem(event, data) {
     const item = await Item.implementation.fromDropData(data);
     const itemData = item.toObject();
 
-    // 检查是否是从其他角色拖过来的
-    if (item.parent && item.parent.id !== this.actor.id) {
-      delete itemData._id;
-      return this.actor.createEmbeddedDocuments("Item", [itemData]);
-    }
-
-    // 检查拖放目标
+    // 检查拖放目标 - 优先检查是否拖放到装备槽
     const dropTarget = event.target.closest('.slot-content');
-    if (!dropTarget) {
-      return super._onDropItem(event, data);
-    }
 
-    const slotType = dropTarget.dataset.slot;
-    const slotIndex = dropTarget.dataset.slotIndex !== undefined ?
-      parseInt(dropTarget.dataset.slotIndex) : null;
+    if (dropTarget) {
+      // 拖放到装备槽的逻辑
+      // 如果是从其他角色或 FVTT 侧边栏拖入，需要先创建物品副本
+      if (!item.parent || item.parent.id !== this.actor.id) {
+        delete itemData._id;
+        const createdItems = await this.actor.createEmbeddedDocuments("Item", [itemData]);
 
-    // 验证物品类型匹配槽位
-    if (!this._validateItemForSlot(item, slotType)) {
-      return false;
-    }
+        if (createdItems && createdItems.length > 0) {
+          const newItem = createdItems[0];
 
-    // 特殊处理战斗骰槽位
-    if (slotType === 'combatDice') {
-      // 检查是否已经装备在其他战斗骰槽位
-      const currentCombatDice = this.actor.system.equipment.combatDice;
-      const existingIndex = currentCombatDice.findIndex(diceId => diceId === item.id);
+          const slotType = dropTarget.dataset.slot;
+          const slotIndex = dropTarget.dataset.slotIndex !== undefined ?
+            parseInt(dropTarget.dataset.slotIndex) : null;
 
-      if (existingIndex !== -1 && existingIndex !== slotIndex) {
-        ui.notifications.warn("该战斗骰已经装备在其他槽位");
+          // 验证物品类型匹配槽位
+          if (!this._validateItemForSlot(newItem, slotType)) {
+            return false;
+          }
+
+          // 装备新创建的物品
+          await game.shuhai.equipItem(this.actor, newItem, slotType, slotIndex);
+        }
+
         return false;
       }
+
+      // 如果是从自己的物品栏拖入装备槽
+      const slotType = dropTarget.dataset.slot;
+      const slotIndex = dropTarget.dataset.slotIndex !== undefined ?
+        parseInt(dropTarget.dataset.slotIndex) : null;
+
+      // 验证物品类型匹配槽位
+      if (!this._validateItemForSlot(item, slotType)) {
+        return false;
+      }
+
+      // 特殊处理战斗骰槽位
+      if (slotType === 'combatDice') {
+        // 检查是否已经装备在其他战斗骰槽位
+        const currentCombatDice = this.actor.system.equipment.combatDice;
+        const existingIndex = currentCombatDice.findIndex(diceId => diceId === item.id);
+
+        if (existingIndex !== -1 && existingIndex !== slotIndex) {
+          ui.notifications.warn("该战斗骰已经装备在其他槽位");
+          return false;
+        }
+      }
+
+      // 装备物品到槽位
+      await game.shuhai.equipItem(this.actor, item, slotType, slotIndex);
+
+      return false;
+    } else {
+      // 拖放到物品栏的逻辑（没有找到 .slot-content）
+      // 检查是否是从其他角色或外部拖入
+      if (!item.parent || item.parent.id !== this.actor.id) {
+        delete itemData._id;
+        return this.actor.createEmbeddedDocuments("Item", [itemData]);
+      }
+
+      // 如果是自己的物品在自己的物品栏内拖放，使用父类的默认排序逻辑
+      return super._onDropItem(event, data);
     }
-
-    // 装备物品到槽位
-    await game.shuhai.equipItem(this.actor, item, slotType, slotIndex);
-
-    return false;
   }
 
   /**
