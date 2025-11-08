@@ -443,6 +443,11 @@ export default class CombatAreaApplication extends Application {
     // 装备使用按钮
     html.find('.equipment-use-btn').click(this._onEquipmentUse.bind(this));
 
+    // 武器/防具/被动骰使用按钮
+    html.find('.weapon-use-btn').click(this._onWeaponUse.bind(this));
+    html.find('.armor-use-btn').click(this._onArmorUse.bind(this));
+    html.find('.passive-dice-use-btn').click(this._onPassiveDiceUse.bind(this));
+
     // 先攻按钮
     html.find('.initiative-btn').click(this._onInitiative.bind(this));
 
@@ -837,6 +842,78 @@ export default class CombatAreaApplication extends Application {
         <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
           <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用装备: ${item.name}</h3>
           <div style="color: #888; margin-bottom: 8px;">费用: ${item.system.cost || 0}</div>
+          <div style="color: #EBBD68;">${item.system.effect || '无特殊效果'}</div>
+        </div>
+      `);
+
+      // 触发【使用时】Activities
+      await this._triggerActivities(item, 'onUse');
+    }
+  }
+
+  /**
+   * 使用武器
+   */
+  async _onWeaponUse(event) {
+    event.preventDefault();
+
+    const weapon = this.actor.items.get(this.actor.system.equipment.weapon);
+    if (!weapon) return;
+
+    // 发送使用消息到聊天框
+    await this._sendChatMessage(`
+      <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
+        <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用武器: ${weapon.name}</h3>
+        <div style="color: #888; margin-bottom: 8px;">分类: ${weapon.system.category || '无'}</div>
+        <div style="color: #EBBD68;">${weapon.system.effect || '无特殊效果'}</div>
+      </div>
+    `);
+
+    // 触发【使用时】Activities
+    await this._triggerActivities(weapon, 'onUse');
+  }
+
+  /**
+   * 使用防具
+   */
+  async _onArmorUse(event) {
+    event.preventDefault();
+
+    const armor = this.actor.items.get(this.actor.system.equipment.armor);
+    if (!armor) return;
+
+    // 发送使用消息到聊天框
+    await this._sendChatMessage(`
+      <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
+        <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用防具: ${armor.name}</h3>
+        <div style="color: #888; margin-bottom: 8px;">分类: ${armor.system.category || '无'}</div>
+        <div style="color: #EBBD68;">${armor.system.effect || '无特殊效果'}</div>
+      </div>
+    `);
+
+    // 触发【使用时】Activities
+    await this._triggerActivities(armor, 'onUse');
+  }
+
+  /**
+   * 使用被动骰
+   */
+  async _onPassiveDiceUse(event) {
+    event.preventDefault();
+    const button = $(event.currentTarget);
+    const passiveIndex = parseInt(button.data('passive-index'));
+
+    const passives = this.actor.system.equipment.passives || [];
+    if (passiveIndex >= 0 && passiveIndex < passives.length && passives[passiveIndex]) {
+      const item = this.actor.items.get(passives[passiveIndex]);
+
+      if (!item) return;
+
+      // 发送使用消息到聊天框
+      await this._sendChatMessage(`
+        <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
+          <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用被动骰: ${item.name}</h3>
+          <div style="color: #888; margin-bottom: 8px;">分类: ${item.system.category || '无'}</div>
           <div style="color: #EBBD68;">${item.system.effect || '无特殊效果'}</div>
         </div>
       `);
