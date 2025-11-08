@@ -1729,6 +1729,32 @@ export default class CombatAreaApplication extends Application {
       });
     }
 
+    // 处理自定义效果
+    if (activity.customEffect && activity.customEffect.enabled) {
+      const customName = activity.customEffect.name || "自定义效果";
+      const layersResult = await this._evaluateDiceFormula(activity.customEffect.layers || 0);
+      const strengthResult = await this._evaluateDiceFormula(activity.customEffect.strength || 0);
+
+      const customLayers = layersResult.value;
+      const customStrength = strengthResult.value;
+
+      if (customLayers > 0) {
+        buffList.push({
+          buffId: 'custom',
+          buffName: customName,
+          buffIcon: 'icons/svg/mystery-man.svg',
+          buffDescription: '自定义效果',
+          buffType: 'effect',
+          layers: customLayers,
+          strength: customStrength,
+          layersFormula: layersResult.isRoll ? layersResult.formula : null,
+          strengthFormula: strengthResult.isRoll ? strengthResult.formula : null,
+          source: this.actor.name,
+          sourceItem: sourceItem.name
+        });
+      }
+    }
+
     if (buffList.length === 0) return false;
 
     // 构建BUFF效果列表HTML

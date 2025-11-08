@@ -837,7 +837,13 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     // 应用所有BUFF
     for (const buff of buffData.buffs) {
       // 检查是否已经存在相同的BUFF
-      const existingBuffIndex = combatState.buffs.findIndex(b => b.id === buff.buffId);
+      // 对于自定义效果（id='custom'），使用名称+ID作为唯一标识
+      let existingBuffIndex;
+      if (buff.buffId === 'custom') {
+        existingBuffIndex = combatState.buffs.findIndex(b => b.id === 'custom' && b.name === buff.buffName);
+      } else {
+        existingBuffIndex = combatState.buffs.findIndex(b => b.id === buff.buffId);
+      }
 
       if (existingBuffIndex !== -1) {
         // 如果已存在，叠加层数和强度
