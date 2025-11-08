@@ -778,6 +778,132 @@ Hooks.on('renderChatMessage', (message, html, data) => {
       });
     }
   });
+
+  // 应用BUFF效果按钮事件
+  html.find('.apply-buff-effect-btn').click(async (event) => {
+    event.preventDefault();
+    const button = event.currentTarget;
+
+    console.log('【调试】应用BUFF按钮被点击');
+
+    // 解析JSON数据
+    const buffDataJson = button.dataset.buffData;
+    if (!buffDataJson) {
+      ui.notifications.error("无法获取BUFF数据");
+      return;
+    }
+
+    let buffData;
+    try {
+      buffData = JSON.parse(buffDataJson);
+      console.log('【调试】BUFF数据:', buffData);
+    } catch (error) {
+      console.error('【调试】解析BUFF数据失败:', error);
+      ui.notifications.error("BUFF数据格式错误");
+      return;
+    }
+
+    // 获取当前玩家的角色
+    const currentActor = await getCurrentActor();
+    if (!currentActor) {
+      return;
+    }
+
+    // 检查权限：如果有指定目标，必须是目标本人才能点击
+    if (buffData.targetId) {
+      if (currentActor.id !== buffData.targetId) {
+        ui.notifications.warn("这个效果不是针对你的！");
+        return;
+      }
+    }
+
+    // 获取目标角色（如果没有指定目标，目标就是当前玩家）
+    const targetActor = buffData.targetId ? game.actors.get(buffData.targetId) : currentActor;
+    if (!targetActor) {
+      ui.notifications.error("无法找到目标角色");
+      return;
+    }
+
+    console.log('【调试】目标角色:', targetActor.name);
+
+    // 获取目标的战斗状态
+    let combatState = targetActor.getFlag('shuhai-dalu', 'combatState') || {
+      exResources: [true, true, true],
+      costResources: 0,
+      activatedDice: [],
+      buffs: []
+    };
+
+    // 应用所有BUFF
+    for (const buff of buffData.buffs) {
+      // 检查是否已经存在相同的BUFF
+      const existingBuffIndex = combatState.buffs.findIndex(b => b.id === buff.buffId);
+
+      if (existingBuffIndex !== -1) {
+        // 如果已存在，叠加层数和强度
+        combatState.buffs[existingBuffIndex].layers += buff.layers;
+        combatState.buffs[existingBuffIndex].strength += buff.strength;
+        console.log(`【调试】叠加BUFF: ${buff.buffName}，层数: ${combatState.buffs[existingBuffIndex].layers}，强度: ${combatState.buffs[existingBuffIndex].strength}`);
+      } else {
+        // 如果不存在，添加新BUFF
+        combatState.buffs.push({
+          id: buff.buffId,
+          name: buff.buffName,
+          icon: buff.buffIcon,
+          layers: buff.layers,
+          strength: buff.strength,
+          source: buff.source,
+          sourceItem: buff.sourceItem
+        });
+        console.log(`【调试】添加新BUFF: ${buff.buffName}，层数: ${buff.layers}，强度: ${buff.strength}`);
+      }
+    }
+
+    // 保存战斗状态
+    try {
+      await targetActor.setFlag('shuhai-dalu', 'combatState', combatState);
+      console.log('【调试】战斗状态已更新');
+    } catch (error) {
+      console.error('【调试】更新战斗状态失败:', error);
+      ui.notifications.error(`更新战斗状态失败: ${error.message}`);
+      return;
+    }
+
+    // 禁用按钮
+    button.disabled = true;
+    button.textContent = '已应用';
+    button.style.background = '#888';
+    button.style.cursor = 'not-allowed';
+
+    // 刷新战斗区域（如果有打开）
+    Object.values(ui.windows).forEach(app => {
+      if (app.constructor.name === 'CombatAreaApplication' && app.actor.id === targetActor.id) {
+        app.render(false);
+        console.log('【调试】战斗区域已刷新');
+      }
+    });
+
+    // 发送确认消息
+    const buffListText = buffData.buffs.map(b => `${b.buffName} (${b.layers}层 ${b.strength}强度)`).join('、');
+    ChatMessage.create({
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: targetActor }),
+      content: `
+        <div style="background: #0F0D1B; border: 2px solid #EBBD68; border-radius: 8px; padding: 12px; color: #EBBD68; text-align: center; font-family: 'Noto Sans SC', sans-serif;">
+          <div style="font-size: 16px; font-weight: bold; color: #E1AA43; margin-bottom: 8px;">✓ 效果已应用</div>
+          <div style="margin-bottom: 8px;">
+            <strong>${targetActor.name}</strong> 获得了 ${buffListText}
+          </div>
+          <div style="font-size: 13px; color: #888;">
+            来自: ${buffData.sourceName} 的 ${buffData.sourceItemName}
+          </div>
+        </div>
+      `
+    });
+
+    ui.notifications.info(`${targetActor.name} 已获得效果: ${buffListText}`);
+    console.log('【调试】应用BUFF流程完成');
+  });
 });
 
 /* -------------------------------------------- */
