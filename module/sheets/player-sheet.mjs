@@ -708,6 +708,11 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
         await this._useItemAsCombatDice(item);
         break;
 
+      case 'triggerDice':
+        // 触发骰：消耗EX资源并使用
+        await this._useItemAsTriggerDice(item);
+        break;
+
       case 'weapon':
       case 'armor':
       case 'equipment':
@@ -718,9 +723,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
         break;
 
       case 'defenseDice':
-      case 'triggerDice':
-        // 守备骰和触发骰只能在对抗时使用
-        ui.notifications.warn("守备骰和触发骰只能在对抗时使用");
+        // 守备骰只能在对抗时使用
+        ui.notifications.warn("守备骰只能在对抗时使用");
         break;
 
       default:
@@ -781,6 +785,52 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
     await ChatMessage.create(chatData);
     ui.notifications.info(`${item.name} 发起对抗！`);
+  }
+
+  /**
+   * 使用触发骰（消耗1个EX资源）
+   */
+  async _useItemAsTriggerDice(item) {
+    // 从Actor的flags中获取战斗状态
+    const combatState = this.actor.getFlag('shuhai-dalu', 'combatState') || {
+      exResources: [false, false, false]
+    };
+
+    // 检查是否有可用的EX资源（找到第一个false）
+    const availableIndex = combatState.exResources.findIndex(ex => !ex);
+
+    if (availableIndex === -1) {
+      ui.notifications.warn("没有可用的EX资源！");
+      return;
+    }
+
+    // 消耗1个EX资源
+    combatState.exResources[availableIndex] = true;
+    await this.actor.setFlag('shuhai-dalu', 'combatState', combatState);
+
+    // 发送使用消息到聊天框
+    const chatData = {
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      content: `
+        <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px; background: #0F0D1B; color: #EBBD68; font-family: 'Noto Sans SC', sans-serif;">
+          <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用触发骰: ${item.name}</h3>
+          <div style="color: #888; margin-bottom: 8px;">消耗: <span style="color: #c14545; font-weight: bold;">1 EX资源</span></div>
+          ${item.system.category ? `<div style="color: #888; margin-bottom: 8px;">分类: ${item.system.category}</div>` : ''}
+          <div style="color: #EBBD68;">${item.system.effect || '无特殊效果'}</div>
+        </div>
+      `
+    };
+
+    await ChatMessage.create(chatData);
+
+    // 触发【使用时】Activities
+    await this._triggerActivities(item, 'onUse');
+
+    ui.notifications.info(`使用了 ${item.name}，消耗了1个EX资源！`);
+
+    // 刷新角色表以显示更新后的EX资源
+    this.render();
   }
 
   /**
