@@ -6,10 +6,10 @@
 
     {{!-- 左侧：发起人 --}}
     <div class="participant initiator" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
-      <div class="participant-name" style="font-size: 16px; font-weight: bold; color: #EBBD68;">{{initiatorName}}</div>
+      <div class="participant-name" style="font-size: 16px; font-weight: bold; color: {{#if (gt initiatorResult counterResult)}}#EBBD68{{else if (lt initiatorResult counterResult)}}#8f1010{{else}}#EBBD68{{/if}};">{{initiatorName}}</div>
 
       {{!-- 战斗骰卡片 --}}
-      <div class="dice-card" style="position: relative; width: 75px; height: 75px; border: 2px solid #EBBD68; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center;">
+      <div class="dice-card" style="position: relative; width: 75px; height: 75px; border: 2px solid {{#if (gt initiatorResult counterResult)}}#EBBD68{{else if (lt initiatorResult counterResult)}}#8f1010{{else}}#EBBD68{{/if}}; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center;">
         <img src="{{initiatorDiceImg}}" alt="{{initiatorDiceName}}" style="width: 100%; height: 100%; object-fit: contain; padding: 4px;" />
 
         {{!-- 左上角费用 --}}
@@ -23,8 +23,8 @@
         </div>
       </div>
 
-      <div class="dice-name" style="font-size: 13px; color: #f3c267;">{{initiatorDiceName}}</div>
-      <div class="dice-result" style="font-size: 18px; font-weight: bold; color: #EBBD68;">{{initiatorResult}}</div>
+      <div class="dice-name" style="font-size: 13px; color: {{#if (gt initiatorResult counterResult)}}#f3c267{{else if (lt initiatorResult counterResult)}}#8f1010{{else}}#f3c267{{/if}};">{{initiatorDiceName}}</div>
+      <div class="dice-result" style="font-size: 18px; font-weight: bold; color: {{#if (gt initiatorResult counterResult)}}#EBBD68{{else if (lt initiatorResult counterResult)}}#8f1010{{else}}#EBBD68{{/if}};">{{initiatorResult}}</div>
     </div>
 
     {{!-- 中间：对抗结果 --}}
@@ -43,10 +43,10 @@
 
     {{!-- 右侧：对抗者 --}}
     <div class="participant counter" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
-      <div class="participant-name" style="font-size: 16px; font-weight: bold; color: #EBBD68;">{{counterName}}</div>
+      <div class="participant-name" style="font-size: 16px; font-weight: bold; color: {{#if (gt counterResult initiatorResult)}}#EBBD68{{else if (lt counterResult initiatorResult)}}#8f1010{{else}}#EBBD68{{/if}};">{{counterName}}</div>
 
       {{!-- 战斗骰卡片 --}}
-      <div class="dice-card" style="position: relative; width: 75px; height: 75px; border: 2px solid #EBBD68; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center;">
+      <div class="dice-card" style="position: relative; width: 75px; height: 75px; border: 2px solid {{#if (gt counterResult initiatorResult)}}#EBBD68{{else if (lt counterResult initiatorResult)}}#8f1010{{else}}#EBBD68{{/if}}; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center;">
         <img src="{{counterDiceImg}}" alt="{{counterDiceName}}" style="width: 100%; height: 100%; object-fit: contain; padding: 4px;" />
 
         {{!-- 左上角费用 --}}
@@ -60,8 +60,8 @@
         </div>
       </div>
 
-      <div class="dice-name" style="font-size: 13px; color: #f3c267;">{{counterDiceName}}</div>
-      <div class="dice-result" style="font-size: 18px; font-weight: bold; color: #EBBD68;">{{counterResult}}</div>
+      <div class="dice-name" style="font-size: 13px; color: {{#if (gt counterResult initiatorResult)}}#f3c267{{else if (lt counterResult initiatorResult)}}#8f1010{{else}}#f3c267{{/if}};">{{counterDiceName}}</div>
+      <div class="dice-result" style="font-size: 18px; font-weight: bold; color: {{#if (gt counterResult initiatorResult)}}#EBBD68{{else if (lt counterResult initiatorResult)}}#8f1010{{else}}#EBBD68{{/if}};">{{counterResult}}</div>
     </div>
 
   </div>
@@ -70,9 +70,9 @@
   <div class="calculation-section" style="padding: 12px 0; border-bottom: 2px solid #EBBD68; margin-bottom: 12px;">
     <div class="calc-title" style="font-size: 14px; font-weight: bold; color: #EBBD68; margin-bottom: 8px; text-align: center;">对抗计算</div>
 
-    <div class="calc-details" style="font-size: 13px; color: #EBBD68; line-height: 1.8; text-align: center;">
-      <div>{{initiatorName}}: {{initiatorDiceRoll}} + {{initiatorBuff}} + {{initiatorAdjustment}} = {{initiatorResult}}</div>
-      <div>{{counterName}}: {{counterDiceRoll}} + {{counterBuff}} + {{counterAdjustment}} = {{counterResult}}</div>
+    <div class="calc-details" style="font-size: 13px; line-height: 1.8; text-align: center;">
+      <div style="color: {{#if (gt initiatorResult counterResult)}}#EBBD68{{else if (lt initiatorResult counterResult)}}#8f1010{{else}}#EBBD68{{/if}};">{{initiatorName}}: {{initiatorDiceRoll}} + {{initiatorBuff}} + {{initiatorAdjustment}} = {{initiatorResult}}</div>
+      <div style="color: {{#if (gt counterResult initiatorResult)}}#EBBD68{{else if (lt counterResult initiatorResult)}}#8f1010{{else}}#EBBD68{{/if}};">{{counterName}}: {{counterDiceRoll}} + {{counterBuff}} + {{counterAdjustment}} = {{counterResult}}</div>
     </div>
   </div>
 
