@@ -1659,20 +1659,28 @@ export default class CombatAreaApplication extends Application {
    * @param {Item} sourceItem - 源物品
    */
   async _applyEffectsToOther(targetActor, activity, sourceItem) {
-    // 获取目标角色的战斗区域应用
+    // 获取目标角色的战斗区域应用（如果打开的话）
     const targetCombatArea = Object.values(ui.windows).find(
       app => app instanceof CombatAreaApplication && app.actor.id === targetActor.id
     );
 
-    if (!targetCombatArea) {
-      ui.notifications.warn(`目标 ${targetActor.name} 的战斗区域未打开`);
-      return;
+    // 获取或初始化目标的战斗状态
+    let targetCombatState = targetActor.getFlag('shuhai-dalu', 'combatState');
+
+    if (!targetCombatState) {
+      targetCombatState = {
+        exResources: [true, true, true],
+        costResources: [false, false, false, false, false, false],
+        activatedDice: [false, false, false, false, false, false],
+        buffs: [],
+        isLocked: false
+      };
     }
 
-    // 获取目标的战斗状态
-    const targetCombatState = targetActor.getFlag('shuhai-dalu', 'combatState') || {
-      buffs: []
-    };
+    // 确保buffs数组存在
+    if (!targetCombatState.buffs) {
+      targetCombatState.buffs = [];
+    }
 
     const effects = activity.effects || {};
     const buffMessages = [];
@@ -1739,7 +1747,11 @@ export default class CombatAreaApplication extends Application {
 
     // 保存目标的战斗状态
     await targetActor.setFlag('shuhai-dalu', 'combatState', targetCombatState);
-    targetCombatArea.render();
+
+    // 如果目标的战斗区域打开了，刷新它
+    if (targetCombatArea) {
+      targetCombatArea.render();
+    }
 
     // 发送效果消息到聊天
     if (buffMessages.length > 0) {
@@ -1751,8 +1763,15 @@ export default class CombatAreaApplication extends Application {
           <ul style="margin: 8px 0; padding-left: 20px; color: #EBBD68;">
             ${buffMessages.map(msg => `<li>${msg}</li>`).join('')}
           </ul>
+          ${!targetCombatArea ? '<div style="color: #888; font-size: 12px; margin-top: 8px;">💡 目标的战斗区域未打开，BUFF已添加到角色数据中</div>' : ''}
         </div>
       `);
+
+      // 给目标玩家发送通知
+      const targetUser = game.users.find(u => u.character?.id === targetActor.id || u.id === targetActor.permission?.default);
+      if (targetUser) {
+        ui.notifications.info(`${this.actor.name} 对你施加了效果：${buffMessages.join(', ')}`, {permanent: false});
+      }
     }
   }
 }
