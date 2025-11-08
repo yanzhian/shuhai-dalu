@@ -1407,7 +1407,7 @@ export default class CombatAreaApplication extends Application {
   /**
    * 获取 Activity 的目标列表
    * @param {string} targetType - 目标类型 (self, selected, multiple)
-   * @returns {Array} 目标角色数组
+   * @returns {Array} 目标角色数组（可能包含null，表示未选中目标）
    */
   _getActivityTargets(targetType) {
     if (targetType === 'self') {
@@ -1418,9 +1418,9 @@ export default class CombatAreaApplication extends Application {
       if (targets.length > 0) {
         return [targets[0].actor];
       } else {
-        // 如果没有选中目标，默认为自己
-        ui.notifications.info("未选中目标，效果将应用到自己");
-        return [this.actor];
+        // 如果没有选中目标，返回null（将创建"所有人都可以点击"的按钮）
+        ui.notifications.info("未选中目标，将创建所有人都可点击的效果按钮");
+        return [null];
       }
     } else if (targetType === 'multiple') {
       // 获取所有选中的目标
@@ -1428,8 +1428,8 @@ export default class CombatAreaApplication extends Application {
       if (targets.length > 0) {
         return targets.map(t => t.actor);
       } else {
-        ui.notifications.info("未选中目标，效果将应用到自己");
-        return [this.actor];
+        ui.notifications.info("未选中目标，将创建所有人都可点击的效果按钮");
+        return [null];
       }
     }
 
@@ -1438,16 +1438,21 @@ export default class CombatAreaApplication extends Application {
 
   /**
    * 应用 Activity 的效果到目标
-   * @param {Actor} targetActor - 目标角色
+   * @param {Actor|null} targetActor - 目标角色（null表示未选中目标，将创建所有人可点击的按钮）
    * @param {object} activity - Activity 数据
    * @param {Item} sourceItem - 源物品
    */
   async _applyActivityEffects(targetActor, activity, sourceItem) {
+    // 如果目标是null（未选中），创建所有人可点击的聊天按钮
+    if (targetActor === null) {
+      await this._applyEffectsToOther(null, activity, sourceItem);
+    }
     // 如果目标是自己，直接操作 combatState
-    if (targetActor.id === this.actor.id) {
+    else if (targetActor.id === this.actor.id) {
       await this._applyEffectsToSelf(activity, sourceItem);
-    } else {
-      // 如果目标是其他角色，需要获取他们的战斗区域应用
+    }
+    // 如果目标是其他角色，创建只有目标可点击的聊天按钮
+    else {
       await this._applyEffectsToOther(targetActor, activity, sourceItem);
     }
   }
@@ -1654,7 +1659,7 @@ export default class CombatAreaApplication extends Application {
 
   /**
    * 应用效果到其他角色
-   * @param {Actor} targetActor - 目标角色
+   * @param {Actor|null} targetActor - 目标角色（null表示未选中目标，所有人可点击）
    * @param {object} activity - Activity 数据
    * @param {Item} sourceItem - 源物品
    */
@@ -1692,7 +1697,9 @@ export default class CombatAreaApplication extends Application {
         layers: layers,
         strength: strength !== 0 ? strength : buffDef.defaultStrength,
         layersFormula: layersResult.isRoll ? layersResult.formula : null,
-        strengthFormula: strengthResult.isRoll ? strengthResult.formula : null
+        strengthFormula: strengthResult.isRoll ? strengthResult.formula : null,
+        source: this.actor.name,
+        sourceItem: sourceItem.name
       });
     }
 
@@ -1718,12 +1725,10 @@ export default class CombatAreaApplication extends Application {
 
     // 将BUFF数据编码为JSON字符串
     const buffDataJson = JSON.stringify({
-      targetId: targetActor.id,
-      targetName: targetActor.name,
-      sourceActorId: this.actor.id,
-      sourceActorName: this.actor.name,
+      targetId: targetActor ? targetActor.id : null,
+      targetName: targetActor ? targetActor.name : null,
+      sourceName: this.actor.name,
       sourceItemName: sourceItem.name,
-      activityName: activity.name || '效果',
       buffs: buffList
     });
 
