@@ -1107,7 +1107,7 @@ export default class CombatAreaApplication extends Application {
         const ruptureDamage = buff.strength;
         const newHpRupture = Math.max(0, this.actor.system.derived.hp.value - ruptureDamage);
         await this.actor.update({ 'system.derived.hp.value': newHpRupture });
-        effectMessage = `<span style="color: #c14545; font-weight: bold;">破裂触发：受到 ${ruptureDamage} 点固定伤害</span>`;
+        effectMessage = `<span style="color: #15D4B2; font-weight: bold;">破裂触发：受到 ${ruptureDamage} 点固定伤害</span>`;
         effectApplied = true;
         break;
 
@@ -1119,7 +1119,7 @@ export default class CombatAreaApplication extends Application {
           this.actor.system.derived.corruption.value + corruptionIncrease
         );
         await this.actor.update({ 'system.derived.corruption.value': newCorruption });
-        effectMessage = `<span style="color: #8b5cf6; font-weight: bold;">沉沦触发：侵蚀度增加 ${corruptionIncrease} 点</span>`;
+        effectMessage = `<span style="color: #2472E1; font-weight: bold;">沉沦触发：侵蚀度增加 ${corruptionIncrease} 点</span>`;
         effectApplied = true;
         break;
 
@@ -1128,7 +1128,7 @@ export default class CombatAreaApplication extends Application {
         const bleedDamage = buff.strength;
         const newHpBleed = Math.max(0, this.actor.system.derived.hp.value - bleedDamage);
         await this.actor.update({ 'system.derived.hp.value': newHpBleed });
-        effectMessage = `<span style="color: #c14545; font-weight: bold;">流血触发：受到 ${bleedDamage} 点固定伤害</span>`;
+        effectMessage = `<span style="color: #BA1B23; font-weight: bold;">流血触发：受到 ${bleedDamage} 点固定伤害</span>`;
         effectApplied = true;
         break;
 
@@ -1137,7 +1137,7 @@ export default class CombatAreaApplication extends Application {
         const burnDamage = buff.strength;
         const newHpBurn = Math.max(0, this.actor.system.derived.hp.value - burnDamage);
         await this.actor.update({ 'system.derived.hp.value': newHpBurn });
-        effectMessage = `<span style="color: #ff6b35; font-weight: bold;">燃烧触发：受到 ${burnDamage} 点固定伤害</span>`;
+        effectMessage = `<span style="color: #E09828; font-weight: bold;">燃烧触发：受到 ${burnDamage} 点固定伤害</span>`;
         effectApplied = true;
         break;
 
@@ -1149,7 +1149,7 @@ export default class CombatAreaApplication extends Application {
           this.actor.system.derived.chaos.value + chaosIncrease
         );
         await this.actor.update({ 'system.derived.chaos.value': newChaos });
-        effectMessage = `<span style="color: #3b82f6; font-weight: bold;">震颤触发：混乱值增加 ${chaosIncrease} 点</span>`;
+        effectMessage = `<span style="color: #EECBA2; font-weight: bold;">震颤触发：混乱值增加 ${chaosIncrease} 点</span>`;
         effectApplied = true;
         break;
 
