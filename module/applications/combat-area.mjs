@@ -840,6 +840,9 @@ export default class CombatAreaApplication extends Application {
           <div style="color: #EBBD68;">${item.system.effect || '无特殊效果'}</div>
         </div>
       `);
+
+      // 触发【使用时】Activities
+      await this._triggerActivities(item, 'onUse');
     }
   }
 
@@ -1087,5 +1090,337 @@ export default class CombatAreaApplication extends Application {
     }
 
     await ChatMessage.create(chatData);
+  }
+
+  /**
+   * 触发 Activities
+   * @param {Item} item - 触发的物品
+   * @param {string} triggerType - 触发类型 (onUse, onAttack, onCounter 等)
+   */
+  async _triggerActivities(item, triggerType) {
+    // 检查物品是否有 activities
+    if (!item.system.activities || Object.keys(item.system.activities).length === 0) {
+      return;
+    }
+
+    // 筛选出匹配的 activities
+    const matchingActivities = Object.values(item.system.activities).filter(
+      activity => activity.trigger === triggerType
+    );
+
+    if (matchingActivities.length === 0) {
+      return;
+    }
+
+    // 执行每个 activity
+    for (const activity of matchingActivities) {
+      await this._executeActivity(item, activity);
+    }
+  }
+
+  /**
+   * 执行单个 Activity
+   * @param {Item} item - 触发的物品
+   * @param {object} activity - Activity 数据
+   */
+  async _executeActivity(item, activity) {
+    // 检查消耗
+    if (activity.hasConsume && activity.consumes && activity.consumes.length > 0) {
+      const canConsume = this._checkActivityConsumes(activity.consumes);
+      if (!canConsume) {
+        ui.notifications.warn(`无法使用 ${item.name}：消耗不足`);
+        return;
+      }
+      // 扣除消耗
+      await this._consumeActivityBuffs(activity.consumes);
+    }
+
+    // 确定目标
+    const targets = this._getActivityTargets(activity.target);
+
+    // 应用效果到每个目标
+    for (const target of targets) {
+      await this._applyActivityEffects(target, activity, item);
+    }
+  }
+
+  /**
+   * 检查 Activity 的消耗是否足够
+   * @param {Array} consumes - 消耗列表
+   * @returns {boolean} 是否足够
+   */
+  _checkActivityConsumes(consumes) {
+    for (const consume of consumes) {
+      const buffId = consume.buffId;
+      const requiredLayers = consume.layers || 0;
+
+      // 在当前战斗状态中查找对应的 BUFF
+      const buff = this.combatState.buffs.find(b => b.id === buffId);
+
+      if (!buff || buff.layers < requiredLayers) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * 消耗 Activity 所需的 BUFFs
+   * @param {Array} consumes - 消耗列表
+   */
+  async _consumeActivityBuffs(consumes) {
+    for (const consume of consumes) {
+      const buffId = consume.buffId;
+      const consumeLayers = consume.layers || 0;
+
+      // 查找对应的 BUFF
+      const buffIndex = this.combatState.buffs.findIndex(b => b.id === buffId);
+
+      if (buffIndex !== -1) {
+        this.combatState.buffs[buffIndex].layers -= consumeLayers;
+
+        // 如果层数降为 0 或更低，删除 BUFF
+        if (this.combatState.buffs[buffIndex].layers <= 0) {
+          this.combatState.buffs.splice(buffIndex, 1);
+        }
+      }
+    }
+
+    await this._saveCombatState();
+    this.render();
+  }
+
+  /**
+   * 获取 Activity 的目标列表
+   * @param {string} targetType - 目标类型 (self, selected, multiple)
+   * @returns {Array} 目标角色数组
+   */
+  _getActivityTargets(targetType) {
+    if (targetType === 'self') {
+      return [this.actor];
+    } else if (targetType === 'selected') {
+      // 获取选中的目标
+      const targets = Array.from(game.user.targets);
+      if (targets.length > 0) {
+        return [targets[0].actor];
+      } else {
+        // 如果没有选中目标，默认为自己
+        ui.notifications.info("未选中目标，效果将应用到自己");
+        return [this.actor];
+      }
+    } else if (targetType === 'multiple') {
+      // 获取所有选中的目标
+      const targets = Array.from(game.user.targets);
+      if (targets.length > 0) {
+        return targets.map(t => t.actor);
+      } else {
+        ui.notifications.info("未选中目标，效果将应用到自己");
+        return [this.actor];
+      }
+    }
+
+    return [this.actor];
+  }
+
+  /**
+   * 应用 Activity 的效果到目标
+   * @param {Actor} targetActor - 目标角色
+   * @param {object} activity - Activity 数据
+   * @param {Item} sourceItem - 源物品
+   */
+  async _applyActivityEffects(targetActor, activity, sourceItem) {
+    // 如果目标是自己，直接操作 combatState
+    if (targetActor.id === this.actor.id) {
+      await this._applyEffectsToSelf(activity, sourceItem);
+    } else {
+      // 如果目标是其他角色，需要获取他们的战斗区域应用
+      await this._applyEffectsToOther(targetActor, activity, sourceItem);
+    }
+  }
+
+  /**
+   * 应用效果到自己
+   * @param {object} activity - Activity 数据
+   * @param {Item} sourceItem - 源物品
+   */
+  async _applyEffectsToSelf(activity, sourceItem) {
+    const effects = activity.effects || {};
+    const buffMessages = [];
+
+    // 预设 BUFF 列表（从 BUFF_TYPES 中获取）
+    const allBuffs = [
+      ...BUFF_TYPES.positive,
+      ...BUFF_TYPES.negative,
+      ...BUFF_TYPES.effect
+    ];
+
+    // 应用每个效果
+    for (const [buffId, effectData] of Object.entries(effects)) {
+      const layers = effectData.layers || 0;
+      const strength = effectData.strength || 0;
+
+      if (layers === 0) continue;
+
+      // 查找 BUFF 定义
+      const buffDef = allBuffs.find(b => b.id === buffId);
+      if (!buffDef) {
+        console.warn(`未找到 BUFF 定义: ${buffId}`);
+        continue;
+      }
+
+      // 检查是否已存在该 BUFF
+      const existingBuffIndex = this.combatState.buffs.findIndex(b => b.id === buffId);
+
+      if (existingBuffIndex !== -1) {
+        // 如果已存在，增加层数
+        this.combatState.buffs[existingBuffIndex].layers += layers;
+        // 如果强度不为0，更新强度
+        if (strength !== 0) {
+          this.combatState.buffs[existingBuffIndex].strength = strength;
+        }
+        buffMessages.push(`${buffDef.name} +${layers}层 (当前${this.combatState.buffs[existingBuffIndex].layers}层)`);
+      } else {
+        // 如果不存在，添加新 BUFF
+        this.combatState.buffs.push({
+          id: buffDef.id,
+          name: buffDef.name,
+          type: buffDef.type,
+          description: buffDef.description,
+          icon: buffDef.icon,
+          layers: layers,
+          strength: strength !== 0 ? strength : buffDef.defaultStrength
+        });
+        buffMessages.push(`获得${buffDef.name} ${layers}层 ${strength}强度`);
+      }
+    }
+
+    // 应用自定义效果（如果启用）
+    if (activity.customEffect && activity.customEffect.enabled) {
+      const customName = activity.customEffect.name || "自定义效果";
+      const customLayers = activity.customEffect.layers || 0;
+      const customStrength = activity.customEffect.strength || 0;
+
+      if (customLayers > 0) {
+        // 自定义效果使用名称作为唯一标识
+        const existingCustomIndex = this.combatState.buffs.findIndex(b => b.name === customName && b.id === 'custom');
+
+        if (existingCustomIndex !== -1) {
+          this.combatState.buffs[existingCustomIndex].layers += customLayers;
+          buffMessages.push(`${customName} +${customLayers}层`);
+        } else {
+          this.combatState.buffs.push({
+            id: 'custom',
+            name: customName,
+            type: 'effect',
+            description: '自定义效果',
+            icon: 'icons/svg/mystery-man.svg',
+            layers: customLayers,
+            strength: customStrength
+          });
+          buffMessages.push(`获得${customName} ${customLayers}层 ${customStrength}强度`);
+        }
+      }
+    }
+
+    // 保存战斗状态
+    await this._saveCombatState();
+    this.render();
+
+    // 发送效果消息到聊天
+    if (buffMessages.length > 0) {
+      await this._sendChatMessage(`
+        <div style="border: 2px solid #4a7c2c; border-radius: 4px; padding: 12px;">
+          <h3 style="margin: 0 0 8px 0; color: #4a7c2c;">【${activity.name || '效果'}】触发</h3>
+          <div style="color: #EBBD68;">来源: ${sourceItem.name}</div>
+          <div style="color: #EBBD68;">目标: 自己</div>
+          <ul style="margin: 8px 0; padding-left: 20px; color: #EBBD68;">
+            ${buffMessages.map(msg => `<li>${msg}</li>`).join('')}
+          </ul>
+        </div>
+      `);
+    }
+  }
+
+  /**
+   * 应用效果到其他角色
+   * @param {Actor} targetActor - 目标角色
+   * @param {object} activity - Activity 数据
+   * @param {Item} sourceItem - 源物品
+   */
+  async _applyEffectsToOther(targetActor, activity, sourceItem) {
+    // 获取目标角色的战斗区域应用
+    const targetCombatArea = Object.values(ui.windows).find(
+      app => app instanceof CombatAreaApplication && app.actor.id === targetActor.id
+    );
+
+    if (!targetCombatArea) {
+      ui.notifications.warn(`目标 ${targetActor.name} 的战斗区域未打开`);
+      return;
+    }
+
+    // 获取目标的战斗状态
+    const targetCombatState = targetActor.getFlag('shuhai-dalu', 'combatState') || {
+      buffs: []
+    };
+
+    const effects = activity.effects || {};
+    const buffMessages = [];
+
+    // 预设 BUFF 列表
+    const allBuffs = [
+      ...BUFF_TYPES.positive,
+      ...BUFF_TYPES.negative,
+      ...BUFF_TYPES.effect
+    ];
+
+    // 应用每个效果
+    for (const [buffId, effectData] of Object.entries(effects)) {
+      const layers = effectData.layers || 0;
+      const strength = effectData.strength || 0;
+
+      if (layers === 0) continue;
+
+      const buffDef = allBuffs.find(b => b.id === buffId);
+      if (!buffDef) continue;
+
+      const existingBuffIndex = targetCombatState.buffs.findIndex(b => b.id === buffId);
+
+      if (existingBuffIndex !== -1) {
+        targetCombatState.buffs[existingBuffIndex].layers += layers;
+        if (strength !== 0) {
+          targetCombatState.buffs[existingBuffIndex].strength = strength;
+        }
+        buffMessages.push(`${buffDef.name} +${layers}层`);
+      } else {
+        targetCombatState.buffs.push({
+          id: buffDef.id,
+          name: buffDef.name,
+          type: buffDef.type,
+          description: buffDef.description,
+          icon: buffDef.icon,
+          layers: layers,
+          strength: strength !== 0 ? strength : buffDef.defaultStrength
+        });
+        buffMessages.push(`获得${buffDef.name} ${layers}层 ${strength}强度`);
+      }
+    }
+
+    // 保存目标的战斗状态
+    await targetActor.setFlag('shuhai-dalu', 'combatState', targetCombatState);
+    targetCombatArea.render();
+
+    // 发送效果消息到聊天
+    if (buffMessages.length > 0) {
+      await this._sendChatMessage(`
+        <div style="border: 2px solid #4a7c2c; border-radius: 4px; padding: 12px;">
+          <h3 style="margin: 0 0 8px 0; color: #4a7c2c;">【${activity.name || '效果'}】触发</h3>
+          <div style="color: #EBBD68;">来源: ${this.actor.name} - ${sourceItem.name}</div>
+          <div style="color: #EBBD68;">目标: ${targetActor.name}</div>
+          <ul style="margin: 8px 0; padding-left: 20px; color: #EBBD68;">
+            ${buffMessages.map(msg => `<li>${msg}</li>`).join('')}
+          </ul>
+        </div>
+      `);
+    }
   }
 }
