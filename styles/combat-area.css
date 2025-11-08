@@ -418,6 +418,26 @@
   object-fit: contain;
 }
 
+.combat-area .trigger-dice-use-btn {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  transition: all 0.2s;
+}
+
+.combat-area .trigger-dice-use-btn:hover {
+  transform: scale(1.05);
+}
+
+.combat-area .trigger-dice-use-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 /* ========================================
    右侧面板
    ======================================== */

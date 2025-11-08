@@ -189,8 +189,8 @@ export default class CombatAreaApplication extends Application {
     this.combatState = this.actor.getFlag('shuhai-dalu', 'combatState') || {
       // Cost资源（6个）
       costResources: [false, false, false, false, false, false],
-      // EX资源（3个）
-      exResources: [false, false, false],
+      // EX资源（3个，默认拥有3个）
+      exResources: [true, true, true],
       // 战斗骰激活状态（6个）
       activatedDice: [false, false, false, false, false, false],
       // BUFF列表
@@ -208,7 +208,7 @@ export default class CombatAreaApplication extends Application {
 
     // 迁移/修复：确保exResources有3个元素
     if (!this.combatState.exResources || this.combatState.exResources.length !== 3) {
-      this.combatState.exResources = [false, false, false];
+      this.combatState.exResources = [true, true, true];
     }
 
     // 迁移/修复：确保activatedDice有6个元素
@@ -933,16 +933,16 @@ export default class CombatAreaApplication extends Application {
     const triggerDice = this.actor.items.get(this.actor.system.equipment.triggerDice);
     if (!triggerDice) return;
 
-    // 检查是否有可用的EX资源（找到第一个false，表示未使用）
-    const availableIndex = this.combatState.exResources.findIndex(ex => ex === false);
+    // 检查是否有可用的EX资源（找到第一个true，表示拥有资源）
+    const availableIndex = this.combatState.exResources.findIndex(ex => ex === true);
 
     if (availableIndex === -1) {
       ui.notifications.warn("没有可用的EX资源！");
       return;
     }
 
-    // 消耗1个EX资源（将false变为true）
-    this.combatState.exResources[availableIndex] = true;
+    // 消耗1个EX资源（将true变为false，实心变空心）
+    this.combatState.exResources[availableIndex] = false;
     await this._saveCombatState();
 
     // 发送使用消息到聊天框
