@@ -838,16 +838,11 @@ export default class CombatAreaApplication extends Application {
 
       if (!item) return;
 
-      // 检查是否有【使用时】Activities且包含effects
-      const hasEffectsActivity = item.system.activities &&
-        Object.values(item.system.activities).some(activity =>
-          activity.trigger === 'onUse' &&
-          activity.effects &&
-          Object.keys(activity.effects).length > 0
-        );
+      // 触发【使用时】Activities
+      const activitySuccess = await this._triggerActivities(item, 'onUse');
 
-      // 如果有effects的activity，不发送普通消息（将由BUFF按钮消息代替）
-      if (!hasEffectsActivity) {
+      // 如果没有成功的activity（没有activity或没有有效effects），发送普通使用消息
+      if (!activitySuccess) {
         await this._sendChatMessage(`
           <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
             <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用装备: ${item.name}</h3>
@@ -856,9 +851,6 @@ export default class CombatAreaApplication extends Application {
           </div>
         `);
       }
-
-      // 触发【使用时】Activities
-      await this._triggerActivities(item, 'onUse');
     }
   }
 
@@ -871,16 +863,11 @@ export default class CombatAreaApplication extends Application {
     const weapon = this.actor.items.get(this.actor.system.equipment.weapon);
     if (!weapon) return;
 
-    // 检查是否有【使用时】Activities且包含effects
-    const hasEffectsActivity = weapon.system.activities &&
-      Object.values(weapon.system.activities).some(activity =>
-        activity.trigger === 'onUse' &&
-        activity.effects &&
-        Object.keys(activity.effects).length > 0
-      );
+    // 触发【使用时】Activities
+    const activitySuccess = await this._triggerActivities(weapon, 'onUse');
 
-    // 如果有effects的activity，不发送普通消息（将由BUFF按钮消息代替）
-    if (!hasEffectsActivity) {
+    // 如果没有成功的activity，发送普通使用消息
+    if (!activitySuccess) {
       await this._sendChatMessage(`
         <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
           <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用武器: ${weapon.name}</h3>
@@ -889,9 +876,6 @@ export default class CombatAreaApplication extends Application {
         </div>
       `);
     }
-
-    // 触发【使用时】Activities
-    await this._triggerActivities(weapon, 'onUse');
   }
 
   /**
@@ -903,17 +887,11 @@ export default class CombatAreaApplication extends Application {
     const armor = this.actor.items.get(this.actor.system.equipment.armor);
     if (!armor) return;
 
-    // 检查是否有【使用时】Activities且包含effects
-    const hasEffectsActivity = armor.system.activities &&
-      Object.values(armor.system.activities).some(activity =>
-        activity.trigger === 'onUse' &&
-        activity.effects &&
-        Object.keys(activity.effects).length > 0
-      );
+    // 触发【使用时】Activities
+    const activitySuccess = await this._triggerActivities(armor, 'onUse');
 
-    // 如果有effects的activity，不发送普通消息（将由BUFF按钮消息代替）
-    // 如果没有effects的activity，发送普通使用消息
-    if (!hasEffectsActivity) {
+    // 如果没有成功的activity，发送普通使用消息
+    if (!activitySuccess) {
       await this._sendChatMessage(`
         <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
           <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用防具: ${armor.name}</h3>
@@ -922,9 +900,6 @@ export default class CombatAreaApplication extends Application {
         </div>
       `);
     }
-
-    // 触发【使用时】Activities
-    await this._triggerActivities(armor, 'onUse');
   }
 
   /**
@@ -941,16 +916,11 @@ export default class CombatAreaApplication extends Application {
 
       if (!item) return;
 
-      // 检查是否有【使用时】Activities且包含effects
-      const hasEffectsActivity = item.system.activities &&
-        Object.values(item.system.activities).some(activity =>
-          activity.trigger === 'onUse' &&
-          activity.effects &&
-          Object.keys(activity.effects).length > 0
-        );
+      // 触发【使用时】Activities
+      const activitySuccess = await this._triggerActivities(item, 'onUse');
 
-      // 如果有effects的activity，不发送普通消息（将由BUFF按钮消息代替）
-      if (!hasEffectsActivity) {
+      // 如果没有成功的activity，发送普通使用消息
+      if (!activitySuccess) {
         await this._sendChatMessage(`
           <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
             <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用被动骰: ${item.name}</h3>
@@ -959,9 +929,6 @@ export default class CombatAreaApplication extends Application {
           </div>
         `);
       }
-
-      // 触发【使用时】Activities
-      await this._triggerActivities(item, 'onUse');
     }
   }
 
@@ -1352,10 +1319,16 @@ export default class CombatAreaApplication extends Application {
    * @param {Item} item - 触发的物品
    * @param {string} triggerType - 触发类型 (onUse, onAttack, onCounter 等)
    */
+  /**
+   * 触发物品的Activities
+   * @param {Item} item - 物品
+   * @param {string} triggerType - 触发类型
+   * @returns {boolean} 是否有任何activity成功应用了效果
+   */
   async _triggerActivities(item, triggerType) {
     // 检查物品是否有 activities
     if (!item.system.activities || Object.keys(item.system.activities).length === 0) {
-      return;
+      return false;
     }
 
     // 筛选出匹配的 activities
@@ -1364,19 +1337,24 @@ export default class CombatAreaApplication extends Application {
     );
 
     if (matchingActivities.length === 0) {
-      return;
+      return false;
     }
 
-    // 执行每个 activity
+    // 执行每个 activity，记录是否有成功的
+    let hasSuccess = false;
     for (const activity of matchingActivities) {
-      await this._executeActivity(item, activity);
+      const success = await this._executeActivity(item, activity);
+      if (success) hasSuccess = true;
     }
+
+    return hasSuccess;
   }
 
   /**
    * 执行单个 Activity
    * @param {Item} item - 触发的物品
    * @param {object} activity - Activity 数据
+   * @returns {boolean} 是否成功应用了效果
    */
   async _executeActivity(item, activity) {
     // 检查消耗
@@ -1384,7 +1362,7 @@ export default class CombatAreaApplication extends Application {
       const canConsume = this._checkActivityConsumes(activity.consumes);
       if (!canConsume) {
         ui.notifications.warn(`无法使用 ${item.name}：消耗不足`);
-        return;
+        return false;
       }
       // 扣除消耗
       await this._consumeActivityBuffs(activity.consumes);
@@ -1393,10 +1371,14 @@ export default class CombatAreaApplication extends Application {
     // 确定目标
     const targets = this._getActivityTargets(activity.target);
 
-    // 应用效果到每个目标
+    // 应用效果到每个目标，记录是否有成功的
+    let hasSuccess = false;
     for (const target of targets) {
-      await this._applyActivityEffects(target, activity, item);
+      const success = await this._applyActivityEffects(target, activity, item);
+      if (success) hasSuccess = true;
     }
+
+    return hasSuccess;
   }
 
   /**
@@ -1482,19 +1464,21 @@ export default class CombatAreaApplication extends Application {
    * @param {Actor|null} targetActor - 目标角色（null表示未选中目标，将创建所有人可点击的按钮）
    * @param {object} activity - Activity 数据
    * @param {Item} sourceItem - 源物品
+   * @returns {boolean} 是否成功应用了效果（对于其他角色，表示是否创建了BUFF消息）
    */
   async _applyActivityEffects(targetActor, activity, sourceItem) {
     // 如果目标是null（未选中），创建所有人可点击的聊天按钮
     if (targetActor === null) {
-      await this._applyEffectsToOther(null, activity, sourceItem);
+      return await this._applyEffectsToOther(null, activity, sourceItem);
     }
     // 如果目标是自己，直接操作 combatState
     else if (targetActor.id === this.actor.id) {
       await this._applyEffectsToSelf(activity, sourceItem);
+      return true;
     }
     // 如果目标是其他角色，创建只有目标可点击的聊天按钮
     else {
-      await this._applyEffectsToOther(targetActor, activity, sourceItem);
+      return await this._applyEffectsToOther(targetActor, activity, sourceItem);
     }
   }
 
@@ -1703,6 +1687,7 @@ export default class CombatAreaApplication extends Application {
    * @param {Actor|null} targetActor - 目标角色（null表示未选中目标，所有人可点击）
    * @param {object} activity - Activity 数据
    * @param {Item} sourceItem - 源物品
+   * @returns {boolean} 是否成功创建了BUFF消息
    */
   async _applyEffectsToOther(targetActor, activity, sourceItem) {
     const effects = activity.effects || {};
@@ -1744,7 +1729,7 @@ export default class CombatAreaApplication extends Application {
       });
     }
 
-    if (buffList.length === 0) return;
+    if (buffList.length === 0) return false;
 
     // 构建BUFF效果列表HTML
     const buffListHtml = buffList.map(buff => {
@@ -1809,5 +1794,6 @@ export default class CombatAreaApplication extends Application {
     };
 
     await ChatMessage.create(chatData);
+    return true;
   }
 }
