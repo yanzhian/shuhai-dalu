@@ -117,35 +117,20 @@ Hooks.once('ready', async function() {
 /* -------------------------------------------- */
 
 /**
- * 等TokenConfig打开后，再打开角色卡，然后关闭TokenConfig
- * 不拦截、不阻止，让它正常打开，然后我们再处理
+ * Token双击打开角色卡而不是Token配置
+ * 流程：TokenConfig打开 → 打开角色卡 → 关闭TokenConfig
  */
 Hooks.on('renderTokenConfig', (app, html, data) => {
-  console.log('书海大陆 | TokenConfig已打开，开始处理');
-
   const token = app.object;
 
-  if (!token || !token.document?.actorId) {
-    console.log('书海大陆 | Token没有关联actor，保持TokenConfig打开');
-    return;
-  }
+  if (!token?.document?.actorId) return;
 
   const actor = game.actors.get(token.document.actorId);
 
-  if (!actor) {
-    console.log('书海大陆 | 找不到actor，保持TokenConfig打开');
-    return;
+  if (actor) {
+    actor.sheet.render(true);
+    app.close();
   }
-
-  console.log('书海大陆 | 找到actor:', actor.name);
-
-  // 1. 先打开角色卡
-  actor.sheet.render(true);
-  console.log('书海大陆 | 已打开角色卡:', actor.name);
-
-  // 2. 然后关闭TokenConfig
-  app.close();
-  console.log('书海大陆 | 已关闭TokenConfig');
 });
 
 /* -------------------------------------------- */
