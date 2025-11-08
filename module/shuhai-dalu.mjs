@@ -120,33 +120,58 @@ Hooks.once('ready', async function() {
  * 覆盖Token双击行为，直接打开角色卡而不是Token配置
  */
 Hooks.once('ready', () => {
-  console.log('书海大陆 | 覆盖Token双击事件');
+  console.log('书海大陆 | 注册Token双击覆盖');
 
-  // 保存原始方法
-  const original = Token.prototype._onClickLeft2;
+  // 使用libWrapper确保不会被其他模块覆盖
+  if (typeof libWrapper === 'function') {
+    libWrapper.register('shuhai-dalu', 'Token.prototype._onClickLeft2', function(wrapped, event) {
+      console.log('书海大陆 | Token双击触发 (libWrapper)');
 
-  // 覆盖双击方法
-  Token.prototype._onClickLeft2 = function(event) {
-    console.log('书海大陆 | Token双击触发');
+      // 获取关联的actor（优先使用actorId获取原始actor）
+      let actor = null;
+      if (this.document?.actorId) {
+        actor = game.actors.get(this.document.actorId);
+        console.log('书海大陆 | 通过actorId获取Actor:', actor?.name);
+      }
 
-    // 获取关联的actor（优先使用actorId获取原始actor）
-    let actor = null;
-    if (this.document?.actorId) {
-      actor = game.actors.get(this.document.actorId);
-      console.log('书海大陆 | 通过actorId获取Actor:', actor?.name);
-    }
+      // 如果有actor，打开角色卡
+      if (actor) {
+        actor.sheet.render(true);
+        console.log('书海大陆 | 已打开角色卡:', actor.name);
+        return; // 阻止TokenConfig打开
+      }
 
-    // 如果有actor，打开角色卡
-    if (actor) {
-      actor.sheet.render(true);
-      console.log('书海大陆 | 已打开角色卡:', actor.name);
-      return; // 不调用原始方法，阻止TokenConfig打开
-    }
+      // 如果没有actor，调用原始方法
+      console.log('书海大陆 | 没有关联Actor，使用默认行为');
+      return wrapped(event);
+    }, 'MIXED');
+    console.log('书海大陆 | libWrapper注册成功');
+  } else {
+    console.warn('书海大陆 | libWrapper未找到，使用直接覆盖方法');
+    // 如果没有libWrapper，直接覆盖方法
+    const original = Token.prototype._onClickLeft2;
+    Token.prototype._onClickLeft2 = function(event) {
+      console.log('书海大陆 | Token双击触发 (直接覆盖)');
 
-    // 如果没有actor，调用原始方法
-    console.log('书海大陆 | 没有关联Actor，使用默认行为');
-    return original.call(this, event);
-  };
+      // 获取关联的actor（优先使用actorId获取原始actor）
+      let actor = null;
+      if (this.document?.actorId) {
+        actor = game.actors.get(this.document.actorId);
+        console.log('书海大陆 | 通过actorId获取Actor:', actor?.name);
+      }
+
+      // 如果有actor，打开角色卡
+      if (actor) {
+        actor.sheet.render(true);
+        console.log('书海大陆 | 已打开角色卡:', actor.name);
+        return; // 阻止TokenConfig打开
+      }
+
+      // 如果没有actor，调用原始方法
+      console.log('书海大陆 | 没有关联Actor，使用默认行为');
+      return original.call(this, event);
+    };
+  }
 });
 
 /* -------------------------------------------- */
