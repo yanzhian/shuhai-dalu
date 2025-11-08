@@ -189,8 +189,8 @@ export default class CombatAreaApplication extends Application {
     this.combatState = this.actor.getFlag('shuhai-dalu', 'combatState') || {
       // Cost资源（6个）
       costResources: [false, false, false, false, false, false],
-      // EX资源（3个）
-      exResources: [false, false, false],
+      // EX资源（3个，默认拥有3个）
+      exResources: [true, true, true],
       // 战斗骰激活状态（6个）
       activatedDice: [false, false, false, false, false, false],
       // BUFF列表
@@ -208,7 +208,7 @@ export default class CombatAreaApplication extends Application {
 
     // 迁移/修复：确保exResources有3个元素
     if (!this.combatState.exResources || this.combatState.exResources.length !== 3) {
-      this.combatState.exResources = [false, false, false];
+      this.combatState.exResources = [true, true, true];
     }
 
     // 迁移/修复：确保activatedDice有6个元素
@@ -443,10 +443,11 @@ export default class CombatAreaApplication extends Application {
     // 装备使用按钮
     html.find('.equipment-use-btn').click(this._onEquipmentUse.bind(this));
 
-    // 武器/防具/被动骰使用按钮
+    // 武器/防具/被动骰/触发骰使用按钮
     html.find('.weapon-use-btn').click(this._onWeaponUse.bind(this));
     html.find('.armor-use-btn').click(this._onArmorUse.bind(this));
     html.find('.passive-dice-use-btn').click(this._onPassiveDiceUse.bind(this));
+    html.find('.trigger-dice-use-btn').click(this._onTriggerDiceUse.bind(this));
 
     // 先攻按钮
     html.find('.initiative-btn').click(this._onInitiative.bind(this));
@@ -924,6 +925,46 @@ export default class CombatAreaApplication extends Application {
   }
 
   /**
+   * 使用触发骰（消耗1个EX资源）
+   */
+  async _onTriggerDiceUse(event) {
+    event.preventDefault();
+
+    const triggerDice = this.actor.items.get(this.actor.system.equipment.triggerDice);
+    if (!triggerDice) return;
+
+    // 检查是否有可用的EX资源（找到第一个true，表示拥有资源）
+    const availableIndex = this.combatState.exResources.findIndex(ex => ex === true);
+
+    if (availableIndex === -1) {
+      ui.notifications.warn("没有可用的EX资源！");
+      return;
+    }
+
+    // 消耗1个EX资源（将true变为false，实心变空心）
+    this.combatState.exResources[availableIndex] = false;
+    await this._saveCombatState();
+
+    // 发送使用消息到聊天框
+    await this._sendChatMessage(`
+      <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
+        <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用触发骰: ${triggerDice.name}</h3>
+        <div style="color: #888; margin-bottom: 8px;">消耗: <span style="color: #c14545; font-weight: bold;">1 EX资源</span></div>
+        <div style="color: #888; margin-bottom: 8px;">分类: ${triggerDice.system.category || '无'}</div>
+        <div style="color: #EBBD68;">${triggerDice.system.effect || '无特殊效果'}</div>
+      </div>
+    `);
+
+    // 触发【使用时】Activities
+    await this._triggerActivities(triggerDice, 'onUse');
+
+    ui.notifications.info(`使用了 ${triggerDice.name}，消耗了1个EX资源！`);
+
+    // 刷新界面以显示更新后的EX资源
+    this.render();
+  }
+
+  /**
    * 投骰
    */
   async _rollDice(item) {
@@ -1050,7 +1091,103 @@ export default class CombatAreaApplication extends Application {
 
     if (!buff) return;
 
-    await this._sendChatMessage(`触发BUFF：${buff.name}（层数：${buff.layers}，强度：${buff.strength}）\n${buff.description}`);
+    // 检查层数是否为0
+    if (buff.layers <= 0) {
+      ui.notifications.warn(`${buff.name} 的层数已为0，无法触发！`);
+      return;
+    }
+
+    let effectApplied = false;
+    let effectMessage = '';
+
+    // 根据BUFF ID执行不同的触发效果
+    switch (buff.id) {
+      case 'rupture': // 破裂
+        // 造成等于强度的固定生命值伤害
+        const ruptureDamage = buff.strength;
+        const newHpRupture = Math.max(0, this.actor.system.derived.hp.value - ruptureDamage);
+        await this.actor.update({ 'system.derived.hp.value': newHpRupture });
+        effectMessage = `<span style="color: #15D4B2; font-weight: bold;">破裂触发：受到 ${ruptureDamage} 点固定伤害</span>`;
+        effectApplied = true;
+        break;
+
+      case 'corruption_effect': // 沉沦
+        // 增加等于强度的侵蚀度
+        const corruptionIncrease = buff.strength;
+        const newCorruption = Math.min(
+          this.actor.system.derived.corruption.max,
+          this.actor.system.derived.corruption.value + corruptionIncrease
+        );
+        await this.actor.update({ 'system.derived.corruption.value': newCorruption });
+        effectMessage = `<span style="color: #2472E1; font-weight: bold;">沉沦触发：侵蚀度增加 ${corruptionIncrease} 点</span>`;
+        effectApplied = true;
+        break;
+
+      case 'bleed': // 流血
+        // 对自己造成等于强度的固定伤害
+        const bleedDamage = buff.strength;
+        const newHpBleed = Math.max(0, this.actor.system.derived.hp.value - bleedDamage);
+        await this.actor.update({ 'system.derived.hp.value': newHpBleed });
+        effectMessage = `<span style="color: #BA1B23; font-weight: bold;">流血触发：受到 ${bleedDamage} 点固定伤害</span>`;
+        effectApplied = true;
+        break;
+
+      case 'burn': // 燃烧
+        // 对自己造成等于强度的固定伤害
+        const burnDamage = buff.strength;
+        const newHpBurn = Math.max(0, this.actor.system.derived.hp.value - burnDamage);
+        await this.actor.update({ 'system.derived.hp.value': newHpBurn });
+        effectMessage = `<span style="color: #E09828; font-weight: bold;">燃烧触发：受到 ${burnDamage} 点固定伤害</span>`;
+        effectApplied = true;
+        break;
+
+      case 'tremor': // 震颤
+        // 增加等于强度的混乱值
+        const chaosIncrease = buff.strength;
+        const newChaos = Math.min(
+          this.actor.system.derived.chaos.max,
+          this.actor.system.derived.chaos.value + chaosIncrease
+        );
+        await this.actor.update({ 'system.derived.chaos.value': newChaos });
+        effectMessage = `<span style="color: #EECBA2; font-weight: bold;">震颤触发：混乱值增加 ${chaosIncrease} 点</span>`;
+        effectApplied = true;
+        break;
+
+      default:
+        // 其他BUFF：只显示触发信息，不执行特殊效果
+        effectMessage = `<span style="color: #EBBD68;">触发 ${buff.name}（层数：${buff.layers}，强度：${buff.strength}）</span>`;
+        break;
+    }
+
+    // 效果生效后，层数减少1
+    if (effectApplied) {
+      buff.layers -= 1;
+
+      // 如果层数降为0，移除BUFF
+      if (buff.layers <= 0) {
+        this.combatState.buffs.splice(buffIndex, 1);
+        effectMessage += `<br><span style="color: #888;">【${buff.name}】层数降为0，已移除</span>`;
+      }
+
+      // 保存战斗状态
+      await this._saveCombatState();
+    }
+
+    // 发送触发效果消息到聊天框
+    await this._sendChatMessage(`
+      <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
+        <h3 style="margin: 0 0 8px 0; color: #E1AA43;">BUFF 触发</h3>
+        <div style="color: #EBBD68; margin-bottom: 8px;">
+          <strong>${buff.name}</strong> (层数: ${effectApplied ? buff.layers + 1 : buff.layers} → ${buff.layers} | 强度: ${buff.strength})
+        </div>
+        <div style="color: #EBBD68; font-size: 13px; line-height: 1.6;">
+          ${effectMessage}
+        </div>
+      </div>
+    `);
+
+    // 刷新界面
+    this.render();
   }
 
   /**

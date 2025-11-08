@@ -698,8 +698,293 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     const itemId = event.currentTarget.dataset.itemId;
     const item = this.actor.items.get(itemId);
 
-    if (item) {
-      await item.use();
+    if (!item) return;
+
+    // 根据物品类型分发到不同的处理方法
+    switch (item.type) {
+      case 'combatDice':
+      case 'shootDice':
+        // 战斗骰：发起对抗
+        await this._useItemAsCombatDice(item);
+        break;
+
+      case 'triggerDice':
+        // 触发骰：消耗EX资源并使用
+        await this._useItemAsTriggerDice(item);
+        break;
+
+      case 'weapon':
+      case 'armor':
+      case 'equipment':
+      case 'item':
+      case 'passiveDice':
+        // 装备类物品：发送使用消息并触发效果
+        await this._useItemAsEquipment(item);
+        break;
+
+      case 'defenseDice':
+        // 守备骰只能在对抗时使用
+        ui.notifications.warn("守备骰只能在对抗时使用");
+        break;
+
+      default:
+        // 其他类型，调用默认的use方法（如果存在）
+        if (item.use) {
+          await item.use();
+        }
+        break;
+    }
+  }
+
+  /**
+   * 使用战斗骰发起对抗
+   */
+  async _useItemAsCombatDice(item) {
+    // 请求调整值
+    const adjustment = await this._requestAdjustmentForInitiate();
+    if (adjustment === null) return; // 用户取消
+
+    // 计算BUFF加成（从Actor的flags中获取战斗状态）
+    const buffBonus = this._calculateInitiatorBuffBonus();
+
+    // 获取选择的目标（如果有）
+    const targets = Array.from(game.user.targets);
+    const targetActor = targets.length > 0 ? targets[0].actor : null;
+
+    // 创建发起数据（不提前投骰，等对抗时再投）
+    const initiateData = {
+      initiatorId: this.actor.id,
+      initiatorName: this.actor.name,
+      diceId: item.id,
+      diceName: item.name,
+      diceFormula: item.system.diceFormula,
+      diceImg: item.img,
+      diceCost: item.system.cost || 0,
+      diceType: item.type,
+      diceCategory: item.system.category || '',
+      diceEffect: item.system.effect || '无特殊效果',
+      diceRoll: null, // 不提前投骰
+      buffBonus: buffBonus,
+      adjustment: adjustment,
+      targetId: targetActor ? targetActor.id : null,
+      targetName: targetActor ? targetActor.name : null
+    };
+
+    // 创建发起对抗聊天卡片
+    const chatData = {
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      content: await renderTemplate("systems/shuhai-dalu/templates/chat/combat-dice-initiate.hbs", initiateData),
+      sound: CONFIG.sounds.dice,
+      flags: {
+        'shuhai-dalu': {
+          initiateData: initiateData
+        }
+      }
+    };
+
+    await ChatMessage.create(chatData);
+    ui.notifications.info(`${item.name} 发起对抗！`);
+  }
+
+  /**
+   * 使用触发骰（消耗1个EX资源）
+   */
+  async _useItemAsTriggerDice(item) {
+    // 从Actor的flags中获取战斗状态
+    let combatState = this.actor.getFlag('shuhai-dalu', 'combatState');
+
+    // 如果没有combatState，初始化一个（默认拥有3个EX资源）
+    if (!combatState) {
+      combatState = {
+        exResources: [true, true, true],
+        costResources: [false, false, false, false, false, false],
+        activatedDice: [false, false, false, false, false, false],
+        buffs: []
+      };
+      await this.actor.setFlag('shuhai-dalu', 'combatState', combatState);
+    }
+
+    // 确保exResources存在且正确
+    if (!combatState.exResources || combatState.exResources.length !== 3) {
+      combatState.exResources = [true, true, true];
+    }
+
+    // 检查是否有可用的EX资源（找到第一个true，表示拥有资源）
+    const availableIndex = combatState.exResources.findIndex(ex => ex === true);
+
+    if (availableIndex === -1) {
+      ui.notifications.warn("没有可用的EX资源！");
+      return;
+    }
+
+    // 消耗1个EX资源（将true变为false，实心变空心）
+    combatState.exResources[availableIndex] = false;
+    await this.actor.setFlag('shuhai-dalu', 'combatState', combatState);
+
+    // 发送使用消息到聊天框
+    const chatData = {
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      content: `
+        <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px; background: #0F0D1B; color: #EBBD68; font-family: 'Noto Sans SC', sans-serif;">
+          <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用触发骰: ${item.name}</h3>
+          <div style="color: #888; margin-bottom: 8px;">消耗: <span style="color: #c14545; font-weight: bold;">1 EX资源</span></div>
+          ${item.system.category ? `<div style="color: #888; margin-bottom: 8px;">分类: ${item.system.category}</div>` : ''}
+          <div style="color: #EBBD68;">${item.system.effect || '无特殊效果'}</div>
+        </div>
+      `
+    };
+
+    await ChatMessage.create(chatData);
+
+    // 触发【使用时】Activities
+    await this._triggerActivities(item, 'onUse');
+
+    ui.notifications.info(`使用了 ${item.name}，消耗了1个EX资源！`);
+
+    // 刷新角色表以显示更新后的EX资源
+    this.render();
+  }
+
+  /**
+   * 使用装备类物品
+   */
+  async _useItemAsEquipment(item) {
+    // 发送使用消息到聊天框
+    const chatData = {
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      content: `
+        <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px; background: #0F0D1B; color: #EBBD68; font-family: 'Noto Sans SC', sans-serif;">
+          <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用${this._getItemTypeName(item.type)}: ${item.name}</h3>
+          ${item.system.cost ? `<div style="color: #888; margin-bottom: 8px;">费用: ${item.system.cost}</div>` : ''}
+          ${item.system.category ? `<div style="color: #888; margin-bottom: 8px;">分类: ${item.system.category}</div>` : ''}
+          <div style="color: #EBBD68;">${item.system.effect || '无特殊效果'}</div>
+        </div>
+      `
+    };
+
+    await ChatMessage.create(chatData);
+
+    // 触发【使用时】Activities（如果物品支持）
+    await this._triggerActivities(item, 'onUse');
+
+    ui.notifications.info(`使用了 ${item.name}！`);
+  }
+
+  /**
+   * 获取物品类型的中文名称
+   */
+  _getItemTypeName(type) {
+    const typeNames = {
+      'weapon': '武器',
+      'armor': '防具',
+      'equipment': '装备',
+      'item': '物品',
+      'passiveDice': '被动骰',
+      'combatDice': '战斗骰',
+      'shootDice': '射击骰',
+      'defenseDice': '守备骰',
+      'triggerDice': '触发骰'
+    };
+    return typeNames[type] || type;
+  }
+
+  /**
+   * 请求发起者的调整值
+   */
+  async _requestAdjustmentForInitiate() {
+    return new Promise((resolve) => {
+      new Dialog({
+        title: "输入调整值",
+        content: `
+          <form>
+            <div class="form-group">
+              <label>调整值:</label>
+              <input type="number" name="adjustment" value="0" style="width: 100%; padding: 0.5rem; background: #0F0D1B; border: 1px solid #EBBD68; color: #EBBD68; border-radius: 3px;"/>
+            </div>
+          </form>
+        `,
+        buttons: {
+          confirm: {
+            icon: '<i class="fas fa-check"></i>',
+            label: "确认",
+            callback: (html) => {
+              const adj = parseInt(html.find('[name="adjustment"]').val()) || 0;
+              resolve(adj);
+            }
+          },
+          cancel: {
+            icon: '<i class="fas fa-times"></i>',
+            label: "取消",
+            callback: () => resolve(null)
+          }
+        },
+        default: "confirm"
+      }).render(true);
+    });
+  }
+
+  /**
+   * 计算发起者的BUFF加成
+   */
+  _calculateInitiatorBuffBonus() {
+    let bonus = 0;
+
+    // 从Actor的flags中获取战斗状态
+    const combatState = this.actor.getFlag('shuhai-dalu', 'combatState');
+    if (!combatState || !combatState.buffs) return bonus;
+
+    for (const buff of combatState.buffs) {
+      if (buff.id === 'strong') {
+        // 强壮：骰数增加
+        bonus += buff.layers;
+      } else if (buff.id === 'weak') {
+        // 虚弱：骰数减少
+        bonus -= buff.layers;
+      }
+      // 可以添加更多BUFF效果
+    }
+
+    return bonus;
+  }
+
+  /**
+   * 触发物品的Activities
+   */
+  async _triggerActivities(item, trigger) {
+    // 检查物品是否有Activities
+    if (!item.system.activities || item.system.activities.length === 0) {
+      return;
+    }
+
+    // 过滤出符合触发条件的Activities
+    const activities = item.system.activities.filter(act => act.trigger === trigger);
+
+    if (activities.length === 0) return;
+
+    // 执行每个Activity
+    for (const activity of activities) {
+      console.log(`书海大陆 | 触发Activity: ${activity.name} (${trigger})`);
+
+      // 这里可以根据Activity类型执行不同的效果
+      // 例如：扣除HP、添加BUFF、修改属性等
+
+      // 简单示例：如果Activity有效果描述，发送到聊天框
+      if (activity.effect) {
+        const chatData = {
+          user: game.user.id,
+          speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+          content: `
+            <div style="border: 2px solid #c14545; border-radius: 4px; padding: 8px; background: #0F0D1B; color: #EBBD68; font-family: 'Noto Sans SC', sans-serif;">
+              <div style="font-weight: bold; color: #c14545; margin-bottom: 4px;">⚡ ${activity.name}</div>
+              <div style="color: #EBBD68; font-size: 13px;">${activity.effect}</div>
+            </div>
+          `
+        };
+        await ChatMessage.create(chatData);
+      }
     }
   }
 

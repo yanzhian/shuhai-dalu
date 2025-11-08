@@ -142,7 +142,7 @@
           {{#if equipment.triggerDice}}
             <div class="dice-cost-badge">{{equipment.triggerDice.system.cost}}</div>
             <div class="dice-count-badge">{{equipment.triggerDice.system.diceFormula}}</div>
-            <button class="combat-dice-initiate-btn" type="button" title="{{equipment.triggerDice.name}}&#10;{{equipment.triggerDice.type}} {{equipment.triggerDice.system.category}}&#10;{{equipment.triggerDice.system.effect}}">
+            <button class="trigger-dice-use-btn" type="button" title="{{equipment.triggerDice.name}}&#10;{{equipment.triggerDice.type}} {{equipment.triggerDice.system.category}}&#10;{{equipment.triggerDice.system.effect}}&#10;消耗: 1 EX资源">
               <img src="{{equipment.triggerDice.img}}" alt="{{equipment.triggerDice.name}}" />
             </button>
           {{else}}
