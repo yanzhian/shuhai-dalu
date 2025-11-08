@@ -124,8 +124,8 @@ Hooks.once('ready', () => {
 
   // 使用libWrapper确保不会被其他模块覆盖
   if (typeof libWrapper === 'function') {
-    libWrapper.register('shuhai-dalu', 'Token.prototype._onClickLeft2', function(wrapped, event) {
-      console.log('书海大陆 | Token双击触发 (libWrapper)');
+    libWrapper.register('shuhai-dalu', 'Token.prototype._onClickLeft2', function(event) {
+      console.log('书海大陆 | Token双击触发 (libWrapper OVERRIDE)');
 
       // 获取关联的actor（优先使用actorId获取原始actor）
       let actor = null;
@@ -141,11 +141,11 @@ Hooks.once('ready', () => {
         return; // 阻止TokenConfig打开
       }
 
-      // 如果没有actor，调用原始方法
-      console.log('书海大陆 | 没有关联Actor，使用默认行为');
-      return wrapped(event);
-    }, 'MIXED');
-    console.log('书海大陆 | libWrapper注册成功');
+      // 如果没有actor，什么都不做（不打开任何窗口）
+      console.log('书海大陆 | 没有关联Actor，不打开任何窗口');
+      return;
+    }, 'OVERRIDE');
+    console.log('书海大陆 | libWrapper注册成功 (OVERRIDE模式)');
   } else {
     console.warn('书海大陆 | libWrapper未找到，使用直接覆盖方法');
     // 如果没有libWrapper，直接覆盖方法
