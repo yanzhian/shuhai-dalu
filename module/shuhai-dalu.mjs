@@ -117,72 +117,36 @@ Hooks.once('ready', async function() {
 /* -------------------------------------------- */
 
 /**
- * 尝试多种hook来拦截TokenConfig
+ * 等TokenConfig打开后，再打开角色卡，然后关闭TokenConfig
+ * 不拦截、不阻止，让它正常打开，然后我们再处理
  */
-Hooks.once('ready', () => {
-  console.log('书海大陆 | 注册多种hook监听器');
+Hooks.on('renderTokenConfig', (app, html, data) => {
+  console.log('书海大陆 | TokenConfig已打开，开始处理');
 
-  // 方法1: 监听 renderTokenConfig (最直接)
-  Hooks.on('renderTokenConfig', (app, html, data) => {
-    console.log('书海大陆 | [renderTokenConfig] 触发!');
-    handleTokenConfigIntercept(app);
-  });
-
-  // 方法2: 监听 preRenderTokenConfig (渲染前)
-  Hooks.on('preRenderTokenConfig', (app) => {
-    console.log('书海大陆 | [preRenderTokenConfig] 触发!');
-    handleTokenConfigIntercept(app);
-    return false; // 尝试阻止渲染
-  });
-
-  // 方法3: 覆盖Token双击方法（备用）
-  const originalClickLeft2 = Token.prototype._onClickLeft2;
-  Token.prototype._onClickLeft2 = function(event) {
-    console.log('书海大陆 | [_onClickLeft2] Token双击触发');
-
-    // 获取actor
-    const actor = this.document?.actorId ? game.actors.get(this.document.actorId) : null;
-
-    if (actor) {
-      console.log('书海大陆 | 找到actor:', actor.name, '打开角色卡');
-      actor.sheet.render(true);
-      return; // 不调用原始方法，阻止TokenConfig打开
-    }
-
-    console.log('书海大陆 | 没有actor，使用默认行为');
-    return originalClickLeft2.call(this, event);
-  };
-
-  console.log('书海大陆 | 所有监听器已注册');
-});
-
-/**
- * 处理TokenConfig拦截
- */
-function handleTokenConfigIntercept(app) {
   const token = app.object;
 
   if (!token || !token.document?.actorId) {
-    console.log('书海大陆 | Token没有关联actor');
+    console.log('书海大陆 | Token没有关联actor，保持TokenConfig打开');
     return;
   }
 
   const actor = game.actors.get(token.document.actorId);
 
   if (!actor) {
-    console.log('书海大陆 | 找不到actor');
+    console.log('书海大陆 | 找不到actor，保持TokenConfig打开');
     return;
   }
 
-  console.log('书海大陆 | 找到actor:', actor.name, '关闭TokenConfig并打开角色卡');
+  console.log('书海大陆 | 找到actor:', actor.name);
 
+  // 1. 先打开角色卡
+  actor.sheet.render(true);
+  console.log('书海大陆 | 已打开角色卡:', actor.name);
+
+  // 2. 然后关闭TokenConfig
   app.close();
-
-  setTimeout(() => {
-    actor.sheet.render(true);
-    console.log('书海大陆 | 已打开角色卡:', actor.name);
-  }, 50);
-}
+  console.log('书海大陆 | 已关闭TokenConfig');
+});
 
 /* -------------------------------------------- */
 /*  Actor创建钩子 - 初始化新角色HP                */
