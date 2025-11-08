@@ -1659,31 +1659,8 @@ export default class CombatAreaApplication extends Application {
    * @param {Item} sourceItem - 源物品
    */
   async _applyEffectsToOther(targetActor, activity, sourceItem) {
-    // 获取目标角色的战斗区域应用（如果打开的话）
-    const targetCombatArea = Object.values(ui.windows).find(
-      app => app instanceof CombatAreaApplication && app.actor.id === targetActor.id
-    );
-
-    // 获取或初始化目标的战斗状态
-    let targetCombatState = targetActor.getFlag('shuhai-dalu', 'combatState');
-
-    if (!targetCombatState) {
-      targetCombatState = {
-        exResources: [true, true, true],
-        costResources: [false, false, false, false, false, false],
-        activatedDice: [false, false, false, false, false, false],
-        buffs: [],
-        isLocked: false
-      };
-    }
-
-    // 确保buffs数组存在
-    if (!targetCombatState.buffs) {
-      targetCombatState.buffs = [];
-    }
-
     const effects = activity.effects || {};
-    const buffMessages = [];
+    const buffList = [];
 
     // 预设 BUFF 列表
     const allBuffs = [
@@ -1692,7 +1669,7 @@ export default class CombatAreaApplication extends Application {
       ...BUFF_TYPES.effect
     ];
 
-    // 应用每个效果
+    // 准备BUFF数据
     for (const [buffId, effectData] of Object.entries(effects)) {
       // 评估层数和强度（支持骰子公式）
       const layersResult = await this._evaluateDiceFormula(effectData.layers || 0);
@@ -1706,72 +1683,85 @@ export default class CombatAreaApplication extends Application {
       const buffDef = allBuffs.find(b => b.id === buffId);
       if (!buffDef) continue;
 
-      const existingBuffIndex = targetCombatState.buffs.findIndex(b => b.id === buffId);
-
-      // 构建消息
-      let message = '';
-      if (layersResult.isRoll) {
-        message = `${buffDef.name} +${layers}层 [${layersResult.formula}=${layers}]`;
-      } else {
-        message = `${buffDef.name} +${layers}层`;
-      }
-
-      if (existingBuffIndex !== -1) {
-        targetCombatState.buffs[existingBuffIndex].layers += layers;
-        if (strength !== 0) {
-          targetCombatState.buffs[existingBuffIndex].strength = strength;
-        }
-        message += ` (当前${targetCombatState.buffs[existingBuffIndex].layers}层)`;
-        if (strengthResult.isRoll && strength !== 0) {
-          message += ` 强度[${strengthResult.formula}=${strength}]`;
-        }
-      } else {
-        targetCombatState.buffs.push({
-          id: buffDef.id,
-          name: buffDef.name,
-          type: buffDef.type,
-          description: buffDef.description,
-          icon: buffDef.icon,
-          layers: layers,
-          strength: strength !== 0 ? strength : buffDef.defaultStrength
-        });
-        if (strengthResult.isRoll && strength !== 0) {
-          message += ` 强度[${strengthResult.formula}=${strength}]`;
-        } else if (strength !== 0) {
-          message += ` ${strength}强度`;
-        }
-      }
-
-      buffMessages.push(message);
+      buffList.push({
+        buffId: buffDef.id,
+        buffName: buffDef.name,
+        buffIcon: buffDef.icon,
+        buffDescription: buffDef.description,
+        buffType: buffDef.type,
+        layers: layers,
+        strength: strength !== 0 ? strength : buffDef.defaultStrength,
+        layersFormula: layersResult.isRoll ? layersResult.formula : null,
+        strengthFormula: strengthResult.isRoll ? strengthResult.formula : null
+      });
     }
 
-    // 保存目标的战斗状态
-    await targetActor.setFlag('shuhai-dalu', 'combatState', targetCombatState);
+    if (buffList.length === 0) return;
 
-    // 如果目标的战斗区域打开了，刷新它
-    if (targetCombatArea) {
-      targetCombatArea.render();
-    }
+    // 构建BUFF效果列表HTML
+    const buffListHtml = buffList.map(buff => {
+      let buffText = `<img src="${buff.buffIcon}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 4px;" /> ${buff.buffName}`;
+      if (buff.layersFormula) {
+        buffText += ` <strong>${buff.layers}层</strong> [${buff.layersFormula}]`;
+      } else {
+        buffText += ` <strong>${buff.layers}层</strong>`;
+      }
+      if (buff.strength !== 0) {
+        if (buff.strengthFormula) {
+          buffText += ` <strong>${buff.strength}强度</strong> [${buff.strengthFormula}]`;
+        } else {
+          buffText += ` <strong>${buff.strength}强度</strong>`;
+        }
+      }
+      return `<li style="margin: 4px 0;">${buffText}</li>`;
+    }).join('');
 
-    // 发送效果消息到聊天
-    if (buffMessages.length > 0) {
-      await this._sendChatMessage(`
-        <div style="border: 2px solid #4a7c2c; border-radius: 4px; padding: 12px;">
-          <h3 style="margin: 0 0 8px 0; color: #4a7c2c;">【${activity.name || '效果'}】触发</h3>
-          <div style="color: #EBBD68;">来源: ${this.actor.name} - ${sourceItem.name}</div>
-          <div style="color: #EBBD68;">目标: ${targetActor.name}</div>
-          <ul style="margin: 8px 0; padding-left: 20px; color: #EBBD68;">
-            ${buffMessages.map(msg => `<li>${msg}</li>`).join('')}
-          </ul>
-          ${!targetCombatArea ? '<div style="color: #888; font-size: 12px; margin-top: 8px;">💡 目标的战斗区域未打开，BUFF已添加到角色数据中</div>' : ''}
+    // 将BUFF数据编码为JSON字符串
+    const buffDataJson = JSON.stringify({
+      targetId: targetActor.id,
+      targetName: targetActor.name,
+      sourceActorId: this.actor.id,
+      sourceActorName: this.actor.name,
+      sourceItemName: sourceItem.name,
+      activityName: activity.name || '效果',
+      buffs: buffList
+    });
+
+    // 发送带按钮的聊天消息
+    const chatData = {
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      content: `
+        <div class="buff-application-card" style="border: 2px solid #4a7c2c; border-radius: 8px; padding: 12px; background: #0F0D1B; color: #EBBD68; font-family: 'Noto Sans SC', sans-serif;">
+          <h3 style="margin: 0 0 8px 0; color: #4a7c2c;">
+            <i class="fas fa-magic"></i> 【${activity.name || '效果'}】待应用
+          </h3>
+          <div style="color: #EBBD68; margin-bottom: 8px;">
+            <strong>来源：</strong>${this.actor.name} - ${sourceItem.name}
+          </div>
+          ${targetActor ? `<div style="color: #EBBD68; margin-bottom: 8px;"><strong>目标：</strong>${targetActor.name}</div>` : ''}
+          <div style="color: #EBBD68; margin-bottom: 12px;">
+            <strong>效果：</strong>
+            <ul style="margin: 4px 0; padding-left: 20px;">
+              ${buffListHtml}
+            </ul>
+          </div>
+          <button class="apply-buff-effect-btn"
+                  data-buff-data="${buffDataJson.replace(/"/g, '&quot;')}"
+                  style="width: 100%; padding: 10px 20px; background: #4a7c2c; color: #FFFFFF; border: none; border-radius: 4px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+            ${targetActor ? `${targetActor.name} 点击应用效果` : '点击应用效果'}
+          </button>
+          ${targetActor ? `<div style="margin-top: 6px; font-size: 11px; color: #888; text-align: center;">仅 ${targetActor.name} 可以点击</div>` : '<div style="margin-top: 6px; font-size: 11px; color: #888; text-align: center;">所有人都可以点击</div>'}
         </div>
-      `);
-
-      // 给目标玩家发送通知
-      const targetUser = game.users.find(u => u.character?.id === targetActor.id || u.id === targetActor.permission?.default);
-      if (targetUser) {
-        ui.notifications.info(`${this.actor.name} 对你施加了效果：${buffMessages.join(', ')}`, {permanent: false});
+      `,
+      flags: {
+        'shuhai-dalu': {
+          buffApplication: true,
+          targetActorId: targetActor ? targetActor.id : null
+        }
       }
-    }
+    };
+
+    await ChatMessage.create(chatData);
   }
 }
