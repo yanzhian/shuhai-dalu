@@ -173,7 +173,8 @@ Hooks.on('renderActorSheet', (sheet, html, data) => {
 
 /**
  * 获取当前玩家的角色
- * 优先级：配置的角色 > 选中的Token > 让用户选择
+ * 优先级：配置的角色 > 选中的Token的原始Actor > 让用户选择
+ * 注意：总是返回原始Actor，而不是Token Actor，确保数据持久化
  */
 async function getCurrentActor() {
   // 1. 尝试获取配置的角色
@@ -181,10 +182,19 @@ async function getCurrentActor() {
     return game.user.character;
   }
 
-  // 2. 尝试获取当前选中的Token对应的角色
+  // 2. 尝试获取当前选中的Token对应的原始角色
   const controlled = canvas.tokens?.controlled;
   if (controlled && controlled.length > 0) {
-    return controlled[0].actor;
+    const tokenActor = controlled[0].actor;
+    // 如果是Token Actor（有 token 属性且不是链接的），获取原始Actor
+    if (tokenActor.isToken && !tokenActor.token?.actorLink) {
+      const baseActor = game.actors.get(tokenActor.token.actorId);
+      if (baseActor) {
+        return baseActor;
+      }
+    }
+    // 否则直接返回actor（可能是链接token或直接的actor）
+    return tokenActor;
   }
 
   // 3. 获取用户拥有的所有角色
