@@ -113,6 +113,56 @@ Hooks.once('ready', async function() {
 });
 
 /* -------------------------------------------- */
+/*  Token双击打开角色卡                           */
+/* -------------------------------------------- */
+
+/**
+ * 监听TokenConfig渲染，拦截并打开角色卡
+ */
+Hooks.on('renderTokenConfig', (app, html, data) => {
+  console.log('=== 书海大陆 | renderTokenConfig 触发 ===');
+  console.log('app:', app);
+  console.log('app.constructor.name:', app.constructor.name);
+  console.log('app.object:', app.object);
+
+  const token = app.object;
+
+  if (!token) {
+    console.log('书海大陆 | 没有token对象');
+    return;
+  }
+
+  console.log('token.document:', token.document);
+  console.log('token.document.actorId:', token.document?.actorId);
+
+  if (!token.document?.actorId) {
+    console.log('书海大陆 | Token没有actorId，保持TokenConfig打开');
+    return;
+  }
+
+  const actor = game.actors.get(token.document.actorId);
+  console.log('找到的actor:', actor);
+
+  if (!actor) {
+    console.log('书海大陆 | 找不到actor，保持TokenConfig打开');
+    return;
+  }
+
+  console.log('书海大陆 | 找到actor:', actor.name);
+  console.log('书海大陆 | 准备打开角色卡并关闭TokenConfig');
+
+  // 打开角色卡
+  actor.sheet.render(true);
+  console.log('书海大陆 | 角色卡已打开');
+
+  // 关闭TokenConfig
+  app.close();
+  console.log('书海大陆 | TokenConfig已关闭');
+});
+
+console.log('书海大陆 | renderTokenConfig hook已注册');
+
+/* -------------------------------------------- */
 /*  Actor创建钩子 - 初始化新角色HP                */
 /* -------------------------------------------- */
 
