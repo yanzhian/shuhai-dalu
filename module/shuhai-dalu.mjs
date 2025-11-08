@@ -113,6 +113,78 @@ Hooks.once('ready', async function() {
 });
 
 /* -------------------------------------------- */
+/*  Token双击打开角色卡                           */
+/* -------------------------------------------- */
+
+/**
+ * 覆盖Token的双击行为，直接打开原始actor sheet
+ * 使用libWrapper来包装Token._onClickLeft2方法
+ */
+Hooks.once('ready', () => {
+  console.log('书海大陆 | 注册Token双击覆盖');
+
+  // 如果libWrapper可用，使用它来包装方法
+  if (typeof libWrapper === 'function') {
+    libWrapper.register('shuhai-dalu', 'Token.prototype._onClickLeft2', function(wrapped, event) {
+      console.log('书海大陆 | Token双击事件触发');
+      console.log('书海大陆 | Token.actor:', this.actor);
+      console.log('书海大陆 | Token.document.actorLink:', this.document.actorLink);
+
+      // 如果token有关联的actor
+      if (this.actor) {
+        // 对于非链接token，打开原始actor sheet
+        if (!this.document.actorLink) {
+          const baseActor = game.actors.get(this.document.actorId);
+          console.log('书海大陆 | 找到原始Actor:', baseActor?.name);
+          if (baseActor) {
+            baseActor.sheet.render(true);
+            console.log('书海大陆 | 已打开原始Actor Sheet');
+            return; // 阻止原始行为
+          }
+        } else {
+          // 对于链接token，直接打开actor sheet
+          console.log('书海大陆 | 链接Token，打开Actor Sheet:', this.actor.name);
+          this.actor.sheet.render(true);
+          return; // 阻止原始行为
+        }
+      }
+
+      // 否则执行原始行为
+      console.log('书海大陆 | 执行原始双击行为');
+      return wrapped(event);
+    }, 'WRAPPER');
+    console.log('书海大陆 | libWrapper注册成功');
+  } else {
+    console.warn('书海大陆 | libWrapper未找到，使用直接覆盖方法');
+    // 如果没有libWrapper，直接覆盖方法
+    const original = Token.prototype._onClickLeft2;
+    Token.prototype._onClickLeft2 = function(event) {
+      console.log('书海大陆 | Token双击事件触发（直接覆盖）');
+
+      // 如果token有关联的actor
+      if (this.actor) {
+        // 对于非链接token，打开原始actor sheet
+        if (!this.document.actorLink) {
+          const baseActor = game.actors.get(this.document.actorId);
+          if (baseActor) {
+            baseActor.sheet.render(true);
+            console.log('书海大陆 | 已打开原始Actor Sheet');
+            return; // 阻止原始行为
+          }
+        } else {
+          // 对于链接token，直接打开actor sheet
+          this.actor.sheet.render(true);
+          return; // 阻止原始行为
+        }
+      }
+
+      // 否则执行原始行为
+      return original.call(this, event);
+    };
+  }
+});
+
+/* -------------------------------------------- */
 /*  Actor创建钩子 - 初始化新角色HP                */
 /* -------------------------------------------- */
 
