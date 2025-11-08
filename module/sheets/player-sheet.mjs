@@ -792,19 +792,33 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    */
   async _useItemAsTriggerDice(item) {
     // 从Actor的flags中获取战斗状态
-    const combatState = this.actor.getFlag('shuhai-dalu', 'combatState') || {
-      exResources: [false, false, false]
-    };
+    let combatState = this.actor.getFlag('shuhai-dalu', 'combatState');
 
-    // 检查是否有可用的EX资源（找到第一个false）
-    const availableIndex = combatState.exResources.findIndex(ex => !ex);
+    // 如果没有combatState，初始化一个
+    if (!combatState) {
+      combatState = {
+        exResources: [false, false, false],
+        costResources: [false, false, false, false, false, false],
+        activatedDice: [false, false, false, false, false, false],
+        buffs: []
+      };
+      await this.actor.setFlag('shuhai-dalu', 'combatState', combatState);
+    }
+
+    // 确保exResources存在且正确
+    if (!combatState.exResources || combatState.exResources.length !== 3) {
+      combatState.exResources = [false, false, false];
+    }
+
+    // 检查是否有可用的EX资源（找到第一个false，表示未使用）
+    const availableIndex = combatState.exResources.findIndex(ex => ex === false);
 
     if (availableIndex === -1) {
       ui.notifications.warn("没有可用的EX资源！");
       return;
     }
 
-    // 消耗1个EX资源
+    // 消耗1个EX资源（将false变为true）
     combatState.exResources[availableIndex] = true;
     await this.actor.setFlag('shuhai-dalu', 'combatState', combatState);
 

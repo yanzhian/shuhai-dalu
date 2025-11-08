@@ -443,10 +443,11 @@ export default class CombatAreaApplication extends Application {
     // 装备使用按钮
     html.find('.equipment-use-btn').click(this._onEquipmentUse.bind(this));
 
-    // 武器/防具/被动骰使用按钮
+    // 武器/防具/被动骰/触发骰使用按钮
     html.find('.weapon-use-btn').click(this._onWeaponUse.bind(this));
     html.find('.armor-use-btn').click(this._onArmorUse.bind(this));
     html.find('.passive-dice-use-btn').click(this._onPassiveDiceUse.bind(this));
+    html.find('.trigger-dice-use-btn').click(this._onTriggerDiceUse.bind(this));
 
     // 先攻按钮
     html.find('.initiative-btn').click(this._onInitiative.bind(this));
@@ -921,6 +922,46 @@ export default class CombatAreaApplication extends Application {
       // 触发【使用时】Activities
       await this._triggerActivities(item, 'onUse');
     }
+  }
+
+  /**
+   * 使用触发骰（消耗1个EX资源）
+   */
+  async _onTriggerDiceUse(event) {
+    event.preventDefault();
+
+    const triggerDice = this.actor.items.get(this.actor.system.equipment.triggerDice);
+    if (!triggerDice) return;
+
+    // 检查是否有可用的EX资源（找到第一个false，表示未使用）
+    const availableIndex = this.combatState.exResources.findIndex(ex => ex === false);
+
+    if (availableIndex === -1) {
+      ui.notifications.warn("没有可用的EX资源！");
+      return;
+    }
+
+    // 消耗1个EX资源（将false变为true）
+    this.combatState.exResources[availableIndex] = true;
+    await this._saveCombatState();
+
+    // 发送使用消息到聊天框
+    await this._sendChatMessage(`
+      <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
+        <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用触发骰: ${triggerDice.name}</h3>
+        <div style="color: #888; margin-bottom: 8px;">消耗: <span style="color: #c14545; font-weight: bold;">1 EX资源</span></div>
+        <div style="color: #888; margin-bottom: 8px;">分类: ${triggerDice.system.category || '无'}</div>
+        <div style="color: #EBBD68;">${triggerDice.system.effect || '无特殊效果'}</div>
+      </div>
+    `);
+
+    // 触发【使用时】Activities
+    await this._triggerActivities(triggerDice, 'onUse');
+
+    ui.notifications.info(`使用了 ${triggerDice.name}，消耗了1个EX资源！`);
+
+    // 刷新界面以显示更新后的EX资源
+    this.render();
   }
 
   /**
