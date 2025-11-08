@@ -70,8 +70,8 @@ export default class ActivityEditor extends Application {
     for (const effect of effectsList) {
       if (effect.buffId) {
         effects[effect.buffId] = {
-          layers: parseInt(effect.layers) || 0,
-          strength: parseInt(effect.strength) || 0
+          layers: effect.layers || "0",  // 保留字符串格式以支持骰子公式
+          strength: effect.strength || "0"
         };
       }
     }
@@ -295,8 +295,8 @@ export default class ActivityEditor extends Application {
       customEffect: {
         enabled: formData.customEffect?.enabled === true || formData.customEffect?.enabled === 'on',
         name: formData.customEffect?.name || "",
-        layers: parseInt(formData.customEffect?.layers) || 0,
-        strength: parseInt(formData.customEffect?.strength) || 0
+        layers: formData.customEffect?.layers || "0",  // 保留字符串格式以支持骰子公式
+        strength: formData.customEffect?.strength || "0"
       }
     };
 

@@ -463,6 +463,25 @@
   font-weight: bold;
 }
 
+.combat-area .armor-use-btn {
+  width: 42px;
+  height: 27px;
+  background: #E1AA43;
+  color: #0F0D1B;
+  border: none;
+  border-radius: 3px;
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s;
+}
+
+.combat-area .armor-use-btn:hover {
+  background: #f5c563;
+  box-shadow: 0 0 8px rgba(225, 170, 67, 0.6);
+}
+
 .combat-area .armor-category {
   color: #f3c267;
 }
@@ -505,11 +524,25 @@
 
 .combat-area .weapon-label {
   font-weight: bold;
-  cursor: help;
 }
 
-.combat-area .armor-label {
-  cursor: help;
+.combat-area .weapon-use-btn {
+  width: 42px;
+  height: 27px;
+  background: #E1AA43;
+  color: #0F0D1B;
+  border: none;
+  border-radius: 3px;
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s;
+}
+
+.combat-area .weapon-use-btn:hover {
+  background: #f5c563;
+  box-shadow: 0 0 8px rgba(225, 170, 67, 0.6);
 }
 
 .combat-area .weapon-category {
