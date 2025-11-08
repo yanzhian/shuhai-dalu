@@ -136,6 +136,39 @@ Hooks.on('preCreateActor', (actor, data, options, userId) => {
 });
 
 /* -------------------------------------------- */
+/*  Token更新钩子 - 同步Token到Actor              */
+/* -------------------------------------------- */
+
+/**
+ * 当Token更新时，同步其delta数据到对应的Actor
+ * 这样可以确保Token上的属性调整能同步回Actor
+ */
+Hooks.on('preUpdateToken', async (tokenDoc, changes, options, userId) => {
+  // 检查是否有delta数据更新（Foundry v10+使用delta存储token覆盖的actor数据）
+  if (!changes.delta) return;
+
+  // 获取token对应的actor
+  const actor = tokenDoc.actor;
+  if (!actor || !actor.isOwner) return;
+
+  // 将delta中的system数据同步到actor
+  // 这样可以让token上的调整反映到原始actor上
+  if (changes.delta.system) {
+    console.log('书海大陆 | 将Token调整同步到Actor:', changes.delta.system);
+
+    // 构建actor更新数据
+    const actorUpdates = {};
+    for (let [key, value] of Object.entries(foundry.utils.flattenObject(changes.delta.system))) {
+      actorUpdates[`system.${key}`] = value;
+    }
+
+    // 同步更新actor
+    // 使用 noHook 选项避免触发额外的钩子
+    await actor.update(actorUpdates, { diff: false, render: true, noHook: true });
+  }
+});
+
+/* -------------------------------------------- */
 /*  聊天消息钩子                                  */
 /* -------------------------------------------- */
 
