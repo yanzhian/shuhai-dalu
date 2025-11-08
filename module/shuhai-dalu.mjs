@@ -136,12 +136,45 @@ Hooks.on('preCreateActor', (actor, data, options, userId) => {
 });
 
 /* -------------------------------------------- */
+/*  Token双击打开角色卡                           */
+/* -------------------------------------------- */
+
+/**
+ * 拦截token的actor sheet打开，改为打开原始actor sheet
+ * 这样双击token时会直接打开角色卡，而不是带有token覆盖数据的sheet
+ */
+Hooks.on('renderActorSheet', (sheet, html, data) => {
+  const actor = sheet.actor;
+
+  // 检查这是否是一个token actor（非链接token的实例）
+  // actor.isToken 表示这是一个token的actor实例
+  // !actor.token?.actorLink 表示这个token不是链接的
+  if (actor.isToken && actor.token && !actor.token.actorLink) {
+    console.log('书海大陆 | 拦截Token Sheet，打开原始Actor Sheet');
+
+    // 关闭当前的token actor sheet
+    setTimeout(() => {
+      sheet.close({ submit: false });
+    }, 0);
+
+    // 打开原始的actor sheet
+    const baseActor = game.actors.get(actor.token.actorId);
+    if (baseActor && !baseActor.sheet.rendered) {
+      setTimeout(() => {
+        baseActor.sheet.render(true);
+      }, 100);
+    }
+  }
+});
+
+/* -------------------------------------------- */
 /*  聊天消息钩子                                  */
 /* -------------------------------------------- */
 
 /**
  * 获取当前玩家的角色
- * 优先级：配置的角色 > 选中的Token > 让用户选择
+ * 优先级：配置的角色 > 选中的Token的原始Actor > 让用户选择
+ * 注意：总是返回原始Actor，而不是Token Actor，确保数据持久化
  */
 async function getCurrentActor() {
   // 1. 尝试获取配置的角色
@@ -149,10 +182,19 @@ async function getCurrentActor() {
     return game.user.character;
   }
 
-  // 2. 尝试获取当前选中的Token对应的角色
+  // 2. 尝试获取当前选中的Token对应的原始角色
   const controlled = canvas.tokens?.controlled;
   if (controlled && controlled.length > 0) {
-    return controlled[0].actor;
+    const tokenActor = controlled[0].actor;
+    // 如果是Token Actor（有 token 属性且不是链接的），获取原始Actor
+    if (tokenActor.isToken && !tokenActor.token?.actorLink) {
+      const baseActor = game.actors.get(tokenActor.token.actorId);
+      if (baseActor) {
+        return baseActor;
+      }
+    }
+    // 否则直接返回actor（可能是链接token或直接的actor）
+    return tokenActor;
   }
 
   // 3. 获取用户拥有的所有角色
@@ -440,11 +482,20 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     }
 
     const token = controlled[0];
-    const actor = token.actor;
+    let actor = token.actor;
 
     if (!actor) {
       ui.notifications.error("选中的Token没有关联角色！");
       return;
+    }
+
+    // 如果是Token Actor（非链接token），获取原始Actor以确保数据持久化
+    if (actor.isToken && !actor.token?.actorLink) {
+      const baseActor = game.actors.get(actor.token.actorId);
+      if (baseActor) {
+        actor = baseActor;
+        console.log('【调试】使用原始Actor而非Token Actor:', actor.name);
+      }
     }
 
     // 记录伤害前的HP
