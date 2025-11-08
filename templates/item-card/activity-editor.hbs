@@ -68,8 +68,8 @@
               <option value="{{buff.id}}" {{#if (eq buff.id effect.buffId)}}selected{{/if}}>{{buff.name}}</option>
             {{/each}}
           </select>
-          <input type="number" name="effects.{{idx}}.layers" value="{{effect.layers}}" placeholder="层数" />
-          <input type="number" name="effects.{{idx}}.strength" value="{{effect.strength}}" placeholder="强度" />
+          <input type="text" name="effects.{{idx}}.layers" value="{{effect.layers}}" placeholder="层数(可用骰子)" />
+          <input type="text" name="effects.{{idx}}.strength" value="{{effect.strength}}" placeholder="强度(可用骰子)" />
           <button type="button" class="remove-btn remove-effect-btn" data-index="{{idx}}"><i class="fas fa-times"></i></button>
         </div>
       {{/each}}
@@ -86,8 +86,8 @@
     {{#if activity.customEffect.enabled}}
       <div class="custom-effect-fields">
         <input type="text" name="customEffect.name" value="{{activity.customEffect.name}}" placeholder="效果名称" />
-        <input type="number" name="customEffect.layers" value="{{activity.customEffect.layers}}" placeholder="层数" />
-        <input type="number" name="customEffect.strength" value="{{activity.customEffect.strength}}" placeholder="强度" />
+        <input type="text" name="customEffect.layers" value="{{activity.customEffect.layers}}" placeholder="层数(可用骰子)" />
+        <input type="text" name="customEffect.strength" value="{{activity.customEffect.strength}}" placeholder="强度(可用骰子)" />
       </div>
     {{/if}}
   </div>

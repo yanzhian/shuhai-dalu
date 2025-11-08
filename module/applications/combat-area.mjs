@@ -1316,6 +1316,66 @@ export default class CombatAreaApplication extends Application {
   }
 
   /**
+   * 解析并评估骰子公式或数字
+   * @param {string|number} formula - 骰子公式或数字（如 "1d8", "2d6+3", "5"）
+   * @returns {object} { value: 结果值, formula: 原始公式, isRoll: 是否为骰子投掷 }
+   */
+  async _evaluateDiceFormula(formula) {
+    // 转换为字符串并去除空格
+    const formulaStr = String(formula || "0").trim();
+
+    // 如果是纯数字，直接返回
+    if (/^-?\d+$/.test(formulaStr)) {
+      return {
+        value: parseInt(formulaStr),
+        formula: formulaStr,
+        isRoll: false
+      };
+    }
+
+    // 如果包含骰子符号（d 或 D），则使用 Roll 评估
+    if (/\d+[dD]\d+/.test(formulaStr)) {
+      try {
+        const roll = new Roll(formulaStr);
+        await roll.evaluate();
+        return {
+          value: roll.total,
+          formula: formulaStr,
+          isRoll: true,
+          roll: roll
+        };
+      } catch (error) {
+        console.error(`骰子公式解析失败: ${formulaStr}`, error);
+        return {
+          value: 0,
+          formula: formulaStr,
+          isRoll: false,
+          error: true
+        };
+      }
+    }
+
+    // 其他情况（如纯加减法），尝试使用 Roll 评估
+    try {
+      const roll = new Roll(formulaStr);
+      await roll.evaluate();
+      return {
+        value: roll.total,
+        formula: formulaStr,
+        isRoll: false
+      };
+    } catch (error) {
+      console.error(`公式解析失败: ${formulaStr}`, error);
+      return {
+        value: 0,
+        formula: formulaStr,
+        isRoll: false,
+        error: true
+      };
+    }
+  }
+
+  /**
    * 应用效果到自己
    * @param {object} activity - Activity 数据
    * @param {Item} sourceItem - 源物品
@@ -1333,8 +1393,12 @@ export default class CombatAreaApplication extends Application {
 
     // 应用每个效果
     for (const [buffId, effectData] of Object.entries(effects)) {
-      const layers = effectData.layers || 0;
-      const strength = effectData.strength || 0;
+      // 评估层数和强度（支持骰子公式）
+      const layersResult = await this._evaluateDiceFormula(effectData.layers || 0);
+      const strengthResult = await this._evaluateDiceFormula(effectData.strength || 0);
+
+      const layers = layersResult.value;
+      const strength = strengthResult.value;
 
       if (layers === 0) continue;
 
@@ -1348,6 +1412,14 @@ export default class CombatAreaApplication extends Application {
       // 检查是否已存在该 BUFF
       const existingBuffIndex = this.combatState.buffs.findIndex(b => b.id === buffId);
 
+      // 构建消息
+      let message = '';
+      if (layersResult.isRoll) {
+        message = `${buffDef.name} +${layers}层 [${layersResult.formula}=${layers}]`;
+      } else {
+        message = `${buffDef.name} +${layers}层`;
+      }
+
       if (existingBuffIndex !== -1) {
         // 如果已存在，增加层数
         this.combatState.buffs[existingBuffIndex].layers += layers;
@@ -1355,7 +1427,10 @@ export default class CombatAreaApplication extends Application {
         if (strength !== 0) {
           this.combatState.buffs[existingBuffIndex].strength = strength;
         }
-        buffMessages.push(`${buffDef.name} +${layers}层 (当前${this.combatState.buffs[existingBuffIndex].layers}层)`);
+        message += ` (当前${this.combatState.buffs[existingBuffIndex].layers}层)`;
+        if (strengthResult.isRoll && strength !== 0) {
+          message += ` 强度[${strengthResult.formula}=${strength}]`;
+        }
       } else {
         // 如果不存在，添加新 BUFF
         this.combatState.buffs.push({
@@ -1367,23 +1442,38 @@ export default class CombatAreaApplication extends Application {
           layers: layers,
           strength: strength !== 0 ? strength : buffDef.defaultStrength
         });
-        buffMessages.push(`获得${buffDef.name} ${layers}层 ${strength}强度`);
+        if (strengthResult.isRoll && strength !== 0) {
+          message += ` 强度[${strengthResult.formula}=${strength}]`;
+        } else if (strength !== 0) {
+          message += ` ${strength}强度`;
+        }
       }
+
+      buffMessages.push(message);
     }
 
     // 应用自定义效果（如果启用）
     if (activity.customEffect && activity.customEffect.enabled) {
       const customName = activity.customEffect.name || "自定义效果";
-      const customLayers = activity.customEffect.layers || 0;
-      const customStrength = activity.customEffect.strength || 0;
+      const layersResult = await this._evaluateDiceFormula(activity.customEffect.layers || 0);
+      const strengthResult = await this._evaluateDiceFormula(activity.customEffect.strength || 0);
+
+      const customLayers = layersResult.value;
+      const customStrength = strengthResult.value;
 
       if (customLayers > 0) {
         // 自定义效果使用名称作为唯一标识
         const existingCustomIndex = this.combatState.buffs.findIndex(b => b.name === customName && b.id === 'custom');
 
+        let message = '';
+        if (layersResult.isRoll) {
+          message = `${customName} +${customLayers}层 [${layersResult.formula}=${customLayers}]`;
+        } else {
+          message = `${customName} +${customLayers}层`;
+        }
+
         if (existingCustomIndex !== -1) {
           this.combatState.buffs[existingCustomIndex].layers += customLayers;
-          buffMessages.push(`${customName} +${customLayers}层`);
         } else {
           this.combatState.buffs.push({
             id: 'custom',
@@ -1394,8 +1484,15 @@ export default class CombatAreaApplication extends Application {
             layers: customLayers,
             strength: customStrength
           });
-          buffMessages.push(`获得${customName} ${customLayers}层 ${customStrength}强度`);
         }
+
+        if (strengthResult.isRoll && customStrength !== 0) {
+          message += ` 强度[${strengthResult.formula}=${customStrength}]`;
+        } else if (customStrength !== 0) {
+          message += ` ${customStrength}强度`;
+        }
+
+        buffMessages.push(message);
       }
     }
 
@@ -1452,8 +1549,12 @@ export default class CombatAreaApplication extends Application {
 
     // 应用每个效果
     for (const [buffId, effectData] of Object.entries(effects)) {
-      const layers = effectData.layers || 0;
-      const strength = effectData.strength || 0;
+      // 评估层数和强度（支持骰子公式）
+      const layersResult = await this._evaluateDiceFormula(effectData.layers || 0);
+      const strengthResult = await this._evaluateDiceFormula(effectData.strength || 0);
+
+      const layers = layersResult.value;
+      const strength = strengthResult.value;
 
       if (layers === 0) continue;
 
@@ -1462,12 +1563,23 @@ export default class CombatAreaApplication extends Application {
 
       const existingBuffIndex = targetCombatState.buffs.findIndex(b => b.id === buffId);
 
+      // 构建消息
+      let message = '';
+      if (layersResult.isRoll) {
+        message = `${buffDef.name} +${layers}层 [${layersResult.formula}=${layers}]`;
+      } else {
+        message = `${buffDef.name} +${layers}层`;
+      }
+
       if (existingBuffIndex !== -1) {
         targetCombatState.buffs[existingBuffIndex].layers += layers;
         if (strength !== 0) {
           targetCombatState.buffs[existingBuffIndex].strength = strength;
         }
-        buffMessages.push(`${buffDef.name} +${layers}层`);
+        message += ` (当前${targetCombatState.buffs[existingBuffIndex].layers}层)`;
+        if (strengthResult.isRoll && strength !== 0) {
+          message += ` 强度[${strengthResult.formula}=${strength}]`;
+        }
       } else {
         targetCombatState.buffs.push({
           id: buffDef.id,
@@ -1478,8 +1590,14 @@ export default class CombatAreaApplication extends Application {
           layers: layers,
           strength: strength !== 0 ? strength : buffDef.defaultStrength
         });
-        buffMessages.push(`获得${buffDef.name} ${layers}层 ${strength}强度`);
+        if (strengthResult.isRoll && strength !== 0) {
+          message += ` 强度[${strengthResult.formula}=${strength}]`;
+        } else if (strength !== 0) {
+          message += ` ${strength}强度`;
+        }
       }
+
+      buffMessages.push(message);
     }
 
     // 保存目标的战斗状态
