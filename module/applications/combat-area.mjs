@@ -838,14 +838,24 @@ export default class CombatAreaApplication extends Application {
 
       if (!item) return;
 
-      // 发送使用消息到聊天框
-      await this._sendChatMessage(`
-        <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
-          <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用装备: ${item.name}</h3>
-          <div style="color: #888; margin-bottom: 8px;">费用: ${item.system.cost || 0}</div>
-          <div style="color: #EBBD68;">${item.system.effect || '无特殊效果'}</div>
-        </div>
-      `);
+      // 检查是否有【使用时】Activities且包含effects
+      const hasEffectsActivity = item.system.activities &&
+        Object.values(item.system.activities).some(activity =>
+          activity.trigger === 'onUse' &&
+          activity.effects &&
+          Object.keys(activity.effects).length > 0
+        );
+
+      // 如果有effects的activity，不发送普通消息（将由BUFF按钮消息代替）
+      if (!hasEffectsActivity) {
+        await this._sendChatMessage(`
+          <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
+            <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用装备: ${item.name}</h3>
+            <div style="color: #888; margin-bottom: 8px;">费用: ${item.system.cost || 0}</div>
+            <div style="color: #EBBD68;">${item.system.effect || '无特殊效果'}</div>
+          </div>
+        `);
+      }
 
       // 触发【使用时】Activities
       await this._triggerActivities(item, 'onUse');
@@ -861,14 +871,24 @@ export default class CombatAreaApplication extends Application {
     const weapon = this.actor.items.get(this.actor.system.equipment.weapon);
     if (!weapon) return;
 
-    // 发送使用消息到聊天框
-    await this._sendChatMessage(`
-      <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
-        <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用武器: ${weapon.name}</h3>
-        <div style="color: #888; margin-bottom: 8px;">分类: ${weapon.system.category || '无'}</div>
-        <div style="color: #EBBD68;">${weapon.system.effect || '无特殊效果'}</div>
-      </div>
-    `);
+    // 检查是否有【使用时】Activities且包含effects
+    const hasEffectsActivity = weapon.system.activities &&
+      Object.values(weapon.system.activities).some(activity =>
+        activity.trigger === 'onUse' &&
+        activity.effects &&
+        Object.keys(activity.effects).length > 0
+      );
+
+    // 如果有effects的activity，不发送普通消息（将由BUFF按钮消息代替）
+    if (!hasEffectsActivity) {
+      await this._sendChatMessage(`
+        <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
+          <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用武器: ${weapon.name}</h3>
+          <div style="color: #888; margin-bottom: 8px;">分类: ${weapon.system.category || '无'}</div>
+          <div style="color: #EBBD68;">${weapon.system.effect || '无特殊效果'}</div>
+        </div>
+      `);
+    }
 
     // 触发【使用时】Activities
     await this._triggerActivities(weapon, 'onUse');
@@ -883,14 +903,25 @@ export default class CombatAreaApplication extends Application {
     const armor = this.actor.items.get(this.actor.system.equipment.armor);
     if (!armor) return;
 
-    // 发送使用消息到聊天框
-    await this._sendChatMessage(`
-      <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
-        <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用防具: ${armor.name}</h3>
-        <div style="color: #888; margin-bottom: 8px;">分类: ${armor.system.category || '无'}</div>
-        <div style="color: #EBBD68;">${armor.system.effect || '无特殊效果'}</div>
-      </div>
-    `);
+    // 检查是否有【使用时】Activities且包含effects
+    const hasEffectsActivity = armor.system.activities &&
+      Object.values(armor.system.activities).some(activity =>
+        activity.trigger === 'onUse' &&
+        activity.effects &&
+        Object.keys(activity.effects).length > 0
+      );
+
+    // 如果有effects的activity，不发送普通消息（将由BUFF按钮消息代替）
+    // 如果没有effects的activity，发送普通使用消息
+    if (!hasEffectsActivity) {
+      await this._sendChatMessage(`
+        <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
+          <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用防具: ${armor.name}</h3>
+          <div style="color: #888; margin-bottom: 8px;">分类: ${armor.system.category || '无'}</div>
+          <div style="color: #EBBD68;">${armor.system.effect || '无特殊效果'}</div>
+        </div>
+      `);
+    }
 
     // 触发【使用时】Activities
     await this._triggerActivities(armor, 'onUse');
@@ -910,14 +941,24 @@ export default class CombatAreaApplication extends Application {
 
       if (!item) return;
 
-      // 发送使用消息到聊天框
-      await this._sendChatMessage(`
-        <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
-          <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用被动骰: ${item.name}</h3>
-          <div style="color: #888; margin-bottom: 8px;">分类: ${item.system.category || '无'}</div>
-          <div style="color: #EBBD68;">${item.system.effect || '无特殊效果'}</div>
-        </div>
-      `);
+      // 检查是否有【使用时】Activities且包含effects
+      const hasEffectsActivity = item.system.activities &&
+        Object.values(item.system.activities).some(activity =>
+          activity.trigger === 'onUse' &&
+          activity.effects &&
+          Object.keys(activity.effects).length > 0
+        );
+
+      // 如果有effects的activity，不发送普通消息（将由BUFF按钮消息代替）
+      if (!hasEffectsActivity) {
+        await this._sendChatMessage(`
+          <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
+            <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用被动骰: ${item.name}</h3>
+            <div style="color: #888; margin-bottom: 8px;">分类: ${item.system.category || '无'}</div>
+            <div style="color: #EBBD68;">${item.system.effect || '无特殊效果'}</div>
+          </div>
+        `);
+      }
 
       // 触发【使用时】Activities
       await this._triggerActivities(item, 'onUse');
