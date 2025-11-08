@@ -117,50 +117,38 @@ Hooks.once('ready', async function() {
 /* -------------------------------------------- */
 
 /**
- * 新方案：直接监听canvas双击事件，在事件处理链的早期拦截
- * 这样就不会被其他模块的Token方法覆盖干扰
+ * 新方案：拦截TokenConfig渲染，关闭它并打开角色卡
+ * 这是最简单直接的方案：双击token → TokenConfig尝试打开 → 我们拦截并关闭 → 打开角色卡
  */
-Hooks.on('canvasReady', (canvas) => {
-  console.log('书海大陆 | 注册canvas双击监听器');
+Hooks.on('renderTokenConfig', (app, html, data) => {
+  console.log('书海大陆 | 检测到TokenConfig打开，准备拦截');
 
-  // 在canvas上监听双击事件（捕获阶段）
-  canvas.stage.on('dblclick', (event) => {
-    console.log('书海大陆 | Canvas双击事件触发');
+  // 获取token对象
+  const token = app.object;
 
-    // 获取当前鼠标位置下的token
-    const tokens = canvas.tokens.placeables.filter(token => {
-      if (!token.visible) return false;
-      const bounds = token.bounds;
-      const pos = event.data.getLocalPosition(token.parent);
-      return bounds.contains(pos.x, pos.y);
-    });
+  if (!token || !token.document?.actorId) {
+    console.log('书海大陆 | Token没有关联actor，保持TokenConfig打开');
+    return;
+  }
 
-    if (tokens.length === 0) {
-      console.log('书海大陆 | 没有点击到token');
-      return;
-    }
+  // 获取原始actor
+  const actor = game.actors.get(token.document.actorId);
 
-    const token = tokens[0];
-    console.log('书海大陆 | 双击了token:', token.document.name);
+  if (!actor) {
+    console.log('书海大陆 | 找不到actor，保持TokenConfig打开');
+    return;
+  }
 
-    // 获取关联的actor（优先使用actorId获取原始actor）
-    let actor = null;
-    if (token.document?.actorId) {
-      actor = game.actors.get(token.document.actorId);
-      console.log('书海大陆 | 通过actorId获取Actor:', actor?.name);
-    }
+  console.log('书海大陆 | 找到actor:', actor.name, '准备关闭TokenConfig并打开角色卡');
 
-    // 如果有actor，打开角色卡并阻止默认行为
-    if (actor) {
-      event.stopPropagation();  // 阻止事件继续传播
-      event.preventDefault();    // 阻止默认行为
+  // 关闭TokenConfig
+  app.close();
 
-      actor.sheet.render(true);
-      console.log('书海大陆 | 已打开角色卡:', actor.name);
-    }
-  });
-
-  console.log('书海大陆 | Canvas双击监听器注册成功');
+  // 延迟一小段时间后打开角色卡，确保TokenConfig已完全关闭
+  setTimeout(() => {
+    actor.sheet.render(true);
+    console.log('书海大陆 | 已打开角色卡:', actor.name);
+  }, 50);
 });
 
 /* -------------------------------------------- */
