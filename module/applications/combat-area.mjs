@@ -1091,7 +1091,103 @@ export default class CombatAreaApplication extends Application {
 
     if (!buff) return;
 
-    await this._sendChatMessage(`触发BUFF：${buff.name}（层数：${buff.layers}，强度：${buff.strength}）\n${buff.description}`);
+    // 检查层数是否为0
+    if (buff.layers <= 0) {
+      ui.notifications.warn(`${buff.name} 的层数已为0，无法触发！`);
+      return;
+    }
+
+    let effectApplied = false;
+    let effectMessage = '';
+
+    // 根据BUFF ID执行不同的触发效果
+    switch (buff.id) {
+      case 'rupture': // 破裂
+        // 造成等于强度的固定生命值伤害
+        const ruptureDamage = buff.strength;
+        const newHpRupture = Math.max(0, this.actor.system.derived.hp.value - ruptureDamage);
+        await this.actor.update({ 'system.derived.hp.value': newHpRupture });
+        effectMessage = `<span style="color: #c14545; font-weight: bold;">破裂触发：受到 ${ruptureDamage} 点固定伤害</span>`;
+        effectApplied = true;
+        break;
+
+      case 'corruption_effect': // 沉沦
+        // 增加等于强度的侵蚀度
+        const corruptionIncrease = buff.strength;
+        const newCorruption = Math.min(
+          this.actor.system.derived.corruption.max,
+          this.actor.system.derived.corruption.value + corruptionIncrease
+        );
+        await this.actor.update({ 'system.derived.corruption.value': newCorruption });
+        effectMessage = `<span style="color: #8b5cf6; font-weight: bold;">沉沦触发：侵蚀度增加 ${corruptionIncrease} 点</span>`;
+        effectApplied = true;
+        break;
+
+      case 'bleed': // 流血
+        // 对自己造成等于强度的固定伤害
+        const bleedDamage = buff.strength;
+        const newHpBleed = Math.max(0, this.actor.system.derived.hp.value - bleedDamage);
+        await this.actor.update({ 'system.derived.hp.value': newHpBleed });
+        effectMessage = `<span style="color: #c14545; font-weight: bold;">流血触发：受到 ${bleedDamage} 点固定伤害</span>`;
+        effectApplied = true;
+        break;
+
+      case 'burn': // 燃烧
+        // 对自己造成等于强度的固定伤害
+        const burnDamage = buff.strength;
+        const newHpBurn = Math.max(0, this.actor.system.derived.hp.value - burnDamage);
+        await this.actor.update({ 'system.derived.hp.value': newHpBurn });
+        effectMessage = `<span style="color: #ff6b35; font-weight: bold;">燃烧触发：受到 ${burnDamage} 点固定伤害</span>`;
+        effectApplied = true;
+        break;
+
+      case 'tremor': // 震颤
+        // 增加等于强度的混乱值
+        const chaosIncrease = buff.strength;
+        const newChaos = Math.min(
+          this.actor.system.derived.chaos.max,
+          this.actor.system.derived.chaos.value + chaosIncrease
+        );
+        await this.actor.update({ 'system.derived.chaos.value': newChaos });
+        effectMessage = `<span style="color: #3b82f6; font-weight: bold;">震颤触发：混乱值增加 ${chaosIncrease} 点</span>`;
+        effectApplied = true;
+        break;
+
+      default:
+        // 其他BUFF：只显示触发信息，不执行特殊效果
+        effectMessage = `<span style="color: #EBBD68;">触发 ${buff.name}（层数：${buff.layers}，强度：${buff.strength}）</span>`;
+        break;
+    }
+
+    // 效果生效后，层数减少1
+    if (effectApplied) {
+      buff.layers -= 1;
+
+      // 如果层数降为0，移除BUFF
+      if (buff.layers <= 0) {
+        this.combatState.buffs.splice(buffIndex, 1);
+        effectMessage += `<br><span style="color: #888;">【${buff.name}】层数降为0，已移除</span>`;
+      }
+
+      // 保存战斗状态
+      await this._saveCombatState();
+    }
+
+    // 发送触发效果消息到聊天框
+    await this._sendChatMessage(`
+      <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px;">
+        <h3 style="margin: 0 0 8px 0; color: #E1AA43;">BUFF 触发</h3>
+        <div style="color: #EBBD68; margin-bottom: 8px;">
+          <strong>${buff.name}</strong> (层数: ${effectApplied ? buff.layers + 1 : buff.layers} → ${buff.layers} | 强度: ${buff.strength})
+        </div>
+        <div style="color: #EBBD68; font-size: 13px; line-height: 1.6;">
+          ${effectMessage}
+        </div>
+      </div>
+    `);
+
+    // 刷新界面
+    this.render();
   }
 
   /**
