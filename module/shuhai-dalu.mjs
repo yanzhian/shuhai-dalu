@@ -784,8 +784,6 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     event.preventDefault();
     const button = event.currentTarget;
 
-    console.log('【调试】应用BUFF按钮被点击');
-
     // 解析JSON数据
     const buffDataJson = button.dataset.buffData;
     if (!buffDataJson) {
@@ -796,9 +794,7 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     let buffData;
     try {
       buffData = JSON.parse(buffDataJson);
-      console.log('【调试】BUFF数据:', buffData);
     } catch (error) {
-      console.error('【调试】解析BUFF数据失败:', error);
       ui.notifications.error("BUFF数据格式错误");
       return;
     }
@@ -824,8 +820,6 @@ Hooks.on('renderChatMessage', (message, html, data) => {
       return;
     }
 
-    console.log('【调试】目标角色:', targetActor.name);
-
     // 获取目标的战斗状态
     let combatState = targetActor.getFlag('shuhai-dalu', 'combatState') || {
       exResources: [true, true, true],
@@ -837,13 +831,18 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     // 应用所有BUFF
     for (const buff of buffData.buffs) {
       // 检查是否已经存在相同的BUFF
-      const existingBuffIndex = combatState.buffs.findIndex(b => b.id === buff.buffId);
+      // 对于自定义效果（id='custom'），使用名称+ID作为唯一标识
+      let existingBuffIndex;
+      if (buff.buffId === 'custom') {
+        existingBuffIndex = combatState.buffs.findIndex(b => b.id === 'custom' && b.name === buff.buffName);
+      } else {
+        existingBuffIndex = combatState.buffs.findIndex(b => b.id === buff.buffId);
+      }
 
       if (existingBuffIndex !== -1) {
         // 如果已存在，叠加层数和强度
         combatState.buffs[existingBuffIndex].layers += buff.layers;
         combatState.buffs[existingBuffIndex].strength += buff.strength;
-        console.log(`【调试】叠加BUFF: ${buff.buffName}，层数: ${combatState.buffs[existingBuffIndex].layers}，强度: ${combatState.buffs[existingBuffIndex].strength}`);
       } else {
         // 如果不存在，添加新BUFF
         combatState.buffs.push({
@@ -855,16 +854,13 @@ Hooks.on('renderChatMessage', (message, html, data) => {
           source: buff.source,
           sourceItem: buff.sourceItem
         });
-        console.log(`【调试】添加新BUFF: ${buff.buffName}，层数: ${buff.layers}，强度: ${buff.strength}`);
       }
     }
 
     // 保存战斗状态
     try {
       await targetActor.setFlag('shuhai-dalu', 'combatState', combatState);
-      console.log('【调试】战斗状态已更新');
     } catch (error) {
-      console.error('【调试】更新战斗状态失败:', error);
       ui.notifications.error(`更新战斗状态失败: ${error.message}`);
       return;
     }
@@ -879,7 +875,6 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     Object.values(ui.windows).forEach(app => {
       if (app.constructor.name === 'CombatAreaApplication' && app.actor.id === targetActor.id) {
         app.render(false);
-        console.log('【调试】战斗区域已刷新');
       }
     });
 
@@ -902,7 +897,6 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     });
 
     ui.notifications.info(`${targetActor.name} 已获得效果: ${buffListText}`);
-    console.log('【调试】应用BUFF流程完成');
   });
 });
 
