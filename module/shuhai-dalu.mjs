@@ -117,55 +117,50 @@ Hooks.once('ready', async function() {
 /* -------------------------------------------- */
 
 /**
- * 双击处理函数
+ * 新方案：直接监听canvas双击事件，在事件处理链的早期拦截
+ * 这样就不会被其他模块的Token方法覆盖干扰
  */
-function handleTokenDoubleClick(event) {
-  console.log('书海大陆 | Token双击触发');
+Hooks.on('canvasReady', (canvas) => {
+  console.log('书海大陆 | 注册canvas双击监听器');
 
-  // 获取关联的actor（优先使用actorId获取原始actor）
-  let actor = null;
-  if (this.document?.actorId) {
-    actor = game.actors.get(this.document.actorId);
-    console.log('书海大陆 | 通过actorId获取Actor:', actor?.name);
-  }
+  // 在canvas上监听双击事件（捕获阶段）
+  canvas.stage.on('dblclick', (event) => {
+    console.log('书海大陆 | Canvas双击事件触发');
 
-  // 如果有actor，打开角色卡
-  if (actor) {
-    actor.sheet.render(true);
-    console.log('书海大陆 | 已打开角色卡:', actor.name);
-    return; // 阻止TokenConfig打开
-  }
+    // 获取当前鼠标位置下的token
+    const tokens = canvas.tokens.placeables.filter(token => {
+      if (!token.visible) return false;
+      const bounds = token.bounds;
+      const pos = event.data.getLocalPosition(token.parent);
+      return bounds.contains(pos.x, pos.y);
+    });
 
-  // 如果没有actor，什么都不做
-  console.log('书海大陆 | 没有关联Actor，不打开任何窗口');
-  return;
-}
+    if (tokens.length === 0) {
+      console.log('书海大陆 | 没有点击到token');
+      return;
+    }
 
-/**
- * 覆盖Token双击行为，直接打开角色卡而不是Token配置
- */
-Hooks.once('ready', () => {
-  console.log('书海大陆 | [ready] 注册Token双击覆盖');
+    const token = tokens[0];
+    console.log('书海大陆 | 双击了token:', token.document.name);
 
-  // 使用libWrapper确保不会被其他模块覆盖
-  if (typeof libWrapper === 'function') {
-    libWrapper.register('shuhai-dalu', 'Token.prototype._onClickLeft2', handleTokenDoubleClick, 'OVERRIDE');
-    console.log('书海大陆 | libWrapper注册成功 (OVERRIDE模式)');
-  } else {
-    console.warn('书海大陆 | libWrapper未找到，使用直接覆盖方法');
-    Token.prototype._onClickLeft2 = handleTokenDoubleClick;
-  }
-});
+    // 获取关联的actor（优先使用actorId获取原始actor）
+    let actor = null;
+    if (token.document?.actorId) {
+      actor = game.actors.get(token.document.actorId);
+      console.log('书海大陆 | 通过actorId获取Actor:', actor?.name);
+    }
 
-/**
- * 在canvasReady时再次确保覆盖生效
- */
-Hooks.on('canvasReady', () => {
-  console.log('书海大陆 | [canvasReady] 验证Token双击覆盖');
+    // 如果有actor，打开角色卡并阻止默认行为
+    if (actor) {
+      event.stopPropagation();  // 阻止事件继续传播
+      event.preventDefault();    // 阻止默认行为
 
-  // 强制重新覆盖，确保在所有其他模块之后我们的覆盖是最终生效的
-  Token.prototype._onClickLeft2 = handleTokenDoubleClick;
-  console.log('书海大陆 | Token双击覆盖已强制应用');
+      actor.sheet.render(true);
+      console.log('书海大陆 | 已打开角色卡:', actor.name);
+    }
+  });
+
+  console.log('书海大陆 | Canvas双击监听器注册成功');
 });
 
 /* -------------------------------------------- */
