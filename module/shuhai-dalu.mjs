@@ -117,71 +117,53 @@ Hooks.once('ready', async function() {
 /* -------------------------------------------- */
 
 /**
- * 覆盖Token的双击行为，直接打开原始actor sheet
- * 使用libWrapper来包装Token._onClickLeft2方法
+ * 拦截TokenConfig打开事件，当检测到打开token配置时
+ * 改为打开对应的角色卡，然后关闭token配置界面
  */
-Hooks.once('ready', () => {
-  console.log('书海大陆 | 注册Token双击覆盖');
+Hooks.on('renderTokenConfig', (app, html, data) => {
+  console.log('书海大陆 | 检测到TokenConfig打开');
 
-  // 如果libWrapper可用，使用它来包装方法
-  if (typeof libWrapper === 'function') {
-    libWrapper.register('shuhai-dalu', 'Token.prototype._onClickLeft2', function(event) {
-      console.log('书海大陆 | Token双击事件触发');
-      console.log('书海大陆 | Token.actor:', this.actor);
-      console.log('书海大陆 | Token.document.actorLink:', this.document.actorLink);
+  // 获取token对象
+  const token = app.object;
 
-      // 如果token有关联的actor，直接打开actor sheet
-      if (this.actor) {
-        // 对于非链接token，打开原始actor sheet
-        if (!this.document.actorLink) {
-          const baseActor = game.actors.get(this.document.actorId);
-          console.log('书海大陆 | 找到原始Actor:', baseActor?.name);
-          if (baseActor) {
-            baseActor.sheet.render(true);
-            console.log('书海大陆 | 已打开原始Actor Sheet');
-            return; // 使用OVERRIDE模式，直接返回阻止原始行为
-          }
-        } else {
-          // 对于链接token，直接打开actor sheet
-          console.log('书海大陆 | 链接Token，打开Actor Sheet:', this.actor.name);
-          this.actor.sheet.render(true);
-          return; // 使用OVERRIDE模式，直接返回阻止原始行为
-        }
-      }
+  if (!token) {
+    console.log('书海大陆 | 未找到token对象');
+    return;
+  }
 
-      // 如果没有actor，不做任何操作（也不打开token sheet）
-      console.log('书海大陆 | Token没有关联Actor，跳过');
-      return;
-    }, 'OVERRIDE');
-    console.log('书海大陆 | libWrapper注册成功（OVERRIDE模式）');
+  console.log('书海大陆 | Token:', token);
+  console.log('书海大陆 | Token.actorId:', token.actorId);
+
+  // 尝试获取关联的actor
+  let actor = null;
+
+  // 优先通过actorId获取原始actor
+  if (token.actorId) {
+    actor = game.actors.get(token.actorId);
+    console.log('书海大陆 | 通过actorId找到Actor:', actor?.name);
+  }
+
+  // 如果找不到，尝试使用token.actor
+  if (!actor && token.actor) {
+    actor = token.actor;
+    console.log('书海大陆 | 使用token.actor:', actor?.name);
+  }
+
+  // 如果找到了关联的actor，打开角色卡并关闭token配置
+  if (actor) {
+    console.log('书海大陆 | 打开Actor Sheet并关闭TokenConfig');
+
+    // 立即关闭token配置界面
+    app.close();
+
+    // 打开角色卡
+    // 使用setTimeout确保关闭操作完成后再打开角色卡
+    setTimeout(() => {
+      actor.sheet.render(true);
+      console.log('书海大陆 | 已成功打开Actor Sheet:', actor.name);
+    }, 10);
   } else {
-    console.warn('书海大陆 | libWrapper未找到，使用直接覆盖方法');
-    // 如果没有libWrapper，直接覆盖方法
-    Token.prototype._onClickLeft2 = function(event) {
-      console.log('书海大陆 | Token双击事件触发（直接覆盖）');
-
-      // 如果token有关联的actor，直接打开actor sheet
-      if (this.actor) {
-        // 对于非链接token，打开原始actor sheet
-        if (!this.document.actorLink) {
-          const baseActor = game.actors.get(this.document.actorId);
-          if (baseActor) {
-            baseActor.sheet.render(true);
-            console.log('书海大陆 | 已打开原始Actor Sheet');
-            return; // 直接返回，不调用原始方法
-          }
-        } else {
-          // 对于链接token，直接打开actor sheet
-          this.actor.sheet.render(true);
-          console.log('书海大陆 | 已打开Actor Sheet');
-          return; // 直接返回，不调用原始方法
-        }
-      }
-
-      // 如果没有actor，不做任何操作（也不打开token sheet）
-      console.log('书海大陆 | Token没有关联Actor，跳过');
-      return;
-    };
+    console.log('书海大陆 | Token没有关联Actor，保持打开TokenConfig');
   }
 });
 
