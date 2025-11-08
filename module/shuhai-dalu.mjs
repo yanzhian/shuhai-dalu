@@ -136,35 +136,34 @@ Hooks.on('preCreateActor', (actor, data, options, userId) => {
 });
 
 /* -------------------------------------------- */
-/*  Token更新钩子 - 同步Token到Actor              */
+/*  Token双击打开角色卡                           */
 /* -------------------------------------------- */
 
 /**
- * 当Token更新时，同步其delta数据到对应的Actor
- * 这样可以确保Token上的属性调整能同步回Actor
+ * 拦截token的actor sheet打开，改为打开原始actor sheet
+ * 这样双击token时会直接打开角色卡，而不是带有token覆盖数据的sheet
  */
-Hooks.on('preUpdateToken', async (tokenDoc, changes, options, userId) => {
-  // 检查是否有delta数据更新（Foundry v10+使用delta存储token覆盖的actor数据）
-  if (!changes.delta) return;
+Hooks.on('renderActorSheet', (sheet, html, data) => {
+  const actor = sheet.actor;
 
-  // 获取token对应的actor
-  const actor = tokenDoc.actor;
-  if (!actor || !actor.isOwner) return;
+  // 检查这是否是一个token actor（非链接token的实例）
+  // actor.isToken 表示这是一个token的actor实例
+  // !actor.token?.actorLink 表示这个token不是链接的
+  if (actor.isToken && actor.token && !actor.token.actorLink) {
+    console.log('书海大陆 | 拦截Token Sheet，打开原始Actor Sheet');
 
-  // 将delta中的system数据同步到actor
-  // 这样可以让token上的调整反映到原始actor上
-  if (changes.delta.system) {
-    console.log('书海大陆 | 将Token调整同步到Actor:', changes.delta.system);
+    // 关闭当前的token actor sheet
+    setTimeout(() => {
+      sheet.close({ submit: false });
+    }, 0);
 
-    // 构建actor更新数据
-    const actorUpdates = {};
-    for (let [key, value] of Object.entries(foundry.utils.flattenObject(changes.delta.system))) {
-      actorUpdates[`system.${key}`] = value;
+    // 打开原始的actor sheet
+    const baseActor = game.actors.get(actor.token.actorId);
+    if (baseActor && !baseActor.sheet.rendered) {
+      setTimeout(() => {
+        baseActor.sheet.render(true);
+      }, 100);
     }
-
-    // 同步更新actor
-    // 使用 noHook 选项避免触发额外的钩子
-    await actor.update(actorUpdates, { diff: false, render: true, noHook: true });
   }
 });
 
