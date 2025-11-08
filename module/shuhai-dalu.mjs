@@ -117,53 +117,71 @@ Hooks.once('ready', async function() {
 /* -------------------------------------------- */
 
 /**
- * 拦截TokenConfig打开事件，当检测到打开token配置时
- * 改为打开对应的角色卡，然后关闭token配置界面
+ * 拦截Token双击事件，直接打开角色卡而不是Token配置界面
+ * 通过监听renderTokenConfig事件，在Token配置界面渲染时立即关闭它，
+ * 并打开对应的角色卡（没有指示物的界面）
  */
-Hooks.on('renderTokenConfig', (app, html, data) => {
-  console.log('书海大陆 | 检测到TokenConfig打开');
+Hooks.on('renderTokenConfig', async (app, html, data) => {
+  console.log('书海大陆 | 拦截TokenConfig渲染事件');
 
   // 获取token对象
   const token = app.object;
 
   if (!token) {
-    console.log('书海大陆 | 未找到token对象');
+    console.log('书海大陆 | 警告：未找到token对象');
     return;
   }
 
-  console.log('书海大陆 | Token:', token);
-  console.log('书海大陆 | Token.actorId:', token.actorId);
+  console.log('书海大陆 | Token信息:', {
+    name: token.name,
+    id: token.id,
+    actorId: token.actorId
+  });
 
-  // 尝试获取关联的actor
+  // 获取关联的原始Actor（不是Token Actor）
   let actor = null;
 
-  // 优先通过actorId获取原始actor
+  // 方法1：通过actorId获取原始Actor
   if (token.actorId) {
     actor = game.actors.get(token.actorId);
-    console.log('书海大陆 | 通过actorId找到Actor:', actor?.name);
+    console.log('书海大陆 | 通过actorId找到原始Actor:', actor?.name);
   }
 
-  // 如果找不到，尝试使用token.actor
+  // 方法2：如果方法1失败，尝试使用token.actor（但要检查是否是链接的）
   if (!actor && token.actor) {
-    actor = token.actor;
-    console.log('书海大陆 | 使用token.actor:', actor?.name);
+    // 如果是链接的Token，直接使用actor
+    if (token.actorLink) {
+      actor = token.actor;
+      console.log('书海大陆 | 使用链接的Token Actor:', actor.name);
+    } else {
+      // 如果不是链接的Token，获取原始Actor
+      const baseActor = game.actors.get(token.actor.id);
+      if (baseActor) {
+        actor = baseActor;
+        console.log('书海大陆 | 使用Token的原始Actor:', actor.name);
+      } else {
+        actor = token.actor;
+        console.log('书海大陆 | 使用Token Actor（未找到原始Actor）:', actor.name);
+      }
+    }
   }
 
-  // 如果找到了关联的actor，打开角色卡并关闭token配置
+  // 如果找到了关联的Actor，关闭Token配置并打开角色卡
   if (actor) {
-    console.log('书海大陆 | 打开Actor Sheet并关闭TokenConfig');
+    console.log('书海大陆 | 准备打开Actor Sheet并关闭TokenConfig');
 
-    // 立即关闭token配置界面
-    app.close();
+    // 立即关闭Token配置界面（带指示物的界面）
+    await app.close({ force: true });
+    console.log('书海大陆 | TokenConfig已关闭');
 
-    // 打开角色卡
-    // 使用setTimeout确保关闭操作完成后再打开角色卡
+    // 延迟打开角色卡，确保Token配置界面完全关闭
     setTimeout(() => {
+      // 打开角色卡（没有指示物的界面）
       actor.sheet.render(true);
-      console.log('书海大陆 | 已成功打开Actor Sheet:', actor.name);
-    }, 10);
+      console.log('书海大陆 | 已打开Actor Sheet:', actor.name);
+    }, 50);
   } else {
-    console.log('书海大陆 | Token没有关联Actor，保持打开TokenConfig');
+    console.log('书海大陆 | 警告：Token没有关联的Actor，保持TokenConfig打开');
   }
 });
 
