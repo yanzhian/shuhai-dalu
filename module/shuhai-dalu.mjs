@@ -117,54 +117,36 @@ Hooks.once('ready', async function() {
 /* -------------------------------------------- */
 
 /**
- * 拦截TokenConfig打开事件，当检测到打开token配置时
- * 改为打开对应的角色卡，然后关闭token配置界面
+ * 覆盖Token双击行为，直接打开角色卡而不是Token配置
  */
-Hooks.on('renderTokenConfig', (app, html, data) => {
-  console.log('书海大陆 | 检测到TokenConfig打开');
+Hooks.once('ready', () => {
+  console.log('书海大陆 | 覆盖Token双击事件');
 
-  // 获取token对象
-  const token = app.object;
+  // 保存原始方法
+  const original = Token.prototype._onClickLeft2;
 
-  if (!token) {
-    console.log('书海大陆 | 未找到token对象');
-    return;
-  }
+  // 覆盖双击方法
+  Token.prototype._onClickLeft2 = function(event) {
+    console.log('书海大陆 | Token双击触发');
 
-  console.log('书海大陆 | Token:', token);
-  console.log('书海大陆 | Token.actorId:', token.actorId);
+    // 获取关联的actor（优先使用actorId获取原始actor）
+    let actor = null;
+    if (this.document?.actorId) {
+      actor = game.actors.get(this.document.actorId);
+      console.log('书海大陆 | 通过actorId获取Actor:', actor?.name);
+    }
 
-  // 尝试获取关联的actor
-  let actor = null;
-
-  // 优先通过actorId获取原始actor
-  if (token.actorId) {
-    actor = game.actors.get(token.actorId);
-    console.log('书海大陆 | 通过actorId找到Actor:', actor?.name);
-  }
-
-  // 如果找不到，尝试使用token.actor
-  if (!actor && token.actor) {
-    actor = token.actor;
-    console.log('书海大陆 | 使用token.actor:', actor?.name);
-  }
-
-  // 如果找到了关联的actor，打开角色卡并关闭token配置
-  if (actor) {
-    console.log('书海大陆 | 打开Actor Sheet并关闭TokenConfig');
-
-    // 立即关闭token配置界面
-    app.close();
-
-    // 打开角色卡
-    // 使用setTimeout确保关闭操作完成后再打开角色卡
-    setTimeout(() => {
+    // 如果有actor，打开角色卡
+    if (actor) {
       actor.sheet.render(true);
-      console.log('书海大陆 | 已成功打开Actor Sheet:', actor.name);
-    }, 10);
-  } else {
-    console.log('书海大陆 | Token没有关联Actor，保持打开TokenConfig');
-  }
+      console.log('书海大陆 | 已打开角色卡:', actor.name);
+      return; // 不调用原始方法，阻止TokenConfig打开
+    }
+
+    // 如果没有actor，调用原始方法
+    console.log('书海大陆 | 没有关联Actor，使用默认行为');
+    return original.call(this, event);
+  };
 });
 
 /* -------------------------------------------- */
