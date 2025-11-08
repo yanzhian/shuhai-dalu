@@ -482,11 +482,20 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     }
 
     const token = controlled[0];
-    const actor = token.actor;
+    let actor = token.actor;
 
     if (!actor) {
       ui.notifications.error("选中的Token没有关联角色！");
       return;
+    }
+
+    // 如果是Token Actor（非链接token），获取原始Actor以确保数据持久化
+    if (actor.isToken && !actor.token?.actorLink) {
+      const baseActor = game.actors.get(actor.token.actorId);
+      if (baseActor) {
+        actor = baseActor;
+        console.log('【调试】使用原始Actor而非Token Actor:', actor.name);
+      }
     }
 
     // 记录伤害前的HP
