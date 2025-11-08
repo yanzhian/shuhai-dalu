@@ -140,30 +140,39 @@ Hooks.on('preCreateActor', (actor, data, options, userId) => {
 /* -------------------------------------------- */
 
 /**
- * 拦截token的actor sheet打开，改为打开原始actor sheet
- * 这样双击token时会直接打开角色卡，而不是带有token覆盖数据的sheet
- * 使用 preRenderActorSheet 钩子在渲染前拦截，避免看到Token Sheet的动画
+ * 覆盖Token的双击行为，直接打开原始actor sheet
+ * 使用libWrapper来包装Token._onClickLeft2方法
  */
-Hooks.on('preRenderActorSheet', (sheet, options) => {
-  const actor = sheet.actor;
-
-  // 检查这是否是一个token actor（非链接token的实例）
-  // actor.isToken 表示这是一个token的actor实例
-  // !actor.token?.actorLink 表示这个token不是链接的
-  if (actor.isToken && actor.token && !actor.token.actorLink) {
-    console.log('书海大陆 | 拦截Token Sheet渲染，直接打开原始Actor Sheet');
-
-    // 获取原始actor
-    const baseActor = game.actors.get(actor.token.actorId);
-    if (baseActor) {
-      // 延迟一帧后打开原始actor sheet，确保当前的渲染流程已完成
-      setTimeout(() => {
-        baseActor.sheet.render(true);
-      }, 10);
-    }
-
-    // 返回false阻止Token Actor Sheet的渲染
-    return false;
+Hooks.once('ready', () => {
+  // 如果libWrapper可用，使用它来包装方法
+  if (typeof libWrapper === 'function') {
+    libWrapper.register('shuhai-dalu', 'Token.prototype._onClickLeft2', function(wrapped, event) {
+      // 如果token有关联的actor且不是链接token
+      if (this.actor && !this.document.actorLink) {
+        const baseActor = game.actors.get(this.document.actorId);
+        if (baseActor) {
+          baseActor.sheet.render(true);
+          return; // 阻止原始行为
+        }
+      }
+      // 否则执行原始行为
+      return wrapped(event);
+    }, 'MIXED');
+  } else {
+    // 如果没有libWrapper，直接覆盖方法
+    const original = Token.prototype._onClickLeft2;
+    Token.prototype._onClickLeft2 = function(event) {
+      // 如果token有关联的actor且不是链接token
+      if (this.actor && !this.document.actorLink) {
+        const baseActor = game.actors.get(this.document.actorId);
+        if (baseActor) {
+          baseActor.sheet.render(true);
+          return; // 阻止原始行为
+        }
+      }
+      // 否则执行原始行为
+      return original.call(this, event);
+    };
   }
 });
 
