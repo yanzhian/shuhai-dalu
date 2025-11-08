@@ -142,7 +142,7 @@ Hooks.once('ready', () => {
 });
 
 /* -------------------------------------------- */
-/*  Actor创建钩子 - 初始化新角色HP                */
+/*  Actor创建钩子 - 初始化新角色HP和原型Token      */
 /* -------------------------------------------- */
 
 Hooks.on('preCreateActor', (actor, data, options, userId) => {
@@ -155,13 +155,14 @@ Hooks.on('preCreateActor', (actor, data, options, userId) => {
   const lvl = data.system?.level || 1;
   const maxHp = con * 3 + str + lvl * 3;
 
-  // 设置初始HP为最大值
+  // 设置初始HP为最大值，并设置原型Token为链接状态
   actor.updateSource({
     'system.derived.hp.value': maxHp,
-    'system.derived.hp.max': maxHp
+    'system.derived.hp.max': maxHp,
+    'prototypeToken.actorLink': true  // 设置原型Token为链接状态
   });
 
-  console.log(`书海大陆 | 新角色HP初始化: ${maxHp}/${maxHp}`);
+  console.log(`书海大陆 | 新角色初始化: HP=${maxHp}/${maxHp}, Token链接=true`);
 });
 
 /* -------------------------------------------- */
