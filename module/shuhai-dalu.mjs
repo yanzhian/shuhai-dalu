@@ -113,27 +113,6 @@ Hooks.once('ready', async function() {
 });
 
 /* -------------------------------------------- */
-/*  Token双击打开角色卡                           */
-/* -------------------------------------------- */
-
-/**
- * Token双击打开角色卡而不是Token配置
- * 流程：TokenConfig打开 → 打开角色卡 → 关闭TokenConfig
- */
-Hooks.on('renderTokenConfig', (app, html, data) => {
-  const token = app.object;
-
-  if (!token?.document?.actorId) return;
-
-  const actor = game.actors.get(token.document.actorId);
-
-  if (actor) {
-    actor.sheet.render(true);
-    app.close();
-  }
-});
-
-/* -------------------------------------------- */
 /*  Actor创建钩子 - 初始化新角色HP                */
 /* -------------------------------------------- */
 
