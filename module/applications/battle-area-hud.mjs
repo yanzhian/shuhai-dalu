@@ -58,7 +58,7 @@ export default class BattleAreaHUD extends Application {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ["shuhai-dalu", "battle-area-hud"],
       template: "systems/shuhai-dalu/templates/hud/battle-area-hud.hbs",
-      width: 700,
+      width: 420,
       height: "auto",
       resizable: false,
       minimizable: false,
@@ -268,10 +268,10 @@ export default class BattleAreaHUD extends Application {
    * 应用缩放
    */
   _applyScale(html) {
-    const content = html.find('.hud-content')[0];
-    if (content) {
-      content.style.transform = `scale(${this.hudState.scale})`;
-      content.style.transformOrigin = 'top left';
+    const window = html.find('.battle-hud-window')[0];
+    if (window) {
+      window.style.transform = `scale(${this.hudState.scale})`;
+      window.style.transformOrigin = 'top left';
     }
   }
 

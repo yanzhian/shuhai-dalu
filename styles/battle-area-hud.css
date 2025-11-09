@@ -20,8 +20,7 @@
 .battle-hud-window {
   font-family: "Noto Sans SC", sans-serif;
   background: transparent;
-  min-width: 700px;
-  max-width: 1400px;
+  width: 420px;
 }
 
 .battle-hud-window.minimized .hud-content {
@@ -150,7 +149,7 @@
   border: 2px solid #E3B767;
   border-radius: 8px;
   padding: 12px;
-  min-width: 680px;
+  width: 100%;
   cursor: pointer;
   transition: all 0.3s;
 }
@@ -196,9 +195,9 @@
   margin-bottom: 12px;
 }
 
-/* 头像 (40px × 92px) */
+/* 头像 (92px × 92px) */
 .hud-avatar {
-  width: 40px;
+  width: 92px;
   height: 92px;
   flex-shrink: 0;
   background: #0F0D1B;
@@ -227,6 +226,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 4px;
+  padding-right: 20px; /* 避免被移除按钮遮挡 */
 }
 
 .hud-player-name {
@@ -533,7 +533,12 @@
    缩放效果
    ======================================== */
 
-.hud-content {
+.battle-hud-window {
+  transform-origin: top left;
+}
+
+/* 确保window-header也跟随缩放 */
+.battle-area-hud .window-header {
   transform-origin: top left;
 }
 
@@ -542,14 +547,6 @@
    ======================================== */
 
 @media (max-width: 800px) {
-  .battle-hud-window {
-    min-width: 500px;
-  }
-
-  .hud-player-card {
-    min-width: 100%;
-  }
-
   .hud-player-name {
     font-size: 20px;
   }
