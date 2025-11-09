@@ -52,6 +52,9 @@ export default class BattleAreaHUD extends Application {
     // 标记是否是初次渲染（用于位置恢复）
     this._isFirstRender = true;
 
+    // 保存滚动位置
+    this._scrollTop = 0;
+
     // 监听角色数据更新
     this._setupActorUpdateHook();
   }
@@ -196,6 +199,19 @@ export default class BattleAreaHUD extends Application {
   }
 
   /** @override */
+  async render(force, options) {
+    // 在渲染前保存滚动位置
+    if (this.element && this.element.length > 0) {
+      const container = this.element.find('.hud-players-container')[0];
+      if (container) {
+        this._scrollTop = container.scrollTop;
+      }
+    }
+
+    return super.render(force, options);
+  }
+
+  /** @override */
   activateListeners(html) {
     super.activateListeners(html);
 
@@ -224,6 +240,19 @@ export default class BattleAreaHUD extends Application {
 
     // 应用缩放
     this._applyScale(html);
+
+    // 恢复滚动位置
+    this._restoreScrollPosition(html);
+  }
+
+  /**
+   * 恢复滚动位置
+   */
+  _restoreScrollPosition(html) {
+    const container = html.find('.hud-players-container')[0];
+    if (container && this._scrollTop) {
+      container.scrollTop = this._scrollTop;
+    }
   }
 
   /**
