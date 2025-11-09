@@ -1,0 +1,125 @@
+<div class="battle-hud-window {{#if hudState.minimized}}minimized{{/if}}">
+  {{!-- HUD头部 (可拖动区域) --}}
+  <div class="hud-header">
+    <div class="hud-title">{{actor.name}}</div>
+    <div class="hud-controls">
+      <button class="hud-control-btn hud-scale-down" title="缩小"><i class="fas fa-search-minus"></i></button>
+      <button class="hud-control-btn hud-scale-up" title="放大"><i class="fas fa-search-plus"></i></button>
+      <button class="hud-control-btn hud-minimize-toggle" title="{{#if hudState.minimized}}展开{{else}}最小化{{/if}}">
+        <i class="fas fa-{{#if hudState.minimized}}plus{{else}}minus{{/if}}"></i>
+      </button>
+      <button class="hud-control-btn close" title="关闭"><i class="fas fa-times"></i></button>
+    </div>
+  </div>
+
+  {{!-- HUD内容区域 --}}
+  {{#unless hudState.minimized}}
+  <div class="hud-content">
+    {{!-- 战斗区域信息 --}}
+    <div class="hud-battle-area-info">
+      {{!-- 左侧头像 --}}
+      <div class="hud-avatar">
+        <img src="{{actor.img}}" alt="{{actor.name}}" />
+      </div>
+
+      {{!-- 右侧信息 --}}
+      <div class="hud-info-right">
+        {{!-- 玩家名字和速度 --}}
+        <div class="hud-name-speed-row">
+          <div class="hud-player-name">{{actor.name}}</div>
+          <div class="hud-speed-circles">
+            {{#each speedValues as |speed index|}}
+              <div class="hud-speed-circle">{{speed}}</div>
+            {{/each}}
+          </div>
+        </div>
+
+        {{!-- 生命值条 --}}
+        <div class="hud-status-bar hud-hp-bar">
+          <div class="hud-bar-fill" style="width: {{multiply (divide system.derived.hp.value system.derived.hp.max) 100}}%;"></div>
+          <div class="hud-bar-text">{{system.derived.hp.value}}/{{system.derived.hp.max}}</div>
+        </div>
+
+        {{!-- 侵蚀度和混乱值 --}}
+        <div class="hud-status-bars-row">
+          <div class="hud-status-bar hud-erosion-bar">
+            <div class="hud-bar-fill" style="width: {{multiply (divide system.derived.corruption.value system.derived.corruption.max) 100}}%;"></div>
+            <div class="hud-bar-text">{{system.derived.corruption.value}}/{{system.derived.corruption.max}}</div>
+          </div>
+          <div class="hud-status-bar hud-chaos-bar">
+            <div class="hud-bar-fill" style="width: {{multiply (divide system.derived.chaos.value system.derived.chaos.max) 100}}%;"></div>
+            <div class="hud-bar-text">{{system.derived.chaos.value}}/{{system.derived.chaos.max}}</div>
+          </div>
+        </div>
+
+        {{!-- Cost和EX资源 --}}
+        <div class="hud-resources-row">
+          <div class="hud-resource-section">
+            <span class="hud-resource-label">Cost</span>
+            <div class="hud-resource-circles">
+              {{#each combatState.costResources as |active index|}}
+                <div class="hud-resource-circle {{#if active}}active{{/if}}"></div>
+              {{/each}}
+            </div>
+          </div>
+          <div class="hud-resource-section">
+            <span class="hud-resource-label">EX</span>
+            <div class="hud-resource-circles">
+              {{#each combatState.exResources as |active index|}}
+                <div class="hud-resource-circle {{#if active}}active{{/if}}"></div>
+              {{/each}}
+            </div>
+          </div>
+        </div>
+
+        {{!-- 战斗骰激活状态 --}}
+        <div class="hud-combat-dice-row">
+          {{#each combatDiceSlots as |slot|}}
+            <div class="hud-dice-slot {{#if slot.activated}}activated{{/if}}">
+              {{#if slot.item}}
+                <img src="{{slot.item.img}}" alt="{{slot.item.name}}" title="{{slot.item.name}}&#10;{{slot.item.system.category}}&#10;{{slot.item.system.diceFormula}}&#10;费用: {{slot.item.system.cost}}&#10;{{slot.item.system.effect}}" />
+                <div class="hud-dice-activation-indicator {{#if slot.activated}}active{{/if}}"></div>
+              {{/if}}
+            </div>
+          {{/each}}
+        </div>
+      </div>
+    </div>
+
+    {{!-- BUFF信息区域 --}}
+    <div class="hud-buff-area">
+      <div class="hud-section-title">BUFF</div>
+      <div class="hud-buff-slots">
+        {{#each combatState.buffs as |buff index|}}
+          <div class="hud-buff-slot" data-buff-index="{{index}}" title="{{buff.name}}&#10;{{buff.description}}">
+            <img src="{{buff.icon}}" alt="{{buff.name}}" />
+            <div class="hud-buff-layers">{{buff.layers}}</div>
+            <div class="hud-buff-strength">{{buff.strength}}</div>
+          </div>
+        {{/each}}
+
+        {{!-- 空BUFF槽（点击跳转到战斗区域） --}}
+        {{#unless combatState.buffs.length}}
+          {{#times 6}}
+            <div class="hud-buff-slot empty" title="点击打开战斗区域"></div>
+          {{/times}}
+        {{else}}
+          {{#if (lt combatState.buffs.length 6)}}
+            {{#times (subtract 6 combatState.buffs.length)}}
+              <div class="hud-buff-slot empty" title="点击打开战斗区域"></div>
+            {{/times}}
+          {{/if}}
+        {{/unless}}
+      </div>
+    </div>
+
+    {{!-- 分割线 --}}
+    <div class="hud-divider"></div>
+
+    {{!-- 加入战斗轮按钮 --}}
+    <button class="hud-join-battle-btn">
+      <i class="fas fa-plus-circle"></i> 点击加入战斗轮
+    </button>
+  </div>
+  {{/unless}}
+</div>

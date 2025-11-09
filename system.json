@@ -21,7 +21,8 @@
     "styles/player-sheet.css",
     "styles/combat-area.css",
     "styles/counter-area.css",
-    "styles/item-card-sheet.css"
+    "styles/item-card-sheet.css",
+    "styles/battle-area-hud.css"
   ],
   "documentTypes": {
     "Actor": {

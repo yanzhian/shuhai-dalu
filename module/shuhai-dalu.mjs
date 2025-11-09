@@ -111,6 +111,9 @@ Hooks.once('ready', async function() {
   // 迁移所有角色的prototypeToken为链接状态
   await migrateActorTokenLinks();
 
+  // 注册键盘事件监听
+  setupKeyboardListeners();
+
   // 显示欢迎消息
   ui.notifications.info("书海大陆系统已加载！");
 });
@@ -1166,7 +1169,10 @@ async function preloadHandlebarsTemplates() {
     "systems/shuhai-dalu/templates/chat/combat-dice-initiate.hbs",
     "systems/shuhai-dalu/templates/chat/counter-result.hbs",
     "systems/shuhai-dalu/templates/chat/contest-result.hbs",
-    "systems/shuhai-dalu/templates/chat/counter-attack-result.hbs"
+    "systems/shuhai-dalu/templates/chat/counter-attack-result.hbs",
+
+    // HUD模板
+    "systems/shuhai-dalu/templates/hud/battle-area-hud.hbs"
   ]);
 }
 
@@ -1217,6 +1223,121 @@ async function migrateActorTokenLinks() {
   } else {
     console.log('书海大陆 | 无需迁移Token链接状态');
   }
+}
+
+/**
+ * 设置键盘事件监听
+ */
+function setupKeyboardListeners() {
+  document.addEventListener('keydown', async (event) => {
+    // 检查是否在输入框中，避免干扰正常输入
+    if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+      return;
+    }
+
+    // 按V键：打开当前选中Token的战斗区域
+    if (event.key.toLowerCase() === 'v' && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+      event.preventDefault();
+
+      // 获取当前选中的Token
+      const controlled = canvas.tokens?.controlled;
+
+      if (!controlled || controlled.length === 0) {
+        ui.notifications.warn("请先选中一个Token！");
+        return;
+      }
+
+      if (controlled.length > 1) {
+        ui.notifications.warn("请只选中一个Token！");
+        return;
+      }
+
+      const token = controlled[0];
+      let actor = token.actor;
+
+      if (!actor) {
+        ui.notifications.error("选中的Token没有关联角色！");
+        return;
+      }
+
+      // 如果是Token Actor（非链接token），获取原始Actor
+      if (actor.isToken && !actor.token?.actorLink) {
+        const baseActor = game.actors.get(actor.token.actorId);
+        if (baseActor) {
+          actor = baseActor;
+        }
+      }
+
+      // 检查是否已经打开了战斗区域窗口
+      const existingWindow = Object.values(ui.windows).find(
+        app => app.constructor.name === 'CombatAreaApplication' && app.actor?.id === actor.id
+      );
+
+      if (existingWindow) {
+        existingWindow.bringToTop();
+        ui.notifications.info(`${actor.name} 的战斗区域已打开`);
+        return;
+      }
+
+      // 动态导入并打开战斗区域
+      const CombatAreaApplication = (await import('./applications/combat-area.mjs')).default;
+      const combatArea = new CombatAreaApplication(actor);
+      combatArea.render(true);
+
+      console.log('书海大陆 | 打开战斗区域:', actor.name);
+      ui.notifications.info(`已打开 ${actor.name} 的战斗区域`);
+    }
+
+    // 按B键：打开/关闭战斗区域HUD
+    if (event.key.toLowerCase() === 'b' && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+      event.preventDefault();
+
+      // 获取当前选中的Token
+      const controlled = canvas.tokens?.controlled;
+
+      if (!controlled || controlled.length === 0) {
+        ui.notifications.warn("请先选中一个Token！");
+        return;
+      }
+
+      const token = controlled[0];
+      let actor = token.actor;
+
+      if (!actor) {
+        ui.notifications.error("选中的Token没有关联角色！");
+        return;
+      }
+
+      // 如果是Token Actor（非链接token），获取原始Actor
+      if (actor.isToken && !actor.token?.actorLink) {
+        const baseActor = game.actors.get(actor.token.actorId);
+        if (baseActor) {
+          actor = baseActor;
+        }
+      }
+
+      // 检查是否已经打开了HUD窗口
+      const existingHUD = Object.values(ui.windows).find(
+        app => app.constructor.name === 'BattleAreaHUD' && app.actor?.id === actor.id
+      );
+
+      if (existingHUD) {
+        existingHUD.close();
+        ui.notifications.info(`已关闭 ${actor.name} 的战斗HUD`);
+        return;
+      }
+
+      // 动态导入并打开战斗HUD
+      const BattleAreaHUD = (await import('./applications/battle-area-hud.mjs')).default;
+      const hud = new BattleAreaHUD(actor);
+      hud.render(true);
+
+      console.log('书海大陆 | 打开战斗HUD:', actor.name);
+      ui.notifications.info(`已打开 ${actor.name} 的战斗HUD`);
+    }
+  });
+
+  console.log('书海大陆 | 键盘事件监听已注册 (V键=战斗区域, B键=战斗HUD)');
 }
 
 /**
