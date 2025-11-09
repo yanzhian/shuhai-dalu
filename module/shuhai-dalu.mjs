@@ -1235,28 +1235,23 @@ function setupKeyboardListeners() {
       return;
     }
 
-    // 按V键：打开当前选中Token的战斗区域
+    // 按V键：开关当前选中Token的战斗区域（静默操作）
     if (event.key.toLowerCase() === 'v' && !event.ctrlKey && !event.shiftKey && !event.altKey) {
       event.preventDefault();
 
       // 获取当前选中的Token
       const controlled = canvas.tokens?.controlled;
 
+      // 如果没有选中Token，静默返回
       if (!controlled || controlled.length === 0) {
-        ui.notifications.warn("请先选中一个Token！");
         return;
       }
 
-      if (controlled.length > 1) {
-        ui.notifications.warn("请只选中一个Token！");
-        return;
-      }
-
+      // 如果选中多个Token，只处理第一个
       const token = controlled[0];
       let actor = token.actor;
 
       if (!actor) {
-        ui.notifications.error("选中的Token没有关联角色！");
         return;
       }
 
@@ -1274,70 +1269,38 @@ function setupKeyboardListeners() {
       );
 
       if (existingWindow) {
-        existingWindow.bringToTop();
-        ui.notifications.info(`${actor.name} 的战斗区域已打开`);
-        return;
+        // 如果已打开，关闭它
+        existingWindow.close();
+      } else {
+        // 如果未打开，打开它
+        const CombatAreaApplication = (await import('./applications/combat-area.mjs')).default;
+        const combatArea = new CombatAreaApplication(actor);
+        combatArea.render(true);
       }
-
-      // 动态导入并打开战斗区域
-      const CombatAreaApplication = (await import('./applications/combat-area.mjs')).default;
-      const combatArea = new CombatAreaApplication(actor);
-      combatArea.render(true);
-
-      console.log('书海大陆 | 打开战斗区域:', actor.name);
-      ui.notifications.info(`已打开 ${actor.name} 的战斗区域`);
     }
 
-    // 按B键：打开/关闭战斗区域HUD
+    // 按B键：开关全局战斗HUD
     if (event.key.toLowerCase() === 'b' && !event.ctrlKey && !event.shiftKey && !event.altKey) {
       event.preventDefault();
 
-      // 获取当前选中的Token
-      const controlled = canvas.tokens?.controlled;
-
-      if (!controlled || controlled.length === 0) {
-        ui.notifications.warn("请先选中一个Token！");
-        return;
-      }
-
-      const token = controlled[0];
-      let actor = token.actor;
-
-      if (!actor) {
-        ui.notifications.error("选中的Token没有关联角色！");
-        return;
-      }
-
-      // 如果是Token Actor（非链接token），获取原始Actor
-      if (actor.isToken && !actor.token?.actorLink) {
-        const baseActor = game.actors.get(actor.token.actorId);
-        if (baseActor) {
-          actor = baseActor;
-        }
-      }
-
-      // 检查是否已经打开了HUD窗口
+      // 检查是否已经打开了全局HUD窗口
       const existingHUD = Object.values(ui.windows).find(
-        app => app.constructor.name === 'BattleAreaHUD' && app.actor?.id === actor.id
+        app => app.constructor.name === 'BattleAreaHUD'
       );
 
       if (existingHUD) {
+        // 如果已打开，关闭它
         existingHUD.close();
-        ui.notifications.info(`已关闭 ${actor.name} 的战斗HUD`);
-        return;
+      } else {
+        // 如果未打开，打开它
+        const BattleAreaHUD = (await import('./applications/battle-area-hud.mjs')).default;
+        const hud = new BattleAreaHUD();
+        hud.render(true);
       }
-
-      // 动态导入并打开战斗HUD
-      const BattleAreaHUD = (await import('./applications/battle-area-hud.mjs')).default;
-      const hud = new BattleAreaHUD(actor);
-      hud.render(true);
-
-      console.log('书海大陆 | 打开战斗HUD:', actor.name);
-      ui.notifications.info(`已打开 ${actor.name} 的战斗HUD`);
     }
   });
 
-  console.log('书海大陆 | 键盘事件监听已注册 (V键=战斗区域, B键=战斗HUD)');
+  console.log('书海大陆 | 键盘事件监听已注册 (V键=战斗区域, B键=全局战斗HUD)');
 }
 
 /**

@@ -1,5 +1,5 @@
 /**
- * 战斗区域HUD - 显示玩家战斗区域信息
+ * 全局战斗区域HUD - 显示所有参战玩家的信息
  * 特性：可拖动、可缩放、可最小化、透明底色
  */
 
@@ -36,16 +36,21 @@ const BUFF_TYPES = {
 
 export default class BattleAreaHUD extends Application {
 
-  constructor(actor, options = {}) {
+  constructor(options = {}) {
     super(options);
-    this.actor = actor;
+
+    // 加载全局参战角色列表
+    this.battleActors = game.settings.get('shuhai-dalu', 'battleActors') || [];
 
     // 加载HUD状态（位置、缩放、最小化）
-    this.hudState = this.actor.getFlag('shuhai-dalu', 'hudState') || {
+    this.hudState = game.settings.get('shuhai-dalu', 'battleHudState') || {
       position: { left: 100, top: 100 },
       scale: 1.0,
       minimized: false
     };
+
+    // 监听角色数据更新
+    this._setupActorUpdateHook();
   }
 
   /** @override */
@@ -53,7 +58,7 @@ export default class BattleAreaHUD extends Application {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ["shuhai-dalu", "battle-area-hud"],
       template: "systems/shuhai-dalu/templates/hud/battle-area-hud.hbs",
-      width: 680,
+      width: 700,
       height: "auto",
       resizable: false,
       minimizable: false,
@@ -65,54 +70,73 @@ export default class BattleAreaHUD extends Application {
 
   /** @override */
   get title() {
-    return `${this.actor.name} - 战斗区域`;
+    return "战斗区域HUD";
   }
 
   /** @override */
   async getData() {
     const context = await super.getData();
 
-    // 获取角色数据
-    context.actor = this.actor;
-    context.system = this.actor.system;
+    // 重新加载参战角色列表
+    this.battleActors = game.settings.get('shuhai-dalu', 'battleActors') || [];
 
-    // 获取战斗状态
-    const combatState = this.actor.getFlag('shuhai-dalu', 'combatState') || {
-      costResources: [false, false, false, false, false, false],
-      exResources: [true, true, true],
-      activatedDice: [false, false, false, false, false, false],
-      buffs: [],
-      isLocked: false,
-      speedValues: null
-    };
-    context.combatState = combatState;
+    // 获取所有参战角色的数据
+    context.players = [];
+    for (const actorId of this.battleActors) {
+      const actor = game.actors.get(actorId);
+      if (actor) {
+        const playerData = await this._preparePlayerData(actor);
+        context.players.push(playerData);
+      }
+    }
 
     // 获取HUD状态
     context.hudState = this.hudState;
-
-    // 准备战斗骰数据
-    context.combatDiceSlots = this._prepareCombatDiceSlots();
-
-    // 计算或获取速度值
-    if (!combatState.speedValues) {
-      combatState.speedValues = this._calculateSpeedValues();
-    }
-    context.speedValues = this._applySpeedModifiers(combatState.speedValues);
 
     return context;
   }
 
   /**
+   * 准备单个玩家的数据
+   */
+  async _preparePlayerData(actor) {
+    const data = {
+      actor: actor,
+      system: actor.system
+    };
+
+    // 获取战斗状态
+    const combatState = actor.getFlag('shuhai-dalu', 'combatState') || {
+      costResources: [false, false, false, false, false, false],
+      exResources: [true, true, true],
+      activatedDice: [false, false, false, false, false, false],
+      buffs: [],
+      speedValues: null
+    };
+    data.combatState = combatState;
+
+    // 准备战斗骰数据
+    data.combatDiceSlots = this._prepareCombatDiceSlots(actor, combatState);
+
+    // 计算或获取速度值
+    if (!combatState.speedValues) {
+      combatState.speedValues = this._calculateSpeedValues(actor);
+    }
+    data.speedValues = this._applySpeedModifiers(actor, combatState.speedValues);
+
+    return data;
+  }
+
+  /**
    * 准备战斗骰槽位数据（6个）
    */
-  _prepareCombatDiceSlots() {
+  _prepareCombatDiceSlots(actor, combatState) {
     const slots = [];
-    const combatState = this.actor.getFlag('shuhai-dalu', 'combatState') || { activatedDice: [] };
 
     for (let i = 0; i < 6; i++) {
-      const diceId = this.actor.system.equipment.combatDice[i];
+      const diceId = actor.system.equipment.combatDice[i];
       if (diceId) {
-        const item = this.actor.items.get(diceId);
+        const item = actor.items.get(diceId);
         if (item) {
           slots.push({
             index: i,
@@ -132,9 +156,9 @@ export default class BattleAreaHUD extends Application {
   /**
    * 计算速度值
    */
-  _calculateSpeedValues() {
-    const constitution = this.actor.system.attributes.constitution || 0;
-    const dexterity = this.actor.system.attributes.dexterity || 0;
+  _calculateSpeedValues(actor) {
+    const constitution = actor.system.attributes.constitution || 0;
+    const dexterity = actor.system.attributes.dexterity || 0;
 
     const diceSize = constitution < 9 ? 6 : 4;
     const bonus = Math.floor(dexterity / 3);
@@ -149,11 +173,11 @@ export default class BattleAreaHUD extends Application {
   /**
    * 应用速度修正（迅捷/束缚）
    */
-  _applySpeedModifiers(baseSpeedValues) {
+  _applySpeedModifiers(actor, baseSpeedValues) {
     if (!baseSpeedValues) return [0, 0, 0];
 
     let modifier = 0;
-    const combatState = this.actor.getFlag('shuhai-dalu', 'combatState') || { buffs: [] };
+    const combatState = actor.getFlag('shuhai-dalu', 'combatState') || { buffs: [] };
 
     if (combatState.buffs) {
       for (const buff of combatState.buffs) {
@@ -183,6 +207,12 @@ export default class BattleAreaHUD extends Application {
     html.find('.hud-buff-slot.empty').click(this._onOpenCombatArea.bind(this));
     html.find('.hud-buff-slot:not(.empty)').click(this._onBuffClick.bind(this));
 
+    // 点击玩家卡片打开战斗区域
+    html.find('.hud-player-card').click(this._onPlayerCardClick.bind(this));
+
+    // 移除玩家按钮
+    html.find('.hud-remove-player-btn').click(this._onRemovePlayer.bind(this));
+
     // 点击加入战斗轮
     html.find('.hud-join-battle-btn').click(this._onJoinBattle.bind(this));
 
@@ -207,7 +237,7 @@ export default class BattleAreaHUD extends Application {
     let initialY;
 
     header.addEventListener('mousedown', (e) => {
-      if (e.target.classList.contains('hud-control-btn')) return;
+      if (e.target.classList.contains('hud-control-btn') || e.target.closest('.hud-control-btn')) return;
       isDragging = true;
       initialX = e.clientX - this.hudState.position.left;
       initialY = e.clientY - this.hudState.position.top;
@@ -276,14 +306,34 @@ export default class BattleAreaHUD extends Application {
   }
 
   /**
+   * 点击玩家卡片，打开该玩家的战斗区域
+   */
+  async _onPlayerCardClick(event) {
+    event.preventDefault();
+    const actorId = $(event.currentTarget).data('actor-id');
+    const actor = game.actors.get(actorId);
+
+    if (!actor) return;
+
+    // 动态导入CombatAreaApplication
+    const CombatAreaApplication = (await import('./combat-area.mjs')).default;
+    const combatArea = new CombatAreaApplication(actor);
+    combatArea.render(true);
+  }
+
+  /**
    * 打开战斗区域
    */
   async _onOpenCombatArea(event) {
     event.preventDefault();
+    const actorId = $(event.currentTarget).closest('.hud-player-card').data('actor-id');
+    const actor = game.actors.get(actorId);
+
+    if (!actor) return;
 
     // 动态导入CombatAreaApplication
     const CombatAreaApplication = (await import('./combat-area.mjs')).default;
-    const combatArea = new CombatAreaApplication(this.actor);
+    const combatArea = new CombatAreaApplication(actor);
     combatArea.render(true);
   }
 
@@ -293,12 +343,34 @@ export default class BattleAreaHUD extends Application {
   async _onBuffClick(event) {
     event.preventDefault();
     const buffIndex = parseInt($(event.currentTarget).data('buff-index'));
-    const combatState = this.actor.getFlag('shuhai-dalu', 'combatState') || { buffs: [] };
+    const actorId = $(event.currentTarget).closest('.hud-player-card').data('actor-id');
+    const actor = game.actors.get(actorId);
+
+    if (!actor) return;
+
+    const combatState = actor.getFlag('shuhai-dalu', 'combatState') || { buffs: [] };
     const buff = combatState.buffs[buffIndex];
 
     if (buff) {
       ui.notifications.info(`${buff.name} - 层数:${buff.layers} 强度:${buff.strength}\n${buff.description || ''}`);
     }
+  }
+
+  /**
+   * 移除玩家
+   */
+  async _onRemovePlayer(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const actorId = $(event.currentTarget).closest('.hud-player-card').data('actor-id');
+
+    // 从列表中移除
+    this.battleActors = this.battleActors.filter(id => id !== actorId);
+    await game.settings.set('shuhai-dalu', 'battleActors', this.battleActors);
+
+    // 刷新
+    this.render();
   }
 
   /**
@@ -309,14 +381,19 @@ export default class BattleAreaHUD extends Application {
 
     // 检查是否有选中的Token
     const controlled = canvas.tokens?.controlled;
+    let actor = null;
+
     if (controlled && controlled.length > 0) {
       // 有选中Token，使用该Token的角色
       const token = controlled[0];
-      const actor = token.actor;
+      actor = token.actor;
 
-      if (actor) {
-        ui.notifications.info(`${actor.name} 已加入战斗轮！`);
-        // TODO: 实现加入战斗轮的逻辑
+      // 如果是Token Actor（非链接token），获取原始Actor
+      if (actor && actor.isToken && !actor.token?.actorLink) {
+        const baseActor = game.actors.get(actor.token.actorId);
+        if (baseActor) {
+          actor = baseActor;
+        }
       }
     } else {
       // 没有选中Token，从角色列表选择
@@ -328,6 +405,23 @@ export default class BattleAreaHUD extends Application {
       }
 
       // 创建选择对话框
+      actor = await this._selectActorDialog(actors);
+      if (!actor) return;
+    }
+
+    // 添加到参战列表
+    if (!this.battleActors.includes(actor.id)) {
+      this.battleActors.push(actor.id);
+      await game.settings.set('shuhai-dalu', 'battleActors', this.battleActors);
+      this.render();
+    }
+  }
+
+  /**
+   * 选择角色对话框
+   */
+  async _selectActorDialog(actors) {
+    return new Promise((resolve) => {
       const options = actors.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
 
       new Dialog({
@@ -348,28 +442,46 @@ export default class BattleAreaHUD extends Application {
             label: "加入",
             callback: (html) => {
               const actorId = html.find('[name="actorId"]').val();
-              const actor = game.actors.get(actorId);
-              if (actor) {
-                ui.notifications.info(`${actor.name} 已加入战斗轮！`);
-                // TODO: 实现加入战斗轮的逻辑
-              }
+              resolve(game.actors.get(actorId));
             }
           },
           cancel: {
             icon: '<i class="fas fa-times"></i>',
-            label: "取消"
+            label: "取消",
+            callback: () => resolve(null)
           }
         },
         default: "join"
       }).render(true);
-    }
+    });
   }
 
   /**
    * 保存HUD状态
    */
   async _saveHudState() {
-    await this.actor.setFlag('shuhai-dalu', 'hudState', this.hudState);
+    await game.settings.set('shuhai-dalu', 'battleHudState', this.hudState);
+  }
+
+  /**
+   * 设置角色数据更新监听
+   */
+  _setupActorUpdateHook() {
+    this._actorUpdateHook = Hooks.on('updateActor', (actor, changes, options, userId) => {
+      // 如果更新的是参战角色，刷新HUD
+      if (this.battleActors.includes(actor.id) && this.rendered) {
+        this.render(false);
+      }
+    });
+  }
+
+  /** @override */
+  async close(options) {
+    // 移除Hook
+    if (this._actorUpdateHook) {
+      Hooks.off('updateActor', this._actorUpdateHook);
+    }
+    return super.close(options);
   }
 
   /** @override */
@@ -385,3 +497,26 @@ export default class BattleAreaHUD extends Application {
     return position;
   }
 }
+
+// 注册游戏设置
+Hooks.once('init', () => {
+  game.settings.register('shuhai-dalu', 'battleActors', {
+    name: '参战角色列表',
+    scope: 'world',
+    config: false,
+    type: Array,
+    default: []
+  });
+
+  game.settings.register('shuhai-dalu', 'battleHudState', {
+    name: '战斗HUD状态',
+    scope: 'client',
+    config: false,
+    type: Object,
+    default: {
+      position: { left: 100, top: 100 },
+      scale: 1.0,
+      minimized: false
+    }
+  });
+});

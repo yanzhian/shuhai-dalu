@@ -1,5 +1,5 @@
 /* ========================================
-   战斗区域HUD样式
+   战斗区域HUD样式 - 全局公共HUD
    底色: 透明
    主色: #0F0D1B
    金色/描边: #E3B767
@@ -20,7 +20,8 @@
 .battle-hud-window {
   font-family: "Noto Sans SC", sans-serif;
   background: transparent;
-  min-width: 680px;
+  min-width: 700px;
+  max-width: 1400px;
 }
 
 .battle-hud-window.minimized .hud-content {
@@ -90,6 +91,99 @@
   border-top: none;
   border-radius: 0 0 8px 8px;
   padding: 12px;
+}
+
+/* ========================================
+   玩家卡片容器
+   ======================================== */
+
+.hud-players-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+  max-height: 600px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* 滚动条样式 */
+.hud-players-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.hud-players-container::-webkit-scrollbar-thumb {
+  background: #E3B767;
+  border-radius: 3px;
+}
+
+.hud-players-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 空消息 */
+.hud-empty-message {
+  width: 100%;
+  padding: 40px;
+  text-align: center;
+  color: #888;
+}
+
+.hud-empty-message i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.hud-empty-message p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+/* ========================================
+   单个玩家卡片
+   ======================================== */
+
+.hud-player-card {
+  position: relative;
+  background: rgba(15, 13, 27, 0.8);
+  border: 2px solid #E3B767;
+  border-radius: 8px;
+  padding: 12px;
+  min-width: 680px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.hud-player-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(227, 183, 103, 0.4);
+  border-color: #f3c267;
+}
+
+/* 移除按钮 */
+.hud-remove-player-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background: rgba(193, 69, 69, 0.8);
+  border: 1px solid #c14545;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.hud-remove-player-btn:hover {
+  background: #c14545;
+  transform: scale(1.1);
 }
 
 /* ========================================
@@ -302,7 +396,7 @@
    ======================================== */
 
 .hud-buff-area {
-  margin-bottom: 12px;
+  margin-top: 12px;
 }
 
 .hud-section-title {
@@ -450,6 +544,10 @@
 @media (max-width: 800px) {
   .battle-hud-window {
     min-width: 500px;
+  }
+
+  .hud-player-card {
+    min-width: 100%;
   }
 
   .hud-player-name {
