@@ -239,8 +239,11 @@ export default class BattleAreaHUD extends Application {
     header.addEventListener('mousedown', (e) => {
       if (e.target.classList.contains('hud-control-btn') || e.target.closest('.hud-control-btn')) return;
       isDragging = true;
-      initialX = e.clientX - this.hudState.position.left;
-      initialY = e.clientY - this.hudState.position.top;
+
+      // 获取窗口当前的实际位置（避免缩放导致的跳动）
+      const rect = html[0].getBoundingClientRect();
+      initialX = e.clientX - rect.left;
+      initialY = e.clientY - rect.top;
     });
 
     document.addEventListener('mousemove', (e) => {
@@ -268,10 +271,11 @@ export default class BattleAreaHUD extends Application {
    * 应用缩放
    */
   _applyScale(html) {
-    const window = html.find('.battle-hud-window')[0];
-    if (window) {
-      window.style.transform = `scale(${this.hudState.scale})`;
-      window.style.transformOrigin = 'top left';
+    // 对整个窗口内容应用缩放（包括header和content）
+    const content = html.find('.window-content')[0];
+    if (content) {
+      content.style.transform = `scale(${this.hudState.scale})`;
+      content.style.transformOrigin = 'top left';
     }
   }
 
@@ -326,6 +330,7 @@ export default class BattleAreaHUD extends Application {
    */
   async _onOpenCombatArea(event) {
     event.preventDefault();
+    event.stopPropagation(); // 阻止事件冒泡到玩家卡片
     const actorId = $(event.currentTarget).closest('.hud-player-card').data('actor-id');
     const actor = game.actors.get(actorId);
 
@@ -342,6 +347,7 @@ export default class BattleAreaHUD extends Application {
    */
   async _onBuffClick(event) {
     event.preventDefault();
+    event.stopPropagation(); // 阻止事件冒泡到玩家卡片
     const buffIndex = parseInt($(event.currentTarget).data('buff-index'));
     const actorId = $(event.currentTarget).closest('.hud-player-card').data('actor-id');
     const actor = game.actors.get(actorId);

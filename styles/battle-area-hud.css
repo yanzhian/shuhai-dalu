@@ -226,7 +226,6 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 4px;
-  padding-right: 20px; /* 避免被移除按钮遮挡 */
 }
 
 .hud-player-name {
@@ -239,6 +238,7 @@
 .hud-speed-circles {
   display: flex;
   gap: 6px;
+  margin-right: 20px; /* 往左移动20px，避免被移除按钮遮挡 */
 }
 
 .hud-speed-circle {
@@ -533,12 +533,7 @@
    缩放效果
    ======================================== */
 
-.battle-hud-window {
-  transform-origin: top left;
-}
-
-/* 确保window-header也跟随缩放 */
-.battle-area-hud .window-header {
+.battle-area-hud .window-content {
   transform-origin: top left;
 }
 
