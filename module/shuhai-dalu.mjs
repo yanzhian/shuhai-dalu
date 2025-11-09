@@ -62,7 +62,28 @@ Hooks.once('init', async function() {
       minimized: false
     }
   });
-  
+
+  // 注册敌人HUD的游戏设置
+  game.settings.register('shuhai-dalu', 'enemyBattleActors', {
+    name: '敌人参战角色列表',
+    scope: 'world',
+    config: false,
+    type: Array,
+    default: []
+  });
+
+  game.settings.register('shuhai-dalu', 'enemyBattleHudState', {
+    name: '敌人战斗HUD状态',
+    scope: 'client',
+    config: false,
+    type: Object,
+    default: {
+      position: { left: 550, top: 100 },
+      scale: 1.0,
+      minimized: false
+    }
+  });
+
   // 注册 Actor 数据模型
   CONFIG.Actor.dataModels = CONFIG.Actor.dataModels || {};
   CONFIG.Actor.dataModels.character = CharacterData;
@@ -1319,9 +1340,29 @@ function setupKeyboardListeners() {
         hud.render(true);
       }
     }
+
+    // 按N键：开关全局敌人战斗HUD
+    if (event.key.toLowerCase() === 'n' && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+      event.preventDefault();
+
+      // 检查是否已经打开了全局敌人HUD窗口
+      const existingEnemyHUD = Object.values(ui.windows).find(
+        app => app.constructor.name === 'EnemyBattleAreaHUD'
+      );
+
+      if (existingEnemyHUD) {
+        // 如果已打开，关闭它
+        existingEnemyHUD.close();
+      } else {
+        // 如果未打开，打开它
+        const EnemyBattleAreaHUD = (await import('./applications/enemy-battle-area-hud.mjs')).default;
+        const enemyHud = new EnemyBattleAreaHUD();
+        enemyHud.render(true);
+      }
+    }
   });
 
-  console.log('书海大陆 | 键盘事件监听已注册 (V键=战斗区域, B键=全局战斗HUD)');
+  console.log('书海大陆 | 键盘事件监听已注册 (V键=战斗区域, B键=玩家HUD, N键=敌人HUD)');
 }
 
 /**

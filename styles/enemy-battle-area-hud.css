@@ -1,0 +1,552 @@
+/* ========================================
+   敌人战斗区域HUD样式 - 全局公共HUD
+   底色: 透明
+   主色: #0F0D1B
+   红色/描边: #C14545
+   ======================================== */
+
+.enemy-battle-area-hud {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.enemy-battle-area-hud .window-content {
+  background: transparent !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.battle-hud-window {
+  font-family: "Noto Sans SC", sans-serif;
+  background: transparent;
+  width: 420px;
+}
+
+.battle-hud-window.minimized .hud-content {
+  display: none;
+}
+
+/* ========================================
+   HUD头部 (可拖动)
+   ======================================== */
+
+.hud-header {
+  background: rgba(15, 13, 27, 0.95);
+  border: 2px solid #C14545;
+  border-radius: 8px 8px 0 0;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: move;
+  user-select: none;
+}
+
+.hud-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #C14545;
+}
+
+.hud-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.hud-control-btn {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 1px solid #C14545;
+  border-radius: 3px;
+  color: #C14545;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.hud-control-btn:hover {
+  background: #C14545;
+  color: #0F0D1B;
+}
+
+.hud-control-btn.close:hover {
+  background: #c14545;
+  border-color: #c14545;
+  color: #fff;
+}
+
+/* ========================================
+   HUD内容区域
+   ======================================== */
+
+.hud-content {
+  background: rgba(15, 13, 27, 0.95);
+  border: 2px solid #C14545;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  padding: 12px;
+}
+
+/* ========================================
+   玩家卡片容器
+   ======================================== */
+
+.hud-players-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+  max-height: 600px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* 滚动条样式 */
+.hud-players-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.hud-players-container::-webkit-scrollbar-thumb {
+  background: #C14545;
+  border-radius: 3px;
+}
+
+.hud-players-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 空消息 */
+.hud-empty-message {
+  width: 100%;
+  padding: 40px;
+  text-align: center;
+  color: #888;
+}
+
+.hud-empty-message i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.hud-empty-message p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+/* ========================================
+   单个玩家卡片
+   ======================================== */
+
+.hud-player-card {
+  position: relative;
+  background: rgba(15, 13, 27, 0.8);
+  border: 2px solid #C14545;
+  border-radius: 8px;
+  padding: 12px;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.hud-player-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(193, 69, 69, 0.4);
+  border-color: #d14545;
+}
+
+/* 移除按钮 */
+.hud-remove-player-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background: rgba(193, 69, 69, 0.8);
+  border: 1px solid #c14545;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.hud-remove-player-btn:hover {
+  background: #c14545;
+  transform: scale(1.1);
+}
+
+/* ========================================
+   战斗区域信息
+   ======================================== */
+
+.hud-battle-area-info {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* 头像 (92px × 92px) */
+.hud-avatar {
+  width: 92px;
+  height: 92px;
+  flex-shrink: 0;
+  background: #0F0D1B;
+  border: 2px solid #C14545;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.hud-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 右侧信息区域 */
+.hud-info-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 玩家名字和速度行 */
+.hud-name-speed-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.hud-player-name {
+  font-size: 26px;
+  font-weight: bold;
+  color: #C14545;
+  line-height: 1;
+}
+
+.hud-speed-circles {
+  display: flex;
+  gap: 6px;
+  margin-right: 20px; /* 往左移动20px，避免被移除按钮遮挡 */
+}
+
+.hud-speed-circle {
+  width: 28px;
+  height: 28px;
+  background: #0F0D1B;
+  border: 2px solid #C14545;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  color: #C14545;
+}
+
+/* 状态条 */
+.hud-status-bar {
+  position: relative;
+  height: 22px;
+  background: #0F0D1B;
+  border: 1px solid #C14545;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.hud-bar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.hud-hp-bar .hud-bar-fill {
+  background: linear-gradient(90deg, #2d5016, #4a7c2c);
+}
+
+.hud-erosion-bar .hud-bar-fill {
+  background: linear-gradient(90deg, #1a4d6d, #2e7da8);
+}
+
+.hud-chaos-bar .hud-bar-fill {
+  background: linear-gradient(90deg, #8b4513, #cd853f);
+}
+
+.hud-bar-text {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  line-height: 22px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #C14545;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* 侵蚀度和混乱值行 */
+.hud-status-bars-row {
+  display: flex;
+  gap: 6px;
+}
+
+.hud-status-bars-row .hud-status-bar {
+  flex: 1;
+  height: 20px;
+}
+
+.hud-status-bars-row .hud-bar-text {
+  line-height: 20px;
+  font-size: 11px;
+}
+
+/* Cost和EX资源 */
+.hud-resources-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.hud-resource-section {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hud-resource-label {
+  font-size: 13px;
+  font-weight: bold;
+  color: #C14545;
+  min-width: 38px;
+}
+
+.hud-resource-circles {
+  display: flex;
+  gap: 4px;
+}
+
+.hud-resource-circle {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #0F0D1B;
+  border: 2px solid #C14545;
+  transition: all 0.2s;
+}
+
+.hud-resource-circle.active {
+  background: #C14545;
+  border-width: 0.5px;
+  box-shadow: 0 0 6px rgba(193, 69, 69, 0.6);
+}
+
+/* 战斗骰行 */
+.hud-combat-dice-row {
+  display: flex;
+  gap: 6px;
+}
+
+.hud-dice-slot {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  background: #0F0D1B;
+  border: 0.5px solid #C14545;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.hud-dice-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.hud-dice-activation-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0F0D1B;
+  border: 2px solid #C14545;
+}
+
+.hud-dice-activation-indicator.active {
+  background: #C14545;
+  border-width: 0.5px;
+  box-shadow: 0 0 4px rgba(193, 69, 69, 0.8);
+}
+
+/* ========================================
+   BUFF区域
+   ======================================== */
+
+.hud-buff-area {
+  margin-top: 12px;
+}
+
+.hud-section-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #C14545;
+  margin-bottom: 8px;
+  text-align: center;
+  padding: 4px;
+  background: rgba(193, 69, 69, 0.1);
+  border-radius: 3px;
+}
+
+.hud-buff-slots {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+.hud-buff-slot {
+  position: relative;
+  aspect-ratio: 1;
+  background: #0F0D1B;
+  border: 1px solid #C14545;
+  border-radius: 4px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.hud-buff-slot:hover {
+  border-color: #d14545;
+  transform: scale(1.05);
+  box-shadow: 0 0 8px rgba(193, 69, 69, 0.4);
+}
+
+.hud-buff-slot.empty {
+  opacity: 0.5;
+  border-style: dashed;
+}
+
+.hud-buff-slot.empty:hover {
+  opacity: 0.8;
+  background: rgba(193, 69, 69, 0.1);
+}
+
+.hud-buff-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
+}
+
+.hud-buff-layers {
+  position: absolute;
+  bottom: 2px;
+  left: 2px;
+  min-width: 16px;
+  height: 16px;
+  background: rgba(15, 13, 27, 0.9);
+  border: 1px solid #C14545;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  color: #E0D9CD;
+  padding: 0 3px;
+}
+
+.hud-buff-strength {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  background: rgba(15, 13, 27, 0.9);
+  border: 1px solid #C14545;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  color: #E0D9CD;
+  padding: 0 3px;
+}
+
+/* ========================================
+   分割线
+   ======================================== */
+
+.hud-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #C14545, transparent);
+  margin: 12px 0;
+}
+
+/* ========================================
+   加入战斗轮按钮
+   ======================================== */
+
+.hud-join-battle-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #C14545, #a03535);
+  border: 2px solid #C14545;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.hud-join-battle-btn:hover {
+  background: linear-gradient(135deg, #d14545, #C14545);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(193, 69, 69, 0.5);
+}
+
+.hud-join-battle-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hud-join-battle-btn i {
+  margin-right: 8px;
+}
+
+/* ========================================
+   缩放效果
+   ======================================== */
+
+.enemy-battle-area-hud .window-content {
+  transform-origin: top left;
+}
+
+/* ========================================
+   响应式调整
+   ======================================== */
+
+@media (max-width: 800px) {
+  .hud-player-name {
+    font-size: 20px;
+  }
+
+  .hud-buff-slots {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
