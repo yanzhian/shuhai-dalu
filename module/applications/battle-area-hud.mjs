@@ -497,26 +497,3 @@ export default class BattleAreaHUD extends Application {
     return position;
   }
 }
-
-// 注册游戏设置
-Hooks.once('init', () => {
-  game.settings.register('shuhai-dalu', 'battleActors', {
-    name: '参战角色列表',
-    scope: 'world',
-    config: false,
-    type: Array,
-    default: []
-  });
-
-  game.settings.register('shuhai-dalu', 'battleHudState', {
-    name: '战斗HUD状态',
-    scope: 'client',
-    config: false,
-    type: Object,
-    default: {
-      position: { left: 100, top: 100 },
-      scale: 1.0,
-      minimized: false
-    }
-  });
-});

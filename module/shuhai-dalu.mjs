@@ -26,7 +26,7 @@ import ItemCardSheet from "./sheets/item-card-sheet.mjs";
 
 Hooks.once('init', async function() {
   console.log('书海大陆 | 初始化系统');
-  
+
   // 定义自定义系统类
   game.shuhai = {
     ShuhaiActor,
@@ -37,10 +37,31 @@ Hooks.once('init', async function() {
     equipItem,
     unequipItem
   };
-  
+
   // 配置文档类
   CONFIG.Actor.documentClass = ShuhaiActor;
   CONFIG.Item.documentClass = ShuhaiItem;
+
+  // 注册战斗HUD的游戏设置
+  game.settings.register('shuhai-dalu', 'battleActors', {
+    name: '参战角色列表',
+    scope: 'world',
+    config: false,
+    type: Array,
+    default: []
+  });
+
+  game.settings.register('shuhai-dalu', 'battleHudState', {
+    name: '战斗HUD状态',
+    scope: 'client',
+    config: false,
+    type: Object,
+    default: {
+      position: { left: 100, top: 100 },
+      scale: 1.0,
+      minimized: false
+    }
+  });
   
   // 注册 Actor 数据模型
   CONFIG.Actor.dataModels = CONFIG.Actor.dataModels || {};
