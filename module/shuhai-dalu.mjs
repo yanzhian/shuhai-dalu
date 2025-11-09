@@ -108,6 +108,9 @@ Hooks.once('ready', async function() {
   // 等待字体加载
   await waitForFonts();
 
+  // 迁移所有角色的prototypeToken为链接状态
+  await migrateActorTokenLinks();
+
   // 显示欢迎消息
   ui.notifications.info("书海大陆系统已加载！");
 });
@@ -142,7 +145,7 @@ Hooks.once('ready', () => {
 });
 
 /* -------------------------------------------- */
-/*  Actor创建钩子 - 初始化新角色HP                */
+/*  Actor创建钩子 - 初始化新角色HP和原型Token      */
 /* -------------------------------------------- */
 
 Hooks.on('preCreateActor', (actor, data, options, userId) => {
@@ -155,13 +158,14 @@ Hooks.on('preCreateActor', (actor, data, options, userId) => {
   const lvl = data.system?.level || 1;
   const maxHp = con * 3 + str + lvl * 3;
 
-  // 设置初始HP为最大值
+  // 设置初始HP为最大值，并设置原型Token为链接状态
   actor.updateSource({
     'system.derived.hp.value': maxHp,
-    'system.derived.hp.max': maxHp
+    'system.derived.hp.max': maxHp,
+    'prototypeToken.actorLink': true  // 设置原型Token为链接状态
   });
 
-  console.log(`书海大陆 | 新角色HP初始化: ${maxHp}/${maxHp}`);
+  console.log(`书海大陆 | 新角色初始化: HP=${maxHp}/${maxHp}, Token链接=true`);
 });
 
 /* -------------------------------------------- */
@@ -1176,6 +1180,42 @@ async function preloadHandlebarsTemplates() {
 async function waitForFonts() {
   if (document.fonts) {
     await document.fonts.ready;
+  }
+}
+
+/**
+ * 迁移所有角色的prototypeToken为链接状态
+ * 这样从角色卡拖出的Token默认是链接的，刷新游戏后也不会变
+ */
+async function migrateActorTokenLinks() {
+  // 只在GM权限下执行迁移
+  if (!game.user.isGM) return;
+
+  console.log('书海大陆 | 开始迁移角色Token链接状态...');
+
+  let migratedCount = 0;
+
+  // 遍历所有character类型的Actor
+  for (const actor of game.actors.filter(a => a.type === 'character')) {
+    // 检查是否需要迁移（prototypeToken.actorLink为false或undefined）
+    if (!actor.prototypeToken.actorLink) {
+      try {
+        await actor.update({
+          'prototypeToken.actorLink': true
+        });
+        migratedCount++;
+        console.log(`书海大陆 | 已迁移角色: ${actor.name}`);
+      } catch (error) {
+        console.error(`书海大陆 | 迁移角色失败: ${actor.name}`, error);
+      }
+    }
+  }
+
+  if (migratedCount > 0) {
+    console.log(`书海大陆 | Token链接迁移完成，共迁移 ${migratedCount} 个角色`);
+    ui.notifications.info(`已自动迁移 ${migratedCount} 个角色为链接Token模式`);
+  } else {
+    console.log('书海大陆 | 无需迁移Token链接状态');
   }
 }
 
