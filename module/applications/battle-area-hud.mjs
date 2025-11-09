@@ -49,6 +49,9 @@ export default class BattleAreaHUD extends Application {
       minimized: false
     };
 
+    // 标记是否是初次渲染（用于位置恢复）
+    this._isFirstRender = true;
+
     // 监听角色数据更新
     this._setupActorUpdateHook();
   }
@@ -494,10 +497,11 @@ export default class BattleAreaHUD extends Application {
   setPosition(options = {}) {
     const position = super.setPosition(options);
 
-    // 应用保存的位置
-    if (this.hudState.position) {
+    // 只在初次渲染时应用保存的位置，后续渲染保持当前位置
+    if (this._isFirstRender && this.hudState.position) {
       position.left = this.hudState.position.left;
       position.top = this.hudState.position.top;
+      this._isFirstRender = false;
     }
 
     return position;
