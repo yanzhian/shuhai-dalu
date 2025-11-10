@@ -1,29 +1,29 @@
 /* ========================================
-   战斗区域HUD样式 - 全局公共HUD
+   敌人战斗区域HUD样式 - 全局公共HUD
    底色: 透明
    主色: #0F0D1B
-   金色/描边: #E3B767
+   红色/描边: #C14545
    ======================================== */
 
-.battle-area-hud {
+.enemy-battle-area-hud {
   background: transparent !important;
   box-shadow: none !important;
   border: none !important;
 }
 
-.battle-area-hud .window-content {
+.enemy-battle-area-hud .window-content {
   background: transparent !important;
   padding: 0 !important;
   overflow: visible !important;
 }
 
-.battle-area-hud .battle-hud-window {
+.enemy-battle-area-hud .battle-hud-window {
   font-family: "Noto Sans SC", sans-serif;
   background: transparent;
   width: 420px;
 }
 
-.battle-area-hud .battle-hud-window.minimized .hud-content {
+.enemy-battle-area-hud .battle-hud-window.minimized .hud-content {
   display: none;
 }
 
@@ -31,9 +31,9 @@
    HUD头部 (可拖动)
    ======================================== */
 
-.battle-area-hud .hud-header {
+.enemy-battle-area-hud .hud-header {
   background: rgba(15, 13, 27, 0.95);
-  border: 2px solid #E3B767;
+  border: 2px solid #C14545;
   border-radius: 8px 8px 0 0;
   padding: 8px 12px;
   display: flex;
@@ -43,24 +43,24 @@
   user-select: none;
 }
 
-.battle-area-hud .hud-title {
+.enemy-battle-area-hud .hud-title {
   font-size: 16px;
   font-weight: bold;
-  color: #E3B767;
+  color: #C14545;
 }
 
-.battle-area-hud .hud-controls {
+.enemy-battle-area-hud .hud-controls {
   display: flex;
   gap: 6px;
 }
 
-.battle-area-hud .hud-control-btn {
+.enemy-battle-area-hud .hud-control-btn {
   width: 24px;
   height: 24px;
   background: transparent;
-  border: 1px solid #E3B767;
+  border: 1px solid #C14545;
   border-radius: 3px;
-  color: #E3B767;
+  color: #C14545;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -69,12 +69,12 @@
   transition: all 0.2s;
 }
 
-.battle-area-hud .hud-control-btn:hover {
-  background: #E3B767;
+.enemy-battle-area-hud .hud-control-btn:hover {
+  background: #C14545;
   color: #0F0D1B;
 }
 
-.battle-area-hud .hud-control-btn.close:hover {
+.enemy-battle-area-hud .hud-control-btn.close:hover {
   background: #c14545;
   border-color: #c14545;
   color: #fff;
@@ -84,57 +84,57 @@
    HUD内容区域
    ======================================== */
 
-.battle-area-hud .hud-content {
-  /* background: rgba(15, 13, 27, 0.95);
-  border: 2px solid #E3B767;
+.enemy-battle-area-hud .hud-content {
+  background: rgba(15, 13, 27, 0.95);
+  border: 2px solid #C14545;
   border-top: none;
   border-radius: 0 0 8px 8px;
-  padding: 12px; */
+  padding: 12px;
 }
 
 /* ========================================
    玩家卡片容器
    ======================================== */
 
-.battle-area-hud .hud-players-container {
+.enemy-battle-area-hud .hud-players-container {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 12px;
-  max-height: 1200px;
+  max-height: 600px;
   overflow-y: auto;
   overflow-x: hidden;
 }
 
 /* 滚动条样式 */
-.battle-area-hud .hud-players-container::-webkit-scrollbar {
+.enemy-battle-area-hud .hud-players-container::-webkit-scrollbar {
   width: 6px;
 }
 
-.battle-area-hud .hud-players-container::-webkit-scrollbar-thumb {
-  background: #E3B767;
+.enemy-battle-area-hud .hud-players-container::-webkit-scrollbar-thumb {
+  background: #C14545;
   border-radius: 3px;
 }
 
-.battle-area-hud .hud-players-container::-webkit-scrollbar-track {
+.enemy-battle-area-hud .hud-players-container::-webkit-scrollbar-track {
   background: transparent;
 }
 
 /* 空消息 */
-.battle-area-hud .hud-empty-message {
+.enemy-battle-area-hud .hud-empty-message {
   width: 100%;
   padding: 40px;
   text-align: center;
   color: #888;
 }
 
-.battle-area-hud .hud-empty-message i {
+.enemy-battle-area-hud .hud-empty-message i {
   font-size: 48px;
   margin-bottom: 16px;
   opacity: 0.5;
 }
 
-.battle-area-hud .hud-empty-message p {
+.enemy-battle-area-hud .hud-empty-message p {
   margin: 8px 0;
   font-size: 14px;
 }
@@ -143,10 +143,10 @@
    单个玩家卡片
    ======================================== */
 
-.battle-area-hud .hud-player-card {
+.enemy-battle-area-hud .hud-player-card {
   position: relative;
   background: rgba(15, 13, 27, 0.8);
-  border: 2px solid #E3B767;
+  border: 2px solid #C14545;
   border-radius: 8px;
   padding: 12px;
   width: 100%;
@@ -154,14 +154,14 @@
   transition: all 0.3s;
 }
 
-.battle-area-hud .hud-player-card:hover {
+.enemy-battle-area-hud .hud-player-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(227, 183, 103, 0.4);
-  border-color: #f3c267;
+  box-shadow: 0 4px 12px rgba(193, 69, 69, 0.4);
+  border-color: #d14545;
 }
 
 /* 移除按钮 */
-.battle-area-hud .hud-remove-player-btn {
+.enemy-battle-area-hud .hud-remove-player-btn {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -180,7 +180,7 @@
   z-index: 10;
 }
 
-.battle-area-hud .hud-remove-player-btn:hover {
+.enemy-battle-area-hud .hud-remove-player-btn:hover {
   background: #c14545;
   transform: scale(1.1);
 }
@@ -189,31 +189,31 @@
    战斗区域信息
    ======================================== */
 
-.battle-area-hud .hud-battle-area-info {
+.enemy-battle-area-hud .hud-battle-area-info {
   display: flex;
   gap: 12px;
   margin-bottom: 12px;
 }
 
 /* 头像 (92px × 92px) */
-.battle-area-hud .hud-avatar {
-  width: 32px;
-  height: 32px;
-  /* flex-shrink: 0;
-  background: #0F0D1B; */
-  /* border: 2px solid #E3B767; */
-  /* border-radius: 4px; */
+.enemy-battle-area-hud .hud-avatar {
+  width: 92px;
+  height: 92px;
+  flex-shrink: 0;
+  background: #0F0D1B;
+  border: 2px solid #C14545;
+  border-radius: 4px;
   overflow: hidden;
 }
 
-.battle-area-hud .hud-avatar img {
+.enemy-battle-area-hud .hud-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
 /* 右侧信息区域 */
-.battle-area-hud .hud-info-right {
+.enemy-battle-area-hud .hud-info-right {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -221,51 +221,51 @@
 }
 
 /* 玩家名字和速度行 */
-.battle-area-hud .hud-name-speed-row {
+.enemy-battle-area-hud .hud-name-speed-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 4px;
 }
 
-.battle-area-hud .hud-player-name {
+.enemy-battle-area-hud .hud-player-name {
   font-size: 26px;
   font-weight: bold;
-  color: #E3B767;
+  color: #C14545;
   line-height: 1;
 }
 
-.battle-area-hud .hud-speed-circles {
+.enemy-battle-area-hud .hud-speed-circles {
   display: flex;
   gap: 6px;
   margin-right: 20px; /* 往左移动20px，避免被移除按钮遮挡 */
 }
 
-.battle-area-hud .hud-speed-circle {
+.enemy-battle-area-hud .hud-speed-circle {
   width: 28px;
   height: 28px;
   background: #0F0D1B;
-  border: 2px solid #E3B767;
+  border: 2px solid #C14545;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
   font-weight: bold;
-  color: #E3B767;
+  color: #C14545;
 }
 
 /* 状态条 */
-.battle-area-hud .hud-status-bar {
+.enemy-battle-area-hud .hud-status-bar {
   position: relative;
   height: 22px;
   background: #0F0D1B;
-  border: 1px solid #E3B767;
+  border: 1px solid #C14545;
   border-radius: 3px;
   overflow: hidden;
 }
 
-.battle-area-hud .hud-bar-fill {
+.enemy-battle-area-hud .hud-bar-fill {
   position: absolute;
   left: 0;
   top: 0;
@@ -273,108 +273,108 @@
   transition: width 0.3s ease;
 }
 
-.battle-area-hud .hud-hp-bar .hud-bar-fill {
+.enemy-battle-area-hud .hud-hp-bar .hud-bar-fill {
   background: linear-gradient(90deg, #2d5016, #4a7c2c);
 }
 
-.battle-area-hud .hud-erosion-bar .hud-bar-fill {
+.enemy-battle-area-hud .hud-erosion-bar .hud-bar-fill {
   background: linear-gradient(90deg, #1a4d6d, #2e7da8);
 }
 
-.battle-area-hud .hud-chaos-bar .hud-bar-fill {
+.enemy-battle-area-hud .hud-chaos-bar .hud-bar-fill {
   background: linear-gradient(90deg, #8b4513, #cd853f);
 }
 
-.battle-area-hud .hud-bar-text {
+.enemy-battle-area-hud .hud-bar-text {
   position: relative;
   z-index: 1;
   text-align: center;
   line-height: 22px;
   font-size: 12px;
   font-weight: bold;
-  color: #E3B767;
+  color: #C14545;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 /* 侵蚀度和混乱值行 */
-.battle-area-hud .hud-status-bars-row {
+.enemy-battle-area-hud .hud-status-bars-row {
   display: flex;
   gap: 6px;
 }
 
-.battle-area-hud .hud-status-bars-row .hud-status-bar {
+.enemy-battle-area-hud .hud-status-bars-row .hud-status-bar {
   flex: 1;
   height: 20px;
 }
 
-.battle-area-hud .hud-status-bars-row .hud-bar-text {
+.enemy-battle-area-hud .hud-status-bars-row .hud-bar-text {
   line-height: 20px;
   font-size: 11px;
 }
 
 /* Cost和EX资源 */
-.battle-area-hud .hud-resources-row {
+.enemy-battle-area-hud .hud-resources-row {
   display: flex;
   gap: 12px;
   align-items: center;
 }
 
-.battle-area-hud .hud-resource-section {
+.enemy-battle-area-hud .hud-resource-section {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.battle-area-hud .hud-resource-label {
+.enemy-battle-area-hud .hud-resource-label {
   font-size: 13px;
   font-weight: bold;
-  color: #E3B767;
+  color: #C14545;
   min-width: 38px;
 }
 
-.battle-area-hud .hud-resource-circles {
+.enemy-battle-area-hud .hud-resource-circles {
   display: flex;
   gap: 4px;
 }
 
-.battle-area-hud .hud-resource-circle {
+.enemy-battle-area-hud .hud-resource-circle {
   width: 18px;
   height: 18px;
   border-radius: 50%;
   background: #0F0D1B;
-  border: 2px solid #E3B767;
+  border: 2px solid #C14545;
   transition: all 0.2s;
 }
 
-.battle-area-hud .hud-resource-circle.active {
-  background: #E3B767;
+.enemy-battle-area-hud .hud-resource-circle.active {
+  background: #C14545;
   border-width: 0.5px;
-  box-shadow: 0 0 6px rgba(227, 183, 103, 0.6);
+  box-shadow: 0 0 6px rgba(193, 69, 69, 0.6);
 }
 
 /* 战斗骰行 */
-.battle-area-hud .hud-combat-dice-row {
+.enemy-battle-area-hud .hud-combat-dice-row {
   display: flex;
   gap: 6px;
 }
 
-.battle-area-hud .hud-dice-slot {
+.enemy-battle-area-hud .hud-dice-slot {
   position: relative;
   width: 26px;
   height: 26px;
   background: #0F0D1B;
-  border: 0.5px solid #E3B767;
+  border: 0.5px solid #C14545;
   border-radius: 3px;
   overflow: hidden;
 }
 
-.battle-area-hud .hud-dice-slot img {
+.enemy-battle-area-hud .hud-dice-slot img {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-.battle-area-hud .hud-dice-activation-indicator {
+.enemy-battle-area-hud .hud-dice-activation-indicator {
   position: absolute;
   bottom: 2px;
   right: 2px;
@@ -382,82 +382,82 @@
   height: 8px;
   border-radius: 50%;
   background: #0F0D1B;
-  border: 2px solid #E3B767;
+  border: 2px solid #C14545;
 }
 
-.battle-area-hud .hud-dice-activation-indicator.active {
-  background: #E3B767;
+.enemy-battle-area-hud .hud-dice-activation-indicator.active {
+  background: #C14545;
   border-width: 0.5px;
-  box-shadow: 0 0 4px rgba(227, 183, 103, 0.8);
+  box-shadow: 0 0 4px rgba(193, 69, 69, 0.8);
 }
 
 /* ========================================
    BUFF区域
    ======================================== */
 
-.battle-area-hud .hud-buff-area {
+.enemy-battle-area-hud .hud-buff-area {
   margin-top: 12px;
 }
 
-.battle-area-hud .hud-section-title {
+.enemy-battle-area-hud .hud-section-title {
   font-size: 14px;
   font-weight: bold;
-  color: #E3B767;
+  color: #C14545;
   margin-bottom: 8px;
   text-align: center;
   padding: 4px;
-  background: rgba(227, 183, 103, 0.1);
+  background: rgba(193, 69, 69, 0.1);
   border-radius: 3px;
 }
 
-.battle-area-hud .hud-buff-slots {
+.enemy-battle-area-hud .hud-buff-slots {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 6px;
 }
 
-.battle-area-hud .hud-buff-slot {
+.enemy-battle-area-hud .hud-buff-slot {
   position: relative;
   aspect-ratio: 1;
   background: #0F0D1B;
-  border: 1px solid #E3B767;
+  border: 1px solid #C14545;
   border-radius: 4px;
   cursor: pointer;
   overflow: hidden;
   transition: all 0.2s;
 }
 
-.battle-area-hud .hud-buff-slot:hover {
-  border-color: #f3c267;
+.enemy-battle-area-hud .hud-buff-slot:hover {
+  border-color: #d14545;
   transform: scale(1.05);
-  box-shadow: 0 0 8px rgba(227, 183, 103, 0.4);
+  box-shadow: 0 0 8px rgba(193, 69, 69, 0.4);
 }
 
-.battle-area-hud .hud-buff-slot.empty {
+.enemy-battle-area-hud .hud-buff-slot.empty {
   opacity: 0.5;
   border-style: dashed;
 }
 
-.battle-area-hud .hud-buff-slot.empty:hover {
+.enemy-battle-area-hud .hud-buff-slot.empty:hover {
   opacity: 0.8;
-  background: rgba(227, 183, 103, 0.1);
+  background: rgba(193, 69, 69, 0.1);
 }
 
-.battle-area-hud .hud-buff-slot img {
+.enemy-battle-area-hud .hud-buff-slot img {
   width: 100%;
   height: 100%;
   object-fit: contain;
   padding: 4px;
 }
 
-.battle-area-hud .hud-buff-layers {
+.enemy-battle-area-hud .hud-buff-layers {
   position: absolute;
   bottom: 2px;
   left: 2px;
   min-width: 16px;
   height: 16px;
   background: rgba(15, 13, 27, 0.9);
-  border: 1px solid #E3B767;
+  border: 1px solid #C14545;
   border-radius: 3px;
   display: flex;
   align-items: center;
@@ -468,14 +468,14 @@
   padding: 0 3px;
 }
 
-.battle-area-hud .hud-buff-strength {
+.enemy-battle-area-hud .hud-buff-strength {
   position: absolute;
   bottom: 2px;
   right: 2px;
   min-width: 16px;
   height: 16px;
   background: rgba(15, 13, 27, 0.9);
-  border: 1px solid #E3B767;
+  border: 1px solid #C14545;
   border-radius: 3px;
   display: flex;
   align-items: center;
@@ -490,9 +490,9 @@
    分割线
    ======================================== */
 
-.battle-area-hud .hud-divider {
+.enemy-battle-area-hud .hud-divider {
   height: 2px;
-  background: linear-gradient(90deg, transparent, #E3B767, transparent);
+  background: linear-gradient(90deg, transparent, #C14545, transparent);
   margin: 12px 0;
 }
 
@@ -500,13 +500,13 @@
    加入战斗轮按钮
    ======================================== */
 
-.battle-area-hud .hud-join-battle-btn {
+.enemy-battle-area-hud .hud-join-battle-btn {
   width: 100%;
   padding: 12px;
-  background: linear-gradient(135deg, #E3B767, #d4a556);
-  border: 2px solid #E3B767;
+  background: linear-gradient(135deg, #C14545, #a03535);
+  border: 2px solid #C14545;
   border-radius: 6px;
-  color: #0F0D1B;
+  color: #fff;
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
@@ -514,18 +514,18 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-.battle-area-hud .hud-join-battle-btn:hover {
-  background: linear-gradient(135deg, #f3c267, #E3B767);
+.enemy-battle-area-hud .hud-join-battle-btn:hover {
+  background: linear-gradient(135deg, #d14545, #C14545);
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(227, 183, 103, 0.5);
+  box-shadow: 0 6px 12px rgba(193, 69, 69, 0.5);
 }
 
-.battle-area-hud .hud-join-battle-btn:active {
+.enemy-battle-area-hud .hud-join-battle-btn:active {
   transform: translateY(0);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.battle-area-hud .hud-join-battle-btn i {
+.enemy-battle-area-hud .hud-join-battle-btn i {
   margin-right: 8px;
 }
 
@@ -533,11 +533,11 @@
    缩放效果
    ======================================== */
 
-.battle-area-hud {
+.enemy-battle-area-hud {
   transform-origin: top left;
 }
 
-.battle-area-hud .window-content {
+.enemy-battle-area-hud .window-content {
   transform-origin: top left;
 }
 
@@ -546,11 +546,11 @@
    ======================================== */
 
 @media (max-width: 800px) {
-  .battle-area-hud .hud-player-name {
+  .enemy-battle-area-hud .hud-player-name {
     font-size: 20px;
   }
 
-  .battle-area-hud .hud-buff-slots {
+  .enemy-battle-area-hud .hud-buff-slots {
     grid-template-columns: repeat(3, 1fr);
   }
 }

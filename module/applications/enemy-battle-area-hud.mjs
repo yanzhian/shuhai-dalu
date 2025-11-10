@@ -1,5 +1,5 @@
 /**
- * 全局战斗区域HUD - 显示所有参战玩家的信息
+ * 全局敌人战斗区域HUD - 显示所有参战敌人的信息
  * 特性：可拖动、可缩放、可最小化、透明底色
  */
 
@@ -34,16 +34,16 @@ const BUFF_TYPES = {
   ]
 };
 
-export default class BattleAreaHUD extends Application {
+export default class EnemyBattleAreaHUD extends Application {
 
   constructor(options = {}) {
     super(options);
 
     // 加载全局参战角色列表
-    this.battleActors = game.settings.get('shuhai-dalu', 'battleActors') || [];
+    this.battleActors = game.settings.get('shuhai-dalu', 'enemyBattleActors') || [];
 
     // 加载HUD状态（位置、缩放、最小化）
-    this.hudState = game.settings.get('shuhai-dalu', 'battleHudState') || {
+    this.hudState = game.settings.get('shuhai-dalu', 'enemyBattleHudState') || {
       position: { left: 100, top: 100 },
       scale: 1.0,
       minimized: false
@@ -62,13 +62,13 @@ export default class BattleAreaHUD extends Application {
   /** @override */
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ["shuhai-dalu", "battle-area-hud"],
-      template: "systems/shuhai-dalu/templates/hud/battle-area-hud.hbs",
+      classes: ["shuhai-dalu", "enemy-battle-area-hud"],
+      template: "systems/shuhai-dalu/templates/hud/enemy-battle-area-hud.hbs",
       width: 420,
       height: "auto",
       resizable: false,
       minimizable: false,
-      title: "战斗区域HUD",
+      title: "敌人信息表",
       popOut: true,
       dragDrop: []
     });
@@ -76,7 +76,7 @@ export default class BattleAreaHUD extends Application {
 
   /** @override */
   get title() {
-    return "战斗区域HUD";
+    return "敌人信息表";
   }
 
   /** @override */
@@ -84,7 +84,7 @@ export default class BattleAreaHUD extends Application {
     const context = await super.getData();
 
     // 重新加载参战角色列表
-    this.battleActors = game.settings.get('shuhai-dalu', 'battleActors') || [];
+    this.battleActors = game.settings.get('shuhai-dalu', 'enemyBattleActors') || [];
 
     // 获取所有参战角色的数据
     context.players = [];
@@ -405,7 +405,7 @@ export default class BattleAreaHUD extends Application {
 
     // 从列表中移除
     this.battleActors = this.battleActors.filter(id => id !== actorId);
-    await game.settings.set('shuhai-dalu', 'battleActors', this.battleActors);
+    await game.settings.set('shuhai-dalu', 'enemyBattleActors', this.battleActors);
 
     // 刷新
     this.render();
@@ -450,7 +450,7 @@ export default class BattleAreaHUD extends Application {
     // 添加到参战列表
     if (!this.battleActors.includes(actor.id)) {
       this.battleActors.push(actor.id);
-      await game.settings.set('shuhai-dalu', 'battleActors', this.battleActors);
+      await game.settings.set('shuhai-dalu', 'enemyBattleActors', this.battleActors);
       this.render();
     }
   }
@@ -498,7 +498,7 @@ export default class BattleAreaHUD extends Application {
    * 保存HUD状态
    */
   async _saveHudState() {
-    await game.settings.set('shuhai-dalu', 'battleHudState', this.hudState);
+    await game.settings.set('shuhai-dalu', 'enemyBattleHudState', this.hudState);
   }
 
   /**

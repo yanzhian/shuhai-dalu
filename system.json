@@ -22,7 +22,8 @@
     "styles/combat-area.css",
     "styles/counter-area.css",
     "styles/item-card-sheet.css",
-    "styles/battle-area-hud.css"
+    "styles/battle-area-hud.css",
+    "styles/enemy-battle-area-hud.css"
   ],
   "documentTypes": {
     "Actor": {
