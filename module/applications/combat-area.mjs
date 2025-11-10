@@ -707,8 +707,8 @@ export default class CombatAreaApplication extends Application {
       return;
     }
 
-    // 检查是否为战斗骰类型
-    if (item.type !== 'combatDice') {
+    // 检查是否为战斗骰类型(攻击骰或射击骰)
+    if (item.type !== 'combatDice' && item.type !== 'shootDice') {
       ui.notifications.warn("只有战斗骰可以发起对抗");
       return;
     }
