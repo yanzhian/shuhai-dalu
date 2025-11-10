@@ -69,8 +69,10 @@
       "path": "lang/zh-CN.json"
     }
   ],
-  "gridDistance": 5,
-  "gridUnits": "m",
+  "grid": {
+    "distance": 5,
+    "units": "m"
+  },
   "primaryTokenAttribute": "derived.hp",
   "secondaryTokenAttribute": "derived.corruption",
   "initiative": "derived.totalSpeed",
