@@ -533,6 +533,10 @@
    缩放效果
    ======================================== */
 
+.battle-area-hud {
+  transform-origin: top left;
+}
+
 .battle-area-hud .window-content {
   transform-origin: top left;
 }

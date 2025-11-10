@@ -303,11 +303,11 @@ export default class EnemyBattleAreaHUD extends Application {
    * 应用缩放
    */
   _applyScale(html) {
-    // 对整个窗口内容应用缩放（包括header和content）
-    const content = html.find('.window-content')[0];
-    if (content) {
-      content.style.transform = `scale(${this.hudState.scale})`;
-      content.style.transformOrigin = 'top left';
+    // 对整个窗口应用缩放（使用this.element获取根元素）
+    if (this.element && this.element.length > 0) {
+      const appElement = this.element[0];
+      appElement.style.transform = `scale(${this.hudState.scale})`;
+      appElement.style.transformOrigin = 'top left';
     }
   }
 
