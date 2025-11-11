@@ -1973,12 +1973,61 @@ export default class CombatAreaApplication extends Application {
 
     console.log('【轮次切换】处理后BUFF数量:', mergedBuffs.length);
 
+    // 第三步：处理"每轮结束时层数减少1层"的BUFF
+    const roundEndBuffIds = ['burn', 'breath', 'charge', 'chant'];
+    const roundEndMessages = [];
+
+    for (const buff of mergedBuffs) {
+      if (roundEndBuffIds.includes(buff.id)) {
+        // 特殊处理【燃烧】：层数减少前先触发伤害
+        if (buff.id === 'burn' && buff.layers > 0) {
+          const damage = buff.strength;
+          const newHp = Math.max(0, this.actor.system.derived.hp.value - damage);
+          await this.actor.update({ 'system.derived.hp.value': newHp });
+          console.log(`【轮次结束】【燃烧】触发: 受到${damage}点伤害`);
+          roundEndMessages.push(`【燃烧】造成 ${damage} 点伤害`);
+        }
+
+        // 层数减少1层
+        buff.layers -= 1;
+        console.log(`【轮次结束】${buff.name} 层数减少1层，剩余${buff.layers}层`);
+
+        if (buff.layers > 0) {
+          roundEndMessages.push(`${buff.name} 层数减少1层（剩余${buff.layers}层）`);
+        }
+      }
+    }
+
+    // 第四步：删除层数为0或以下的BUFF
+    const finalBuffs = mergedBuffs.filter(buff => {
+      if (buff.layers <= 0) {
+        console.log(`【轮次结束】删除层数为0的BUFF: ${buff.name}`);
+        roundEndMessages.push(`${buff.name} 已消失`);
+        return false;
+      }
+      return true;
+    });
+
+    console.log('【轮次切换】最终BUFF数量:', finalBuffs.length);
+
     // 更新BUFF列表
-    this.combatState.buffs = mergedBuffs;
+    this.combatState.buffs = finalBuffs;
 
     // 保存并重新渲染
     await this._saveCombatState();
     this.render(false);
+
+    // 发送轮次结束效果消息
+    if (roundEndMessages.length > 0) {
+      await this._sendChatMessage(`
+        <div style="border: 2px solid #8b4513; border-radius: 4px; padding: 12px; background: #0F0D1B;">
+          <h3 style="margin: 0 0 8px 0; color: #cd853f;">【轮次结束效果】</h3>
+          <ul style="margin: 8px 0; padding-left: 20px; color: #EBBD68;">
+            ${roundEndMessages.map(msg => `<li>${msg}</li>`).join('')}
+          </ul>
+        </div>
+      `);
+    }
 
     ui.notifications.info(`轮次切换：一回合内BUFF已清除，下回合BUFF已生效并合并`);
   }
