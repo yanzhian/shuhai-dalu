@@ -304,11 +304,8 @@ async function getCurrentActor() {
  * @returns {boolean} 是否有活动被触发
  */
 export async function triggerItemActivities(actor, item, triggerType) {
-  console.log(`【独立触发】角色: ${actor.name}, 物品: ${item.name}, 触发类型: ${triggerType}`);
-
   // 检查物品是否有activities
   if (!item.system.activities || Object.keys(item.system.activities).length === 0) {
-    console.log(`【独立触发】物品 ${item.name} 没有 activities`);
     return false;
   }
 
@@ -318,11 +315,8 @@ export async function triggerItemActivities(actor, item, triggerType) {
   );
 
   if (matchingActivities.length === 0) {
-    console.log(`【独立触发】物品 ${item.name} 没有匹配 ${triggerType} 的 activities`);
     return false;
   }
-
-  console.log(`【独立触发】找到 ${matchingActivities.length} 个匹配的 activities`);
 
   // 获取战斗状态
   let combatState = actor.getFlag('shuhai-dalu', 'combatState') || {
@@ -343,8 +337,6 @@ export async function triggerItemActivities(actor, item, triggerType) {
 
   // 执行每个activity
   for (const activity of matchingActivities) {
-    console.log(`【独立触发】执行 activity:`, activity);
-
     // 获取回合时机
     const roundTiming = activity.roundTiming || 'current';
 
@@ -353,7 +345,6 @@ export async function triggerItemActivities(actor, item, triggerType) {
 
     // 目前只处理self目标
     if (targetType !== 'self') {
-      console.log(`【独立触发】跳过非self目标的activity (目标类型: ${targetType})`);
       continue;
     }
 
@@ -368,7 +359,7 @@ export async function triggerItemActivities(actor, item, triggerType) {
         // 查找BUFF定义
         const buffDef = allBuffs.find(b => b.id === buffId);
         if (!buffDef) {
-          console.warn(`【独立触发】未找到 BUFF 定义: ${buffId}`);
+          console.warn(`未找到 BUFF 定义: ${buffId}`);
           continue;
         }
 
@@ -381,7 +372,6 @@ export async function triggerItemActivities(actor, item, triggerType) {
           // 如果已存在，增加层数和强度
           combatState.buffs[existingBuffIndex].layers += layers;
           combatState.buffs[existingBuffIndex].strength += strength;
-          console.log(`【独立触发】叠加 ${buffDef.name}: 现在 ${combatState.buffs[existingBuffIndex].layers}层 ${combatState.buffs[existingBuffIndex].strength}强度`);
         } else {
           // 如果不存在，添加新BUFF
           combatState.buffs.push({
@@ -394,7 +384,6 @@ export async function triggerItemActivities(actor, item, triggerType) {
             strength: strength !== 0 ? strength : buffDef.defaultStrength,
             roundTiming: roundTiming
           });
-          console.log(`【独立触发】添加 ${buffDef.name}: ${layers}层 ${strength !== 0 ? strength : buffDef.defaultStrength}强度`);
         }
 
         hasTriggered = true;
@@ -405,7 +394,6 @@ export async function triggerItemActivities(actor, item, triggerType) {
   // 保存战斗状态
   if (hasTriggered) {
     await actor.setFlag('shuhai-dalu', 'combatState', combatState);
-    console.log(`【独立触发】已保存战斗状态到 ${actor.name}`);
 
     // 刷新战斗区域（如果打开）
     Object.values(ui.windows).forEach(app => {
@@ -416,6 +404,170 @@ export async function triggerItemActivities(actor, item, triggerType) {
   }
 
   return hasTriggered;
+}
+
+/**
+ * 独立的回合结束处理函数 - 不依赖CombatAreaApplication
+ * @param {Actor} actor - 角色
+ */
+export async function advanceActorRound(actor) {
+  // 获取战斗状态
+  let combatState = actor.getFlag('shuhai-dalu', 'combatState');
+  if (!combatState || !combatState.buffs || combatState.buffs.length === 0) {
+    return;
+  }
+
+  // 定义"一回合内"的BUFF ID（轮次切换时清除）
+  const oneRoundBuffIds = ['strong', 'weak', 'guard', 'vulnerable', 'swift', 'bound', 'endure', 'flaw'];
+
+  // 定义"每轮结束时层数减少"的BUFF ID（不合并本回合和下回合）
+  const roundEndBuffIds = ['burn', 'breath', 'charge', 'chant'];
+
+  // 第一步：分类BUFF
+  const currentBuffs = [];  // 本回合的BUFF
+  const nextBuffs = [];     // 下回合的BUFF
+
+  for (const buff of combatState.buffs) {
+    const timing = buff.roundTiming || 'current';
+
+    if (timing === 'current') {
+      // 删除"一回合内"的BUFF
+      if (oneRoundBuffIds.includes(buff.id)) {
+        continue;
+      }
+      // 保留其他BUFF（效果型BUFF）
+      currentBuffs.push(buff);
+    } else if (timing === 'next' || timing === 'both') {
+      nextBuffs.push(buff);
+    }
+  }
+
+  // 第二步：处理本回合的"每轮结束时层数减少"的BUFF
+  const roundEndMessages = [];
+
+  for (const buff of currentBuffs) {
+    if (roundEndBuffIds.includes(buff.id)) {
+      // 特殊处理【燃烧】：层数减少前先触发伤害
+      if (buff.id === 'burn' && buff.layers > 0) {
+        const damage = buff.strength;
+        const newHp = Math.max(0, actor.system.derived.hp.value - damage);
+        await actor.update({ 'system.derived.hp.value': newHp });
+        roundEndMessages.push(`【燃烧】造成 ${damage} 点伤害`);
+      }
+
+      // 层数减少1层
+      buff.layers -= 1;
+
+      if (buff.layers > 0) {
+        roundEndMessages.push(`${buff.name} 层数减少1层（剩余${buff.layers}层）`);
+      }
+    }
+  }
+
+  // 第三步：删除层数为0或以下的本回合BUFF
+  const survivedCurrentBuffs = currentBuffs.filter(buff => {
+    if (buff.layers <= 0) {
+      roundEndMessages.push(`${buff.name} 已消失`);
+      return false;
+    }
+    return true;
+  });
+
+  // 第四步：合并BUFF（每轮结束减层的BUFF不合并）
+  const mergedBuffs = [];
+  const processedIds = new Set();
+
+  // 先处理本回合保留的BUFF
+  for (const currentBuff of survivedCurrentBuffs) {
+    const key = currentBuff.id === 'custom'
+      ? `custom_${currentBuff.name}`
+      : currentBuff.id;
+
+    // 如果是每轮结束减层的BUFF，不合并，直接保留
+    if (roundEndBuffIds.includes(currentBuff.id)) {
+      mergedBuffs.push({
+        ...currentBuff,
+        roundTiming: 'current'
+      });
+      processedIds.add(key);
+      continue;
+    }
+
+    // 查找是否有同id的下回合BUFF
+    const nextBuff = nextBuffs.find(b => {
+      if (b.id === 'custom') {
+        return b.id === currentBuff.id && b.name === currentBuff.name;
+      }
+      return b.id === currentBuff.id;
+    });
+
+    if (nextBuff) {
+      // 找到匹配的下回合BUFF，合并它们（只合并非每轮减层的BUFF）
+      const mergedLayers = currentBuff.layers + nextBuff.layers;
+      const mergedStrength = currentBuff.strength + nextBuff.strength;
+      mergedBuffs.push({
+        ...currentBuff,
+        layers: mergedLayers,
+        strength: mergedStrength,
+        roundTiming: 'current'
+      });
+      processedIds.add(key);
+    } else {
+      // 没有匹配的下回合BUFF，直接保留
+      mergedBuffs.push({
+        ...currentBuff,
+        roundTiming: 'current'
+      });
+      processedIds.add(key);
+    }
+  }
+
+  // 第五步：处理未匹配的下回合BUFF（直接转为本回合）
+  for (const nextBuff of nextBuffs) {
+    const key = nextBuff.id === 'custom'
+      ? `custom_${nextBuff.name}`
+      : nextBuff.id;
+
+    if (!processedIds.has(key)) {
+      // 这个下回合BUFF没有本回合版本，直接转换
+      mergedBuffs.push({
+        ...nextBuff,
+        roundTiming: 'current'
+      });
+    }
+  }
+
+  // 更新BUFF列表
+  combatState.buffs = mergedBuffs;
+
+  // 保存战斗状态
+  await actor.setFlag('shuhai-dalu', 'combatState', combatState);
+
+  // 刷新战斗区域（如果打开）
+  Object.values(ui.windows).forEach(app => {
+    if (app.constructor.name === 'CombatAreaApplication' && app.actor.id === actor.id) {
+      app.render(false);
+    }
+  });
+
+  // 发送轮次结束效果消息
+  if (roundEndMessages.length > 0) {
+    const chatData = {
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: actor }),
+      content: `
+        <div style="border: 2px solid #8b4513; border-radius: 4px; padding: 12px; background: #0F0D1B;">
+          <h3 style="margin: 0 0 8px 0; color: #cd853f;">【轮次结束效果 - ${actor.name}】</h3>
+          <ul style="margin: 8px 0; padding-left: 20px; color: #EBBD68;">
+            ${roundEndMessages.map(msg => `<li>${msg}</li>`).join('')}
+          </ul>
+        </div>
+      `
+    };
+    await ChatMessage.create(chatData);
+  }
+
+  ui.notifications.info(`${actor.name}：轮次切换完成`);
 }
 
 /**
@@ -438,8 +590,6 @@ Hooks.on('renderChatMessage', (message, html, data) => {
 
     const initiateData = chatMessage.flags['shuhai-dalu'].initiateData;
 
-    console.log('【对抗按钮】点击对抗按钮，发起者ID:', initiateData.initiatorId);
-
     // 检查是否是指定目标，如果是，验证当前玩家
     if (initiateData.targetId) {
       const currentActor = await getCurrentActor();
@@ -456,7 +606,6 @@ Hooks.on('renderChatMessage', (message, html, data) => {
       counterArea.render(true);
     } else {
       // 没有指定目标，任何人都可以对抗
-      console.log('【对抗按钮】没有指定目标，任何人可对抗');
       const actor = await getCurrentActor();
       if (!actor) return;
 
@@ -1676,16 +1825,9 @@ Hooks.on('updateCombat', async (combat, changed, options, userId) => {
       const actor = combatant.actor;
       if (!actor) continue;
 
-      // 查找该角色打开的战斗区域窗口
-      const combatArea = Object.values(ui.windows).find(
-        app => app.constructor.name === 'CombatAreaApplication' && app.actor.id === actor.id
-      );
-
-      // 如果找到了战斗区域窗口，调用其advanceRound方法
-      if (combatArea && typeof combatArea.advanceRound === 'function') {
-        await combatArea.advanceRound();
-        console.log(`书海大陆 | 已更新 ${actor.name} 的BUFF回合计数`);
-      }
+      // 使用独立的回合结束处理函数
+      await advanceActorRound(actor);
+      console.log(`书海大陆 | 已更新 ${actor.name} 的BUFF回合计数`);
     }
   }
 });

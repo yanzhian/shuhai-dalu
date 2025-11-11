@@ -370,15 +370,8 @@ export default class CounterAreaApplication extends Application {
    * 执行对抗
    */
   async _performCounter(dice, adjustment, consumedEx = false, diceIndex = null) {
-    console.log('【防守方攻击时触发】开始处理，防守方:', this.actor.name, '使用骰子:', dice.name);
-
     // 触发防守方的【攻击时】activities（防守方使用战斗骰进行对抗）
-    const attackResult = await triggerItemActivities(this.actor, dice, 'onAttack');
-    if (attackResult) {
-      console.log('【防守方攻击时触发】触发成功');
-    } else {
-      console.log('【防守方攻击时触发】该骰子没有【攻击时】activities');
-    }
+    await triggerItemActivities(this.actor, dice, 'onAttack');
 
     // 先投发起者的骰子（如果还没投）
     const initiatorRollResult = await this._rollInitiatorDice();
@@ -412,25 +405,14 @@ export default class CounterAreaApplication extends Application {
     const initiatorResult = initiatorRoll + initiatorBuffBonus + initiatorAdjustment;
 
     // 触发双方的【对抗时】activities
-    console.log('【对抗时触发】开始触发双方的【对抗时】');
-
     // 1. 触发防守方骰子的【对抗时】
-    const defenderCounterResult = await triggerItemActivities(this.actor, dice, 'onCounter');
-    if (defenderCounterResult) {
-      console.log('【对抗时触发】防守方骰子触发成功');
-    }
+    await triggerItemActivities(this.actor, dice, 'onCounter');
 
     // 2. 触发攻击方骰子的【对抗时】
     if (initiator && this.initiateData.diceId) {
       const initiatorDice = initiator.items.get(this.initiateData.diceId);
       if (initiatorDice) {
-        console.log('【对抗时触发】触发攻击方骰子:', initiatorDice.name);
-        const initiatorCounterResult = await triggerItemActivities(initiator, initiatorDice, 'onCounter');
-        if (initiatorCounterResult) {
-          console.log('【对抗时触发】攻击方骰子触发成功');
-        }
-      } else {
-        console.warn('【对抗时触发】未找到攻击方的骰子，ID:', this.initiateData.diceId);
+        await triggerItemActivities(initiator, initiatorDice, 'onCounter');
       }
     }
 
@@ -450,14 +432,6 @@ export default class CounterAreaApplication extends Application {
       // 对抗者赢了，使用对抗者的战斗骰攻击类型
       // 如果对抗者的战斗骰没有设置 category，默认使用"打击"
       attackType = dice.system.category || '打击';
-
-      // 调试输出
-      console.log('【调试】对抗者战斗骰信息:', {
-        name: dice.name,
-        category: dice.system.category,
-        attackType: attackType,
-        loser: loser.name
-      });
     }
 
     // 计算抗性结果
@@ -580,14 +554,6 @@ export default class CounterAreaApplication extends Application {
 
     // 获取目标的防具
     const armor = actualTarget.items.get(actualTarget.system.equipment.armor);
-
-    console.log('【调试】抗性计算:', {
-      target: actualTarget.name,
-      damageCategory: damageCategory,
-      baseDamage: baseDamage,
-      hasArmor: !!armor,
-      armorName: armor?.name
-    });
 
     if (armor && armor.system.armorProperties) {
       const props = armor.system.armorProperties;
