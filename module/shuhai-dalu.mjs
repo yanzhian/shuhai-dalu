@@ -300,23 +300,37 @@ async function getCurrentActor() {
  * @param {Actor} actor - 要触发activities的角色
  */
 async function triggerCounterActivities(actor) {
+  console.log('【对抗时触发】开始处理角色:', actor.name);
+
   // 查找该角色的CombatAreaApplication
   const combatArea = Object.values(ui.windows).find(
     app => app.constructor.name === 'CombatAreaApplication' && app.actor.id === actor.id
   );
 
   if (!combatArea) {
-    console.warn(`未找到角色 ${actor.name} 的战斗区域应用`);
+    console.warn(`【对抗时触发】未找到角色 ${actor.name} 的战斗区域应用`);
     return;
   }
 
+  console.log(`【对抗时触发】找到战斗区域应用，开始遍历物品`);
+
   // 遍历角色的所有物品，触发【对抗时】activities
+  let triggeredCount = 0;
   for (const item of actor.items) {
     if (item.system.activities && Object.keys(item.system.activities).length > 0) {
+      console.log(`【对抗时触发】物品 ${item.name} 有 activities:`, Object.keys(item.system.activities));
       // 使用combat area的_triggerActivities方法
-      await combatArea._triggerActivities(item, 'onCounter');
+      const result = await combatArea._triggerActivities(item, 'onCounter');
+      if (result) {
+        triggeredCount++;
+        console.log(`【对抗时触发】物品 ${item.name} 触发成功`);
+      } else {
+        console.log(`【对抗时触发】物品 ${item.name} 没有匹配的【对抗时】activities`);
+      }
     }
   }
+
+  console.log(`【对抗时触发】完成，共触发 ${triggeredCount} 个 activities`);
 }
 
 /**
@@ -339,6 +353,8 @@ Hooks.on('renderChatMessage', (message, html, data) => {
 
     const initiateData = chatMessage.flags['shuhai-dalu'].initiateData;
 
+    console.log('【对抗按钮】点击对抗按钮，发起者ID:', initiateData.initiatorId);
+
     // 检查是否是指定目标，如果是，验证当前玩家
     if (initiateData.targetId) {
       const currentActor = await getCurrentActor();
@@ -349,11 +365,15 @@ Hooks.on('renderChatMessage', (message, html, data) => {
         return;
       }
 
+      console.log('【对抗按钮】开始触发双方【对抗时】activities');
       // 触发双方的【对抗时】activities
       await triggerCounterActivities(currentActor); // 防守方
       const initiatorActor = game.actors.get(initiateData.initiatorId);
       if (initiatorActor) {
+        console.log('【对抗按钮】找到攻击方角色:', initiatorActor.name);
         await triggerCounterActivities(initiatorActor); // 攻击方
+      } else {
+        console.warn('【对抗按钮】未找到攻击方角色');
       }
 
       // 打开对抗界面
@@ -362,6 +382,7 @@ Hooks.on('renderChatMessage', (message, html, data) => {
       counterArea.render(true);
     } else {
       // 没有指定目标，任何人都可以对抗
+      console.log('【对抗按钮】没有指定目标，任何人可对抗');
       const actor = await getCurrentActor();
       if (!actor) return;
 
@@ -371,11 +392,15 @@ Hooks.on('renderChatMessage', (message, html, data) => {
         return;
       }
 
+      console.log('【对抗按钮】开始触发双方【对抗时】activities');
       // 触发双方的【对抗时】activities
       await triggerCounterActivities(actor); // 防守方
       const initiatorActor2 = game.actors.get(initiateData.initiatorId);
       if (initiatorActor2) {
+        console.log('【对抗按钮】找到攻击方角色:', initiatorActor2.name);
         await triggerCounterActivities(initiatorActor2); // 攻击方
+      } else {
+        console.warn('【对抗按钮】未找到攻击方角色');
       }
 
       // 打开对抗界面

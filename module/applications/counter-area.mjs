@@ -368,12 +368,22 @@ export default class CounterAreaApplication extends Application {
    * 执行对抗
    */
   async _performCounter(dice, adjustment, consumedEx = false, diceIndex = null) {
+    console.log('【防守方攻击时触发】开始处理，防守方:', this.actor.name, '使用骰子:', dice.name);
+
     // 触发防守方的【攻击时】activities（防守方使用战斗骰进行对抗）
     const combatArea = Object.values(ui.windows).find(
       app => app.constructor.name === 'CombatAreaApplication' && app.actor.id === this.actor.id
     );
     if (combatArea && typeof combatArea._triggerActivities === 'function') {
-      await combatArea._triggerActivities(dice, 'onAttack');
+      console.log('【防守方攻击时触发】找到战斗区域应用，开始触发');
+      const result = await combatArea._triggerActivities(dice, 'onAttack');
+      if (result) {
+        console.log('【防守方攻击时触发】触发成功');
+      } else {
+        console.log('【防守方攻击时触发】该骰子没有【攻击时】activities');
+      }
+    } else {
+      console.warn('【防守方攻击时触发】未找到战斗区域应用或_triggerActivities方法');
     }
 
     // 先投发起者的骰子（如果还没投）
