@@ -835,19 +835,28 @@ Hooks.on('renderChatMessage', (message, html, data) => {
 
     // 应用所有BUFF
     for (const buff of buffData.buffs) {
-      // 检查是否已经存在相同的BUFF
-      // 对于自定义效果（id='custom'），使用名称+ID作为唯一标识
+      const roundTiming = buff.roundTiming || 'current';
+
+      // 检查是否已经存在相同id和roundTiming的BUFF（分开管理）
+      // 对于自定义效果（id='custom'），使用名称+ID+roundTiming作为唯一标识
       let existingBuffIndex;
       if (buff.buffId === 'custom') {
-        existingBuffIndex = combatState.buffs.findIndex(b => b.id === 'custom' && b.name === buff.buffName);
+        existingBuffIndex = combatState.buffs.findIndex(
+          b => b.id === 'custom' && b.name === buff.buffName && (b.roundTiming || 'current') === roundTiming
+        );
       } else {
-        existingBuffIndex = combatState.buffs.findIndex(b => b.id === buff.buffId);
+        existingBuffIndex = combatState.buffs.findIndex(
+          b => b.id === buff.buffId && (b.roundTiming || 'current') === roundTiming
+        );
       }
 
       if (existingBuffIndex !== -1) {
-        // 如果已存在，叠加层数和强度
+        // 如果已存在相同id和roundTiming的BUFF，叠加层数
         combatState.buffs[existingBuffIndex].layers += buff.layers;
-        combatState.buffs[existingBuffIndex].strength += buff.strength;
+        // 更新强度（不叠加）
+        if (buff.strength !== 0) {
+          combatState.buffs[existingBuffIndex].strength = buff.strength;
+        }
       } else {
         // 如果不存在，添加新BUFF
         combatState.buffs.push({
@@ -858,7 +867,7 @@ Hooks.on('renderChatMessage', (message, html, data) => {
           strength: buff.strength,
           source: buff.source,
           sourceItem: buff.sourceItem,
-          roundTiming: buff.roundTiming || 'current'  // 添加回合计数字段
+          roundTiming: roundTiming  // 添加回合计数字段
         });
       }
     }

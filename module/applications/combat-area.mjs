@@ -261,6 +261,21 @@ export default class CombatAreaApplication extends Application {
       this.combatState = savedState;
     }
 
+    // 对BUFF进行排序：本回合的在前，下回合的在后
+    if (this.combatState.buffs) {
+      this.combatState.buffs.sort((a, b) => {
+        const aRound = a.roundTiming || 'current';
+        const bRound = b.roundTiming || 'current';
+
+        // 本回合的在前
+        if (aRound === 'current' && bRound !== 'current') return -1;
+        if (aRound !== 'current' && bRound === 'current') return 1;
+
+        // 同类型按名称排序
+        return a.name.localeCompare(b.name);
+      });
+    }
+
     // 获取角色数据
     context.actor = this.actor;
     context.system = this.actor.system;
@@ -276,7 +291,7 @@ export default class CombatAreaApplication extends Application {
     // 准备被动骰槽位
     context.passiveDiceSlots = this._preparePassiveDiceSlots();
 
-    // 使用保存的速度值，并应用迅捷/束缚BUFF效果
+    // 使用保存的速度值，并应用迅捷/束缚BUFF效果（只考虑本回合的BUFF）
     context.speedValues = this._applySpeedModifiers(this.combatState.speedValues);
 
     return context;
@@ -396,21 +411,26 @@ export default class CombatAreaApplication extends Application {
 
   /**
    * 应用迅捷/束缚BUFF对速度值的修正
+   * 只考虑本回合的BUFF（roundTiming='current'或未设置）
    */
   _applySpeedModifiers(baseSpeedValues) {
     if (!baseSpeedValues) return [0, 0, 0];
 
     let modifier = 0;
 
-    // 计算迅捷/束缚的修正值
+    // 计算迅捷/束缚的修正值（只考虑本回合的BUFF）
     if (this.combatState.buffs) {
       for (const buff of this.combatState.buffs) {
-        if (buff.id === 'swift' && buff.layers > 0) {
-          // 迅捷：速度增加
-          modifier += buff.layers;
-        } else if (buff.id === 'bound' && buff.layers > 0) {
-          // 束缚：速度减少
-          modifier -= buff.layers;
+        const timing = buff.roundTiming || 'current';
+        // 只考虑本回合的BUFF
+        if (timing === 'current') {
+          if (buff.id === 'swift' && buff.layers > 0) {
+            // 迅捷：速度增加
+            modifier += buff.layers;
+          } else if (buff.id === 'bound' && buff.layers > 0) {
+            // 束缚：速度减少
+            modifier -= buff.layers;
+          }
         }
       }
     }
@@ -1585,8 +1605,10 @@ export default class CombatAreaApplication extends Application {
         continue;
       }
 
-      // 检查是否已存在该 BUFF
-      const existingBuffIndex = this.combatState.buffs.findIndex(b => b.id === buffId);
+      // 检查是否已存在相同id和roundTiming的BUFF（分开管理）
+      const existingBuffIndex = this.combatState.buffs.findIndex(
+        b => b.id === buffId && b.roundTiming === roundTiming
+      );
 
       // 构建消息
       let message = '';
@@ -1596,8 +1618,15 @@ export default class CombatAreaApplication extends Application {
         message = `${buffDef.name} +${layers}层`;
       }
 
+      // 添加回合标记到消息
+      if (roundTiming === 'next') {
+        message += ' (下回合)';
+      } else if (roundTiming === 'both') {
+        message += ' (本回合和下回合)';
+      }
+
       if (existingBuffIndex !== -1) {
-        // 如果已存在，增加层数
+        // 如果已存在相同id和roundTiming的BUFF，增加层数
         this.combatState.buffs[existingBuffIndex].layers += layers;
         // 如果强度不为0，更新强度
         if (strength !== 0) {
@@ -1639,8 +1668,10 @@ export default class CombatAreaApplication extends Application {
       const customStrength = strengthResult.value;
 
       if (customLayers > 0) {
-        // 自定义效果使用名称作为唯一标识
-        const existingCustomIndex = this.combatState.buffs.findIndex(b => b.name === customName && b.id === 'custom');
+        // 自定义效果使用名称和roundTiming作为唯一标识（分开管理）
+        const existingCustomIndex = this.combatState.buffs.findIndex(
+          b => b.name === customName && b.id === 'custom' && b.roundTiming === roundTiming
+        );
 
         let message = '';
         if (layersResult.isRoll) {
@@ -1649,8 +1680,18 @@ export default class CombatAreaApplication extends Application {
           message = `${customName} +${customLayers}层`;
         }
 
+        // 添加回合标记到消息
+        if (roundTiming === 'next') {
+          message += ' (下回合)';
+        } else if (roundTiming === 'both') {
+          message += ' (本回合和下回合)';
+        }
+
         if (existingCustomIndex !== -1) {
           this.combatState.buffs[existingCustomIndex].layers += customLayers;
+          if (customStrength !== 0) {
+            this.combatState.buffs[existingCustomIndex].strength = customStrength;
+          }
         } else {
           this.combatState.buffs.push({
             id: 'custom',
@@ -1842,23 +1883,62 @@ export default class CombatAreaApplication extends Application {
   /**
    * 处理轮次切换，更新BUFF的回合计数
    * 当战斗遭遇进入下一轮时调用此方法
+   * 逻辑：
+   * 1. 删除所有"一回合内"的本回合BUFF（强壮、虚弱、守护、易损、迅捷、束缚、忍耐、破绽）
+   * 2. 保留所有其他本回合BUFF（破裂、流血、燃烧等效果型BUFF）
+   * 3. 将所有下回合的BUFF（roundTiming='next'或'both'）变为本回合
    */
   async advanceRound() {
-    let changed = false;
+    console.log('【轮次切换】开始处理，当前BUFF数量:', this.combatState.buffs.length);
 
-    // 遍历所有BUFF，更新回合计数
-    for (const buff of this.combatState.buffs) {
-      // 如果是'next'（下回合）或'both'（本回合和下回合），变为'current'（本回合）
-      if (buff.roundTiming === 'next' || buff.roundTiming === 'both') {
-        buff.roundTiming = 'current';
-        changed = true;
-      }
-    }
+    // 定义"一回合内"的BUFF ID（轮次切换时清除）
+    const oneRoundBuffIds = ['strong', 'weak', 'guard', 'vulnerable', 'swift', 'bound', 'endure', 'flaw'];
 
-    // 如果有变化，保存并重新渲染
-    if (changed) {
-      await this._saveCombatState();
-      this.render(false);
-    }
+    const newBuffs = this.combatState.buffs
+      .filter(buff => {
+        const timing = buff.roundTiming || 'current';
+
+        // 保留所有下回合的BUFF
+        if (timing === 'next' || timing === 'both') {
+          console.log(`【轮次切换】保留下回合BUFF: ${buff.name} (${buff.layers}层)`);
+          return true;
+        }
+
+        // 对于本回合的BUFF
+        if (timing === 'current') {
+          // 删除"一回合内"的BUFF
+          if (oneRoundBuffIds.includes(buff.id)) {
+            console.log(`【轮次切换】删除一回合内BUFF: ${buff.name} (${buff.layers}层)`);
+            return false;
+          }
+          // 保留其他BUFF（效果型BUFF）
+          console.log(`【轮次切换】保留持续性BUFF: ${buff.name} (${buff.layers}层)`);
+          return true;
+        }
+
+        return true;
+      })
+      .map(buff => {
+        // 将下回合的BUFF转换为本回合
+        const timing = buff.roundTiming || 'current';
+        if (timing === 'next' || timing === 'both') {
+          return {
+            ...buff,
+            roundTiming: 'current'
+          };
+        }
+        return buff;
+      });
+
+    console.log('【轮次切换】处理后BUFF数量:', newBuffs.length);
+
+    // 更新BUFF列表
+    this.combatState.buffs = newBuffs;
+
+    // 保存并重新渲染
+    await this._saveCombatState();
+    this.render(false);
+
+    ui.notifications.info(`轮次切换：一回合内BUFF已清除，下回合BUFF已生效`);
   }
 }
