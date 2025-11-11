@@ -536,7 +536,7 @@ export default class CounterAreaApplication extends Application {
   }
 
   /**
-   * 计算BUFF加成
+   * 计算BUFF加成（只考虑本回合的BUFF）
    */
   _calculateBuffBonus() {
     let bonus = 0;
@@ -544,6 +544,10 @@ export default class CounterAreaApplication extends Application {
     if (!this.combatState.buffs) return bonus;
 
     for (const buff of this.combatState.buffs) {
+      const timing = buff.roundTiming || 'current';
+      // 只应用本回合的BUFF
+      if (timing !== 'current') continue;
+
       if (buff.id === 'strong') {
         // 强壮：骰数增加
         bonus += buff.layers;
@@ -623,10 +627,14 @@ export default class CounterAreaApplication extends Application {
       description = `受到${finalDamage}点伤害`;
     }
 
-    // 应用守护/易损 BUFF 效果
+    // 应用守护/易损 BUFF 效果（只考虑本回合的BUFF）
     const targetCombatState = actualTarget.getFlag('shuhai-dalu', 'combatState');
     if (targetCombatState && targetCombatState.buffs) {
       for (const buff of targetCombatState.buffs) {
+        const timing = buff.roundTiming || 'current';
+        // 只应用本回合的BUFF
+        if (timing !== 'current') continue;
+
         if (buff.id === 'guard' && buff.layers > 0) {
           // 守护：减少伤害
           const damageReduction = buff.layers;
