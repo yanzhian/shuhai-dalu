@@ -1099,6 +1099,12 @@ export default class CombatAreaApplication extends Application {
 
     if (!buff) return;
 
+    // 检查是否是下回合的BUFF（带有'N'标记）
+    if (buff.roundTiming === 'next' || buff.roundTiming === 'both') {
+      ui.notifications.warn(`${buff.name} 是下回合的效果，本回合无法触发！`);
+      return;
+    }
+
     // 检查层数是否为0
     if (buff.layers <= 0) {
       ui.notifications.warn(`${buff.name} 的层数已为0，无法触发！`);
@@ -1551,6 +1557,9 @@ export default class CombatAreaApplication extends Application {
     const effects = activity.effects || {};
     const buffMessages = [];
 
+    // 获取回合计数设置，默认为'current'（本回合）
+    const roundTiming = activity.roundTiming || 'current';
+
     // 预设 BUFF 列表（从 BUFF_TYPES 中获取）
     const allBuffs = [
       ...BUFF_TYPES.positive,
@@ -1607,7 +1616,8 @@ export default class CombatAreaApplication extends Application {
           description: buffDef.description,
           icon: buffDef.icon,
           layers: layers,
-          strength: strength !== 0 ? strength : buffDef.defaultStrength
+          strength: strength !== 0 ? strength : buffDef.defaultStrength,
+          roundTiming: roundTiming  // 添加回合计数字段
         });
         if (strengthResult.isRoll && strength !== 0) {
           message += ` 强度[${strengthResult.formula}=${strength}]`;
@@ -1649,7 +1659,8 @@ export default class CombatAreaApplication extends Application {
             description: '自定义效果',
             icon: 'icons/svg/mystery-man.svg',
             layers: customLayers,
-            strength: customStrength
+            strength: customStrength,
+            roundTiming: roundTiming  // 添加回合计数字段
           });
         }
 
@@ -1693,6 +1704,9 @@ export default class CombatAreaApplication extends Application {
     const effects = activity.effects || {};
     const buffList = [];
 
+    // 获取回合计数设置，默认为'current'（本回合）
+    const roundTiming = activity.roundTiming || 'current';
+
     // 预设 BUFF 列表
     const allBuffs = [
       ...BUFF_TYPES.positive,
@@ -1725,7 +1739,8 @@ export default class CombatAreaApplication extends Application {
         layersFormula: layersResult.isRoll ? layersResult.formula : null,
         strengthFormula: strengthResult.isRoll ? strengthResult.formula : null,
         source: this.actor.name,
-        sourceItem: sourceItem.name
+        sourceItem: sourceItem.name,
+        roundTiming: roundTiming  // 添加回合计数字段
       });
     }
 
@@ -1750,7 +1765,8 @@ export default class CombatAreaApplication extends Application {
           layersFormula: layersResult.isRoll ? layersResult.formula : null,
           strengthFormula: strengthResult.isRoll ? strengthResult.formula : null,
           source: this.actor.name,
-          sourceItem: sourceItem.name
+          sourceItem: sourceItem.name,
+          roundTiming: roundTiming  // 添加回合计数字段
         });
       }
     }
@@ -1821,5 +1837,28 @@ export default class CombatAreaApplication extends Application {
 
     await ChatMessage.create(chatData);
     return true;
+  }
+
+  /**
+   * 处理轮次切换，更新BUFF的回合计数
+   * 当战斗遭遇进入下一轮时调用此方法
+   */
+  async advanceRound() {
+    let changed = false;
+
+    // 遍历所有BUFF，更新回合计数
+    for (const buff of this.combatState.buffs) {
+      // 如果是'next'（下回合）或'both'（本回合和下回合），变为'current'（本回合）
+      if (buff.roundTiming === 'next' || buff.roundTiming === 'both') {
+        buff.roundTiming = 'current';
+        changed = true;
+      }
+    }
+
+    // 如果有变化，保存并重新渲染
+    if (changed) {
+      await this._saveCombatState();
+      this.render(false);
+    }
   }
 }

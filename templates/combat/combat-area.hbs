@@ -256,8 +256,11 @@
     <div class="buff-display-area">
       <div class="buff-icons-grid">
         {{#each combatState.buffs as |buff index|}}
-          <button class="buff-icon" type="button" title="{{buff.name}}&#10;{{buff.layers}}/{{buff.strength}}&#10;{{buff.description}}" data-buff-index="{{@index}}">
+          <button class="buff-icon {{#if (or (eq buff.roundTiming 'next') (eq buff.roundTiming 'both'))}}next-round{{/if}}" type="button" title="{{buff.name}}&#10;{{buff.layers}}/{{buff.strength}}&#10;{{buff.description}}" data-buff-index="{{@index}}">
             <img src="{{buff.icon}}" alt="{{buff.name}}" />
+            {{#if (or (eq buff.roundTiming 'next') (eq buff.roundTiming 'both'))}}
+              <span class="next-round-badge">N</span>
+            {{/if}}
           </button>
         {{/each}}
       </div>
@@ -280,9 +283,12 @@
       {{!-- BUFF条目 --}}
       <div class="buff-list-items">
         {{#each combatState.buffs as |buff index|}}
-          <div class="buff-list-item">
+          <div class="buff-list-item {{#if (or (eq buff.roundTiming 'next') (eq buff.roundTiming 'both'))}}next-round{{/if}}">
             <div class="buff-col-icon">
               <img src="{{buff.icon}}" alt="{{buff.name}}" />
+              {{#if (or (eq buff.roundTiming 'next') (eq buff.roundTiming 'both'))}}
+                <span class="next-round-badge-list">N</span>
+              {{/if}}
             </div>
             <div class="buff-col-name">{{buff.name}}</div>
             <div class="buff-col-layers">

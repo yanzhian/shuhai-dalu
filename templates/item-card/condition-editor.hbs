@@ -105,6 +105,27 @@
 
   <div class="section-divider"></div>
 
+  {{!-- 回合计数选择（单选） --}}
+  <div class="round-timing-section">
+    <span class="section-label">回合</span>
+    <div class="round-timing-options">
+      <label class="round-timing-option {{#unless condition.roundTiming}}selected{{/unless}}{{#if (eq condition.roundTiming 'current')}}selected{{/if}}">
+        <input type="radio" name="system.conditions.{{index}}.roundTiming" value="current" {{#unless condition.roundTiming}}checked{{/unless}}{{#if (eq condition.roundTiming 'current')}}checked{{/if}} {{#if locked}}disabled{{/if}} />
+        <span>本回合</span>
+      </label>
+      <label class="round-timing-option {{#if (eq condition.roundTiming 'next')}}selected{{/if}}">
+        <input type="radio" name="system.conditions.{{index}}.roundTiming" value="next" {{#if (eq condition.roundTiming 'next')}}checked{{/if}} {{#if locked}}disabled{{/if}} />
+        <span>下回合</span>
+      </label>
+      <label class="round-timing-option {{#if (eq condition.roundTiming 'both')}}selected{{/if}}">
+        <input type="radio" name="system.conditions.{{index}}.roundTiming" value="both" {{#if (eq condition.roundTiming 'both')}}checked{{/if}} {{#if locked}}disabled{{/if}} />
+        <span>本回合和下回合</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
   {{!-- 效果添加标题 --}}
   <div class="effects-section">
     <div class="section-title">效果添加</div>
