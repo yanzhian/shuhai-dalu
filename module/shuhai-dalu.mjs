@@ -296,6 +296,30 @@ async function getCurrentActor() {
 }
 
 /**
+ * 触发角色的【对抗时】activities
+ * @param {Actor} actor - 要触发activities的角色
+ */
+async function triggerCounterActivities(actor) {
+  // 查找该角色的CombatAreaApplication
+  const combatArea = Object.values(ui.windows).find(
+    app => app.constructor.name === 'CombatAreaApplication' && app.actor.id === actor.id
+  );
+
+  if (!combatArea) {
+    console.warn(`未找到角色 ${actor.name} 的战斗区域应用`);
+    return;
+  }
+
+  // 遍历角色的所有物品，触发【对抗时】activities
+  for (const item of actor.items) {
+    if (item.system.activities && Object.keys(item.system.activities).length > 0) {
+      // 使用combat area的_triggerActivities方法
+      await combatArea._triggerActivities(item, 'onCounter');
+    }
+  }
+}
+
+/**
  * 为聊天消息添加事件监听器
  */
 Hooks.on('renderChatMessage', (message, html, data) => {
@@ -325,6 +349,9 @@ Hooks.on('renderChatMessage', (message, html, data) => {
         return;
       }
 
+      // 触发【对抗时】activities
+      await triggerCounterActivities(currentActor);
+
       // 打开对抗界面
       const CounterAreaApplication = (await import('./applications/counter-area.mjs')).default;
       const counterArea = new CounterAreaApplication(currentActor, initiateData);
@@ -339,6 +366,9 @@ Hooks.on('renderChatMessage', (message, html, data) => {
         ui.notifications.warn("你不能对抗自己！");
         return;
       }
+
+      // 触发【对抗时】activities
+      await triggerCounterActivities(actor);
 
       // 打开对抗界面
       const CounterAreaApplication = (await import('./applications/counter-area.mjs')).default;

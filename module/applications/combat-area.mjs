@@ -733,6 +733,9 @@ export default class CombatAreaApplication extends Application {
       return;
     }
 
+    // 触发【攻击时】activities
+    await this._triggerActivities(item, 'onAttack');
+
     // 请求调整值
     const adjustment = await this._requestAdjustmentForInitiate();
     if (adjustment === null) return; // 用户取消
