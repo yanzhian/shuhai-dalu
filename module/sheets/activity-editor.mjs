@@ -89,6 +89,7 @@ export default class ActivityEditor extends Application {
       hasConsume: false,
       consumes: [],
       target: "selected",
+      roundTiming: "current",  // 添加回合计数字段，默认为本回合
       effectsList: [],
       customEffect: {
         enabled: false,
@@ -291,6 +292,7 @@ export default class ActivityEditor extends Application {
       hasConsume: formData.hasConsume === true || formData.hasConsume === 'on',
       consumes: consumes,
       target: formData.target || "selected",
+      roundTiming: formData.roundTiming || "current",  // 添加回合计数字段
       effects: effects,
       customEffect: {
         enabled: formData.customEffect?.enabled === true || formData.customEffect?.enabled === 'on',

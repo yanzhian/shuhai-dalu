@@ -2,6 +2,8 @@
  * 书海大陆 对抗界面应用 - 重新设计
  * 用于响应战斗骰发起时的对抗
  */
+import { triggerItemActivities, triggerBleedEffect } from "../shuhai-dalu.mjs";
+
 export default class CounterAreaApplication extends Application {
 
   constructor(actor, initiateData, options = {}) {
@@ -368,6 +370,15 @@ export default class CounterAreaApplication extends Application {
    * 执行对抗
    */
   async _performCounter(dice, adjustment, consumedEx = false, diceIndex = null) {
+    // 触发防守方的【攻击时】activities（防守方使用战斗骰进行对抗）
+    await triggerItemActivities(this.actor, dice, 'onAttack');
+
+    // 触发防守方的【流血】效果
+    const bleedResult = await triggerBleedEffect(this.actor);
+    if (bleedResult.triggered) {
+      ui.notifications.warn(`${this.actor.name} ${bleedResult.message}`);
+    }
+
     // 先投发起者的骰子（如果还没投）
     const initiatorRollResult = await this._rollInitiatorDice();
 
@@ -399,11 +410,48 @@ export default class CounterAreaApplication extends Application {
     const initiatorAdjustment = parseInt(this.initiateData.adjustment) || 0;
     const initiatorResult = initiatorRoll + initiatorBuffBonus + initiatorAdjustment;
 
+    // 触发双方的【对抗时】activities
+    // 1. 触发防守方骰子的【对抗时】
+    await triggerItemActivities(this.actor, dice, 'onCounter');
+
+    // 2. 触发攻击方骰子的【对抗时】
+    if (initiator && this.initiateData.diceId) {
+      const initiatorDice = initiator.items.get(this.initiateData.diceId);
+      if (initiatorDice) {
+        await triggerItemActivities(initiator, initiatorDice, 'onCounter');
+      }
+    }
+
     // 判断胜负
     const initiatorWon = initiatorResult > counterResult;
     const loser = initiatorWon ? this.actor : initiator;
     const winner = initiatorWon ? initiator : this.actor;
     const baseDamage = initiatorWon ? initiatorResult : counterResult;
+
+    // 触发【对抗成功】和【对抗失败】
+    // 1. 触发胜利方的【对抗成功】
+    if (initiatorWon) {
+      // 攻击方胜利
+      const initiatorDice = initiator.items.get(this.initiateData.diceId);
+      if (initiatorDice) {
+        await triggerItemActivities(initiator, initiatorDice, 'onCounterSuccess');
+      }
+    } else {
+      // 防守方胜利
+      await triggerItemActivities(this.actor, dice, 'onCounterSuccess');
+    }
+
+    // 2. 触发失败方的【对抗失败】
+    if (initiatorWon) {
+      // 防守方失败
+      await triggerItemActivities(this.actor, dice, 'onCounterFail');
+    } else {
+      // 攻击方失败
+      const initiatorDice = initiator.items.get(this.initiateData.diceId);
+      if (initiatorDice) {
+        await triggerItemActivities(initiator, initiatorDice, 'onCounterFail');
+      }
+    }
 
     // 根据胜者决定攻击类型
     let attackType;
@@ -415,14 +463,6 @@ export default class CounterAreaApplication extends Application {
       // 对抗者赢了，使用对抗者的战斗骰攻击类型
       // 如果对抗者的战斗骰没有设置 category，默认使用"打击"
       attackType = dice.system.category || '打击';
-
-      // 调试输出
-      console.log('【调试】对抗者战斗骰信息:', {
-        name: dice.name,
-        category: dice.system.category,
-        attackType: attackType,
-        loser: loser.name
-      });
     }
 
     // 计算抗性结果
@@ -545,14 +585,6 @@ export default class CounterAreaApplication extends Application {
 
     // 获取目标的防具
     const armor = actualTarget.items.get(actualTarget.system.equipment.armor);
-
-    console.log('【调试】抗性计算:', {
-      target: actualTarget.name,
-      damageCategory: damageCategory,
-      baseDamage: baseDamage,
-      hasArmor: !!armor,
-      armorName: armor?.name
-    });
 
     if (armor && armor.system.armorProperties) {
       const props = armor.system.armorProperties;

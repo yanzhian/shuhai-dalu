@@ -219,6 +219,7 @@ export default class ItemCardSheet extends ItemSheet {
             hasConsume: condition.hasConsume || false,
             consumes: condition.consumes || [],
             target: condition.target || 'selected',
+            roundTiming: condition.roundTiming || 'current',  // 添加回合计数字段
             effects: effects,
             customEffect: condition.customEffect || {
               enabled: false,
