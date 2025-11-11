@@ -349,8 +349,12 @@ Hooks.on('renderChatMessage', (message, html, data) => {
         return;
       }
 
-      // 触发【对抗时】activities
-      await triggerCounterActivities(currentActor);
+      // 触发双方的【对抗时】activities
+      await triggerCounterActivities(currentActor); // 防守方
+      const initiatorActor = game.actors.get(initiateData.initiatorId);
+      if (initiatorActor) {
+        await triggerCounterActivities(initiatorActor); // 攻击方
+      }
 
       // 打开对抗界面
       const CounterAreaApplication = (await import('./applications/counter-area.mjs')).default;
@@ -367,8 +371,12 @@ Hooks.on('renderChatMessage', (message, html, data) => {
         return;
       }
 
-      // 触发【对抗时】activities
-      await triggerCounterActivities(actor);
+      // 触发双方的【对抗时】activities
+      await triggerCounterActivities(actor); // 防守方
+      const initiatorActor2 = game.actors.get(initiateData.initiatorId);
+      if (initiatorActor2) {
+        await triggerCounterActivities(initiatorActor2); // 攻击方
+      }
 
       // 打开对抗界面
       const CounterAreaApplication = (await import('./applications/counter-area.mjs')).default;

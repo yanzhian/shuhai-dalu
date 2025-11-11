@@ -368,6 +368,14 @@ export default class CounterAreaApplication extends Application {
    * 执行对抗
    */
   async _performCounter(dice, adjustment, consumedEx = false, diceIndex = null) {
+    // 触发防守方的【攻击时】activities（防守方使用战斗骰进行对抗）
+    const combatArea = Object.values(ui.windows).find(
+      app => app.constructor.name === 'CombatAreaApplication' && app.actor.id === this.actor.id
+    );
+    if (combatArea && typeof combatArea._triggerActivities === 'function') {
+      await combatArea._triggerActivities(dice, 'onAttack');
+    }
+
     // 先投发起者的骰子（如果还没投）
     const initiatorRollResult = await this._rollInitiatorDice();
 
