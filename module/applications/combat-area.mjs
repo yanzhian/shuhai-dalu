@@ -1893,6 +1893,9 @@ export default class CombatAreaApplication extends Application {
     // 定义"一回合内"的BUFF ID（轮次切换时清除）
     const oneRoundBuffIds = ['strong', 'weak', 'guard', 'vulnerable', 'swift', 'bound', 'endure', 'flaw'];
 
+    // 定义"每轮结束时层数减少"的BUFF ID（不合并本回合和下回合）
+    const roundEndBuffIds = ['burn', 'breath', 'charge', 'chant'];
+
     // 第一步：分类BUFF
     const currentBuffs = [];  // 本回合的BUFF
     const nextBuffs = [];     // 下回合的BUFF
@@ -1910,74 +1913,15 @@ export default class CombatAreaApplication extends Application {
         console.log(`【轮次切换】保留持续性BUFF: ${buff.name} (${buff.layers}层 ${buff.strength}强度)`);
         currentBuffs.push(buff);
       } else if (timing === 'next' || timing === 'both') {
-        console.log(`【轮次切换】下回合BUFF转本回合: ${buff.name} (${buff.layers}层 ${buff.strength}强度)`);
+        console.log(`【轮次切换】下回合BUFF待转换: ${buff.name} (${buff.layers}层 ${buff.strength}强度)`);
         nextBuffs.push(buff);
       }
     }
 
-    // 第二步：合并BUFF
-    const mergedBuffs = [];
-    const processedIds = new Set();
-
-    // 先处理本回合保留的BUFF
-    for (const currentBuff of currentBuffs) {
-      const key = currentBuff.id === 'custom'
-        ? `custom_${currentBuff.name}`
-        : currentBuff.id;
-
-      // 查找是否有同id的下回合BUFF
-      const nextBuff = nextBuffs.find(b => {
-        if (b.id === 'custom') {
-          return b.id === currentBuff.id && b.name === currentBuff.name;
-        }
-        return b.id === currentBuff.id;
-      });
-
-      if (nextBuff) {
-        // 找到匹配的下回合BUFF，合并它们
-        const mergedLayers = currentBuff.layers + nextBuff.layers;
-        const mergedStrength = currentBuff.strength + nextBuff.strength;
-        console.log(`【轮次切换】合并BUFF: ${currentBuff.name} (本回合${currentBuff.layers}层${currentBuff.strength}强度 + 下回合${nextBuff.layers}层${nextBuff.strength}强度 = ${mergedLayers}层${mergedStrength}强度)`);
-        mergedBuffs.push({
-          ...currentBuff,
-          layers: mergedLayers,
-          strength: mergedStrength,
-          roundTiming: 'current'
-        });
-        processedIds.add(key);
-      } else {
-        // 没有匹配的下回合BUFF，直接保留
-        mergedBuffs.push({
-          ...currentBuff,
-          roundTiming: 'current'
-        });
-        processedIds.add(key);
-      }
-    }
-
-    // 再处理未匹配的下回合BUFF
-    for (const nextBuff of nextBuffs) {
-      const key = nextBuff.id === 'custom'
-        ? `custom_${nextBuff.name}`
-        : nextBuff.id;
-
-      if (!processedIds.has(key)) {
-        // 这个下回合BUFF没有本回合版本，直接转换
-        console.log(`【轮次切换】单独转换: ${nextBuff.name} (${nextBuff.layers}层 ${nextBuff.strength}强度)`);
-        mergedBuffs.push({
-          ...nextBuff,
-          roundTiming: 'current'
-        });
-      }
-    }
-
-    console.log('【轮次切换】处理后BUFF数量:', mergedBuffs.length);
-
-    // 第三步：处理"每轮结束时层数减少1层"的BUFF
-    const roundEndBuffIds = ['burn', 'breath', 'charge', 'chant'];
+    // 第二步：处理本回合的"每轮结束时层数减少"的BUFF
     const roundEndMessages = [];
 
-    for (const buff of mergedBuffs) {
+    for (const buff of currentBuffs) {
       if (roundEndBuffIds.includes(buff.id)) {
         // 特殊处理【燃烧】：层数减少前先触发伤害
         if (buff.id === 'burn' && buff.layers > 0) {
@@ -1998,20 +1942,86 @@ export default class CombatAreaApplication extends Application {
       }
     }
 
-    // 第四步：删除层数为0或以下的BUFF
-    const finalBuffs = mergedBuffs.filter(buff => {
+    // 第三步：删除层数为0或以下的本回合BUFF
+    const survivedCurrentBuffs = currentBuffs.filter(buff => {
       if (buff.layers <= 0) {
-        console.log(`【轮次结束】删除层数为0的BUFF: ${buff.name}`);
+        console.log(`【轮次结束】删除层数为0的本回合BUFF: ${buff.name}`);
         roundEndMessages.push(`${buff.name} 已消失`);
         return false;
       }
       return true;
     });
 
-    console.log('【轮次切换】最终BUFF数量:', finalBuffs.length);
+    // 第四步：合并BUFF（每轮结束减层的BUFF不合并）
+    const mergedBuffs = [];
+    const processedIds = new Set();
+
+    // 先处理本回合保留的BUFF
+    for (const currentBuff of survivedCurrentBuffs) {
+      const key = currentBuff.id === 'custom'
+        ? `custom_${currentBuff.name}`
+        : currentBuff.id;
+
+      // 如果是每轮结束减层的BUFF，不合并，直接保留
+      if (roundEndBuffIds.includes(currentBuff.id)) {
+        mergedBuffs.push({
+          ...currentBuff,
+          roundTiming: 'current'
+        });
+        processedIds.add(key);
+        continue;
+      }
+
+      // 查找是否有同id的下回合BUFF
+      const nextBuff = nextBuffs.find(b => {
+        if (b.id === 'custom') {
+          return b.id === currentBuff.id && b.name === currentBuff.name;
+        }
+        return b.id === currentBuff.id;
+      });
+
+      if (nextBuff) {
+        // 找到匹配的下回合BUFF，合并它们（只合并非每轮减层的BUFF）
+        const mergedLayers = currentBuff.layers + nextBuff.layers;
+        const mergedStrength = currentBuff.strength + nextBuff.strength;
+        console.log(`【轮次切换】合并BUFF: ${currentBuff.name} (本回合${currentBuff.layers}层${currentBuff.strength}强度 + 下回合${nextBuff.layers}层${nextBuff.strength}强度 = ${mergedLayers}层${mergedStrength}强度)`);
+        mergedBuffs.push({
+          ...currentBuff,
+          layers: mergedLayers,
+          strength: mergedStrength,
+          roundTiming: 'current'
+        });
+        processedIds.add(key);
+      } else {
+        // 没有匹配的下回合BUFF，直接保留
+        mergedBuffs.push({
+          ...currentBuff,
+          roundTiming: 'current'
+        });
+        processedIds.add(key);
+      }
+    }
+
+    // 第五步：处理未匹配的下回合BUFF（直接转为本回合）
+    for (const nextBuff of nextBuffs) {
+      const key = nextBuff.id === 'custom'
+        ? `custom_${nextBuff.name}`
+        : nextBuff.id;
+
+      if (!processedIds.has(key)) {
+        // 这个下回合BUFF没有本回合版本，直接转换
+        console.log(`【轮次切换】下回合BUFF转本回合: ${nextBuff.name} (${nextBuff.layers}层 ${nextBuff.strength}强度)`);
+        mergedBuffs.push({
+          ...nextBuff,
+          roundTiming: 'current'
+        });
+      }
+    }
+
+    console.log('【轮次切换】最终BUFF数量:', mergedBuffs.length);
 
     // 更新BUFF列表
-    this.combatState.buffs = finalBuffs;
+    this.combatState.buffs = mergedBuffs;
 
     // 保存并重新渲染
     await this._saveCombatState();
@@ -2029,6 +2039,6 @@ export default class CombatAreaApplication extends Application {
       `);
     }
 
-    ui.notifications.info(`轮次切换：一回合内BUFF已清除，下回合BUFF已生效并合并`);
+    ui.notifications.info(`轮次切换：一回合内BUFF已清除，下回合BUFF已生效`);
   }
 }
