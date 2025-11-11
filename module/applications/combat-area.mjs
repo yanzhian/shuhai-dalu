@@ -1626,13 +1626,11 @@ export default class CombatAreaApplication extends Application {
       }
 
       if (existingBuffIndex !== -1) {
-        // 如果已存在相同id和roundTiming的BUFF，增加层数
+        // 如果已存在相同id和roundTiming的BUFF，增加层数和强度
         this.combatState.buffs[existingBuffIndex].layers += layers;
-        // 如果强度不为0，更新强度
-        if (strength !== 0) {
-          this.combatState.buffs[existingBuffIndex].strength = strength;
-        }
-        message += ` (当前${this.combatState.buffs[existingBuffIndex].layers}层)`;
+        // 强度也相加（而不是替换）
+        this.combatState.buffs[existingBuffIndex].strength += strength;
+        message += ` (当前${this.combatState.buffs[existingBuffIndex].layers}层 ${this.combatState.buffs[existingBuffIndex].strength}强度)`;
         if (strengthResult.isRoll && strength !== 0) {
           message += ` 强度[${strengthResult.formula}=${strength}]`;
         }
@@ -1689,9 +1687,9 @@ export default class CombatAreaApplication extends Application {
 
         if (existingCustomIndex !== -1) {
           this.combatState.buffs[existingCustomIndex].layers += customLayers;
-          if (customStrength !== 0) {
-            this.combatState.buffs[existingCustomIndex].strength = customStrength;
-          }
+          // 强度也相加（而不是替换）
+          this.combatState.buffs[existingCustomIndex].strength += customStrength;
+          message += ` (当前${this.combatState.buffs[existingCustomIndex].layers}层 ${this.combatState.buffs[existingCustomIndex].strength}强度)`;
         } else {
           this.combatState.buffs.push({
             id: 'custom',

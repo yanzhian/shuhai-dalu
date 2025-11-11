@@ -851,12 +851,10 @@ Hooks.on('renderChatMessage', (message, html, data) => {
       }
 
       if (existingBuffIndex !== -1) {
-        // 如果已存在相同id和roundTiming的BUFF，叠加层数
+        // 如果已存在相同id和roundTiming的BUFF，叠加层数和强度
         combatState.buffs[existingBuffIndex].layers += buff.layers;
-        // 更新强度（不叠加）
-        if (buff.strength !== 0) {
-          combatState.buffs[existingBuffIndex].strength = buff.strength;
-        }
+        // 强度也相加（而不是替换）
+        combatState.buffs[existingBuffIndex].strength += buff.strength;
       } else {
         // 如果不存在，添加新BUFF
         combatState.buffs.push({
