@@ -419,30 +419,6 @@ export async function triggerItemActivities(actor, item, triggerType) {
 }
 
 /**
- * 触发角色的【对抗时】activities
- * @param {Actor} actor - 要触发activities的角色
- */
-async function triggerCounterActivities(actor) {
-  console.log('【对抗时触发】开始处理角色:', actor.name);
-
-  // 遍历角色的所有物品，触发【对抗时】activities
-  let triggeredCount = 0;
-  for (const item of actor.items) {
-    if (item.system.activities && Object.keys(item.system.activities).length > 0) {
-      console.log(`【对抗时触发】物品 ${item.name} 有 activities`);
-      // 使用独立的触发函数
-      const result = await triggerItemActivities(actor, item, 'onCounter');
-      if (result) {
-        triggeredCount++;
-        console.log(`【对抗时触发】物品 ${item.name} 触发成功`);
-      }
-    }
-  }
-
-  console.log(`【对抗时触发】完成，共触发 ${triggeredCount} 个 activities`);
-}
-
-/**
  * 为聊天消息添加事件监听器
  */
 Hooks.on('renderChatMessage', (message, html, data) => {
@@ -474,18 +450,7 @@ Hooks.on('renderChatMessage', (message, html, data) => {
         return;
       }
 
-      console.log('【对抗按钮】开始触发双方【对抗时】activities');
-      // 触发双方的【对抗时】activities
-      await triggerCounterActivities(currentActor); // 防守方
-      const initiatorActor = game.actors.get(initiateData.initiatorId);
-      if (initiatorActor) {
-        console.log('【对抗按钮】找到攻击方角色:', initiatorActor.name);
-        await triggerCounterActivities(initiatorActor); // 攻击方
-      } else {
-        console.warn('【对抗按钮】未找到攻击方角色');
-      }
-
-      // 打开对抗界面
+      // 打开对抗界面（【对抗时】将在选择骰子后触发）
       const CounterAreaApplication = (await import('./applications/counter-area.mjs')).default;
       const counterArea = new CounterAreaApplication(currentActor, initiateData);
       counterArea.render(true);
@@ -501,18 +466,7 @@ Hooks.on('renderChatMessage', (message, html, data) => {
         return;
       }
 
-      console.log('【对抗按钮】开始触发双方【对抗时】activities');
-      // 触发双方的【对抗时】activities
-      await triggerCounterActivities(actor); // 防守方
-      const initiatorActor2 = game.actors.get(initiateData.initiatorId);
-      if (initiatorActor2) {
-        console.log('【对抗按钮】找到攻击方角色:', initiatorActor2.name);
-        await triggerCounterActivities(initiatorActor2); // 攻击方
-      } else {
-        console.warn('【对抗按钮】未找到攻击方角色');
-      }
-
-      // 打开对抗界面
+      // 打开对抗界面（【对抗时】将在选择骰子后触发）
       const CounterAreaApplication = (await import('./applications/counter-area.mjs')).default;
       const counterArea = new CounterAreaApplication(actor, initiateData);
       counterArea.render(true);

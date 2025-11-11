@@ -373,11 +373,35 @@ export default class CounterAreaApplication extends Application {
     console.log('【防守方攻击时触发】开始处理，防守方:', this.actor.name, '使用骰子:', dice.name);
 
     // 触发防守方的【攻击时】activities（防守方使用战斗骰进行对抗）
-    const result = await triggerItemActivities(this.actor, dice, 'onAttack');
-    if (result) {
+    const attackResult = await triggerItemActivities(this.actor, dice, 'onAttack');
+    if (attackResult) {
       console.log('【防守方攻击时触发】触发成功');
     } else {
       console.log('【防守方攻击时触发】该骰子没有【攻击时】activities');
+    }
+
+    // 触发双方的【对抗时】activities
+    console.log('【对抗时触发】开始触发双方的【对抗时】');
+
+    // 1. 触发防守方骰子的【对抗时】
+    const defenderCounterResult = await triggerItemActivities(this.actor, dice, 'onCounter');
+    if (defenderCounterResult) {
+      console.log('【对抗时触发】防守方骰子触发成功');
+    }
+
+    // 2. 触发攻击方骰子的【对抗时】
+    const initiator = game.actors.get(this.initiateData.initiatorId);
+    if (initiator && this.initiateData.diceId) {
+      const initiatorDice = initiator.items.get(this.initiateData.diceId);
+      if (initiatorDice) {
+        console.log('【对抗时触发】触发攻击方骰子:', initiatorDice.name);
+        const initiatorCounterResult = await triggerItemActivities(initiator, initiatorDice, 'onCounter');
+        if (initiatorCounterResult) {
+          console.log('【对抗时触发】攻击方骰子触发成功');
+        }
+      } else {
+        console.warn('【对抗时触发】未找到攻击方的骰子，ID:', this.initiateData.diceId);
+      }
     }
 
     // 先投发起者的骰子（如果还没投）
