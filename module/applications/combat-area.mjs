@@ -805,6 +805,10 @@ export default class CombatAreaApplication extends Application {
     if (!this.combatState.buffs) return bonus;
 
     for (const buff of this.combatState.buffs) {
+      const timing = buff.roundTiming || 'current';
+      // 只应用当前回合的BUFF
+      if (timing !== 'current') continue;
+
       if (buff.id === 'strong') {
         // 强壮：骰数增加
         bonus += buff.layers;
