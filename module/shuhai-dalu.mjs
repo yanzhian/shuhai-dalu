@@ -954,6 +954,23 @@ Hooks.once('init', function() {
     return a <= b;
   });
 
+  // 逻辑运算符
+  Handlebars.registerHelper('or', function() {
+    // 获取所有参数（最后一个是Handlebars的options对象，需要排除）
+    const args = Array.prototype.slice.call(arguments, 0, -1);
+    return args.some(arg => !!arg);
+  });
+
+  Handlebars.registerHelper('and', function() {
+    // 获取所有参数（最后一个是Handlebars的options对象，需要排除）
+    const args = Array.prototype.slice.call(arguments, 0, -1);
+    return args.every(arg => !!arg);
+  });
+
+  Handlebars.registerHelper('not', function(value) {
+    return !value;
+  });
+
   Handlebars.registerHelper('add', function(a, b) {
     return a + b;
   });
