@@ -428,6 +428,31 @@ export default class CounterAreaApplication extends Application {
     const winner = initiatorWon ? initiator : this.actor;
     const baseDamage = initiatorWon ? initiatorResult : counterResult;
 
+    // 触发【对抗成功】和【对抗失败】
+    // 1. 触发胜利方的【对抗成功】
+    if (initiatorWon) {
+      // 攻击方胜利
+      const initiatorDice = initiator.items.get(this.initiateData.diceId);
+      if (initiatorDice) {
+        await triggerItemActivities(initiator, initiatorDice, 'onCounterSuccess');
+      }
+    } else {
+      // 防守方胜利
+      await triggerItemActivities(this.actor, dice, 'onCounterSuccess');
+    }
+
+    // 2. 触发失败方的【对抗失败】
+    if (initiatorWon) {
+      // 防守方失败
+      await triggerItemActivities(this.actor, dice, 'onCounterFail');
+    } else {
+      // 攻击方失败
+      const initiatorDice = initiator.items.get(this.initiateData.diceId);
+      if (initiatorDice) {
+        await triggerItemActivities(initiator, initiatorDice, 'onCounterFail');
+      }
+    }
+
     // 根据胜者决定攻击类型
     let attackType;
     if (initiatorWon) {
