@@ -32,6 +32,16 @@
     </select>
   </div>
 
+  {{!-- 回合计数选择 --}}
+  <div class="form-group">
+    <label>回合</label>
+    <select name="roundTiming">
+      <option value="current" {{#unless activity.roundTiming}}selected{{/unless}}{{#if (eq activity.roundTiming "current")}}selected{{/if}}>本回合</option>
+      <option value="next" {{#if (eq activity.roundTiming "next")}}selected{{/if}}>下回合</option>
+      <option value="both" {{#if (eq activity.roundTiming "both")}}selected{{/if}}>本回合和下回合</option>
+    </select>
+  </div>
+
   {{!-- 消耗列表 --}}
   <div class="form-group">
     <label>

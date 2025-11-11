@@ -857,7 +857,8 @@ Hooks.on('renderChatMessage', (message, html, data) => {
           layers: buff.layers,
           strength: buff.strength,
           source: buff.source,
-          sourceItem: buff.sourceItem
+          sourceItem: buff.sourceItem,
+          roundTiming: buff.roundTiming || 'current'  // 添加回合计数字段
         });
       }
     }
@@ -1509,6 +1510,35 @@ async function unequipItem(actor, slotType, slotIndex = null) {
   ui.notifications.info(`已卸下 ${item ? item.name : '物品'}`);
   return true;
 }
+
+/* -------------------------------------------- */
+/*  战斗轮次切换Hook                              */
+/* -------------------------------------------- */
+
+// 监听战斗轮次变化，更新BUFF的回合计数
+Hooks.on('updateCombat', async (combat, changed, options, userId) => {
+  // 检查是否是轮次变化（round字段改变）
+  if (changed.round !== undefined) {
+    console.log('书海大陆 | 战斗轮次切换到第', changed.round, '轮');
+
+    // 遍历所有参战者，更新他们的BUFF回合计数
+    for (const combatant of combat.combatants) {
+      const actor = combatant.actor;
+      if (!actor) continue;
+
+      // 查找该角色打开的战斗区域窗口
+      const combatArea = Object.values(ui.windows).find(
+        app => app.constructor.name === 'CombatAreaApplication' && app.actor.id === actor.id
+      );
+
+      // 如果找到了战斗区域窗口，调用其advanceRound方法
+      if (combatArea && typeof combatArea.advanceRound === 'function') {
+        await combatArea.advanceRound();
+        console.log(`书海大陆 | 已更新 ${actor.name} 的BUFF回合计数`);
+      }
+    }
+  }
+});
 
 /* -------------------------------------------- */
 /*  导出                                         */
