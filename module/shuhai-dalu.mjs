@@ -571,6 +571,61 @@ export async function advanceActorRound(actor) {
 }
 
 /**
+ * 处理【流血】效果 - 在攻击时触发
+ * @param {Actor} actor - 角色
+ * @returns {Object} { triggered: boolean, damage: number, message: string }
+ */
+export async function triggerBleedEffect(actor) {
+  // 获取战斗状态
+  let combatState = actor.getFlag('shuhai-dalu', 'combatState');
+  if (!combatState || !combatState.buffs) {
+    return { triggered: false, damage: 0, message: '' };
+  }
+
+  // 查找【流血】BUFF（只考虑本回合的）
+  const bleedIndex = combatState.buffs.findIndex(
+    buff => buff.id === 'bleed' && (buff.roundTiming === 'current' || !buff.roundTiming)
+  );
+
+  if (bleedIndex === -1) {
+    return { triggered: false, damage: 0, message: '' };
+  }
+
+  const bleedBuff = combatState.buffs[bleedIndex];
+  const damage = bleedBuff.strength;
+
+  // 扣除HP
+  const hpBefore = actor.system.derived.hp.value;
+  const newHp = Math.max(0, hpBefore - damage);
+  await actor.update({ 'system.derived.hp.value': newHp });
+
+  // 层数减少1层
+  bleedBuff.layers -= 1;
+
+  let message = `【流血】触发：受到 ${damage} 点固定伤害`;
+
+  // 如果层数降到0或以下，删除BUFF
+  if (bleedBuff.layers <= 0) {
+    combatState.buffs.splice(bleedIndex, 1);
+    message += `，【流血】已消失`;
+  } else {
+    message += `，【流血】层数减少1层（剩余${bleedBuff.layers}层）`;
+  }
+
+  // 保存战斗状态
+  await actor.setFlag('shuhai-dalu', 'combatState', combatState);
+
+  // 刷新战斗区域（如果打开）
+  Object.values(ui.windows).forEach(app => {
+    if (app.constructor.name === 'CombatAreaApplication' && app.actor.id === actor.id) {
+      app.render(false);
+    }
+  });
+
+  return { triggered: true, damage: damage, message: message };
+}
+
+/**
  * 为聊天消息添加事件监听器
  */
 Hooks.on('renderChatMessage', (message, html, data) => {

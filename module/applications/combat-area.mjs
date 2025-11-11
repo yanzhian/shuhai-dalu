@@ -1,6 +1,7 @@
 /**
  * 书海大陆 战斗区域应用 - 完全重新设计
  */
+import { triggerBleedEffect } from "../shuhai-dalu.mjs";
 
 // 预定义BUFF类型
 export const BUFF_TYPES = {
@@ -735,6 +736,12 @@ export default class CombatAreaApplication extends Application {
 
     // 触发【攻击时】activities
     await this._triggerActivities(item, 'onAttack');
+
+    // 触发【流血】效果
+    const bleedResult = await triggerBleedEffect(this.actor);
+    if (bleedResult.triggered) {
+      await this._sendChatMessage(`<div style="color: #c14545;">${bleedResult.message}</div>`);
+    }
 
     // 请求调整值
     const adjustment = await this._requestAdjustmentForInitiate();

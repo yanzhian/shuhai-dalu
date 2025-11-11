@@ -2,7 +2,7 @@
  * 书海大陆 对抗界面应用 - 重新设计
  * 用于响应战斗骰发起时的对抗
  */
-import { triggerItemActivities } from "../shuhai-dalu.mjs";
+import { triggerItemActivities, triggerBleedEffect } from "../shuhai-dalu.mjs";
 
 export default class CounterAreaApplication extends Application {
 
@@ -372,6 +372,12 @@ export default class CounterAreaApplication extends Application {
   async _performCounter(dice, adjustment, consumedEx = false, diceIndex = null) {
     // 触发防守方的【攻击时】activities（防守方使用战斗骰进行对抗）
     await triggerItemActivities(this.actor, dice, 'onAttack');
+
+    // 触发防守方的【流血】效果
+    const bleedResult = await triggerBleedEffect(this.actor);
+    if (bleedResult.triggered) {
+      ui.notifications.warn(`${this.actor.name} ${bleedResult.message}`);
+    }
 
     // 先投发起者的骰子（如果还没投）
     const initiatorRollResult = await this._rollInitiatorDice();
