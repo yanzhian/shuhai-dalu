@@ -19,6 +19,7 @@ import ShuhaiActorSheet from "./sheets/actor-sheet.mjs";
 import ShuhaiPlayerSheet from "./sheets/player-sheet.mjs";
 import ShuhaiItemSheet from "./sheets/item-sheet.mjs";
 import ItemCardSheet from "./sheets/item-card-sheet.mjs";
+import { BUFF_TYPES } from "./applications/combat-area.mjs";
 
 /* -------------------------------------------- */
 /*  初始化钩子                                    */
@@ -296,36 +297,144 @@ async function getCurrentActor() {
 }
 
 /**
+ * 独立的activity触发函数 - 不依赖CombatAreaApplication
+ * @param {Actor} actor - 角色
+ * @param {Item} item - 物品
+ * @param {string} triggerType - 触发类型 (onUse, onAttack, onCounter等)
+ * @returns {boolean} 是否有活动被触发
+ */
+export async function triggerItemActivities(actor, item, triggerType) {
+  console.log(`【独立触发】角色: ${actor.name}, 物品: ${item.name}, 触发类型: ${triggerType}`);
+
+  // 检查物品是否有activities
+  if (!item.system.activities || Object.keys(item.system.activities).length === 0) {
+    console.log(`【独立触发】物品 ${item.name} 没有 activities`);
+    return false;
+  }
+
+  // 筛选出匹配的activities
+  const matchingActivities = Object.values(item.system.activities).filter(
+    activity => activity.trigger === triggerType
+  );
+
+  if (matchingActivities.length === 0) {
+    console.log(`【独立触发】物品 ${item.name} 没有匹配 ${triggerType} 的 activities`);
+    return false;
+  }
+
+  console.log(`【独立触发】找到 ${matchingActivities.length} 个匹配的 activities`);
+
+  // 获取战斗状态
+  let combatState = actor.getFlag('shuhai-dalu', 'combatState') || {
+    costResources: [false, false, false, false, false, false],
+    exResources: [false, false, false],
+    activatedDice: [false, false, false, false, false, false],
+    buffs: []
+  };
+
+  // 获取所有BUFF定义
+  const allBuffs = [
+    ...BUFF_TYPES.positive,
+    ...BUFF_TYPES.negative,
+    ...BUFF_TYPES.effect
+  ];
+
+  let hasTriggered = false;
+
+  // 执行每个activity
+  for (const activity of matchingActivities) {
+    console.log(`【独立触发】执行 activity:`, activity);
+
+    // 获取回合时机
+    const roundTiming = activity.roundTiming || 'current';
+
+    // 检查目标类型
+    const targetType = activity.target || 'self';
+
+    // 目前只处理self目标
+    if (targetType !== 'self') {
+      console.log(`【独立触发】跳过非self目标的activity (目标类型: ${targetType})`);
+      continue;
+    }
+
+    // 应用效果
+    if (activity.effects && Object.keys(activity.effects).length > 0) {
+      for (const [buffId, effectData] of Object.entries(activity.effects)) {
+        const layers = parseInt(effectData.layers) || 0;
+        const strength = parseInt(effectData.strength) || 0;
+
+        if (layers === 0) continue;
+
+        // 查找BUFF定义
+        const buffDef = allBuffs.find(b => b.id === buffId);
+        if (!buffDef) {
+          console.warn(`【独立触发】未找到 BUFF 定义: ${buffId}`);
+          continue;
+        }
+
+        // 检查是否已存在相同id和roundTiming的BUFF
+        const existingBuffIndex = combatState.buffs.findIndex(
+          b => b.id === buffId && b.roundTiming === roundTiming
+        );
+
+        if (existingBuffIndex !== -1) {
+          // 如果已存在，增加层数和强度
+          combatState.buffs[existingBuffIndex].layers += layers;
+          combatState.buffs[existingBuffIndex].strength += strength;
+          console.log(`【独立触发】叠加 ${buffDef.name}: 现在 ${combatState.buffs[existingBuffIndex].layers}层 ${combatState.buffs[existingBuffIndex].strength}强度`);
+        } else {
+          // 如果不存在，添加新BUFF
+          combatState.buffs.push({
+            id: buffDef.id,
+            name: buffDef.name,
+            type: buffDef.type,
+            description: buffDef.description,
+            icon: buffDef.icon,
+            layers: layers,
+            strength: strength !== 0 ? strength : buffDef.defaultStrength,
+            roundTiming: roundTiming
+          });
+          console.log(`【独立触发】添加 ${buffDef.name}: ${layers}层 ${strength !== 0 ? strength : buffDef.defaultStrength}强度`);
+        }
+
+        hasTriggered = true;
+      }
+    }
+  }
+
+  // 保存战斗状态
+  if (hasTriggered) {
+    await actor.setFlag('shuhai-dalu', 'combatState', combatState);
+    console.log(`【独立触发】已保存战斗状态到 ${actor.name}`);
+
+    // 刷新战斗区域（如果打开）
+    Object.values(ui.windows).forEach(app => {
+      if (app.constructor.name === 'CombatAreaApplication' && app.actor.id === actor.id) {
+        app.render(false);
+      }
+    });
+  }
+
+  return hasTriggered;
+}
+
+/**
  * 触发角色的【对抗时】activities
  * @param {Actor} actor - 要触发activities的角色
  */
 async function triggerCounterActivities(actor) {
   console.log('【对抗时触发】开始处理角色:', actor.name);
 
-  // 查找该角色的CombatAreaApplication
-  const combatArea = Object.values(ui.windows).find(
-    app => app.constructor.name === 'CombatAreaApplication' && app.actor.id === actor.id
-  );
-
-  if (!combatArea) {
-    console.warn(`【对抗时触发】未找到角色 ${actor.name} 的战斗区域应用`);
-    return;
-  }
-
-  console.log(`【对抗时触发】找到战斗区域应用，开始遍历物品`);
-
   // 遍历角色的所有物品，触发【对抗时】activities
   let triggeredCount = 0;
   for (const item of actor.items) {
     if (item.system.activities && Object.keys(item.system.activities).length > 0) {
-      console.log(`【对抗时触发】物品 ${item.name} 有 activities:`, Object.keys(item.system.activities));
-      // 使用combat area的_triggerActivities方法
-      const result = await combatArea._triggerActivities(item, 'onCounter');
+      console.log(`【对抗时触发】物品 ${item.name} 有 activities`);
+      // 使用独立的触发函数
+      const result = await triggerItemActivities(actor, item, 'onCounter');
       if (result) {
         triggeredCount++;
         console.log(`【对抗时触发】物品 ${item.name} 触发成功`);
-      } else {
-        console.log(`【对抗时触发】物品 ${item.name} 没有匹配的【对抗时】activities`);
       }
     }
   }

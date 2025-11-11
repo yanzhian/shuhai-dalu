@@ -2,6 +2,8 @@
  * 书海大陆 对抗界面应用 - 重新设计
  * 用于响应战斗骰发起时的对抗
  */
+import { triggerItemActivities } from "../shuhai-dalu.mjs";
+
 export default class CounterAreaApplication extends Application {
 
   constructor(actor, initiateData, options = {}) {
@@ -371,19 +373,11 @@ export default class CounterAreaApplication extends Application {
     console.log('【防守方攻击时触发】开始处理，防守方:', this.actor.name, '使用骰子:', dice.name);
 
     // 触发防守方的【攻击时】activities（防守方使用战斗骰进行对抗）
-    const combatArea = Object.values(ui.windows).find(
-      app => app.constructor.name === 'CombatAreaApplication' && app.actor.id === this.actor.id
-    );
-    if (combatArea && typeof combatArea._triggerActivities === 'function') {
-      console.log('【防守方攻击时触发】找到战斗区域应用，开始触发');
-      const result = await combatArea._triggerActivities(dice, 'onAttack');
-      if (result) {
-        console.log('【防守方攻击时触发】触发成功');
-      } else {
-        console.log('【防守方攻击时触发】该骰子没有【攻击时】activities');
-      }
+    const result = await triggerItemActivities(this.actor, dice, 'onAttack');
+    if (result) {
+      console.log('【防守方攻击时触发】触发成功');
     } else {
-      console.warn('【防守方攻击时触发】未找到战斗区域应用或_triggerActivities方法');
+      console.log('【防守方攻击时触发】该骰子没有【攻击时】activities');
     }
 
     // 先投发起者的骰子（如果还没投）

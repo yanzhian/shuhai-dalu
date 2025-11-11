@@ -3,7 +3,7 @@
  */
 
 // 预定义BUFF类型
-const BUFF_TYPES = {
+export const BUFF_TYPES = {
   // 增益BUFF
   positive: [
     {
