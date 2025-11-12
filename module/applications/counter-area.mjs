@@ -465,8 +465,13 @@ export default class CounterAreaApplication extends Application {
       attackType = dice.system.category || '打击';
     }
 
-    // 计算抗性结果
-    const { finalDamage, description } = this._calculateDamage(
+    // 获取获胜者的骰数（用于【呼吸】效果）
+    const winnerDiceRoll = initiatorWon ? initiatorRoll : counterRoll;
+
+    // 计算抗性结果（包含【呼吸】效果）
+    const { finalDamage, description } = await this._calculateDamage(
+      winner,
+      winnerDiceRoll,
       baseDamage,
       attackType,
       loser
@@ -502,6 +507,8 @@ export default class CounterAreaApplication extends Application {
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       content: await renderTemplate("systems/shuhai-dalu/templates/chat/counter-result.hbs", {
         initiatorName: initiator.name,
+        initiatorId: initiator.id,
+        initiatorDiceId: this.initiateData.diceId,
         initiatorDiceImg: this.initiateData.diceImg,
         initiatorDiceName: this.initiateData.diceName,
         initiatorDiceCost: this.initiateData.diceCost,
@@ -511,6 +518,8 @@ export default class CounterAreaApplication extends Application {
         initiatorBuff: initiatorBuffBonus,
         initiatorAdjustment: initiatorAdjustment,
         counterName: this.actor.name,
+        counterId: this.actor.id,
+        counterDiceId: dice.id,
         counterDiceImg: dice.img,
         counterDiceName: dice.name + (consumedEx ? "（消耗1EX）" : ""),
         counterDiceCost: dice.system.cost,
@@ -522,6 +531,8 @@ export default class CounterAreaApplication extends Application {
         initiatorWon: initiatorWon,
         resultDescription: resultDescription,
         loserId: loser.id,
+        winnerId: initiatorWon ? initiator.id : this.actor.id,
+        winnerDiceId: initiatorWon ? this.initiateData.diceId : dice.id,
         finalDamage: finalDamage
       }),
       sound: CONFIG.sounds.dice,
@@ -536,7 +547,7 @@ export default class CounterAreaApplication extends Application {
   }
 
   /**
-   * 计算BUFF加成
+   * 计算BUFF加成（只考虑本回合的BUFF）
    */
   _calculateBuffBonus() {
     let bonus = 0;
@@ -544,6 +555,10 @@ export default class CounterAreaApplication extends Application {
     if (!this.combatState.buffs) return bonus;
 
     for (const buff of this.combatState.buffs) {
+      const timing = buff.roundTiming || 'current';
+      // 只应用本回合的BUFF
+      if (timing !== 'current') continue;
+
       if (buff.id === 'strong') {
         // 强壮：骰数增加
         bonus += buff.layers;
@@ -558,11 +573,23 @@ export default class CounterAreaApplication extends Application {
   }
 
   /**
-   * 计算伤害（包含抗性）
+   * 计算伤害（包含抗性和【呼吸】效果）
    */
-  _calculateDamage(baseDamage, damageCategory, target) {
+  async _calculateDamage(attacker, diceRoll, baseDamage, damageCategory, target) {
     let finalDamage = baseDamage;
     let description = "";
+    let breathMessage = "";
+
+    // 检查攻击者的【呼吸】BUFF效果（在计算抗性之前）
+    if (attacker && diceRoll !== null && diceRoll !== undefined) {
+      const { triggerBreathEffect } = await import('../shuhai-dalu.mjs');
+      const breathResult = await triggerBreathEffect(attacker, diceRoll, baseDamage);
+
+      if (breathResult.triggered) {
+        finalDamage = breathResult.finalDamage;
+        breathMessage = breathResult.message;
+      }
+    }
 
     // 优先从场景中的 Token 获取装备信息
     let actualTarget = target;
@@ -623,10 +650,14 @@ export default class CounterAreaApplication extends Application {
       description = `受到${finalDamage}点伤害`;
     }
 
-    // 应用守护/易损 BUFF 效果
+    // 应用守护/易损 BUFF 效果（只考虑本回合的BUFF）
     const targetCombatState = actualTarget.getFlag('shuhai-dalu', 'combatState');
     if (targetCombatState && targetCombatState.buffs) {
       for (const buff of targetCombatState.buffs) {
+        const timing = buff.roundTiming || 'current';
+        // 只应用本回合的BUFF
+        if (timing !== 'current') continue;
+
         if (buff.id === 'guard' && buff.layers > 0) {
           // 守护：减少伤害
           const damageReduction = buff.layers;
@@ -639,6 +670,11 @@ export default class CounterAreaApplication extends Application {
           description += `\n由于【易损 ${buff.layers}层】，伤害增加${damageIncrease}点`;
         }
       }
+    }
+
+    // 如果有【呼吸】效果，添加到描述前面
+    if (breathMessage) {
+      description = breathMessage + `\n` + description;
     }
 
     return { finalDamage, description };
@@ -720,7 +756,9 @@ export default class CounterAreaApplication extends Application {
       resultMessage = `<div style="color: #4a7c2c; font-weight: bold;">${this.actor.name} 闪避成功！无视本次攻击</div>`;
     } else {
       // 闪避失败，计算伤害（包含抗性）
-      const { finalDamage: damage, description } = this._calculateDamage(
+      const { finalDamage: damage, description } = await this._calculateDamage(
+        initiator,
+        initiatorRollResult.total,
         initiatorResult,
         this.initiateData.diceCategory || '打击',
         this.actor
@@ -806,14 +844,18 @@ export default class CounterAreaApplication extends Application {
     const counterAttackType = this._extractAttackType(defenseDice.system.category) || '打击';
 
     // 计算反击伤害（考虑发起者的抗性）
-    const { finalDamage: counterDamage, description: counterDescription } = this._calculateDamage(
+    const { finalDamage: counterDamage, description: counterDescription } = await this._calculateDamage(
+      this.actor,
+      roll.total,
       counterBaseDamage,
       counterAttackType,
       initiator
     );
 
     // 计算对抗者受到的伤害（考虑抗性）
-    const { finalDamage: initiatorDamage, description: initiatorDescription } = this._calculateDamage(
+    const { finalDamage: initiatorDamage, description: initiatorDescription } = await this._calculateDamage(
+      initiator,
+      initiatorRollResult.total,
       initiatorTotal,
       this.initiateData.diceCategory || '打击',
       this.actor
@@ -897,8 +939,14 @@ export default class CounterAreaApplication extends Application {
       attackType = this.initiateData.diceCategory || '打击';
     }
 
+    // 获取获胜者和对应的骰数
+    const winner = counterWon ? this.actor : initiator;
+    const winnerDiceRoll = counterWon ? roll.total : initiatorRollResult.total;
+
     // 计算抗性结果
-    const { finalDamage, description } = this._calculateDamage(
+    const { finalDamage, description } = await this._calculateDamage(
+      winner,
+      winnerDiceRoll,
       baseDamage,
       attackType,
       loser
@@ -981,7 +1029,9 @@ export default class CounterAreaApplication extends Application {
                           parseInt(this.initiateData.adjustment);
 
     // 先计算原始伤害（包含抗性）
-    const { finalDamage: baseDamage, description: damageDescription } = this._calculateDamage(
+    const { finalDamage: baseDamage, description: damageDescription } = await this._calculateDamage(
+      initiator,
+      initiatorRollResult.total,
       initiatorTotal,
       this.initiateData.diceCategory || '打击',
       this.actor
@@ -1074,7 +1124,9 @@ export default class CounterAreaApplication extends Application {
       resultDescription = `<div style="color: #4a7c2c; font-weight: bold;">${this.actor.name} 强化防御成功！完全抵挡了攻击</div>`;
     } else {
       // 防御失败，计算伤害（先算抗性，再减防御值）
-      const { finalDamage: baseDamage, description: damageDescription } = this._calculateDamage(
+      const { finalDamage: baseDamage, description: damageDescription } = await this._calculateDamage(
+        initiator,
+        initiatorRollResult.total,
         initiatorResult,
         this.initiateData.diceCategory || '打击',
         this.actor
