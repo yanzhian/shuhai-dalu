@@ -502,6 +502,8 @@ export default class CounterAreaApplication extends Application {
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       content: await renderTemplate("systems/shuhai-dalu/templates/chat/counter-result.hbs", {
         initiatorName: initiator.name,
+        initiatorId: initiator.id,
+        initiatorDiceId: this.initiateData.diceId,
         initiatorDiceImg: this.initiateData.diceImg,
         initiatorDiceName: this.initiateData.diceName,
         initiatorDiceCost: this.initiateData.diceCost,
@@ -511,6 +513,8 @@ export default class CounterAreaApplication extends Application {
         initiatorBuff: initiatorBuffBonus,
         initiatorAdjustment: initiatorAdjustment,
         counterName: this.actor.name,
+        counterId: this.actor.id,
+        counterDiceId: dice.id,
         counterDiceImg: dice.img,
         counterDiceName: dice.name + (consumedEx ? "（消耗1EX）" : ""),
         counterDiceCost: dice.system.cost,
@@ -522,6 +526,8 @@ export default class CounterAreaApplication extends Application {
         initiatorWon: initiatorWon,
         resultDescription: resultDescription,
         loserId: loser.id,
+        winnerId: initiatorWon ? initiator.id : this.actor.id,
+        winnerDiceId: initiatorWon ? this.initiateData.diceId : dice.id,
         finalDamage: finalDamage
       }),
       sound: CONFIG.sounds.dice,

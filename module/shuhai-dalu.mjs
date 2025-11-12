@@ -407,6 +407,127 @@ export async function triggerItemActivities(actor, item, triggerType) {
 }
 
 /**
+ * 触发物品活动（支持指定目标）
+ * @param {Actor} sourceActor - 触发源角色
+ * @param {Item} item - 触发的物品
+ * @param {string} triggerType - 触发类型
+ * @param {Actor} targetActor - 目标角色（可选，如果activity的target是'selected'则必须提供）
+ * @returns {boolean} - 是否有活动被触发
+ */
+export async function triggerItemActivitiesWithTarget(sourceActor, item, triggerType, targetActor = null) {
+  // 检查物品是否有activities
+  if (!item.system.activities || Object.keys(item.system.activities).length === 0) {
+    return false;
+  }
+
+  // 筛选出匹配的activities
+  const matchingActivities = Object.values(item.system.activities).filter(
+    activity => activity.trigger === triggerType
+  );
+
+  if (matchingActivities.length === 0) {
+    return false;
+  }
+
+  // 获取所有BUFF定义
+  const allBuffs = [
+    ...BUFF_TYPES.positive,
+    ...BUFF_TYPES.negative,
+    ...BUFF_TYPES.effect
+  ];
+
+  let hasTriggered = false;
+
+  // 执行每个activity
+  for (const activity of matchingActivities) {
+    // 获取回合时机
+    const roundTiming = activity.roundTiming || 'current';
+
+    // 检查目标类型
+    const targetType = activity.target || 'self';
+
+    // 确定实际目标actor
+    let actualTarget = null;
+    if (targetType === 'self') {
+      actualTarget = sourceActor;
+    } else if (targetType === 'selected') {
+      if (!targetActor) {
+        console.warn(`Activity需要目标，但未提供: ${item.name}`);
+        continue;
+      }
+      actualTarget = targetActor;
+    } else {
+      // 其他目标类型暂不支持
+      continue;
+    }
+
+    // 获取目标的战斗状态
+    let combatState = actualTarget.getFlag('shuhai-dalu', 'combatState') || {
+      costResources: [false, false, false, false, false, false],
+      exResources: [false, false, false],
+      activatedDice: [false, false, false, false, false, false],
+      buffs: []
+    };
+
+    // 应用效果
+    if (activity.effects && Object.keys(activity.effects).length > 0) {
+      for (const [buffId, effectData] of Object.entries(activity.effects)) {
+        const layers = parseInt(effectData.layers) || 0;
+        const strength = parseInt(effectData.strength) || 0;
+
+        if (layers === 0) continue;
+
+        // 查找BUFF定义
+        const buffDef = allBuffs.find(b => b.id === buffId);
+        if (!buffDef) {
+          console.warn(`未找到 BUFF 定义: ${buffId}`);
+          continue;
+        }
+
+        // 检查是否已存在相同id和roundTiming的BUFF
+        const existingBuffIndex = combatState.buffs.findIndex(
+          b => b.id === buffId && b.roundTiming === roundTiming
+        );
+
+        if (existingBuffIndex !== -1) {
+          // 如果已存在，增加层数和强度
+          combatState.buffs[existingBuffIndex].layers += layers;
+          combatState.buffs[existingBuffIndex].strength += strength;
+        } else {
+          // 如果不存在，添加新BUFF
+          combatState.buffs.push({
+            id: buffDef.id,
+            name: buffDef.name,
+            type: buffDef.type,
+            description: buffDef.description,
+            icon: buffDef.icon,
+            layers: layers,
+            strength: strength !== 0 ? strength : buffDef.defaultStrength,
+            roundTiming: roundTiming
+          });
+        }
+
+        hasTriggered = true;
+      }
+    }
+
+    // 保存目标的战斗状态
+    if (hasTriggered) {
+      await actualTarget.setFlag('shuhai-dalu', 'combatState', combatState);
+
+      // 刷新目标的战斗区域（如果打开）
+      Object.values(ui.windows).forEach(app => {
+        if (app.constructor.name === 'CombatAreaApplication' && app.actor.id === actualTarget.id) {
+          app.render(false);
+        }
+      });
+    }
+  }
+
+  return hasTriggered;
+}
+
+/**
  * 独立的回合结束处理函数 - 不依赖CombatAreaApplication
  * @param {Actor} actor - 角色
  */
@@ -844,6 +965,9 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     const button = event.currentTarget;
 
     const finalDamage = parseInt(button.dataset.finalDamage) || 0;
+    const winnerId = button.dataset.winnerId;
+    const winnerDiceId = button.dataset.winnerDiceId;
+    const loserId = button.dataset.loserId;
 
     // 获取当前选中的Token
     const controlled = canvas.tokens?.controlled;
@@ -888,6 +1012,30 @@ Hooks.on('renderChatMessage', (message, html, data) => {
       console.error('【调试】HP更新失败:', error);
       ui.notifications.error(`更新HP失败: ${error.message}`);
       return;
+    }
+
+    // 触发【攻击命中】和【受到伤害】效果
+    if (winnerId && loserId && finalDamage > 0) {
+      const winner = game.actors.get(winnerId);
+      const loser = game.actors.get(loserId);
+
+      if (winner && loser) {
+        // 1. 触发获胜者的【攻击命中】效果
+        if (winnerDiceId) {
+          const winnerDice = winner.items.get(winnerDiceId);
+          if (winnerDice) {
+            await triggerItemActivitiesWithTarget(winner, winnerDice, 'onHit', loser);
+          }
+        }
+
+        // 2. 触发失败者的【受到伤害】效果（遍历所有装备）
+        const loserEquippedItems = loser.items.filter(item =>
+          item.type === 'item' && item.system.equipped
+        );
+        for (const item of loserEquippedItems) {
+          await triggerItemActivitiesWithTarget(loser, item, 'onDamaged', winner);
+        }
+      }
     }
 
     // 禁用按钮
@@ -1023,6 +1171,29 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     // 应用伤害
     const newHp = Math.max(0, actor.system.derived.hp.value - finalDamage);
     await actor.update({ 'system.derived.hp.value': newHp });
+
+    // 触发【攻击命中】和【受到伤害】效果
+    if (finalDamage > 0) {
+      const initiator = game.actors.get(initiatorId);
+
+      if (initiator) {
+        // 1. 触发攻击者的【攻击命中】效果
+        if (initiateData.diceId) {
+          const initiatorDice = initiator.items.get(initiateData.diceId);
+          if (initiatorDice) {
+            await triggerItemActivitiesWithTarget(initiator, initiatorDice, 'onHit', actor);
+          }
+        }
+
+        // 2. 触发承受者的【受到伤害】效果（遍历所有装备）
+        const defenderEquippedItems = actor.items.filter(item =>
+          item.type === 'item' && item.system.equipped
+        );
+        for (const item of defenderEquippedItems) {
+          await triggerItemActivitiesWithTarget(actor, item, 'onDamaged', initiator);
+        }
+      }
+    }
 
     // 重新获取更新后的角色数据
     const updatedActor = game.actors.get(actor.id);
