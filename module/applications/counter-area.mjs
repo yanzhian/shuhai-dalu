@@ -465,8 +465,13 @@ export default class CounterAreaApplication extends Application {
       attackType = dice.system.category || '打击';
     }
 
-    // 计算抗性结果
-    const { finalDamage, description } = this._calculateDamage(
+    // 获取获胜者的骰数（用于【呼吸】效果）
+    const winnerDiceRoll = initiatorWon ? initiatorRoll : counterRoll;
+
+    // 计算抗性结果（包含【呼吸】效果）
+    const { finalDamage, description } = await this._calculateDamage(
+      winner,
+      winnerDiceRoll,
       baseDamage,
       attackType,
       loser
@@ -568,11 +573,23 @@ export default class CounterAreaApplication extends Application {
   }
 
   /**
-   * 计算伤害（包含抗性）
+   * 计算伤害（包含抗性和【呼吸】效果）
    */
-  _calculateDamage(baseDamage, damageCategory, target) {
+  async _calculateDamage(attacker, diceRoll, baseDamage, damageCategory, target) {
     let finalDamage = baseDamage;
     let description = "";
+    let breathMessage = "";
+
+    // 检查攻击者的【呼吸】BUFF效果（在计算抗性之前）
+    if (attacker && diceRoll !== null && diceRoll !== undefined) {
+      const { triggerBreathEffect } = await import('../shuhai-dalu.mjs');
+      const breathResult = await triggerBreathEffect(attacker, diceRoll, baseDamage);
+
+      if (breathResult.triggered) {
+        finalDamage = breathResult.finalDamage;
+        breathMessage = breathResult.message;
+      }
+    }
 
     // 优先从场景中的 Token 获取装备信息
     let actualTarget = target;
@@ -653,6 +670,11 @@ export default class CounterAreaApplication extends Application {
           description += `\n由于【易损 ${buff.layers}层】，伤害增加${damageIncrease}点`;
         }
       }
+    }
+
+    // 如果有【呼吸】效果，添加到描述前面
+    if (breathMessage) {
+      description = breathMessage + `\n` + description;
     }
 
     return { finalDamage, description };

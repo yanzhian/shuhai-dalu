@@ -747,6 +747,199 @@ export async function triggerBleedEffect(actor) {
 }
 
 /**
+ * 处理【破裂】效果 - 在受到伤害时触发
+ * @param {Actor} actor - 受伤角色
+ * @returns {Object} { triggered: boolean, damage: number, message: string }
+ */
+export async function triggerRuptureEffect(actor) {
+  // 获取战斗状态
+  let combatState = actor.getFlag('shuhai-dalu', 'combatState');
+  if (!combatState || !combatState.buffs) {
+    return { triggered: false, damage: 0, message: '' };
+  }
+
+  // 查找【破裂】BUFF（只考虑本回合的）
+  const ruptureIndex = combatState.buffs.findIndex(
+    buff => buff.id === 'rupture' && (buff.roundTiming === 'current' || !buff.roundTiming)
+  );
+
+  if (ruptureIndex === -1) {
+    return { triggered: false, damage: 0, message: '' };
+  }
+
+  const ruptureBuff = combatState.buffs[ruptureIndex];
+  const damage = ruptureBuff.strength;
+
+  // 扣除HP
+  const hpBefore = actor.system.derived.hp.value;
+  const newHp = Math.max(0, hpBefore - damage);
+  await actor.update({ 'system.derived.hp.value': newHp });
+
+  // 层数减少1层
+  ruptureBuff.layers -= 1;
+
+  let message = `【破裂】触发：受到 ${damage} 点固定伤害`;
+
+  // 如果层数降到0或以下，删除BUFF
+  if (ruptureBuff.layers <= 0) {
+    combatState.buffs.splice(ruptureIndex, 1);
+    message += `，【破裂】已消失`;
+  } else {
+    message += `，【破裂】层数减少1层（剩余${ruptureBuff.layers}层）`;
+  }
+
+  // 保存战斗状态
+  await actor.setFlag('shuhai-dalu', 'combatState', combatState);
+
+  // 刷新战斗区域（如果打开）
+  Object.values(ui.windows).forEach(app => {
+    if (app.constructor.name === 'CombatAreaApplication' && app.actor.id === actor.id) {
+      app.render(false);
+    }
+  });
+
+  return { triggered: true, damage: damage, message: message };
+}
+
+/**
+ * 处理【沉沦】效果 - 在受到伤害时触发
+ * @param {Actor} actor - 受伤角色
+ * @returns {Object} { triggered: boolean, corruption: number, message: string }
+ */
+export async function triggerCorruptionEffect(actor) {
+  // 获取战斗状态
+  let combatState = actor.getFlag('shuhai-dalu', 'combatState');
+  if (!combatState || !combatState.buffs) {
+    return { triggered: false, corruption: 0, message: '' };
+  }
+
+  // 查找【沉沦】BUFF（只考虑本回合的）
+  const corruptionIndex = combatState.buffs.findIndex(
+    buff => buff.id === 'corruption_effect' && (buff.roundTiming === 'current' || !buff.roundTiming)
+  );
+
+  if (corruptionIndex === -1) {
+    return { triggered: false, corruption: 0, message: '' };
+  }
+
+  const corruptionBuff = combatState.buffs[corruptionIndex];
+  const corruptionValue = corruptionBuff.strength;
+
+  // 增加侵蚀度
+  const corruptionBefore = actor.system.derived.corruption.value;
+  const newCorruption = Math.min(actor.system.derived.corruption.max, corruptionBefore + corruptionValue);
+  await actor.update({ 'system.derived.corruption.value': newCorruption });
+
+  // 层数减少1层
+  corruptionBuff.layers -= 1;
+
+  let message = `【沉沦】触发：增加 ${corruptionValue} 点侵蚀度`;
+
+  // 如果层数降到0或以下，删除BUFF
+  if (corruptionBuff.layers <= 0) {
+    combatState.buffs.splice(corruptionIndex, 1);
+    message += `，【沉沦】已消失`;
+  } else {
+    message += `，【沉沦】层数减少1层（剩余${corruptionBuff.layers}层）`;
+  }
+
+  // 保存战斗状态
+  await actor.setFlag('shuhai-dalu', 'combatState', combatState);
+
+  // 刷新战斗区域（如果打开）
+  Object.values(ui.windows).forEach(app => {
+    if (app.constructor.name === 'CombatAreaApplication' && app.actor.id === actor.id) {
+      app.render(false);
+    }
+  });
+
+  return { triggered: true, corruption: corruptionValue, message: message };
+}
+
+/**
+ * 处理【呼吸】效果 - 在攻击命中时检查重击/暴击
+ * @param {Actor} attacker - 攻击者
+ * @param {number} diceRoll - 骰子点数
+ * @param {number} baseDamage - 基础伤害
+ * @returns {Object} { multiplier: number, finalDamage: number, message: string, triggered: boolean }
+ */
+export async function triggerBreathEffect(attacker, diceRoll, baseDamage) {
+  // 获取战斗状态
+  let combatState = attacker.getFlag('shuhai-dalu', 'combatState');
+  if (!combatState || !combatState.buffs) {
+    return { multiplier: 1, finalDamage: baseDamage, message: '', triggered: false };
+  }
+
+  // 查找【呼吸】BUFF（只考虑本回合的）
+  const breathIndex = combatState.buffs.findIndex(
+    buff => buff.id === 'breath' && (buff.roundTiming === 'current' || !buff.roundTiming)
+  );
+
+  if (breathIndex === -1) {
+    return { multiplier: 1, finalDamage: baseDamage, message: '', triggered: false };
+  }
+
+  const breathBuff = combatState.buffs[breathIndex];
+  const breathStrength = breathBuff.strength;
+
+  // 计算【呼吸】附加伤害
+  const breathDamage = breathStrength;
+  let totalDamage = baseDamage + breathDamage;
+
+  let multiplier = 1;
+  let critType = '';
+  let shouldReduceLayer = false;
+
+  // 检查重击和暴击
+  if (diceRoll > 20) {
+    multiplier = 2;
+    critType = '暴击';
+    shouldReduceLayer = true;
+  } else if (diceRoll > 15) {
+    multiplier = 1.5;
+    critType = '重击';
+    shouldReduceLayer = true;
+  }
+
+  // 应用倍率
+  const finalDamage = Math.floor(totalDamage * multiplier);
+
+  let message = `【呼吸】触发：附加 ${breathDamage} 点伤害`;
+
+  if (critType) {
+    message += `，${critType}！伤害 x${multiplier} = ${finalDamage}`;
+
+    // 触发重击或暴击时，层数减少1层
+    breathBuff.layers -= 1;
+
+    if (breathBuff.layers <= 0) {
+      combatState.buffs.splice(breathIndex, 1);
+      message += `，【呼吸】已消失`;
+    } else {
+      message += `，【呼吸】层数减少1层（剩余${breathBuff.layers}层）`;
+    }
+
+    // 保存战斗状态
+    await attacker.setFlag('shuhai-dalu', 'combatState', combatState);
+
+    // 刷新战斗区域（如果打开）
+    Object.values(ui.windows).forEach(app => {
+      if (app.constructor.name === 'CombatAreaApplication' && app.actor.id === attacker.id) {
+        app.render(false);
+      }
+    });
+  }
+
+  return {
+    multiplier: multiplier,
+    finalDamage: finalDamage,
+    message: message,
+    triggered: true,
+    critType: critType
+  };
+}
+
+/**
  * 为聊天消息添加事件监听器
  */
 Hooks.on('renderChatMessage', (message, html, data) => {
@@ -1014,6 +1207,20 @@ Hooks.on('renderChatMessage', (message, html, data) => {
       return;
     }
 
+    // 触发【破裂】和【沉沦】被动效果（受到伤害时）
+    const passiveMessages = [];
+    if (finalDamage > 0) {
+      const ruptureResult = await triggerRuptureEffect(actor);
+      if (ruptureResult.triggered) {
+        passiveMessages.push(ruptureResult.message);
+      }
+
+      const corruptionResult = await triggerCorruptionEffect(actor);
+      if (corruptionResult.triggered) {
+        passiveMessages.push(corruptionResult.message);
+      }
+    }
+
     // 触发【攻击命中】和【受到伤害】效果
     if (winnerId && loserId && finalDamage > 0) {
       const winner = game.actors.get(winnerId);
@@ -1054,6 +1261,13 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     });
 
     // 发送确认消息
+    const updatedHp = game.actors.get(actor.id).system.derived.hp.value;
+    const passiveEffectsHtml = passiveMessages.length > 0
+      ? `<div style="margin-top: 8px; padding: 8px; background: rgba(235, 189, 104, 0.15); border-radius: 4px; border-left: 3px solid #E1AA43;">
+           ${passiveMessages.map(msg => `<div style="font-size: 13px; color: #EBBD68; margin: 4px 0;">${msg}</div>`).join('')}
+         </div>`
+      : '';
+
     ChatMessage.create({
       user: game.user.id,
       speaker: ChatMessage.getSpeaker({ actor: actor }),
@@ -1061,9 +1275,10 @@ Hooks.on('renderChatMessage', (message, html, data) => {
         <div style="background: #0F0D1B; border: 2px solid #c14545; border-radius: 8px; padding: 12px; color: #EBBD68; text-align: center; font-family: 'Noto Sans SC', sans-serif;">
           <div style="font-size: 16px; font-weight: bold; color: #c14545; margin-bottom: 8px;">✓ 生命值已扣除</div>
           <div style="margin-bottom: 8px;"><strong>${actor.name}</strong> 受到了 <span style="color: #c14545; font-weight: bold;">${finalDamage}</span> 点伤害</div>
-          <div style="padding: 8px; background: rgba(193, 69, 69, 0.1); border-radius: 4px;">
+          ${passiveEffectsHtml}
+          <div style="padding: 8px; background: rgba(193, 69, 69, 0.1); border-radius: 4px; margin-top: 8px;">
             <div style="font-size: 14px; color: #888;">伤害前: ${hpBefore}/${hpMax}</div>
-            <div style="font-size: 16px; font-weight: bold; color: ${newHp > 0 ? '#EBBD68' : '#c14545'}; margin-top: 4px;">当前生命值: ${newHp}/${hpMax}</div>
+            <div style="font-size: 16px; font-weight: bold; color: ${updatedHp > 0 ? '#EBBD68' : '#c14545'}; margin-top: 4px;">当前生命值: ${updatedHp}/${hpMax}</div>
           </div>
         </div>
       `
@@ -1169,8 +1384,23 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     }
 
     // 应用伤害
-    const newHp = Math.max(0, actor.system.derived.hp.value - finalDamage);
+    const hpBefore = actor.system.derived.hp.value;
+    const newHp = Math.max(0, hpBefore - finalDamage);
     await actor.update({ 'system.derived.hp.value': newHp });
+
+    // 触发【破裂】和【沉沦】被动效果（受到伤害时）
+    const passiveMessages = [];
+    if (finalDamage > 0) {
+      const ruptureResult = await triggerRuptureEffect(actor);
+      if (ruptureResult.triggered) {
+        passiveMessages.push(ruptureResult.message);
+      }
+
+      const corruptionResult = await triggerCorruptionEffect(actor);
+      if (corruptionResult.triggered) {
+        passiveMessages.push(corruptionResult.message);
+      }
+    }
 
     // 触发【攻击命中】和【受到伤害】效果
     if (finalDamage > 0) {
@@ -1210,6 +1440,12 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     });
 
     // 发送消息
+    const passiveEffectsHtml = passiveMessages.length > 0
+      ? `<div style="margin-top: 8px; padding: 8px; background: rgba(235, 189, 104, 0.15); border-radius: 4px; border-left: 3px solid #E1AA43;">
+           ${passiveMessages.map(msg => `<div style="font-size: 13px; color: #EBBD68; margin: 4px 0;">${msg}</div>`).join('')}
+         </div>`
+      : '';
+
     ChatMessage.create({
       user: game.user.id,
       speaker: ChatMessage.getSpeaker({ actor: actor }),
@@ -1226,7 +1462,8 @@ Hooks.on('renderChatMessage', (message, html, data) => {
           <div style="padding: 8px; background: rgba(235, 189, 104, 0.1); border-radius: 4px; margin-bottom: 8px;">
             <div>${description}</div>
           </div>
-          <div style="text-align: center; font-weight: bold;">
+          ${passiveEffectsHtml}
+          <div style="text-align: center; font-weight: bold; margin-top: 8px;">
             当前生命值: ${updatedActor.system.derived.hp.value}/${updatedActor.system.derived.hp.max}
           </div>
         </div>
