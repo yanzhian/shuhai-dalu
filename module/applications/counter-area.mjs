@@ -423,6 +423,68 @@ export default class CounterAreaApplication extends Application {
     }
 
     // 判断胜负
+    const isDraw = initiatorResult === counterResult;
+
+    // 如果是平局，发送平局消息并提供【再次对抗】按钮
+    if (isDraw) {
+      // 使用后解除激活状态（对抗者）
+      if (diceIndex !== null && diceIndex >= 0 && diceIndex < 6) {
+        this.combatState.activatedDice[diceIndex] = false;
+      }
+
+      // 保存对抗者的状态
+      await this._saveCombatState();
+
+      // 创建结果描述
+      const resultDescription = `<div style="text-align: center;">
+        <div style="color: #EBBD68; font-weight: bold; margin-bottom: 8px;">${initiator.name}: ${initiatorRoll} + ${initiatorBuffBonus} + ${initiatorAdjustment} = ${initiatorResult}</div>
+        <div style="color: #EBBD68; font-weight: bold; margin-bottom: 8px;">${this.actor.name}: ${counterRoll} + ${buffBonus} + ${adjustment} = ${counterResult}</div>
+        <div style="color: #f3c267; font-weight: bold; font-size: 16px; margin-top: 12px;">本次对抗【平局】</div>
+      </div>`;
+
+      // 发送平局消息
+      const chatData = {
+        user: game.user.id,
+        speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+        content: await renderTemplate("systems/shuhai-dalu/templates/chat/counter-draw.hbs", {
+          initiatorName: initiator.name,
+          initiatorId: initiator.id,
+          initiatorDiceId: this.initiateData.diceId,
+          initiatorDiceImg: this.initiateData.diceImg,
+          initiatorDiceName: this.initiateData.diceName,
+          initiatorDiceCost: this.initiateData.diceCost,
+          initiatorDiceFormula: this.initiateData.diceFormula,
+          initiatorResult: initiatorResult,
+          initiatorDiceRoll: initiatorRoll,
+          initiatorBuff: initiatorBuffBonus,
+          initiatorAdjustment: initiatorAdjustment,
+          initiatorDiceCategory: this.initiateData.diceCategory,
+          counterName: this.actor.name,
+          counterId: this.actor.id,
+          counterDiceId: dice.id,
+          counterDiceImg: dice.img,
+          counterDiceName: dice.name + (consumedEx ? "（消耗1EX）" : ""),
+          counterDiceCost: dice.system.cost,
+          counterDiceFormula: dice.system.diceFormula,
+          counterDiceCategory: dice.system.category,
+          counterResult: counterResult,
+          counterDiceRoll: counterRoll,
+          counterBuff: buffBonus,
+          counterAdjustment: adjustment,
+          resultDescription: resultDescription
+        }),
+        sound: CONFIG.sounds.dice,
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        rolls: [roll]
+      };
+
+      await ChatMessage.create(chatData);
+
+      // 关闭对抗窗口
+      this.close();
+      return;
+    }
+
     const initiatorWon = initiatorResult > counterResult;
     const loser = initiatorWon ? this.actor : initiator;
     const winner = initiatorWon ? initiator : this.actor;
