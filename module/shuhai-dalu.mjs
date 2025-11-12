@@ -1480,6 +1480,218 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     ui.notifications.info(`${actor.name} 承受了 ${finalDamage} 点伤害`);
   });
 
+  // 再次对抗按钮事件（counter-draw.hbs）
+  html.find('.retry-counter-btn').click(async (event) => {
+    event.preventDefault();
+    const button = event.currentTarget;
+
+    const initiatorId = button.dataset.initiatorId;
+    const initiatorDiceId = button.dataset.initiatorDiceId;
+    const initiatorName = button.dataset.initiatorName;
+    const initiatorDiceCategory = button.dataset.initiatorDiceCategory;
+    const counterId = button.dataset.counterId;
+    const counterDiceId = button.dataset.counterDiceId;
+
+    // 获取双方角色和骰子
+    const initiator = game.actors.get(initiatorId);
+    const counter = game.actors.get(counterId);
+
+    if (!initiator || !counter) {
+      ui.notifications.error("无法找到对抗双方角色");
+      return;
+    }
+
+    const initiatorDice = initiator.items.get(initiatorDiceId);
+    const counterDice = counter.items.get(counterDiceId);
+
+    if (!initiatorDice || !counterDice) {
+      ui.notifications.error("无法找到对抗骰子");
+      return;
+    }
+
+    // 禁用按钮
+    button.disabled = true;
+    button.textContent = '对抗中...';
+
+    // 双方重新投骰
+    const initiatorRoll = new Roll(initiatorDice.system.diceFormula);
+    await initiatorRoll.evaluate();
+
+    const counterRoll = new Roll(counterDice.system.diceFormula);
+    await counterRoll.evaluate();
+
+    // 显示骰子动画
+    if (game.dice3d) {
+      await game.dice3d.showForRoll(initiatorRoll, game.user, true);
+      await game.dice3d.showForRoll(counterRoll, game.user, true);
+    }
+
+    // 获取双方的BUFF加成
+    const initiatorCombatState = initiator.getFlag('shuhai-dalu', 'combatState') || { buffs: [] };
+    const counterCombatState = counter.getFlag('shuhai-dalu', 'combatState') || { buffs: [] };
+
+    let initiatorBuffBonus = 0;
+    let counterBuffBonus = 0;
+
+    // 计算发起者BUFF加成
+    for (const buff of initiatorCombatState.buffs || []) {
+      const timing = buff.roundTiming || 'current';
+      if (timing !== 'current') continue;
+
+      if (buff.id === 'strong') {
+        initiatorBuffBonus += buff.layers;
+      } else if (buff.id === 'weak') {
+        initiatorBuffBonus -= buff.layers;
+      }
+    }
+
+    // 计算对抗者BUFF加成
+    for (const buff of counterCombatState.buffs || []) {
+      const timing = buff.roundTiming || 'current';
+      if (timing !== 'current') continue;
+
+      if (buff.id === 'strong') {
+        counterBuffBonus += buff.layers;
+      } else if (buff.id === 'weak') {
+        counterBuffBonus -= buff.layers;
+      }
+    }
+
+    const initiatorResult = initiatorRoll.total + initiatorBuffBonus;
+    const counterResult = counterRoll.total + counterBuffBonus;
+
+    // 触发双方的【对抗时】activities
+    const { triggerItemActivities } = await import('./shuhai-dalu.mjs');
+    await triggerItemActivities(initiator, initiatorDice, 'onCounter');
+    await triggerItemActivities(counter, counterDice, 'onCounter');
+
+    // 判断结果
+    const isDraw = initiatorResult === counterResult;
+
+    if (isDraw) {
+      // 还是平局，再次显示平局消息
+      const resultDescription = `<div style="text-align: center;">
+        <div style="color: #EBBD68; font-weight: bold; margin-bottom: 8px;">${initiatorName}: ${initiatorRoll.total} + ${initiatorBuffBonus} + 0 = ${initiatorResult}</div>
+        <div style="color: #EBBD68; font-weight: bold; margin-bottom: 8px;">${counter.name}: ${counterRoll.total} + ${counterBuffBonus} + 0 = ${counterResult}</div>
+        <div style="color: #f3c267; font-weight: bold; font-size: 16px; margin-top: 12px;">再次对抗仍为【平局】</div>
+      </div>`;
+
+      const chatData = {
+        user: game.user.id,
+        speaker: ChatMessage.getSpeaker({ actor: counter }),
+        content: await renderTemplate("systems/shuhai-dalu/templates/chat/counter-draw.hbs", {
+          initiatorName: initiatorName,
+          initiatorId: initiatorId,
+          initiatorDiceId: initiatorDiceId,
+          initiatorDiceImg: initiatorDice.img,
+          initiatorDiceName: initiatorDice.name,
+          initiatorDiceCost: initiatorDice.system.cost,
+          initiatorDiceFormula: initiatorDice.system.diceFormula,
+          initiatorResult: initiatorResult,
+          initiatorDiceRoll: initiatorRoll.total,
+          initiatorBuff: initiatorBuffBonus,
+          initiatorAdjustment: 0,
+          initiatorDiceCategory: initiatorDiceCategory,
+          counterName: counter.name,
+          counterId: counterId,
+          counterDiceId: counterDiceId,
+          counterDiceImg: counterDice.img,
+          counterDiceName: counterDice.name,
+          counterDiceCost: counterDice.system.cost,
+          counterDiceFormula: counterDice.system.diceFormula,
+          counterDiceCategory: counterDice.system.category,
+          counterResult: counterResult,
+          counterDiceRoll: counterRoll.total,
+          counterBuff: counterBuffBonus,
+          counterAdjustment: 0,
+          resultDescription: resultDescription
+        }),
+        sound: CONFIG.sounds.dice,
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        rolls: [initiatorRoll, counterRoll]
+      };
+
+      await ChatMessage.create(chatData);
+    } else {
+      // 有胜负，显示正常的对抗结果
+      const initiatorWon = initiatorResult > counterResult;
+      const winner = initiatorWon ? initiator : counter;
+      const loser = initiatorWon ? counter : initiator;
+      const winnerDice = initiatorWon ? initiatorDice : counterDice;
+      const loserDice = initiatorWon ? counterDice : initiatorDice;
+
+      // 触发【对抗成功】和【对抗失败】
+      await triggerItemActivities(winner, winnerDice, 'onCounterSuccess');
+      await triggerItemActivities(loser, loserDice, 'onCounterFail');
+
+      // 计算伤害
+      const baseDamage = initiatorWon ? initiatorResult : counterResult;
+      const attackType = initiatorWon ? initiatorDiceCategory : counterDice.system.category;
+      const winnerDiceRoll = initiatorWon ? initiatorRoll.total : counterRoll.total;
+
+      // 导入 _calculateDamage 的逻辑（简化版，直接计算）
+      let finalDamage = baseDamage;
+      let description = `受到${baseDamage}点伤害`;
+
+      // 检查【呼吸】效果
+      const { triggerBreathEffect } = await import('./shuhai-dalu.mjs');
+      const breathResult = await triggerBreathEffect(winner, winnerDiceRoll, baseDamage);
+      if (breathResult.triggered) {
+        finalDamage = breathResult.finalDamage;
+        description = breathResult.message + '\n' + description;
+      }
+
+      const resultDescription = `<div style="text-align: center;">
+        <div style="color: ${initiatorWon ? '#EBBD68' : '#cf4646'}; font-weight: bold; margin-bottom: 8px;">${initiatorName}: ${initiatorRoll.total} + ${initiatorBuffBonus} + 0 = ${initiatorResult}</div>
+        <div style="color: ${!initiatorWon ? '#EBBD68' : '#cf4646'}; font-weight: bold; margin-bottom: 8px;">${counter.name}: ${counterRoll.total} + ${counterBuffBonus} + 0 = ${counterResult}</div>
+        <div style="color: #EBBD68; font-weight: bold; font-size: 16px; margin-top: 12px;">本次对抗，${winner.name}【获胜】，${loser.name}【败北】</div>
+        <div style="margin-top: 8px;">${loser.name}${description}</div>
+      </div>`;
+
+      const chatData = {
+        user: game.user.id,
+        speaker: ChatMessage.getSpeaker({ actor: counter }),
+        content: await renderTemplate("systems/shuhai-dalu/templates/chat/counter-result.hbs", {
+          initiatorName: initiatorName,
+          initiatorId: initiatorId,
+          initiatorDiceId: initiatorDiceId,
+          initiatorDiceImg: initiatorDice.img,
+          initiatorDiceName: initiatorDice.name,
+          initiatorDiceCost: initiatorDice.system.cost,
+          initiatorDiceFormula: initiatorDice.system.diceFormula,
+          initiatorResult: initiatorResult,
+          initiatorDiceRoll: initiatorRoll.total,
+          initiatorBuff: initiatorBuffBonus,
+          initiatorAdjustment: 0,
+          counterName: counter.name,
+          counterId: counterId,
+          counterDiceId: counterDiceId,
+          counterDiceImg: counterDice.img,
+          counterDiceName: counterDice.name,
+          counterDiceCost: counterDice.system.cost,
+          counterDiceFormula: counterDice.system.diceFormula,
+          counterResult: counterResult,
+          counterDiceRoll: counterRoll.total,
+          counterBuff: counterBuffBonus,
+          counterAdjustment: 0,
+          initiatorWon: initiatorWon,
+          resultDescription: resultDescription,
+          loserId: loser.id,
+          winnerId: winner.id,
+          winnerDiceId: winnerDice.id,
+          finalDamage: finalDamage
+        }),
+        sound: CONFIG.sounds.dice,
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        rolls: [initiatorRoll, counterRoll]
+      };
+
+      await ChatMessage.create(chatData);
+    }
+
+    ui.notifications.info("再次对抗完成");
+  });
+
   // 旧的挑战按钮事件（兼容性保留）
   html.find('.challenge-btn').click(async (event) => {
     event.preventDefault();
@@ -1980,6 +2192,7 @@ async function preloadHandlebarsTemplates() {
     "systems/shuhai-dalu/templates/chat/combat-dice-challenge.hbs",
     "systems/shuhai-dalu/templates/chat/combat-dice-initiate.hbs",
     "systems/shuhai-dalu/templates/chat/counter-result.hbs",
+    "systems/shuhai-dalu/templates/chat/counter-draw.hbs",
     "systems/shuhai-dalu/templates/chat/contest-result.hbs",
     "systems/shuhai-dalu/templates/chat/counter-attack-result.hbs",
 
