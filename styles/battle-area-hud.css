@@ -399,21 +399,11 @@
   margin-top: 12px;
 }
 
-.battle-area-hud .hud-section-title {
-  font-size: 14px;
-  font-weight: bold;
-  color: #E3B767;
-  margin-bottom: 8px;
-  text-align: center;
-  padding: 4px;
-  background: rgba(227, 183, 103, 0.1);
-  border-radius: 3px;
-}
-
 .battle-area-hud .hud-buff-slots {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(9, 1fr);
   gap: 6px;
+  position: absolute;
 }
 
 .battle-area-hud .hud-buff-slot {
@@ -451,18 +441,12 @@
 }
 
 .battle-area-hud .hud-buff-layers {
-  position: absolute;
-  bottom: 2px;
-  left: 2px;
-  min-width: 16px;
-  height: 16px;
-  background: rgba(15, 13, 27, 0.9);
-  border: 1px solid #E3B767;
-  border-radius: 3px;
+  left: -3px;
+  bottom: -3px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: 14px;
   font-weight: bold;
   color: #E0D9CD;
   padding: 0 3px;
@@ -470,20 +454,16 @@
 
 .battle-area-hud .hud-buff-strength {
   position: absolute;
-  bottom: 2px;
-  right: 2px;
+  bottom: -1px;
+  right: -3px;
   min-width: 16px;
   height: 16px;
-  background: rgba(15, 13, 27, 0.9);
-  border: 1px solid #E3B767;
-  border-radius: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: 14px;
   font-weight: bold;
   color: #E0D9CD;
-  padding: 0 3px;
 }
 
 /* ========================================
