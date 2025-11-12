@@ -446,6 +446,7 @@
 }
 
 .battle-area-hud .hud-buff-layers {
+  position: absolute;
   left: -3px;
   bottom: -3px;
   display: flex;
