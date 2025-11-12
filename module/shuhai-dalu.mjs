@@ -882,32 +882,29 @@ export async function triggerBreathEffect(attacker, diceRoll, baseDamage) {
   const breathBuff = combatState.buffs[breathIndex];
   const breathStrength = breathBuff.strength;
 
-  // 计算【呼吸】附加伤害
-  const breathDamage = breathStrength;
-  let totalDamage = baseDamage + breathDamage;
+  // 【呼吸】用于判定暴击/重击：骰数 + 呼吸强度
+  const criticalJudgement = diceRoll + breathStrength;
 
   let multiplier = 1;
   let critType = '';
-  let shouldReduceLayer = false;
 
-  // 检查重击和暴击
-  if (diceRoll > 20) {
+  // 检查重击和暴击（基于判定值）
+  if (criticalJudgement > 20) {
     multiplier = 2;
     critType = '暴击';
-    shouldReduceLayer = true;
-  } else if (diceRoll > 15) {
+  } else if (criticalJudgement > 15) {
     multiplier = 1.5;
     critType = '重击';
-    shouldReduceLayer = true;
   }
 
-  // 应用倍率
-  const finalDamage = Math.floor(totalDamage * multiplier);
+  // 最终伤害 = 基础伤害（骰数）× 倍率
+  const finalDamage = Math.floor(baseDamage * multiplier);
 
-  let message = `【呼吸】触发：附加 ${breathDamage} 点伤害`;
+  let message = '';
 
   if (critType) {
-    message += `，${critType}！伤害 x${multiplier} = ${finalDamage}`;
+    // 触发了重击或暴击
+    message = `【呼吸】触发：${diceRoll}（骰数）+ ${breathStrength}（呼吸）= ${criticalJudgement} ≥ ${critType === '暴击' ? '20' : '15'}，${critType}！伤害 ${baseDamage} x${multiplier} = ${finalDamage}`;
 
     // 触发重击或暴击时，层数减少1层
     breathBuff.layers -= 1;
@@ -928,6 +925,9 @@ export async function triggerBreathEffect(attacker, diceRoll, baseDamage) {
         app.render(false);
       }
     });
+  } else {
+    // 未触发暴击
+    message = `【呼吸】判定：${diceRoll}（骰数）+ ${breathStrength}（呼吸）= ${criticalJudgement} < 15，未触发暴击`;
   }
 
   return {
