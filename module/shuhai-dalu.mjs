@@ -2182,6 +2182,7 @@ async function preloadHandlebarsTemplates() {
     "systems/shuhai-dalu/templates/dialog/check-dialog.hbs",
     "systems/shuhai-dalu/templates/dialog/create-item.hbs",
     "systems/shuhai-dalu/templates/dialog/item-details.hbs",
+    "systems/shuhai-dalu/templates/dialog/special-dice-dialog.hbs",
 
     // 聊天模板
     "systems/shuhai-dalu/templates/chat/check-roll.hbs",

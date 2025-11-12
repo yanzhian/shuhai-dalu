@@ -456,6 +456,7 @@ export default class CombatAreaApplication extends Application {
     // 控制按钮
     html.find('.draw-activate-btn').click(this._onDrawActivate.bind(this));
     html.find('.draw-one-btn').click(this._onDrawOne.bind(this));
+    html.find('.discard-btn').click(this._onDiscard.bind(this));
 
     // 战斗骰按钮
     html.find('.dice-activate-toggle').click(this._onToggleDiceActivation.bind(this));
@@ -573,6 +574,7 @@ export default class CombatAreaApplication extends Application {
 
     let extraCost = 0;
     let extraEX = 0;
+    const drawnDice = []; // 记录抽到的骰子
 
     // 处理每个选中的骰子
     for (const diceIndex of selectedIndices) {
@@ -588,6 +590,14 @@ export default class CombatAreaApplication extends Application {
         }
       } else {
         this.combatState.activatedDice[diceIndex] = true;
+        // 记录新激活的骰子（可能触发闪击）
+        const diceId = this.actor.system.equipment.combatDice[diceIndex];
+        if (diceId) {
+          const dice = this.actor.items.get(diceId);
+          if (dice) {
+            drawnDice.push({ dice, diceIndex });
+          }
+        }
       }
     }
 
@@ -616,6 +626,9 @@ export default class CombatAreaApplication extends Application {
     await this._sendChatMessage(message);
     await this._saveCombatState();
     this.render();
+
+    // 检查新激活的骰子是否有闪击效果
+    await this._checkFlashStrike(drawnDice);
   }
 
   /**
@@ -643,6 +656,7 @@ export default class CombatAreaApplication extends Application {
     let message = `抽取激活了第 ${diceIndex + 1} 个战斗骰`;
     let extraCost = 0;
     let extraEX = 0;
+    const drawnDice = []; // 记录抽到的骰子
 
     // 如果已经激活，增加Cost
     if (this.combatState.activatedDice[diceIndex]) {
@@ -676,11 +690,86 @@ export default class CombatAreaApplication extends Application {
       }
     } else {
       this.combatState.activatedDice[diceIndex] = true;
+      // 记录新激活的骰子（可能触发闪击）
+      const diceId = this.actor.system.equipment.combatDice[diceIndex];
+      if (diceId) {
+        const dice = this.actor.items.get(diceId);
+        if (dice) {
+          drawnDice.push({ dice, diceIndex });
+        }
+      }
     }
 
     await this._sendChatMessage(message);
     await this._saveCombatState();
     this.render();
+
+    // 检查新激活的骰子是否有闪击效果
+    await this._checkFlashStrike(drawnDice);
+  }
+
+  /**
+   * 检查新激活的骰子是否有闪击效果
+   * @param {Array} drawnDice - 抽到的骰子数组 [{dice, diceIndex}, ...]
+   */
+  async _checkFlashStrike(drawnDice) {
+    if (drawnDice.length === 0) return;
+
+    // 检查是否有骰子带有闪击效果
+    const flashStrikeDice = drawnDice.filter(({ dice }) => {
+      if (!dice.system.activities) return false;
+      return Object.values(dice.system.activities).some(
+        activity => activity.trigger === 'onFlashStrike'
+      );
+    });
+
+    if (flashStrikeDice.length === 0) return;
+
+    // 构建提示消息
+    const diceNames = flashStrikeDice.map(({ dice }) => dice.name).join('、');
+    const shouldTrigger = await new Promise((resolve) => {
+      new Dialog({
+        title: "触发闪击效果",
+        content: `
+          <div style="padding: 16px; font-family: 'Noto Sans SC', sans-serif;">
+            <p style="margin-bottom: 12px; font-size: 14px; color: #EBBD68;">
+              抽到了带有【闪击☪】效果的战斗骰：<strong style="color: #f3c267;">${diceNames}</strong>
+            </p>
+            <p style="font-size: 13px; color: #888;">是否要触发闪击效果？</p>
+          </div>
+        `,
+        buttons: {
+          yes: {
+            icon: '<i class="fas fa-bolt"></i>',
+            label: "触发闪击",
+            callback: () => resolve(true)
+          },
+          no: {
+            icon: '<i class="fas fa-times"></i>',
+            label: "取消",
+            callback: () => resolve(false)
+          }
+        },
+        default: "yes"
+      }).render(true);
+    });
+
+    if (shouldTrigger) {
+      // 打开闪击骰子选择对话框
+      const SpecialDiceDialog = (await import('./special-dice-dialog.mjs')).default;
+      new SpecialDiceDialog(this.actor, 'onFlashStrike').render(true);
+    }
+  }
+
+  /**
+   * 丢弃：打开丢弃骰子选择对话框
+   */
+  async _onDiscard(event) {
+    event.preventDefault();
+
+    // 打开丢弃骰子选择对话框
+    const SpecialDiceDialog = (await import('./special-dice-dialog.mjs')).default;
+    new SpecialDiceDialog(this.actor, 'onDiscard').render(true);
   }
 
   /**

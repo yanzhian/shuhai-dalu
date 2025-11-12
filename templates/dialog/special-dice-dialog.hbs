@@ -1,0 +1,95 @@
+{{!-- 特殊骰子选择对话框（闪击/丢弃） --}}
+<div class="special-dice-dialog-content" style="padding: 16px; background: #0F0D1B; color: #EBBD68; font-family: 'Noto Sans SC', sans-serif;">
+
+  <div class="dialog-header" style="text-align: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #EBBD68;">
+    <h2 style="margin: 0; color: #E1AA43; font-size: 20px;">触发{{triggerName}}效果</h2>
+    <p style="margin: 8px 0 0 0; font-size: 13px; color: #888;">选择一个已激活的骰子触发其{{triggerName}}效果</p>
+  </div>
+
+  {{#if hasDice}}
+  <div class="dice-list" style="display: flex; flex-direction: column; gap: 12px; max-height: 400px; overflow-y: auto;">
+    {{#each availableDice}}
+    <div class="dice-item" style="background: rgba(235, 189, 104, 0.1); border: 2px solid #EBBD68; border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 12px;">
+
+      {{!-- 骰子图标 --}}
+      <div class="dice-image" style="position: relative; flex-shrink: 0;">
+        <img src="{{img}}" alt="{{name}}" style="width: 64px; height: 64px; border: 2px solid #EBBD68; border-radius: 4px;"/>
+
+        {{!-- 左上角费用 --}}
+        <div style="position: absolute; top: -4px; left: -4px; width: 20px; height: 20px; background: #E1AA43; color: #0F0D1B; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;">
+          {{cost}}
+        </div>
+
+        {{!-- 右下角骰数 --}}
+        <div style="position: absolute; bottom: -4px; right: -4px; padding: 2px 6px; background: #E1AA43; color: #0F0D1B; border-radius: 4px; font-size: 11px; font-weight: bold;">
+          {{diceFormula}}
+        </div>
+      </div>
+
+      {{!-- 骰子信息 --}}
+      <div class="dice-info" style="flex: 1;">
+        <div style="font-size: 16px; font-weight: bold; color: #f3c267; margin-bottom: 4px;">{{name}}</div>
+        <div style="font-size: 13px; color: #EBBD68; margin-bottom: 8px;">{{category}}</div>
+
+        {{!-- 活动效果预览 --}}
+        <div style="font-size: 12px; color: #888; padding: 6px; background: rgba(0, 0, 0, 0.3); border-radius: 4px;">
+          {{#each activities}}
+          <div style="margin-bottom: 4px;">
+            <span style="color: #E1AA43;">{{../triggerName}}效果：</span>
+            {{#if effects}}
+              {{#each effects}}
+                {{@key}} x{{layers}}
+                {{#if strength}}({{strength}}){{/if}}
+              {{/each}}
+            {{/if}}
+          </div>
+          {{/each}}
+        </div>
+      </div>
+
+      {{!-- 选择按钮 --}}
+      <button class="select-dice-btn"
+              data-dice-id="{{id}}"
+              style="padding: 10px 20px; background: #EBBD68; color: #0F0D1B; border: none; border-radius: 4px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.2s; flex-shrink: 0;">
+        选择
+      </button>
+    </div>
+    {{/each}}
+  </div>
+  {{else}}
+  <div class="no-dice" style="text-align: center; padding: 32px; color: #888;">
+    <div style="font-size: 48px; margin-bottom: 16px;">🎲</div>
+    <div style="font-size: 16px;">没有可触发{{triggerName}}效果的骰子</div>
+    <div style="font-size: 13px; margin-top: 8px;">请确保骰子已激活且配置了{{triggerName}}效果</div>
+  </div>
+  {{/if}}
+
+  {{!-- 底部按钮 --}}
+  <div class="dialog-footer" style="margin-top: 16px; padding-top: 12px; border-top: 2px solid #EBBD68; text-align: center;">
+    <button class="cancel-btn" style="padding: 8px 24px; background: #666; color: #FFF; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; transition: all 0.2s;">
+      取消
+    </button>
+  </div>
+
+</div>
+
+<style>
+.special-dice-dialog .select-dice-btn:hover {
+  background: #f3c267;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.special-dice-dialog .cancel-btn:hover {
+  background: #888;
+}
+
+.special-dice-dialog .dice-item {
+  transition: all 0.2s;
+}
+
+.special-dice-dialog .dice-item:hover {
+  background: rgba(235, 189, 104, 0.2);
+  transform: translateX(4px);
+}
+</style>

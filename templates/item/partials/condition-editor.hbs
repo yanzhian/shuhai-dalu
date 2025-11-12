@@ -40,6 +40,14 @@
         <input type="radio" name="conditions.{{index}}.trigger" value="onTurnEnd" {{#if (eq condition.trigger 'onTurnEnd')}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
         <span>回合结束</span>
       </label>
+      <label class="timing-option {{#if (eq condition.trigger 'onFlashStrike')}}selected{{/if}}">
+        <input type="radio" name="conditions.{{index}}.trigger" value="onFlashStrike" {{#if (eq condition.trigger 'onFlashStrike')}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+        <span>闪击☪</span>
+      </label>
+      <label class="timing-option {{#if (eq condition.trigger 'onDiscard')}}selected{{/if}}">
+        <input type="radio" name="conditions.{{index}}.trigger" value="onDiscard" {{#if (eq condition.trigger 'onDiscard')}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+        <span>丢弃✦</span>
+      </label>
     </div>
   </div>
 
