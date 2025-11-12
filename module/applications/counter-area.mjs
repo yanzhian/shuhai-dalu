@@ -756,7 +756,9 @@ export default class CounterAreaApplication extends Application {
       resultMessage = `<div style="color: #4a7c2c; font-weight: bold;">${this.actor.name} 闪避成功！无视本次攻击</div>`;
     } else {
       // 闪避失败，计算伤害（包含抗性）
-      const { finalDamage: damage, description } = this._calculateDamage(
+      const { finalDamage: damage, description } = await this._calculateDamage(
+        initiator,
+        initiatorRollResult.total,
         initiatorResult,
         this.initiateData.diceCategory || '打击',
         this.actor
@@ -842,14 +844,18 @@ export default class CounterAreaApplication extends Application {
     const counterAttackType = this._extractAttackType(defenseDice.system.category) || '打击';
 
     // 计算反击伤害（考虑发起者的抗性）
-    const { finalDamage: counterDamage, description: counterDescription } = this._calculateDamage(
+    const { finalDamage: counterDamage, description: counterDescription } = await this._calculateDamage(
+      this.actor,
+      roll.total,
       counterBaseDamage,
       counterAttackType,
       initiator
     );
 
     // 计算对抗者受到的伤害（考虑抗性）
-    const { finalDamage: initiatorDamage, description: initiatorDescription } = this._calculateDamage(
+    const { finalDamage: initiatorDamage, description: initiatorDescription } = await this._calculateDamage(
+      initiator,
+      initiatorRollResult.total,
       initiatorTotal,
       this.initiateData.diceCategory || '打击',
       this.actor
@@ -933,8 +939,14 @@ export default class CounterAreaApplication extends Application {
       attackType = this.initiateData.diceCategory || '打击';
     }
 
+    // 获取获胜者和对应的骰数
+    const winner = counterWon ? this.actor : initiator;
+    const winnerDiceRoll = counterWon ? roll.total : initiatorRollResult.total;
+
     // 计算抗性结果
-    const { finalDamage, description } = this._calculateDamage(
+    const { finalDamage, description } = await this._calculateDamage(
+      winner,
+      winnerDiceRoll,
       baseDamage,
       attackType,
       loser
@@ -1017,7 +1029,9 @@ export default class CounterAreaApplication extends Application {
                           parseInt(this.initiateData.adjustment);
 
     // 先计算原始伤害（包含抗性）
-    const { finalDamage: baseDamage, description: damageDescription } = this._calculateDamage(
+    const { finalDamage: baseDamage, description: damageDescription } = await this._calculateDamage(
+      initiator,
+      initiatorRollResult.total,
       initiatorTotal,
       this.initiateData.diceCategory || '打击',
       this.actor
@@ -1110,7 +1124,9 @@ export default class CounterAreaApplication extends Application {
       resultDescription = `<div style="color: #4a7c2c; font-weight: bold;">${this.actor.name} 强化防御成功！完全抵挡了攻击</div>`;
     } else {
       // 防御失败，计算伤害（先算抗性，再减防御值）
-      const { finalDamage: baseDamage, description: damageDescription } = this._calculateDamage(
+      const { finalDamage: baseDamage, description: damageDescription } = await this._calculateDamage(
+        initiator,
+        initiatorRollResult.total,
         initiatorResult,
         this.initiateData.diceCategory || '打击',
         this.actor

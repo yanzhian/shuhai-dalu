@@ -1383,6 +1383,17 @@ Hooks.on('renderChatMessage', (message, html, data) => {
       description = `受到${finalDamage}点伤害`;
     }
 
+    // 检查发起者的【呼吸】BUFF效果
+    const initiator = game.actors.get(initiatorId);
+    if (initiator && diceRoll !== null && diceRoll !== undefined) {
+      const breathResult = await triggerBreathEffect(initiator, diceRoll, finalDamage);
+
+      if (breathResult.triggered) {
+        finalDamage = breathResult.finalDamage;
+        description = breathResult.message + '\n' + description;
+      }
+    }
+
     // 应用伤害
     const hpBefore = actor.system.derived.hp.value;
     const newHp = Math.max(0, hpBefore - finalDamage);
@@ -1403,25 +1414,21 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     }
 
     // 触发【攻击命中】和【受到伤害】效果
-    if (finalDamage > 0) {
-      const initiator = game.actors.get(initiatorId);
-
-      if (initiator) {
-        // 1. 触发攻击者的【攻击命中】效果
-        if (initiateData.diceId) {
-          const initiatorDice = initiator.items.get(initiateData.diceId);
-          if (initiatorDice) {
-            await triggerItemActivitiesWithTarget(initiator, initiatorDice, 'onHit', actor);
-          }
+    if (finalDamage > 0 && initiator) {
+      // 1. 触发攻击者的【攻击命中】效果
+      if (initiateData.diceId) {
+        const initiatorDice = initiator.items.get(initiateData.diceId);
+        if (initiatorDice) {
+          await triggerItemActivitiesWithTarget(initiator, initiatorDice, 'onHit', actor);
         }
+      }
 
-        // 2. 触发承受者的【受到伤害】效果（遍历所有装备）
-        const defenderEquippedItems = actor.items.filter(item =>
-          item.type === 'item' && item.system.equipped
-        );
-        for (const item of defenderEquippedItems) {
-          await triggerItemActivitiesWithTarget(actor, item, 'onDamaged', initiator);
-        }
+      // 2. 触发承受者的【受到伤害】效果（遍历所有装备）
+      const defenderEquippedItems = actor.items.filter(item =>
+        item.type === 'item' && item.system.equipped
+      );
+      for (const item of defenderEquippedItems) {
+        await triggerItemActivitiesWithTarget(actor, item, 'onDamaged', initiator);
       }
     }
 
