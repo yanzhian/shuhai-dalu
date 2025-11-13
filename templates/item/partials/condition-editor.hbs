@@ -40,6 +40,10 @@
         <input type="radio" name="conditions.{{index}}.trigger" value="onTurnEnd" {{#if (eq condition.trigger 'onTurnEnd')}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
         <span>回合结束</span>
       </label>
+      <label class="timing-option {{#if (eq condition.trigger 'onTremorExplode')}}selected{{/if}}">
+        <input type="radio" name="conditions.{{index}}.trigger" value="onTremorExplode" {{#if (eq condition.trigger 'onTremorExplode')}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
+        <span>震颤引爆时</span>
+      </label>
       <label class="timing-option {{#if (eq condition.trigger 'onFlashStrike')}}selected{{/if}}">
         <input type="radio" name="conditions.{{index}}.trigger" value="onFlashStrike" {{#if (eq condition.trigger 'onFlashStrike')}}checked{{/if}} {{#if isLocked}}disabled{{/if}}/>
         <span>闪击☪</span>
@@ -182,6 +186,22 @@
              class="effect-input"
              {{#if isLocked}}disabled{{/if}}/>
       {{/if}}
+    </div>
+  </div>
+
+  <div class="divider-small"></div>
+
+  {{!-- 特殊动作 --}}
+  <div class="special-actions-section">
+    <h4 class="section-title">特殊动作</h4>
+    <div class="special-action-list">
+      <label class="action-checkbox">
+        <input type="checkbox"
+               name="conditions.{{index}}.specialActions.tremorExplode"
+               {{#if condition.specialActions.tremorExplode}}checked{{/if}}
+               {{#if isLocked}}disabled{{/if}}/>
+        <span>震颤引爆</span>
+      </label>
     </div>
   </div>
 

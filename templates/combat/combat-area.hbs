@@ -220,7 +220,7 @@
         {{/if}}
       </div>
 
-      {{!-- 总速度 + 先攻按钮 --}}
+      {{!-- 总速度 + 先攻/回合按钮 --}}
       <div class="speed-initiative-area">
         <div class="speed-displays">
           <div class="speed-item total-speed">总速度: <span>{{add (add speedValues.[0] speedValues.[1]) speedValues.[2]}}</span></div>
@@ -228,7 +228,10 @@
           <div class="speed-item">速度2: <span>{{speedValues.[1]}}</span></div>
           <div class="speed-item">速度3: <span>{{speedValues.[2]}}</span></div>
         </div>
-        <button class="initiative-btn" type="button">先攻</button>
+        <div class="initiative-buttons">
+          <button class="initiative-btn" type="button">先攻</button>
+          <button class="turn-start-btn" type="button" title="触发所有回合开始效果">回合开始</button>
+        </div>
       </div>
 
       {{!-- 被动骰显示（右侧的被动骰） --}}

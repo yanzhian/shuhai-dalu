@@ -474,6 +474,9 @@ export default class CombatAreaApplication extends Application {
     // 先攻按钮
     html.find('.initiative-btn').click(this._onInitiative.bind(this));
 
+    // 回合开始按钮
+    html.find('.turn-start-btn').click(this._onTurnStart.bind(this));
+
     // 行动骰装扮按钮
     html.find('.action-dice-theme-btn').click(this._onSelectActionDiceTheme.bind(this));
 
@@ -1145,6 +1148,14 @@ export default class CombatAreaApplication extends Application {
   }
 
   /**
+   * 回合开始按钮：触发所有回合开始效果
+   */
+  async _onTurnStart(event) {
+    event.preventDefault();
+    await this.triggerTurnStart();
+  }
+
+  /**
    * 选择行动骰装扮
    */
   async _onSelectActionDiceTheme(event) {
@@ -1505,9 +1516,42 @@ export default class CombatAreaApplication extends Application {
     for (const target of targets) {
       const success = await this._applyActivityEffects(target, activity, item);
       if (success) hasSuccess = true;
+
+      // 执行特殊动作
+      if (target && activity.specialActions) {
+        await this._executeSpecialActions(target, activity.specialActions, item);
+      }
     }
 
     return hasSuccess;
+  }
+
+  /**
+   * 执行特殊动作
+   * @param {Actor} targetActor - 目标角色
+   * @param {object} specialActions - 特殊动作对象
+   * @param {Item} sourceItem - 源物品
+   */
+  async _executeSpecialActions(targetActor, specialActions, sourceItem) {
+    if (!specialActions) return;
+
+    // 震颤引爆
+    if (specialActions.tremorExplode) {
+      const { triggerTremorExplode } = await import('../shuhai-dalu.mjs');
+      const result = await triggerTremorExplode(targetActor);
+
+      if (result.triggered) {
+        await this._sendChatMessage(`
+          <div style="border: 2px solid #EECBA2; border-radius: 4px; padding: 12px;">
+            <h3 style="margin: 0 0 8px 0; color: #EECBA2;">特殊动作触发</h3>
+            <div style="color: #EBBD68;">来源: ${sourceItem.name}</div>
+            <div style="color: #EBBD68; margin-top: 8px;">
+              ${result.message}
+            </div>
+          </div>
+        `);
+      }
+    }
   }
 
   /**
@@ -2143,5 +2187,62 @@ export default class CombatAreaApplication extends Application {
     }
 
     ui.notifications.info(`轮次切换：一回合内BUFF已清除，下回合BUFF已生效`);
+  }
+
+  /**
+   * 触发回合开始效果
+   * 遍历所有装备的物品，触发【回合开始】时机的 Activities
+   */
+  async triggerTurnStart() {
+    console.log('【回合开始】触发所有 onTurnStart activities');
+
+    const messages = [];
+
+    // 遍历所有装备的物品
+    const equippedItems = this.actor.items.filter(item =>
+      item.system.equipped ||
+      (item.type === 'item' && item.system.itemType === '被动骰')
+    );
+
+    for (const item of equippedItems) {
+      if (!item.system.activities) continue;
+
+      // 查找 onTurnStart 触发的 activities
+      const turnStartActivities = Object.values(item.system.activities).filter(
+        activity => activity.trigger === 'onTurnStart'
+      );
+
+      if (turnStartActivities.length === 0) continue;
+
+      console.log(`【回合开始】触发物品: ${item.name}, 共 ${turnStartActivities.length} 个效果`);
+
+      // 触发每个 activity
+      for (const activity of turnStartActivities) {
+        try {
+          await this._executeActivity(item, activity);
+          messages.push(`${item.name} - ${activity.name || '效果'}`);
+        } catch (error) {
+          console.error(`【回合开始】触发失败: ${item.name}`, error);
+        }
+      }
+    }
+
+    // 保存并刷新
+    await this._saveCombatState();
+    this.render(false);
+
+    // 发送回合开始消息
+    if (messages.length > 0) {
+      await this._sendChatMessage(`
+        <div style="border: 2px solid #4a7c2c; border-radius: 4px; padding: 12px; background: #0F0D1B;">
+          <h3 style="margin: 0 0 8px 0; color: #4a7c2c;">【回合开始效果】</h3>
+          <ul style="margin: 8px 0; padding-left: 20px; color: #EBBD68;">
+            ${messages.map(msg => `<li>${msg}</li>`).join('')}
+          </ul>
+        </div>
+      `);
+    }
+
+    ui.notifications.info(`回合开始：触发了 ${messages.length} 个效果`);
   }
 }

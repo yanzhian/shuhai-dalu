@@ -940,6 +940,84 @@ export async function triggerBreathEffect(attacker, diceRoll, baseDamage) {
 }
 
 /**
+ * 触发震颤引爆效果
+ * @param {Actor} target - 目标角色
+ * @returns {object} - 引爆结果 { triggered: boolean, chaosIncrease: number, message: string }
+ */
+export async function triggerTremorExplode(target) {
+  // 获取战斗状态
+  let combatState = target.getFlag('shuhai-dalu', 'combatState');
+  if (!combatState || !combatState.buffs) {
+    return { triggered: false, chaosIncrease: 0, message: '' };
+  }
+
+  // 查找【震颤】BUFF（本回合的）
+  const tremorIndex = combatState.buffs.findIndex(
+    buff => buff.id === 'tremor' && (buff.roundTiming === 'current' || !buff.roundTiming)
+  );
+
+  if (tremorIndex === -1) {
+    return { triggered: false, chaosIncrease: 0, message: '目标没有震颤效果' };
+  }
+
+  const tremorBuff = combatState.buffs[tremorIndex];
+  const tremorLayers = tremorBuff.layers;
+  const tremorStrength = tremorBuff.strength;
+
+  // 计算混乱值增加 = 层数 × 强度
+  const chaosIncrease = tremorLayers * tremorStrength;
+
+  // 检查是否有特殊震颤效果（黑暗骑士-誓约）
+  const hasSpecialTremor = combatState.buffs.some(
+    buff => buff.id === 'dark_knight_oath' || buff.name === '黑暗骑士-誓约'
+  );
+
+  let message = '';
+  let actualChaosIncrease = 0;
+
+  if (hasSpecialTremor) {
+    // 有黑暗骑士-誓约：不陷入混乱
+    message = `<span style="color: #EECBA2; font-weight: bold;">【震颤引爆】：${target.name} 的【震颤】${tremorLayers}层 × 强度${tremorStrength} = ${chaosIncrease}混乱值</span><br>`;
+    message += `<span style="color: #4a7c2c;">【黑暗骑士-誓约】生效：不会陷入混乱</span>`;
+    actualChaosIncrease = 0;
+  } else {
+    // 正常增加混乱值
+    const currentChaos = target.system.derived.chaos.value || 0;
+    const maxChaos = target.system.derived.chaos.max || 10;
+    actualChaosIncrease = Math.min(chaosIncrease, maxChaos - currentChaos);
+    const newChaos = Math.min(maxChaos, currentChaos + chaosIncrease);
+
+    await target.update({ 'system.derived.chaos.value': newChaos });
+
+    message = `<span style="color: #EECBA2; font-weight: bold;">【震颤引爆】：${target.name} 的【震颤】${tremorLayers}层 × 强度${tremorStrength} = ${chaosIncrease}混乱值</span><br>`;
+    message += `<span style="color: #888;">混乱值：${currentChaos} → ${newChaos}</span>`;
+  }
+
+  // 移除震颤 BUFF
+  combatState.buffs.splice(tremorIndex, 1);
+  message += `<br><span style="color: #888;">【震颤】已移除</span>`;
+
+  // 保存战斗状态
+  await target.setFlag('shuhai-dalu', 'combatState', combatState);
+
+  // 刷新战斗区域（如果打开）
+  Object.values(ui.windows).forEach(app => {
+    if (app.constructor.name === 'CombatAreaApplication' && app.actor.id === target.id) {
+      app.render(false);
+    }
+  });
+
+  // 触发 onTremorExplode 时机的 activities
+  await triggerItemActivities(target, null, 'onTremorExplode');
+
+  return {
+    triggered: true,
+    chaosIncrease: actualChaosIncrease,
+    message: message
+  };
+}
+
+/**
  * 为聊天消息添加事件监听器
  */
 Hooks.on('renderChatMessage', (message, html, data) => {
