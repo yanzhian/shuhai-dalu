@@ -5,8 +5,6 @@
  * 处理物品活动（Activity）的触发和效果应用
  */
 
-import { getAllBuffs, findBuffById } from "../constants/buff-types.mjs";
-
 /**
  * 触发物品活动
  * @param {Actor} actor - 角色
@@ -28,17 +26,6 @@ export async function triggerItemActivities(actor, item, triggerType) {
   if (matchingActivities.length === 0) {
     return false;
   }
-
-  // 获取战斗状态
-  let combatState = actor.getFlag('shuhai-dalu', 'combatState') || {
-    costResources: [false, false, false, false, false, false],
-    exResources: [false, false, false],
-    activatedDice: [false, false, false, false, false, false],
-    buffs: []
-  };
-
-  // 获取所有BUFF定义
-  const allBuffs = getAllBuffs();
 
   let hasTriggered = false;
 
@@ -63,51 +50,11 @@ export async function triggerItemActivities(actor, item, triggerType) {
 
         if (layers === 0) continue;
 
-        // 查找BUFF定义
-        const buffDef = findBuffById(buffId);
-        if (!buffDef) {
-          console.warn(`未找到 BUFF 定义: ${buffId}`);
-          continue;
-        }
-
-        // 检查是否已存在相同id和roundTiming的BUFF
-        const existingBuffIndex = combatState.buffs.findIndex(
-          b => b.id === buffId && b.roundTiming === roundTiming
-        );
-
-        if (existingBuffIndex !== -1) {
-          // 如果已存在，增加层数和强度
-          combatState.buffs[existingBuffIndex].layers += layers;
-          combatState.buffs[existingBuffIndex].strength += strength;
-        } else {
-          // 如果不存在，添加新BUFF
-          combatState.buffs.push({
-            id: buffDef.id,
-            name: buffDef.name,
-            type: buffDef.type,
-            description: buffDef.description,
-            icon: buffDef.icon,
-            layers: layers,
-            strength: strength !== 0 ? strength : buffDef.defaultStrength,
-            roundTiming: roundTiming
-          });
-        }
-
+        // 使用Actor的addBuff方法添加BUFF
+        await actor.addBuff(buffId, layers, strength, roundTiming);
         hasTriggered = true;
       }
     }
-  }
-
-  // 保存战斗状态
-  if (hasTriggered) {
-    await actor.setFlag('shuhai-dalu', 'combatState', combatState);
-
-    // 刷新战斗区域（如果打开）
-    Object.values(ui.windows).forEach(app => {
-      if (app.constructor.name === 'CombatAreaApplication' && app.actor.id === actor.id) {
-        app.render(false);
-      }
-    });
   }
 
   return hasTriggered;
@@ -136,9 +83,6 @@ export async function triggerItemActivitiesWithTarget(sourceActor, item, trigger
     return false;
   }
 
-  // 获取所有BUFF定义
-  const allBuffs = getAllBuffs();
-
   let hasTriggered = false;
 
   // 执行每个activity
@@ -164,14 +108,6 @@ export async function triggerItemActivitiesWithTarget(sourceActor, item, trigger
       continue;
     }
 
-    // 获取目标的战斗状态
-    let combatState = actualTarget.getFlag('shuhai-dalu', 'combatState') || {
-      costResources: [false, false, false, false, false, false],
-      exResources: [false, false, false],
-      activatedDice: [false, false, false, false, false, false],
-      buffs: []
-    };
-
     // 应用效果
     if (activity.effects && Object.keys(activity.effects).length > 0) {
       for (const [buffId, effectData] of Object.entries(activity.effects)) {
@@ -180,50 +116,10 @@ export async function triggerItemActivitiesWithTarget(sourceActor, item, trigger
 
         if (layers === 0) continue;
 
-        // 查找BUFF定义
-        const buffDef = findBuffById(buffId);
-        if (!buffDef) {
-          console.warn(`未找到 BUFF 定义: ${buffId}`);
-          continue;
-        }
-
-        // 检查是否已存在相同id和roundTiming的BUFF
-        const existingBuffIndex = combatState.buffs.findIndex(
-          b => b.id === buffId && b.roundTiming === roundTiming
-        );
-
-        if (existingBuffIndex !== -1) {
-          // 如果已存在，增加层数和强度
-          combatState.buffs[existingBuffIndex].layers += layers;
-          combatState.buffs[existingBuffIndex].strength += strength;
-        } else {
-          // 如果不存在，添加新BUFF
-          combatState.buffs.push({
-            id: buffDef.id,
-            name: buffDef.name,
-            type: buffDef.type,
-            description: buffDef.description,
-            icon: buffDef.icon,
-            layers: layers,
-            strength: strength !== 0 ? strength : buffDef.defaultStrength,
-            roundTiming: roundTiming
-          });
-        }
-
+        // 使用Actor的addBuff方法添加BUFF
+        await actualTarget.addBuff(buffId, layers, strength, roundTiming);
         hasTriggered = true;
       }
-    }
-
-    // 保存目标的战斗状态
-    if (hasTriggered) {
-      await actualTarget.setFlag('shuhai-dalu', 'combatState', combatState);
-
-      // 刷新目标的战斗区域（如果打开）
-      Object.values(ui.windows).forEach(app => {
-        if (app.constructor.name === 'CombatAreaApplication' && app.actor.id === actualTarget.id) {
-          app.render(false);
-        }
-      });
     }
   }
 

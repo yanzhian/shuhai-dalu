@@ -379,7 +379,198 @@ export default class ShuhaiActor extends Actor {
     };
     
     ChatMessage.create(messageData);
-    
+
     ui.notifications.info(`${this.name} 完成了长期休息`);
+  }
+
+  // ===== BUFF 管理辅助方法 =====
+
+  /**
+   * 获取战斗状态
+   * @returns {Object} 战斗状态对象
+   */
+  _getCombatState() {
+    return this.getFlag('shuhai-dalu', 'combatState') || {
+      costResources: [false, false, false, false, false, false],
+      exResources: [false, false, false],
+      activatedDice: [false, false, false, false, false, false],
+      buffs: []
+    };
+  }
+
+  /**
+   * 保存战斗状态
+   * @param {Object} combatState - 战斗状态对象
+   */
+  async _saveCombatState(combatState) {
+    await this.setFlag('shuhai-dalu', 'combatState', combatState);
+    this._refreshCombatUI();
+  }
+
+  /**
+   * 刷新战斗UI
+   */
+  _refreshCombatUI() {
+    Object.values(ui.windows).forEach(app => {
+      if (app.constructor.name === 'CombatAreaApplication' && app.actor.id === this.id) {
+        app.render(false);
+      }
+    });
+  }
+
+  /**
+   * 获取指定BUFF
+   * @param {string} buffId - BUFF ID
+   * @param {string} roundTiming - 回合时机 (current/next)，如果未指定则返回任意时机的BUFF
+   * @returns {Object|undefined} BUFF对象
+   */
+  getBuff(buffId, roundTiming = null) {
+    const combatState = this._getCombatState();
+
+    if (roundTiming) {
+      return combatState.buffs.find(b => b.id === buffId && b.roundTiming === roundTiming);
+    } else {
+      return combatState.buffs.find(b => b.id === buffId);
+    }
+  }
+
+  /**
+   * 添加BUFF
+   * @param {string} buffId - BUFF ID
+   * @param {number} layers - 层数
+   * @param {number} strength - 强度（可选）
+   * @param {string} roundTiming - 回合时机 (current/next)，默认current
+   */
+  async addBuff(buffId, layers = 1, strength = 0, roundTiming = 'current') {
+    // 动态导入BUFF定义（避免循环依赖）
+    const { findBuffById } = await import('../constants/buff-types.mjs');
+
+    const buffDef = findBuffById(buffId);
+    if (!buffDef) {
+      console.warn(`未找到 BUFF 定义: ${buffId}`);
+      return false;
+    }
+
+    const combatState = this._getCombatState();
+
+    // 检查是否已存在相同id和roundTiming的BUFF
+    const existingBuffIndex = combatState.buffs.findIndex(
+      b => b.id === buffId && b.roundTiming === roundTiming
+    );
+
+    if (existingBuffIndex !== -1) {
+      // 如果已存在，增加层数和强度
+      combatState.buffs[existingBuffIndex].layers += layers;
+      if (strength !== 0) {
+        combatState.buffs[existingBuffIndex].strength += strength;
+      }
+    } else {
+      // 如果不存在，添加新BUFF
+      combatState.buffs.push({
+        id: buffDef.id,
+        name: buffDef.name,
+        type: buffDef.type,
+        description: buffDef.description,
+        icon: buffDef.icon,
+        layers: layers,
+        strength: strength !== 0 ? strength : buffDef.defaultStrength,
+        roundTiming: roundTiming
+      });
+    }
+
+    await this._saveCombatState(combatState);
+    return true;
+  }
+
+  /**
+   * 消耗BUFF层数
+   * @param {string} buffId - BUFF ID
+   * @param {number} layers - 要消耗的层数
+   * @param {string} roundTiming - 回合时机（可选）
+   * @returns {boolean} 是否成功消耗
+   */
+  async consumeBuff(buffId, layers = 1, roundTiming = null) {
+    const combatState = this._getCombatState();
+
+    const buffIndex = roundTiming
+      ? combatState.buffs.findIndex(b => b.id === buffId && b.roundTiming === roundTiming)
+      : combatState.buffs.findIndex(b => b.id === buffId);
+
+    if (buffIndex === -1) {
+      return false;
+    }
+
+    const buff = combatState.buffs[buffIndex];
+    if (buff.layers < layers) {
+      return false;
+    }
+
+    buff.layers -= layers;
+
+    // 如果层数为0，移除BUFF
+    if (buff.layers <= 0) {
+      combatState.buffs.splice(buffIndex, 1);
+    }
+
+    await this._saveCombatState(combatState);
+    return true;
+  }
+
+  /**
+   * 清除指定BUFF的所有层数
+   * @param {string} buffId - BUFF ID
+   * @param {string} roundTiming - 回合时机（可选）
+   */
+  async clearBuff(buffId, roundTiming = null) {
+    const combatState = this._getCombatState();
+
+    if (roundTiming) {
+      combatState.buffs = combatState.buffs.filter(
+        b => !(b.id === buffId && b.roundTiming === roundTiming)
+      );
+    } else {
+      combatState.buffs = combatState.buffs.filter(b => b.id !== buffId);
+    }
+
+    await this._saveCombatState(combatState);
+  }
+
+  /**
+   * 获取所有BUFF
+   * @returns {Array} BUFF数组
+   */
+  getAllBuffs() {
+    const combatState = this._getCombatState();
+    return combatState.buffs || [];
+  }
+
+  /**
+   * 应用BUFF效果（触发BUFF的被动效果）
+   * @param {Object} buff - BUFF对象
+   */
+  async applyBuffEffect(buff) {
+    // 这里需要根据BUFF类型执行对应的效果
+    // 例如：燃烧造成伤害、破裂造成伤害等
+    // 目前保留为空，后续可以补充具体逻辑
+    console.log(`触发BUFF效果: ${buff.name} (${buff.id})`);
+  }
+
+  /**
+   * 受到伤害
+   * @param {number} amount - 伤害量
+   * @param {string} type - 伤害类型 (direct/normal等)
+   */
+  async takeDamage(amount, type = 'normal') {
+    const currentHP = this.system.attributes?.hp?.value || this.system.derived?.hp?.value || 0;
+    const newHP = Math.max(0, currentHP - amount);
+
+    // 根据数据模型更新HP
+    if (this.system.attributes?.hp) {
+      await this.update({ 'system.attributes.hp.value': newHP });
+    } else if (this.system.derived?.hp) {
+      await this.update({ 'system.derived.hp.value': newHP });
+    }
+
+    return newHP;
   }
 }
