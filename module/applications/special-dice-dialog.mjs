@@ -157,8 +157,14 @@ export default class SpecialDiceDialog extends Application {
     const triggered = await triggerItemActivities(this.actor, dice, this.triggerType);
 
     if (triggered) {
-      // 保存战斗状态
-      await this.actor.setFlag('shuhai-dalu', 'combatState', combatState);
+      // 重新获取战斗状态（包含效果执行后的修改，如 restoreCost）
+      const updatedCombatState = this.actor.getFlag('shuhai-dalu', 'combatState') || combatState;
+
+      // 应用骰子取消激活的修改
+      updatedCombatState.activatedDice = combatState.activatedDice;
+
+      // 保存合并后的战斗状态
+      await this.actor.setFlag('shuhai-dalu', 'combatState', updatedCombatState);
       ChatMessage.create({
         user: game.user.id,
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
