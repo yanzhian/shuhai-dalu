@@ -1,0 +1,425 @@
+<div class="activity-editor-enhanced">
+
+  {{!-- 标签页导航 --}}
+  <div class="tabs">
+    <button class="tab-btn {{#if isBasicMode}}active{{/if}}" data-mode="basic">
+      <i class="fas fa-edit"></i> 基础编辑器
+    </button>
+    <button class="tab-btn {{#if isAdvancedMode}}active{{/if}}" data-mode="advanced">
+      <i class="fas fa-code"></i> 高级模式 (JSON)
+    </button>
+  </div>
+
+  <form class="activity-editor-form">
+
+    {{!-- ========== 基础编辑器 ========== --}}
+    {{#if isBasicMode}}
+    <div class="tab-content tab-basic active">
+
+      {{!-- 活动名称 --}}
+      <div class="form-group">
+        <label>活动名称</label>
+        <input type="text" name="name" value="{{activity.name}}" placeholder="例如：攻击命中时-燃烧效果" />
+      </div>
+
+      {{!-- 触发时机 --}}
+      <div class="form-group">
+        <label>触发时机</label>
+        <select name="trigger">
+          <option value="onUse" {{#if (eq activity.trigger "onUse")}}selected{{/if}}>使用时</option>
+          <option value="onAttack" {{#if (eq activity.trigger "onAttack")}}selected{{/if}}>攻击时</option>
+          <option value="onCounter" {{#if (eq activity.trigger "onCounter")}}selected{{/if}}>对抗时</option>
+          <option value="onCounterSuccess" {{#if (eq activity.trigger "onCounterSuccess")}}selected{{/if}}>对抗成功</option>
+          <option value="onCounterFail" {{#if (eq activity.trigger "onCounterFail")}}selected{{/if}}>对抗失败</option>
+          <option value="onHit" {{#if (eq activity.trigger "onHit")}}selected{{/if}}>攻击命中</option>
+          <option value="onDamaged" {{#if (eq activity.trigger "onDamaged")}}selected{{/if}}>受到伤害</option>
+          <option value="onTurnStart" {{#if (eq activity.trigger "onTurnStart")}}selected{{/if}}>回合开始</option>
+          <option value="onTurnEnd" {{#if (eq activity.trigger "onTurnEnd")}}selected{{/if}}>回合结束</option>
+          <option value="onFlashStrike" {{#if (eq activity.trigger "onFlashStrike")}}selected{{/if}}>闪击☪</option>
+          <option value="onDiscard" {{#if (eq activity.trigger "onDiscard")}}selected{{/if}}>丢弃✦</option>
+        </select>
+      </div>
+
+      {{!-- 目标选择 --}}
+      <div class="form-group">
+        <label>目标</label>
+        <select name="target">
+          <option value="selected" {{#if (eq activity.target "selected")}}selected{{/if}}>选择的目标</option>
+          <option value="self" {{#if (eq activity.target "self")}}selected{{/if}}>自己</option>
+          <option value="multiple" {{#if (eq activity.target "multiple")}}selected{{/if}}>多个目标</option>
+        </select>
+      </div>
+
+      {{!-- 回合计数选择 --}}
+      <div class="form-group">
+        <label>回合</label>
+        <select name="roundTiming">
+          <option value="current" {{#unless activity.roundTiming}}selected{{/unless}}{{#if (eq activity.roundTiming "current")}}selected{{/if}}>本回合</option>
+          <option value="next" {{#if (eq activity.roundTiming "next")}}selected{{/if}}>下回合</option>
+          <option value="both" {{#if (eq activity.roundTiming "both")}}selected{{/if}}>本回合和下回合</option>
+        </select>
+      </div>
+
+      {{!-- 消耗列表 --}}
+      <div class="form-group">
+        <label>
+          <input type="checkbox" name="hasConsume" {{#if activity.hasConsume}}checked{{/if}} class="has-consume-checkbox" />
+          需要消耗
+        </label>
+        {{#if activity.hasConsume}}
+          <div class="dynamic-list consumes-list">
+            {{#each activity.consumes as |consume idx|}}
+              <div class="dynamic-row" data-index="{{idx}}">
+                <select name="consumes.{{idx}}.buffId">
+                  {{#each ../buffPresets as |buff|}}
+                    <option value="{{buff.id}}" {{#if (eq buff.id consume.buffId)}}selected{{/if}}>{{buff.name}}</option>
+                  {{/each}}
+                </select>
+                <input type="number" name="consumes.{{idx}}.layers" value="{{consume.layers}}" placeholder="层数" />
+                <input type="number" name="consumes.{{idx}}.strength" value="{{consume.strength}}" placeholder="强度" />
+                <button type="button" class="remove-btn remove-consume-btn" data-index="{{idx}}"><i class="fas fa-times"></i></button>
+              </div>
+            {{/each}}
+            <button type="button" class="add-btn add-consume-btn"><i class="fas fa-plus"></i> 添加消耗</button>
+          </div>
+        {{/if}}
+      </div>
+
+      {{!-- 效果添加 --}}
+      <div class="form-group">
+        <label>效果添加</label>
+        <div class="dynamic-list effects-list">
+          {{#each activity.effectsList as |effect idx|}}
+            <div class="dynamic-row" data-index="{{idx}}">
+              <select name="effects.{{idx}}.buffId" class="effect-select">
+                {{#each ../buffPresets as |buff|}}
+                  <option value="{{buff.id}}" {{#if (eq buff.id effect.buffId)}}selected{{/if}}>{{buff.name}}</option>
+                {{/each}}
+              </select>
+              <input type="text" name="effects.{{idx}}.layers" value="{{effect.layers}}" placeholder="层数(可用骰子/表达式)" />
+              <input type="text" name="effects.{{idx}}.strength" value="{{effect.strength}}" placeholder="强度(可用骰子/表达式)" />
+              <button type="button" class="remove-btn remove-effect-btn" data-index="{{idx}}"><i class="fas fa-times"></i></button>
+            </div>
+          {{/each}}
+          <button type="button" class="add-btn add-effect-btn"><i class="fas fa-plus"></i> 添加效果</button>
+        </div>
+      </div>
+
+      {{!-- 自定义效果 --}}
+      <div class="form-group">
+        <label>
+          <input type="checkbox" name="customEffect.enabled" {{#if activity.customEffect.enabled}}checked{{/if}} class="custom-effect-checkbox" />
+          其他效果
+        </label>
+        {{#if activity.customEffect.enabled}}
+          <div class="custom-effect-fields">
+            <input type="text" name="customEffect.name" value="{{activity.customEffect.name}}" placeholder="效果名称" />
+            <input type="text" name="customEffect.layers" value="{{activity.customEffect.layers}}" placeholder="层数(可用骰子/表达式)" />
+            <input type="text" name="customEffect.strength" value="{{activity.customEffect.strength}}" placeholder="强度(可用骰子/表达式)" />
+          </div>
+        {{/if}}
+      </div>
+
+      {{!-- 提示信息 --}}
+      <div class="info-box">
+        <i class="fas fa-info-circle"></i>
+        <span>💡 提示：层数和强度字段支持表达式，如 <code>{literal}{{burn.layers}}{/literal}</code> 或 <code>floor({literal}{{burn.layers}}{/literal}/4)</code>。需要复杂逻辑？切换到 <strong>高级模式</strong>！</span>
+      </div>
+
+    </div>
+    {{/if}}
+
+    {{!-- ========== 高级模式 (JSON) ========== --}}
+    {{#if isAdvancedMode}}
+    <div class="tab-content tab-advanced active">
+
+      <div class="json-editor-container">
+        <label>JSON 编辑器</label>
+        <textarea class="json-editor" rows="20">{{activityJSON}}</textarea>
+      </div>
+
+      <div class="json-controls">
+        <button type="button" class="validate-json-btn"><i class="fas fa-check-circle"></i> 验证JSON</button>
+        <button type="button" class="format-json-btn"><i class="fas fa-align-left"></i> 格式化</button>
+      </div>
+
+      <div class="json-preview">
+        <h4>预览</h4>
+        <div class="preview-content">点击"验证JSON"查看预览</div>
+      </div>
+
+      {{!-- 语法帮助 --}}
+      <div class="json-help">
+        <h4><i class="fas fa-book"></i> JSON 语法帮助</h4>
+
+        <div class="help-section">
+          <h5>动态值引用</h5>
+          <ul>
+            <li><code>{literal}{buffId.layers}{/literal}</code> - 引用BUFF层数</li>
+            <li><code>{literal}{buffId.strength}{/literal}</code> - 引用BUFF强度</li>
+            <li><code>{literal}{cost.extra}{/literal}</code> - 额外Cost数量</li>
+            <li><code>{literal}{dice.finalValue}{/literal}</code> - 骰子最终值</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <h5>数学表达式</h5>
+          <ul>
+            <li><code>floor(x)</code> - 向下取整</li>
+            <li><code>ceil(x)</code> - 向上取整</li>
+            <li><code>max(a, b)</code> - 最大值</li>
+            <li><code>min(a, b)</code> - 最小值</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <h5>常用示例</h5>
+          {{#each expressionExamples as |example|}}
+          <div class="example-item">
+            <strong>{{example.name}}</strong>
+            <code>{{example.expression}}</code>
+            <p>{{example.description}}</p>
+          </div>
+          {{/each}}
+        </div>
+
+        <div class="help-section">
+          <h5>完整示例：封焰之舞-回合结束</h5>
+          <pre><code>{
+  "name": "封焰之舞-回合结束",
+  "trigger": "onTurnEnd",
+  "target": "self",
+  "effects": [
+    {
+      "type": "restoreCost",
+      "amount": "floor({literal}{burn.layers}{/literal}/4)"
+    },
+    {
+      "type": "clearBuff",
+      "buffId": "burn"
+    }
+  ]
+}</code></pre>
+        </div>
+      </div>
+
+    </div>
+    {{/if}}
+
+    {{!-- 保存和取消按钮 --}}
+    <div class="form-actions">
+      <button type="button" class="cancel-btn">取消</button>
+      <button type="submit" class="save-btn">保存</button>
+    </div>
+
+  </form>
+
+</div>
+
+<style>
+.activity-editor-enhanced {
+  font-family: 'Noto Sans SC', sans-serif;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 2px solid #EBBD68;
+  margin-bottom: 16px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 12px 24px;
+  background: #1a1a1a;
+  border: 1px solid #555;
+  border-bottom: none;
+  color: #ccc;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.tab-btn:hover {
+  background: #252525;
+  color: #fff;
+}
+
+.tab-btn.active {
+  background: #0F0D1B;
+  border-color: #EBBD68;
+  color: #EBBD68;
+  font-weight: bold;
+}
+
+.tab-btn i {
+  margin-right: 6px;
+}
+
+.tab-content {
+  display: none;
+  animation: fadeIn 0.3s;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.info-box {
+  background: #1a3a5a;
+  border-left: 4px solid #4a9eff;
+  padding: 12px;
+  margin-top: 16px;
+  border-radius: 4px;
+  display: flex;
+  align-items: start;
+  gap: 8px;
+}
+
+.info-box i {
+  color: #4a9eff;
+  margin-top: 2px;
+}
+
+.info-box code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+}
+
+.json-editor-container {
+  margin-bottom: 16px;
+}
+
+.json-editor {
+  width: 100%;
+  min-height: 400px;
+  background: #1a1a1a;
+  color: #f0f0f0;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.json-controls {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.validate-json-btn,
+.format-json-btn {
+  padding: 8px 16px;
+  background: #2a5a8a;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.validate-json-btn:hover,
+.format-json-btn:hover {
+  background: #3a7aba;
+}
+
+.json-preview {
+  background: #0a0a0a;
+  border: 1px solid #EBBD68;
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.json-preview h4 {
+  margin-top: 0;
+  color: #EBBD68;
+}
+
+.json-help {
+  background: #1a1a1a;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.json-help h4 {
+  margin-top: 0;
+  color: #EBBD68;
+}
+
+.json-help h5 {
+  color: #ccc;
+  margin-top: 12px;
+  margin-bottom: 6px;
+}
+
+.json-help ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.json-help li {
+  margin: 4px 0;
+}
+
+.json-help code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  color: #4a9eff;
+}
+
+.json-help pre {
+  background: #0a0a0a;
+  padding: 12px;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+.json-help pre code {
+  background: none;
+  padding: 0;
+  color: #f0f0f0;
+}
+
+.example-item {
+  margin: 8px 0;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.example-item strong {
+  color: #EBBD68;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.example-item code {
+  display: block;
+  margin: 4px 0;
+}
+
+.example-item p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #999;
+}
+
+.help-section {
+  margin-bottom: 16px;
+}
+</style>

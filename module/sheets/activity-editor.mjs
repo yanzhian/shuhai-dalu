@@ -1,6 +1,10 @@
 /**
- * Activity 编辑对话框
+ * Activity 编辑对话框 - 增强版
+ * 支持基础编辑器和高级JSON模式
  */
+
+import { EFFECT_TYPES, EFFECT_CATEGORIES } from '../helpers/effect-registry.mjs';
+import { ExpressionParser, EXPRESSION_EXAMPLES } from '../helpers/expression-parser.mjs';
 
 // BUFF预设列表
 const BUFF_PRESETS = [
@@ -24,7 +28,9 @@ const BUFF_PRESETS = [
   { id: 'tremor', name: '震颤', type: 'effect', icon: 'icons/svg/frozen.svg', defaultLayers: 1, defaultStrength: 3 },
   { id: 'ammo', name: '弹药', type: 'effect', icon: 'icons/svg/sword.svg', defaultLayers: 10, defaultStrength: 0 },
   { id: 'chant', name: '吟唱', type: 'effect', icon: 'icons/svg/book.svg', defaultLayers: 1, defaultStrength: 0 },
-  { id: 'paralyze', name: '麻痹', type: 'effect', icon: 'icons/svg/paralysis.svg', defaultLayers: 1, defaultStrength: 0 }
+  { id: 'paralyze', name: '麻痹', type: 'effect', icon: 'icons/svg/paralysis.svg', defaultLayers: 1, defaultStrength: 0 },
+  { id: 'fearSword', name: '惧剑', type: 'effect', icon: 'icons/svg/sword.svg', defaultLayers: 1, defaultStrength: 0 },
+  { id: 'grandMagic', name: '宏伟法术', type: 'effect', icon: 'icons/svg/book.svg', defaultLayers: 1, defaultStrength: 0 }
 ];
 
 export default class ActivityEditor extends Application {
@@ -38,13 +44,19 @@ export default class ActivityEditor extends Application {
       // 编辑现有activity
       this.activityId = activity._id;
       this.activity = foundry.utils.deepClone(activity);
-      // 将effects对象转换为effectsList数组
-      this.activity.effectsList = this._effectsToList(activity.effects || {});
+
+      // 兼容旧格式：将effects对象转换为effectsList数组
+      if (activity.effects && !Array.isArray(activity.effects)) {
+        this.activity.effectsList = this._effectsToList(activity.effects);
+      }
     } else {
       // 创建新activity
       this.activityId = foundry.utils.randomID();
       this.activity = this._getDefaultActivity();
     }
+
+    // 编辑模式：basic 或 advanced
+    this.editMode = this.activity._editMode || 'basic';
   }
 
   /**
@@ -103,9 +115,9 @@ export default class ActivityEditor extends Application {
   /** @override */
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ["shuhai-dalu", "activity-editor"],
-      template: "systems/shuhai-dalu/templates/item-card/activity-editor.hbs",
-      width: 500,
+      classes: ["shuhai-dalu", "activity-editor", "activity-editor-enhanced"],
+      template: "systems/shuhai-dalu/templates/item-card/activity-editor-enhanced.hbs",
+      width: 600,
       height: "auto",
       title: "编辑活动",
       closeOnSubmit: false,
@@ -117,42 +129,73 @@ export default class ActivityEditor extends Application {
 
   /** @override */
   async getData() {
-    return {
+    const data = {
       activity: this.activity,
-      buffPresets: BUFF_PRESETS
+      buffPresets: BUFF_PRESETS,
+      effectTypes: EFFECT_TYPES,
+      effectCategories: EFFECT_CATEGORIES,
+      expressionExamples: EXPRESSION_EXAMPLES,
+      editMode: this.editMode,
+      isBasicMode: this.editMode === 'basic',
+      isAdvancedMode: this.editMode === 'advanced'
     };
+
+    // 如果是高级模式，准备JSON字符串
+    if (this.editMode === 'advanced') {
+      data.activityJSON = JSON.stringify(this.activity, null, 2);
+    }
+
+    return data;
   }
 
   /** @override */
   activateListeners(html) {
     super.activateListeners(html);
 
-    // 消耗管理
-    html.find('.add-consume-btn').click(this._onAddConsume.bind(this));
-    html.find('.remove-consume-btn').click(this._onRemoveConsume.bind(this));
+    // 标签页切换
+    html.find('.tab-btn').click(this._onSwitchTab.bind(this));
 
-    // 效果管理
-    html.find('.add-effect-btn').click(this._onAddEffect.bind(this));
-    html.find('.remove-effect-btn').click(this._onRemoveEffect.bind(this));
+    // 基础编辑器事件
+    if (this.editMode === 'basic') {
+      // 消耗管理
+      html.find('.add-consume-btn').click(this._onAddConsume.bind(this));
+      html.find('.remove-consume-btn').click(this._onRemoveConsume.bind(this));
 
-    // checkbox 变化时先保存表单状态再重新渲染
-    html.find('.has-consume-checkbox').change(async (e) => {
-      // 先读取并保存当前表单数据
-      this._updateActivityFromForm();
-      // 更新 checkbox 状态
-      this.activity.hasConsume = e.target.checked;
-      // 重新渲染
-      this.render();
-    });
+      // 效果管理
+      html.find('.add-effect-btn').click(this._onAddEffect.bind(this));
+      html.find('.remove-effect-btn').click(this._onRemoveEffect.bind(this));
 
-    html.find('.custom-effect-checkbox').change(async (e) => {
-      // 先读取并保存当前表单数据
-      this._updateActivityFromForm();
-      // 更新 checkbox 状态
-      this.activity.customEffect.enabled = e.target.checked;
-      // 重新渲染
-      this.render();
-    });
+      // checkbox 变化时先保存表单状态再重新渲染
+      html.find('.has-consume-checkbox').change(async (e) => {
+        this._updateActivityFromForm();
+        this.activity.hasConsume = e.target.checked;
+        this.render();
+      });
+
+      html.find('.custom-effect-checkbox').change(async (e) => {
+        this._updateActivityFromForm();
+        this.activity.customEffect.enabled = e.target.checked;
+        this.render();
+      });
+
+      html.find('.consume-type-radio').change(async (e) => {
+        this._updateActivityFromForm();
+        this.activity.consumeType = e.target.value;
+        this.render();
+      });
+    }
+
+    // 高级模式事件
+    if (this.editMode === 'advanced') {
+      // JSON验证
+      html.find('.validate-json-btn').click(this._onValidateJSON.bind(this));
+
+      // JSON编辑器输入
+      html.find('.json-editor').on('input', this._onJSONChange.bind(this));
+
+      // 格式化JSON
+      html.find('.format-json-btn').click(this._onFormatJSON.bind(this));
+    }
 
     // 保存和取消按钮
     html.find('.save-btn').click(this._onSave.bind(this));
@@ -252,57 +295,199 @@ export default class ActivityEditor extends Application {
   }
 
   /**
+   * 切换标签页
+   */
+  async _onSwitchTab(event) {
+    event.preventDefault();
+    const newMode = $(event.currentTarget).data('mode');
+
+    if (newMode === this.editMode) {
+      return; // 已经在当前模式，无需切换
+    }
+
+    if (newMode === 'advanced' && this.editMode === 'basic') {
+      // 从基础模式切换到高级模式：UI → JSON
+      this._syncBasicToJSON();
+    } else if (newMode === 'basic' && this.editMode === 'advanced') {
+      // 从高级模式切换到基础模式：JSON → UI
+      if (!this._syncJSONToBasic()) {
+        return; // 切换失败
+      }
+    }
+
+    this.editMode = newMode;
+    this.activity._editMode = newMode;
+    this.render();
+  }
+
+  /**
+   * 从基础模式同步到JSON
+   */
+  _syncBasicToJSON() {
+    // 从表单收集数据，更新activity对象
+    this._updateActivityFromForm();
+  }
+
+  /**
+   * 从JSON同步到基础模式
+   */
+  _syncJSONToBasic() {
+    try {
+      const jsonText = this.element.find('.json-editor').val();
+      const parsed = JSON.parse(jsonText);
+
+      // 验证必需字段
+      if (!parsed.name || !parsed.trigger) {
+        throw new Error('缺少必需字段：name 或 trigger');
+      }
+
+      this.activity = parsed;
+      this.activity._editMode = 'basic';
+      ui.notifications.info('已切换到基础编辑器');
+      return true;
+    } catch (error) {
+      ui.notifications.error(`JSON格式错误: ${error.message}`);
+      console.error('【Activity编辑器】JSON解析失败:', error);
+      return false;
+    }
+  }
+
+  /**
+   * 验证JSON
+   */
+  _onValidateJSON(event) {
+    event.preventDefault();
+
+    try {
+      const jsonText = this.element.find('.json-editor').val();
+      const parsed = JSON.parse(jsonText);
+
+      // 基本验证
+      const errors = [];
+
+      if (!parsed.name) errors.push('缺少 name 字段');
+      if (!parsed.trigger && !parsed.baseTiming) errors.push('缺少 trigger 或 baseTiming 字段');
+
+      if (errors.length > 0) {
+        ui.notifications.warn(`JSON验证警告:\n${errors.join('\n')}`);
+      } else {
+        ui.notifications.info('✅ JSON格式正确！');
+      }
+
+      // 显示预览
+      this._showJSONPreview(parsed);
+
+    } catch (error) {
+      ui.notifications.error(`❌ JSON格式错误: ${error.message}`);
+    }
+  }
+
+  /**
+   * 格式化JSON
+   */
+  _onFormatJSON(event) {
+    event.preventDefault();
+
+    try {
+      const jsonText = this.element.find('.json-editor').val();
+      const parsed = JSON.parse(jsonText);
+      const formatted = JSON.stringify(parsed, null, 2);
+      this.element.find('.json-editor').val(formatted);
+      ui.notifications.info('JSON已格式化');
+    } catch (error) {
+      ui.notifications.error(`格式化失败: ${error.message}`);
+    }
+  }
+
+  /**
+   * JSON编辑器内容变化
+   */
+  _onJSONChange(event) {
+    // 实时保存到临时变量（避免频繁解析）
+    this._tempJSON = $(event.currentTarget).val();
+  }
+
+  /**
+   * 显示JSON预览
+   */
+  _showJSONPreview(parsed) {
+    let preview = `<strong>活动名称:</strong> ${parsed.name}<br>`;
+    preview += `<strong>触发时机:</strong> ${parsed.trigger || parsed.baseTiming}<br>`;
+
+    if (parsed.consume) {
+      preview += `<strong>消耗:</strong> ${parsed.consume.type === 'optional' ? '可选' : '强制'}<br>`;
+    }
+
+    if (parsed.effects && parsed.effects.length > 0) {
+      preview += `<strong>效果数量:</strong> ${parsed.effects.length}<br>`;
+    }
+
+    // 在预览区域显示
+    this.element.find('.json-preview').html(preview);
+  }
+
+  /**
    * 保存
    */
   async _onSave(event) {
     event.preventDefault();
-    console.log('【Activity保存】开始保存流程');
+    console.log('【Activity保存】开始保存流程，模式:', this.editMode);
 
-    const form = this.element.find('form')[0];
-    if (!form) {
-      console.error('【Activity保存】找不到表单');
-      ui.notifications.error("保存失败：找不到表单");
-      return;
+    let activityData;
+
+    if (this.editMode === 'advanced') {
+      // 高级模式：从JSON编辑器获取数据
+      try {
+        const jsonText = this.element.find('.json-editor').val();
+        activityData = JSON.parse(jsonText);
+        activityData._id = this.activityId;
+        activityData._editMode = 'advanced';
+        console.log('【Activity保存】从JSON解析的数据:', activityData);
+      } catch (error) {
+        ui.notifications.error(`JSON格式错误: ${error.message}`);
+        return;
+      }
+    } else {
+      // 基础模式：从表单获取数据
+      const form = this.element.find('form')[0];
+      if (!form) {
+        console.error('【Activity保存】找不到表单');
+        ui.notifications.error("保存失败：找不到表单");
+        return;
+      }
+
+      const formDataRaw = new foundry.applications.ux.FormDataExtended(form).object;
+      const formData = foundry.utils.expandObject(formDataRaw);
+      console.log('【Activity保存】表单数据:', formData);
+
+      // 处理 consumes
+      const consumes = formData.consumes ? Object.values(formData.consumes) : [];
+
+      // 处理 effectsList
+      const effectsList = formData.effects ? Object.values(formData.effects) : [];
+      const effects = this._listToEffects(effectsList);
+
+      // 构建 activity 数据
+      activityData = {
+        _id: this.activityId,
+        _editMode: 'basic',
+        name: formData.name || "",
+        trigger: formData.trigger || "onUse",
+        hasConsume: formData.hasConsume === true || formData.hasConsume === 'on',
+        consumes: consumes,
+        target: formData.target || "selected",
+        roundTiming: formData.roundTiming || "current",
+        effects: effects,
+        customEffect: {
+          enabled: formData.customEffect?.enabled === true || formData.customEffect?.enabled === 'on',
+          name: formData.customEffect?.name || "",
+          layers: formData.customEffect?.layers || "0",
+          strength: formData.customEffect?.strength || "0"
+        }
+      };
     }
 
-    // 使用 Foundry V13+ 的命名空间版本
-    const formDataRaw = new foundry.applications.ux.FormDataExtended(form).object;
-    console.log('【Activity保存】原始平面化数据:', formDataRaw);
-
-    // 在 Foundry V13 中需要手动展开对象
-    const formData = foundry.utils.expandObject(formDataRaw);
-    console.log('【Activity保存】展开后的表单数据:', formData);
-
-    // 处理 consumes
-    const consumes = formData.consumes ? Object.values(formData.consumes) : [];
-    console.log('【Activity保存】处理后的 consumes:', consumes);
-
-    // 处理 effectsList
-    console.log('【Activity保存】formData.effects:', formData.effects);
-    const effectsList = formData.effects ? Object.values(formData.effects) : [];
-    console.log('【Activity保存】effectsList:', effectsList);
-    const effects = this._listToEffects(effectsList);
-    console.log('【Activity保存】处理后的 effects:', effects);
-
-    // 构建 activity 数据
-    const activityData = {
-      _id: this.activityId,
-      name: formData.name || "",
-      trigger: formData.trigger || "onUse",
-      hasConsume: formData.hasConsume === true || formData.hasConsume === 'on',
-      consumes: consumes,
-      target: formData.target || "selected",
-      roundTiming: formData.roundTiming || "current",  // 添加回合计数字段
-      effects: effects,
-      customEffect: {
-        enabled: formData.customEffect?.enabled === true || formData.customEffect?.enabled === 'on',
-        name: formData.customEffect?.name || "",
-        layers: formData.customEffect?.layers || "0",  // 保留字符串格式以支持骰子公式
-        strength: formData.customEffect?.strength || "0"
-      }
-    };
-
-    console.log('【Activity保存】构建的 activityData:', activityData);
+    console.log('【Activity保存】最终数据:', activityData);
 
     try {
       // 根据是新建还是编辑，调用不同的方法
