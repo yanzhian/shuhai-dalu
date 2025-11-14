@@ -41,6 +41,28 @@ export function isDice3dAvailable() {
 
     console.log(`【Dice So Nice! 设置】:`, settings);
 
+    // 检查是否启用
+    if (settings.globalEnabled === false) {
+      console.warn(`【警告】Dice So Nice! 全局未启用`);
+      console.log(`【解决方案】进入游戏设置 → 模组设置 → Dice So Nice! → 启用 3D 骰子`);
+    }
+
+    if (settings.userEnabled === false) {
+      console.warn(`【警告】Dice So Nice! 对当前用户未启用`);
+      console.log(`【解决方案】点击 Dice So Nice! 按钮 → 启用`);
+    }
+
+    // 检查可用的 colorset（如果存在的话）
+    try {
+      const diceConfig = game.dice3d?.DiceFactory?.systems;
+      if (diceConfig) {
+        const availableColorsets = Object.keys(diceConfig);
+        console.log(`【可用 Colorset】:`, availableColorsets.slice(0, 10)); // 只显示前10个
+      }
+    } catch (e) {
+      // 无法获取 colorset 列表
+    }
+
     // 检查 WebGL 支持
     const canvas = document.createElement('canvas');
     const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
@@ -50,12 +72,6 @@ export function isDice3dAvailable() {
     if (!webglSupported) {
       console.error(`【警告】浏览器不支持 WebGL，3D 骰子无法显示`);
       console.log(`【建议】启用硬件加速或更换浏览器（Chrome/Firefox）`);
-    }
-
-    // 检查 Dice So Nice! 是否为当前用户启用
-    if (settings.enabled === false || settings.enabledForUser === false) {
-      console.warn(`【警告】Dice So Nice! 对当前用户已禁用`);
-      console.log(`【解决方案】进入 Dice So Nice! 设置 → 启用 3D 骰子`);
     }
   } else {
     console.warn(`【Dice So Nice! 警告】模组未启用或未安装`);
