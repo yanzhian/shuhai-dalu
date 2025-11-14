@@ -180,9 +180,6 @@ Hooks.once('init', async function() {
 Hooks.once('ready', async function() {
   console.log('书海大陆 | 系统已就绪');
 
-  // 检查 Dice So Nice! 模组
-  isDice3dAvailable();
-
   // 等待字体加载
   await waitForFonts();
 
@@ -194,6 +191,28 @@ Hooks.once('ready', async function() {
 
   // 显示欢迎消息
   ui.notifications.info("书海大陆系统已加载！");
+});
+
+/* -------------------------------------------- */
+/*  Dice So Nice! 集成                           */
+/* -------------------------------------------- */
+
+// 监听 Dice So Nice! 就绪事件
+Hooks.once('diceSoNiceReady', (dice3d) => {
+  console.log('【Dice So Nice!】模组已就绪');
+  isDice3dAvailable();
+});
+
+// 如果 Dice So Nice! 在系统之前就绪，也要检查
+Hooks.once('ready', () => {
+  // 延迟检查，确保所有模组都已加载
+  setTimeout(() => {
+    if (game.dice3d) {
+      console.log('【Dice So Nice!】已可用');
+    } else {
+      console.log('【Dice So Nice!】未检测到，3D骰子动画将被禁用');
+    }
+  }, 1000);
 });
 
 /* -------------------------------------------- */
