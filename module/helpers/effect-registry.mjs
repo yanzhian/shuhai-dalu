@@ -221,7 +221,7 @@ export const EFFECT_TYPES = {
   // ===== 资源相关效果 =====
 
   /**
-   * 恢复额外Cost（costResources，用于激活战斗骰）
+   * 恢复额外Cost
    */
   restoreCost: {
     name: '恢复额外Cost',
@@ -236,16 +236,15 @@ export const EFFECT_TYPES = {
         return { success: false, reason: '恢复数量必须大于0' };
       }
 
-      // 恢复额外Cost（costResources）
-      // 数据结构：false = 空槽位，true = 有Cost
+      // 恢复额外Cost
       const combatState = actor.getFlag('shuhai-dalu', 'combatState') || {
-        costResources: [false, false, false, false, false, false]
+        exResources: [false, false, false]
       };
 
       let restored = 0;
-      for (let i = 0; i < combatState.costResources.length && restored < amount; i++) {
-        if (!combatState.costResources[i]) {  // 如果是 false（空槽位）
-          combatState.costResources[i] = true;  // 改为 true（添加Cost）
+      for (let i = 0; i < combatState.exResources.length && restored < amount; i++) {
+        if (combatState.exResources[i]) {
+          combatState.exResources[i] = false;
           restored++;
         }
       }
@@ -257,7 +256,7 @@ export const EFFECT_TYPES = {
   },
 
   /**
-   * 消耗额外Cost（costResources）
+   * 消耗额外Cost
    */
   consumeCost: {
     name: '消耗额外Cost',
@@ -272,23 +271,21 @@ export const EFFECT_TYPES = {
         return { success: false, reason: '消耗数量必须大于0' };
       }
 
-      // 消耗额外Cost（costResources）
-      // 数据结构：false = 空槽位，true = 有Cost
       const combatState = actor.getFlag('shuhai-dalu', 'combatState') || {
-        costResources: [false, false, false, false, false, false]
+        exResources: [false, false, false]
       };
 
-      // 检查是否有足够的Cost（true = 有Cost）
-      const available = combatState.costResources.filter(r => r).length;
+      // 检查是否有足够的Cost
+      const available = combatState.exResources.filter(r => !r).length;
       if (available < amount) {
         return { success: false, reason: `额外Cost不足（需要${amount}，拥有${available}）` };
       }
 
-      // 消耗Cost（将true改为false）
+      // 消耗Cost
       let consumed = 0;
-      for (let i = 0; i < combatState.costResources.length && consumed < amount; i++) {
-        if (combatState.costResources[i]) {  // 如果是 true（有Cost）
-          combatState.costResources[i] = false;  // 改为 false（移除Cost）
+      for (let i = 0; i < combatState.exResources.length && consumed < amount; i++) {
+        if (!combatState.exResources[i]) {
+          combatState.exResources[i] = true;
           consumed++;
         }
       }

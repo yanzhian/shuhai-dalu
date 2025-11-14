@@ -362,54 +362,24 @@ export default class ActivityEditor extends Application {
       const jsonText = this.element.find('.json-editor').val();
       const parsed = JSON.parse(jsonText);
 
-      // 检测是数组还是单个对象
-      if (Array.isArray(parsed)) {
-        // 数组格式 - 验证每个活动
-        const allErrors = [];
-        parsed.forEach((activity, index) => {
-          const errors = this._validateActivity(activity);
-          if (errors.length > 0) {
-            allErrors.push(`活动 ${index + 1} (${activity.name || '未命名'}):\n  ${errors.join('\n  ')}`);
-          }
-        });
+      // 基本验证
+      const errors = [];
 
-        if (allErrors.length > 0) {
-          ui.notifications.warn(`JSON验证警告:\n${allErrors.join('\n')}`);
-        } else {
-          ui.notifications.info(`✅ 所有 ${parsed.length} 个活动的JSON格式正确！`);
-        }
+      if (!parsed.name) errors.push('缺少 name 字段');
+      if (!parsed.trigger && !parsed.baseTiming) errors.push('缺少 trigger 或 baseTiming 字段');
 
-        // 显示数组预览
-        this._showJSONPreview(parsed);
+      if (errors.length > 0) {
+        ui.notifications.warn(`JSON验证警告:\n${errors.join('\n')}`);
       } else {
-        // 单个对象格式 - 按原来的方式验证
-        const errors = this._validateActivity(parsed);
-
-        if (errors.length > 0) {
-          ui.notifications.warn(`JSON验证警告:\n${errors.join('\n')}`);
-        } else {
-          ui.notifications.info('✅ JSON格式正确！');
-        }
-
-        // 显示预览
-        this._showJSONPreview(parsed);
+        ui.notifications.info('✅ JSON格式正确！');
       }
+
+      // 显示预览
+      this._showJSONPreview(parsed);
 
     } catch (error) {
       ui.notifications.error(`❌ JSON格式错误: ${error.message}`);
     }
-  }
-
-  /**
-   * 验证单个活动对象
-   */
-  _validateActivity(activity) {
-    const errors = [];
-
-    if (!activity.name) errors.push('缺少 name 字段');
-    if (!activity.trigger && !activity.baseTiming) errors.push('缺少 trigger 或 baseTiming 字段');
-
-    return errors;
   }
 
   /**

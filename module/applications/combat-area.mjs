@@ -542,14 +542,8 @@ export default class CombatAreaApplication extends Application {
     // 检查是否有骰子带有闪击效果
     const flashStrikeDice = drawnDice.filter(({ dice }) => {
       if (!dice.system.activities) return false;
-
-      // 兼容数组和对象两种格式
-      const activitiesArray = Array.isArray(dice.system.activities)
-        ? dice.system.activities
-        : Object.values(dice.system.activities);
-
-      return activitiesArray.some(
-        activity => activity && activity.trigger === 'onFlashStrike'
+      return Object.values(dice.system.activities).some(
+        activity => activity.trigger === 'onFlashStrike'
       );
     });
 
@@ -1340,22 +1334,13 @@ export default class CombatAreaApplication extends Application {
    */
   async _triggerActivities(item, triggerType) {
     // 检查物品是否有 activities
-    if (!item.system.activities) {
-      return false;
-    }
-
-    // 兼容数组和对象两种格式
-    const activitiesArray = Array.isArray(item.system.activities)
-      ? item.system.activities
-      : Object.values(item.system.activities);
-
-    if (activitiesArray.length === 0) {
+    if (!item.system.activities || Object.keys(item.system.activities).length === 0) {
       return false;
     }
 
     // 筛选出匹配的 activities
-    const matchingActivities = activitiesArray.filter(
-      activity => activity && activity.trigger === triggerType
+    const matchingActivities = Object.values(item.system.activities).filter(
+      activity => activity.trigger === triggerType
     );
 
     if (matchingActivities.length === 0) {

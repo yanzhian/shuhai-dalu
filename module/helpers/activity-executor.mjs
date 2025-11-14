@@ -30,28 +30,12 @@ export class ActivityExecutor {
         return { success: false, reason: '资源不足' };
       }
 
-      // 3. 执行效果列表（兼容新旧两种格式）
+      // 3. 执行效果列表
       const effectResults = [];
-      if (activity.effects) {
-        if (Array.isArray(activity.effects)) {
-          // 新格式：数组 [{type: "addBuff", ...}, {type: "restoreCost", ...}]
-          for (const effect of activity.effects) {
-            const result = await this.executeEffect(effect, context);
-            effectResults.push(result);
-          }
-        } else if (typeof activity.effects === 'object') {
-          // 旧格式：对象 {buffId: {layers, strength}, ...}
-          for (const [buffId, buffData] of Object.entries(activity.effects)) {
-            const effect = {
-              type: 'addBuff',
-              buffId: buffId,
-              layers: buffData.layers,
-              strength: buffData.strength,
-              target: activity.target || 'selected'
-            };
-            const result = await this.executeEffect(effect, context);
-            effectResults.push(result);
-          }
+      if (activity.effects && Array.isArray(activity.effects)) {
+        for (const effect of activity.effects) {
+          const result = await this.executeEffect(effect, context);
+          effectResults.push(result);
         }
       }
 
