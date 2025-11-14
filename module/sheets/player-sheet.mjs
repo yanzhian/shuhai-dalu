@@ -955,12 +955,21 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    */
   async _triggerActivities(item, trigger) {
     // 检查物品是否有Activities
-    if (!item.system.activities || item.system.activities.length === 0) {
+    if (!item.system.activities) {
+      return;
+    }
+
+    // 兼容对象和数组两种格式
+    const activitiesArray = Array.isArray(item.system.activities)
+      ? item.system.activities
+      : Object.values(item.system.activities);
+
+    if (activitiesArray.length === 0) {
       return;
     }
 
     // 过滤出符合触发条件的Activities
-    const activities = item.system.activities.filter(act => act.trigger === trigger);
+    const activities = activitiesArray.filter(act => act.trigger === trigger);
 
     if (activities.length === 0) return;
 
@@ -968,11 +977,50 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     for (const activity of activities) {
       console.log(`书海大陆 | 触发Activity: ${activity.name} (${trigger})`);
 
-      // 这里可以根据Activity类型执行不同的效果
-      // 例如：扣除HP、添加BUFF、修改属性等
+      // 检查是否是新格式的activity（有effects数组）
+      if (activity.effects && (Array.isArray(activity.effects) || typeof activity.effects === 'object')) {
+        // 使用增强版执行引擎
+        try {
+          const { ActivityExecutor, createContext } = await import('../helpers/activity-executor.mjs');
 
-      // 简单示例：如果Activity有效果描述，发送到聊天框
-      if (activity.effect) {
+          // 创建执行上下文
+          const context = createContext(
+            this.actor,      // actor
+            this.actor,      // target (默认自己)
+            item,            // item
+            null,            // dice
+            game.combat      // combat
+          );
+
+          // 执行activity
+          const result = await ActivityExecutor.execute(activity, context);
+
+          if (result.success) {
+            console.log(`书海大陆 | Activity执行成功: ${activity.name}`);
+
+            // 发送成功消息到聊天
+            const chatData = {
+              user: game.user.id,
+              speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+              content: `
+                <div style="border: 2px solid #4a9eff; border-radius: 4px; padding: 8px; background: #0F0D1B; color: #EBBD68; font-family: 'Noto Sans SC', sans-serif;">
+                  <div style="font-weight: bold; color: #4a9eff; margin-bottom: 4px;">⚡ ${activity.name}</div>
+                  <div style="color: #EBBD68; font-size: 13px;">触发成功</div>
+                </div>
+              `
+            };
+            await ChatMessage.create(chatData);
+          } else {
+            console.warn(`书海大陆 | Activity执行失败: ${activity.name}`, result.reason);
+            ui.notifications.warn(`${activity.name} 执行失败: ${result.reason}`);
+          }
+        } catch (error) {
+          console.error(`书海大陆 | Activity执行异常: ${activity.name}`, error);
+          ui.notifications.error(`${activity.name} 执行异常: ${error.message}`);
+        }
+      }
+      // 旧格式兼容（简单的effect字符串）
+      else if (activity.effect) {
         const chatData = {
           user: game.user.id,
           speaker: ChatMessage.getSpeaker({ actor: this.actor }),
