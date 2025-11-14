@@ -24,28 +24,33 @@ export default class SpecialDiceDialog extends Application {
     const data = super.getData();
 
     console.log('【特殊骰子对话框】触发类型:', this.triggerType);
-    console.log('【特殊骰子对话框】所有物品:', this.actor.items.map(i => ({
-      id: i.id,
-      name: i.name,
-      type: i.type,
-      itemType: i.system.itemType,
-      equipped: i.system.equipped,
-      hasActivities: !!i.system.activities
-    })));
+    console.log('【特殊骰子对话框】角色装备配置:', this.actor.system.equipment);
 
-    // 获取所有装备的战斗骰 - 扩展查找范围
+    // 获取装备中的战斗骰ID列表
+    const equippedDiceIds = new Set();
+
+    // 从 equipment.combatDice 数组中获取ID
+    if (this.actor.system.equipment?.combatDice) {
+      this.actor.system.equipment.combatDice.forEach(id => {
+        if (id) equippedDiceIds.add(id);
+      });
+    }
+
+    console.log('【装备的骰子ID】:', Array.from(equippedDiceIds));
+
+    // 获取所有装备的战斗骰
     const equippedDice = this.actor.items.filter(item => {
       // 检查多种可能的战斗骰类型
       const isCombatDice = (
-        (item.type === 'item' && item.system.itemType === '战斗骰') ||
         item.type === 'combatDice' ||
-        item.type === 'shootDice'
+        item.type === 'shootDice' ||
+        (item.type === 'item' && item.system.itemType === '战斗骰')
       );
 
-      // 必须已装备
-      const isEquipped = item.system.equipped;
+      // 检查是否在装备列表中
+      const isEquipped = equippedDiceIds.has(item.id);
 
-      console.log(`【检查骰子】${item.name}: type=${item.type}, itemType=${item.system.itemType}, equipped=${isEquipped}, isCombatDice=${isCombatDice}`);
+      console.log(`【检查骰子】${item.name}: type=${item.type}, id=${item.id}, isCombatDice=${isCombatDice}, isEquipped=${isEquipped}`);
 
       return isCombatDice && isEquipped;
     });
@@ -133,14 +138,9 @@ export default class SpecialDiceDialog extends Application {
       return;
     }
 
-    // 找到对应的激活状态索引
-    const equippedDice = this.actor.items.filter(item =>
-      item.type === 'item' &&
-      item.system.equipped &&
-      item.system.itemType === '战斗骰'
-    ).sort((a, b) => (a.system.slot || 0) - (b.system.slot || 0));
-
-    const diceIndex = equippedDice.findIndex(d => d.id === diceId);
+    // 找到对应的激活状态索引 - 从 equipment.combatDice 数组中查找
+    const combatDiceSlots = this.actor.system.equipment?.combatDice || [];
+    const diceIndex = combatDiceSlots.findIndex(id => id === diceId);
 
     // 获取战斗状态
     let combatState = this.actor.getFlag('shuhai-dalu', 'combatState') || {
