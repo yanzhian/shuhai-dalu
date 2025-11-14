@@ -340,40 +340,69 @@ export const EFFECT_TYPES = {
 
       // 解析恢复量（支持骰子公式，如 "1d8"）
       let amount;
+      let rollFormula = null;
+
       if (typeof effect.amount === 'string' && effect.amount.includes('d')) {
         // 骰子公式
         const roll = new Roll(effect.amount);
         await roll.evaluate();
         amount = roll.total;
+        rollFormula = effect.amount;
 
-        // 发送骰子结果到聊天
-        await roll.toMessage({
+        // 发送带恢复按钮的骰子结果到聊天
+        const messageContent = `
+          <div class="dice-roll">
+            <div class="dice-result">
+              <div class="dice-formula">${rollFormula}</div>
+              <h4 class="dice-total">${amount}</h4>
+            </div>
+          </div>
+          <div style="margin-top: 8px; text-align: center;">
+            <button class="heal-button"
+                    data-actor-id="${targetActor.id}"
+                    data-amount="${amount}"
+                    style="background: #4a9eff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-family: 'Noto Sans SC', sans-serif; font-weight: bold;">
+              💊 恢复 ${amount} 点生命值
+            </button>
+          </div>
+        `;
+
+        const message = await ChatMessage.create({
           speaker: ChatMessage.getSpeaker({ actor: context.actor }),
-          flavor: `${effect.name || '恢复生命值'} - ${effect.amount}`
+          flavor: `${context.item?.name || '恢复生命值'}`,
+          content: messageContent
         });
+
+        // 不立即恢复，等待按钮点击
+        return {
+          success: true,
+          message: `骰子结果: ${amount}点治疗（等待确认）`,
+          healAmount: amount,
+          pending: true
+        };
       } else {
-        // 普通数值或表达式
+        // 普通数值或表达式 - 直接恢复
         amount = ExpressionParser.parse(effect.amount, context);
+
+        if (amount <= 0) {
+          return { success: false, reason: '恢复量必须大于0' };
+        }
+
+        // 恢复生命值
+        const currentHP = targetActor.system.attributes?.hp?.value || 0;
+        const maxHP = targetActor.system.attributes?.hp?.max || 100;
+        const newHP = Math.min(currentHP + amount, maxHP);
+
+        await targetActor.update({
+          'system.attributes.hp.value': newHP
+        });
+
+        return {
+          success: true,
+          message: `${targetActor.name}恢复${amount}点生命值（${currentHP} → ${newHP}）`,
+          healAmount: amount
+        };
       }
-
-      if (amount <= 0) {
-        return { success: false, reason: '恢复量必须大于0' };
-      }
-
-      // 恢复生命值
-      const currentHP = targetActor.system.attributes?.hp?.value || 0;
-      const maxHP = targetActor.system.attributes?.hp?.max || 100;
-      const newHP = Math.min(currentHP + amount, maxHP);
-
-      await targetActor.update({
-        'system.attributes.hp.value': newHP
-      });
-
-      return {
-        success: true,
-        message: `${targetActor.name}恢复${amount}点生命值（${currentHP} → ${newHP}）`,
-        healAmount: amount
-      };
     }
   },
 
