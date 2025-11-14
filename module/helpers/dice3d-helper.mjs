@@ -13,7 +13,34 @@ export function isDice3dAvailable() {
 
   if (available) {
     console.log(`【Dice So Nice! 信息】版本:`, game.modules.get('dice-so-nice')?.version);
-    console.log(`【Dice So Nice! 信息】配置:`, game.dice3d);
+
+    // 检查关键设置
+    const settings = {
+      enabled: game.settings.get('dice-so-nice', 'settings')?.enabled,
+      showForRolls: game.settings.get('dice-so-nice', 'enabledForCurrentUser'),
+      showGhostDice: game.settings.get('dice-so-nice', 'showGhostDice'),
+      enabledForUser: game.user.getFlag('dice-so-nice', 'settings')?.enabled,
+      appearance: game.user.getFlag('dice-so-nice', 'appearance'),
+    };
+
+    console.log(`【Dice So Nice! 设置】:`, settings);
+
+    // 检查 WebGL 支持
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    const webglSupported = !!gl;
+    console.log(`【WebGL 支持】: ${webglSupported}`);
+
+    if (!webglSupported) {
+      console.error(`【警告】浏览器不支持 WebGL，3D 骰子无法显示`);
+      console.log(`【建议】启用硬件加速或更换浏览器（Chrome/Firefox）`);
+    }
+
+    // 检查 Dice So Nice! 是否为当前用户启用
+    if (settings.enabled === false || settings.enabledForUser === false) {
+      console.warn(`【警告】Dice So Nice! 对当前用户已禁用`);
+      console.log(`【解决方案】进入 Dice So Nice! 设置 → 启用 3D 骰子`);
+    }
   } else {
     console.warn(`【Dice So Nice! 警告】模组未启用或未安装`);
   }
