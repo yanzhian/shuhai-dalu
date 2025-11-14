@@ -29,25 +29,8 @@ export default class SpecialDiceDialog extends Application {
     const equippedDiceIds = new Set(this.actor.system.equipment?.combatDice || []);
     console.log(`【装备的骰子ID】:`, Array.from(equippedDiceIds));
 
-    // 调试：查看所有物品
-    console.log(`【所有物品】共 ${this.actor.items.size} 个:`);
-    this.actor.items.forEach(item => {
-      if (equippedDiceIds.has(item.id)) {
-        console.log(`  - ${item.name} (ID: ${item.id})`);
-        console.log(`    type: ${item.type}`);
-        console.log(`    system.type: ${item.system.type}`);
-        console.log(`    system.itemType: ${item.system.itemType}`);
-        console.log(`    system.category: ${item.system.category}`);
-      }
-    });
-
-    // 获取所有战斗骰类型的物品
-    const combatDiceItems = this.actor.items.filter(item =>
-      item.type === 'item' &&
-      item.system.type === 'shootDice'
-    );
-
-    console.log(`【战斗骰类型物品】共 ${combatDiceItems.length} 个`);
+    // ✅ 获取所有战斗骰类型的物品（type === 'combatDice'）
+    const combatDiceItems = this.actor.items.filter(item => item.type === 'combatDice');
 
     // 筛选出已装备的战斗骰
     const equippedDice = combatDiceItems.filter(item => equippedDiceIds.has(item.id));
