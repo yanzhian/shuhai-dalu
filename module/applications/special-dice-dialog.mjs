@@ -23,9 +23,6 @@ export default class SpecialDiceDialog extends Application {
   getData() {
     const data = super.getData();
 
-    console.log('【特殊骰子对话框】触发类型:', this.triggerType);
-    console.log('【特殊骰子对话框】角色装备配置:', this.actor.system.equipment);
-
     // 获取装备中的战斗骰ID列表
     const equippedDiceIds = new Set();
 
@@ -35,8 +32,6 @@ export default class SpecialDiceDialog extends Application {
         if (id) equippedDiceIds.add(id);
       });
     }
-
-    console.log('【装备的骰子ID】:', Array.from(equippedDiceIds));
 
     // 获取所有装备的战斗骰
     const equippedDice = this.actor.items.filter(item => {
@@ -50,38 +45,22 @@ export default class SpecialDiceDialog extends Application {
       // 检查是否在装备列表中
       const isEquipped = equippedDiceIds.has(item.id);
 
-      console.log(`【检查骰子】${item.name}: type=${item.type}, id=${item.id}, isCombatDice=${isCombatDice}, isEquipped=${isEquipped}`);
-
       return isCombatDice && isEquipped;
     });
-
-    console.log('【特殊骰子对话框】找到装备的战斗骰:', equippedDice.length, '个');
 
     // 筛选出有对应触发类型的骰子
     const availableDice = [];
     for (const dice of equippedDice) {
-      console.log(`【检查活动】骰子: ${dice.name}`);
-      console.log('  - activities:', dice.system.activities);
-      console.log('  - activities是数组?', Array.isArray(dice.system.activities));
-
       if (dice.system.activities) {
         // 兼容数组和对象两种格式
         const activitiesArray = Array.isArray(dice.system.activities)
           ? dice.system.activities
           : Object.values(dice.system.activities);
 
-        console.log('  - activitiesArray:', activitiesArray);
-        console.log('  - 数组长度:', activitiesArray.length);
-
         // 过滤出匹配的活动
         const matchingActivities = activitiesArray.filter(
-          activity => {
-            console.log(`    - 检查活动: ${activity?.name}, trigger=${activity?.trigger}, 期望=${this.triggerType}, 匹配=${activity?.trigger === this.triggerType}`);
-            return activity && activity.trigger === this.triggerType;
-          }
+          activity => activity && activity.trigger === this.triggerType
         );
-
-        console.log('  - 匹配的活动数:', matchingActivities.length);
 
         if (matchingActivities.length > 0) {
           availableDice.push({
@@ -94,12 +73,8 @@ export default class SpecialDiceDialog extends Application {
             activities: matchingActivities
           });
         }
-      } else {
-        console.log('  - 没有activities字段');
       }
     }
-
-    console.log('【最终结果】可用骰子数:', availableDice.length);
 
     data.actor = this.actor;
     data.triggerType = this.triggerType;
@@ -138,6 +113,9 @@ export default class SpecialDiceDialog extends Application {
       return;
     }
 
+    // 定义触发类型名称（在顶部定义避免作用域问题）
+    const triggerName = this.triggerType === 'onFlashStrike' ? '闪击☪' : '丢弃✦';
+
     // 找到对应的激活状态索引 - 从 equipment.combatDice 数组中查找
     const combatDiceSlots = this.actor.system.equipment?.combatDice || [];
     const diceIndex = combatDiceSlots.findIndex(id => id === diceId);
@@ -150,15 +128,28 @@ export default class SpecialDiceDialog extends Application {
       buffs: []
     };
 
-    // 检查骰子是否已激活
-    if (diceIndex >= 0 && diceIndex < 6) {
-      if (!combatState.activatedDice[diceIndex]) {
-        ui.notifications.warn(`${dice.name} 未激活，无法触发${this.triggerType === 'onFlashStrike' ? '闪击' : '丢弃'}效果`);
-        return;
-      }
+    // 检查骰子是否已激活（仅对闪击☪检查，丢弃✦不需要激活也能用）
+    if (this.triggerType === 'onFlashStrike') {
+      if (diceIndex >= 0 && diceIndex < 6) {
+        if (!combatState.activatedDice[diceIndex]) {
+          ui.notifications.warn(`${dice.name} 未激活，无法触发${triggerName}效果`);
+          return;
+        }
 
-      // 取消激活状态
-      combatState.activatedDice[diceIndex] = false;
+        // 取消激活状态
+        combatState.activatedDice[diceIndex] = false;
+      }
+    } else if (this.triggerType === 'onDiscard') {
+      // 丢弃✦：检查骰子是否已激活，如果已激活则取消激活
+      if (diceIndex >= 0 && diceIndex < 6) {
+        if (!combatState.activatedDice[diceIndex]) {
+          ui.notifications.warn(`${dice.name} 未激活，无法触发${triggerName}效果`);
+          return;
+        }
+
+        // 取消激活状态
+        combatState.activatedDice[diceIndex] = false;
+      }
     }
 
     // 触发效果
@@ -168,9 +159,6 @@ export default class SpecialDiceDialog extends Application {
     if (triggered) {
       // 保存战斗状态
       await this.actor.setFlag('shuhai-dalu', 'combatState', combatState);
-
-      // 发送消息
-      const triggerName = this.triggerType === 'onFlashStrike' ? '闪击☪' : '丢弃✦';
       ChatMessage.create({
         user: game.user.id,
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
