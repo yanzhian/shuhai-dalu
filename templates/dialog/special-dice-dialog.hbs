@@ -35,12 +35,13 @@
         <div style="font-size: 12px; color: #888; padding: 6px; background: rgba(0, 0, 0, 0.3); border-radius: 4px;">
           {{#each activities}}
           <div style="margin-bottom: 4px;">
-            <span style="color: #E1AA43;">{{../triggerName}}效果：</span>
+            <span style="color: #E1AA43;">{{../../triggerName}}效果：</span>
             {{#if effects}}
               {{#each effects}}
-                {{@key}} x{{layers}}
-                {{#if strength}}({{strength}}){{/if}}
+                <span style="color: #aaa;">{{@key}}</span> x{{layers}}{{#if strength}}(强度{{strength}}){{/if}}{{#unless @last}}, {{/unless}}
               {{/each}}
+            {{else}}
+              <span style="color: #666;">（未配置效果）</span>
             {{/if}}
           </div>
           {{/each}}

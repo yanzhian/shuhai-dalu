@@ -32,6 +32,8 @@ export const TRIGGER_TYPES = {
   ON_COMBAT_END: 'onCombatEnd',           // 战斗结束时
 
   // 特殊触发
+  ON_FLASH_STRIKE: 'onFlashStrike',       // 闪击☪（消耗已激活的骰子）
+  ON_DISCARD: 'onDiscard',                // 丢弃✦（消耗已激活的骰子）
   ON_TREMOR_EXPLODE: 'onTremorExplode',   // 震颤引爆时
   ON_BUFF_APPLIED: 'onBuffApplied',       // BUFF被应用时
   ON_BUFF_REMOVED: 'onBuffRemoved',       // BUFF被移除时
@@ -56,6 +58,8 @@ export const TRIGGER_TYPE_LABELS = {
   [TRIGGER_TYPES.ON_ROUND_END]: '回合结束时',
   [TRIGGER_TYPES.ON_COMBAT_START]: '战斗开始时',
   [TRIGGER_TYPES.ON_COMBAT_END]: '战斗结束时',
+  [TRIGGER_TYPES.ON_FLASH_STRIKE]: '闪击☪',
+  [TRIGGER_TYPES.ON_DISCARD]: '丢弃✦',
   [TRIGGER_TYPES.ON_TREMOR_EXPLODE]: '震颤引爆时',
   [TRIGGER_TYPES.ON_BUFF_APPLIED]: 'BUFF应用时',
   [TRIGGER_TYPES.ON_BUFF_REMOVED]: 'BUFF移除时',

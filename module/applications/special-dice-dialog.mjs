@@ -23,20 +23,35 @@ export default class SpecialDiceDialog extends Application {
   getData() {
     const data = super.getData();
 
-    // 获取所有装备的战斗骰
-    const equippedDice = this.actor.items.filter(item =>
-      item.type === 'item' &&
-      item.system.equipped &&
-      item.system.itemType === '战斗骰'
-    );
+    console.log(`【特殊骰子对话框】触发类型: ${this.triggerType}`);
+
+    // ✅ 从 equipment.combatDice 数组获取装备的战斗骰ID
+    const equippedDiceIds = new Set(this.actor.system.equipment?.combatDice || []);
+    console.log(`【装备的骰子ID】:`, Array.from(equippedDiceIds));
+
+    // ✅ 获取所有战斗骰类型的物品（type === 'combatDice'）
+    const combatDiceItems = this.actor.items.filter(item => item.type === 'combatDice');
+
+    // 筛选出已装备的战斗骰
+    const equippedDice = combatDiceItems.filter(item => equippedDiceIds.has(item.id));
+
+    console.log(`【特殊骰子对话框】找到装备的战斗骰: ${equippedDice.length} 个`);
 
     // 筛选出有对应触发类型的骰子
     const availableDice = [];
     for (const dice of equippedDice) {
+      console.log(`【检查活动】骰子: ${dice.name}`);
+      console.log(`  - activities:`, dice.system.activities);
+
       if (dice.system.activities && Object.keys(dice.system.activities).length > 0) {
         const matchingActivities = Object.values(dice.system.activities).filter(
-          activity => activity.trigger === this.triggerType
+          activity => {
+            console.log(`  - 检查活动: ${activity.name}, trigger=${activity.trigger}, 期望=${this.triggerType}, 匹配=${activity.trigger === this.triggerType}`);
+            return activity.trigger === this.triggerType;
+          }
         );
+
+        console.log(`【${dice.name}】匹配的activities: ${matchingActivities.length}`, matchingActivities);
 
         if (matchingActivities.length > 0) {
           availableDice.push({
@@ -51,6 +66,8 @@ export default class SpecialDiceDialog extends Application {
         }
       }
     }
+
+    console.log(`【最终结果】可用骰子数: ${availableDice.length}`, availableDice);
 
     data.actor = this.actor;
     data.triggerType = this.triggerType;
@@ -89,14 +106,11 @@ export default class SpecialDiceDialog extends Application {
       return;
     }
 
-    // 找到对应的激活状态索引
-    const equippedDice = this.actor.items.filter(item =>
-      item.type === 'item' &&
-      item.system.equipped &&
-      item.system.itemType === '战斗骰'
-    ).sort((a, b) => (a.system.slot || 0) - (b.system.slot || 0));
+    // ✅ 直接从 equipment.combatDice 数组查找索引
+    const combatDiceSlots = this.actor.system.equipment?.combatDice || [];
+    const diceIndex = combatDiceSlots.findIndex(id => id === diceId);
 
-    const diceIndex = equippedDice.findIndex(d => d.id === diceId);
+    console.log(`【触发效果】骰子: ${dice.name}, ID: ${diceId}, 槽位索引: ${diceIndex}`);
 
     // 获取战斗状态
     let combatState = this.actor.getFlag('shuhai-dalu', 'combatState') || {
@@ -108,6 +122,8 @@ export default class SpecialDiceDialog extends Application {
 
     // 检查骰子是否已激活
     if (diceIndex >= 0 && diceIndex < 6) {
+      console.log(`【激活状态】槽位 ${diceIndex} 是否激活: ${combatState.activatedDice[diceIndex]}`);
+
       if (!combatState.activatedDice[diceIndex]) {
         ui.notifications.warn(`${dice.name} 未激活，无法触发${this.triggerType === 'onFlashStrike' ? '闪击' : '丢弃'}效果`);
         return;
@@ -115,6 +131,9 @@ export default class SpecialDiceDialog extends Application {
 
       // 取消激活状态
       combatState.activatedDice[diceIndex] = false;
+      console.log(`【取消激活】槽位 ${diceIndex} 已取消激活`);
+    } else {
+      console.warn(`【警告】骰子索引无效: ${diceIndex}`);
     }
 
     // 触发效果
