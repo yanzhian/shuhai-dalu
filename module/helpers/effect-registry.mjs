@@ -361,10 +361,24 @@ export const EFFECT_TYPES = {
             <button class="heal-button"
                     data-actor-id="${targetActor.id}"
                     data-amount="${amount}"
-                    style="background: #4a9eff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-family: 'Noto Sans SC', sans-serif; font-weight: bold;">
+                    style="padding: 10px 28px; background: #4a7c2c; color: #FFFFFF; border: 2px solid #5ec770; border-radius: 4px; font-size: 15px; font-weight: bold; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.3); font-family: 'Noto Sans SC', sans-serif;">
               💊 恢复 ${amount} 点生命值
             </button>
           </div>
+          <style>
+          .heal-button:hover {
+            background: #5a9c3c;
+            border-color: #6ed780;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+          }
+          .heal-button:disabled {
+            background: #888;
+            border-color: #666;
+            cursor: not-allowed;
+            transform: none;
+          }
+          </style>
         `;
 
         const message = await ChatMessage.create({

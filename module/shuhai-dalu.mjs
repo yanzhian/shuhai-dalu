@@ -1288,7 +1288,9 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     button.disabled = true;
     button.textContent = '✓ 已恢复';
     button.style.background = '#888';
+    button.style.borderColor = '#666';
     button.style.cursor = 'not-allowed';
+    button.style.transform = 'none';
 
     // 刷新所有打开的角色表单
     if (updatedActor.sheet && updatedActor.sheet.rendered) {
@@ -1309,12 +1311,12 @@ Hooks.on('renderChatMessage', (message, html, data) => {
       user: game.user.id,
       speaker: ChatMessage.getSpeaker({ actor: updatedActor }),
       content: `
-        <div style="background: #0F0D1B; border: 2px solid #4a9eff; border-radius: 8px; padding: 12px; color: #EBBD68; text-align: center; font-family: 'Noto Sans SC', sans-serif;">
-          <div style="font-size: 16px; font-weight: bold; color: #4a9eff; margin-bottom: 8px;">✓ 生命值已恢复</div>
-          <div style="margin-bottom: 8px;"><strong>${updatedActor.name}</strong> 恢复了 <span style="color: #4a9eff; font-weight: bold;">${healAmount}</span> 点生命值</div>
-          <div style="padding: 8px; background: rgba(74, 156, 255, 0.1); border-radius: 4px;">
+        <div style="background: #0F0D1B; border: 2px solid #5ec770; border-radius: 8px; padding: 12px; color: #EBBD68; text-align: center; font-family: 'Noto Sans SC', sans-serif;">
+          <div style="font-size: 16px; font-weight: bold; color: #5ec770; margin-bottom: 8px;">✓ 生命值已恢复</div>
+          <div style="margin-bottom: 8px;"><strong>${updatedActor.name}</strong> 恢复了 <span style="color: #5ec770; font-weight: bold;">${healAmount}</span> 点生命值</div>
+          <div style="padding: 8px; background: rgba(94, 199, 112, 0.1); border-radius: 4px;">
             <div style="font-size: 14px; color: #888;">恢复前: ${hpBefore}/${hpMax}</div>
-            <div style="font-size: 16px; font-weight: bold; color: #4a9eff; margin-top: 4px;">当前生命值: ${finalHP}/${hpMax}</div>
+            <div style="font-size: 16px; font-weight: bold; color: #5ec770; margin-top: 4px;">当前生命值: ${finalHP}/${hpMax}</div>
           </div>
         </div>
       `
