@@ -23,26 +23,60 @@ export default class SpecialDiceDialog extends Application {
   getData() {
     const data = super.getData();
 
-    // 获取所有装备的战斗骰
-    const equippedDice = this.actor.items.filter(item =>
-      item.type === 'item' &&
-      item.system.equipped &&
-      item.system.itemType === '战斗骰'
-    );
+    console.log('【特殊骰子对话框】触发类型:', this.triggerType);
+    console.log('【特殊骰子对话框】所有物品:', this.actor.items.map(i => ({
+      id: i.id,
+      name: i.name,
+      type: i.type,
+      itemType: i.system.itemType,
+      equipped: i.system.equipped,
+      hasActivities: !!i.system.activities
+    })));
+
+    // 获取所有装备的战斗骰 - 扩展查找范围
+    const equippedDice = this.actor.items.filter(item => {
+      // 检查多种可能的战斗骰类型
+      const isCombatDice = (
+        (item.type === 'item' && item.system.itemType === '战斗骰') ||
+        item.type === 'combatDice' ||
+        item.type === 'shootDice'
+      );
+
+      // 必须已装备
+      const isEquipped = item.system.equipped;
+
+      console.log(`【检查骰子】${item.name}: type=${item.type}, itemType=${item.system.itemType}, equipped=${isEquipped}, isCombatDice=${isCombatDice}`);
+
+      return isCombatDice && isEquipped;
+    });
+
+    console.log('【特殊骰子对话框】找到装备的战斗骰:', equippedDice.length, '个');
 
     // 筛选出有对应触发类型的骰子
     const availableDice = [];
     for (const dice of equippedDice) {
+      console.log(`【检查活动】骰子: ${dice.name}`);
+      console.log('  - activities:', dice.system.activities);
+      console.log('  - activities是数组?', Array.isArray(dice.system.activities));
+
       if (dice.system.activities) {
         // 兼容数组和对象两种格式
         const activitiesArray = Array.isArray(dice.system.activities)
           ? dice.system.activities
           : Object.values(dice.system.activities);
 
+        console.log('  - activitiesArray:', activitiesArray);
+        console.log('  - 数组长度:', activitiesArray.length);
+
         // 过滤出匹配的活动
         const matchingActivities = activitiesArray.filter(
-          activity => activity && activity.trigger === this.triggerType
+          activity => {
+            console.log(`    - 检查活动: ${activity?.name}, trigger=${activity?.trigger}, 期望=${this.triggerType}, 匹配=${activity?.trigger === this.triggerType}`);
+            return activity && activity.trigger === this.triggerType;
+          }
         );
+
+        console.log('  - 匹配的活动数:', matchingActivities.length);
 
         if (matchingActivities.length > 0) {
           availableDice.push({
@@ -55,8 +89,12 @@ export default class SpecialDiceDialog extends Application {
             activities: matchingActivities
           });
         }
+      } else {
+        console.log('  - 没有activities字段');
       }
     }
+
+    console.log('【最终结果】可用骰子数:', availableDice.length);
 
     data.actor = this.actor;
     data.triggerType = this.triggerType;
