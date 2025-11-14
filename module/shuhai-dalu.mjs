@@ -23,6 +23,9 @@ import ItemCardSheet from "./sheets/item-card-sheet.mjs";
 // 导入常量
 import { BUFF_TYPES } from "./constants/buff-types.mjs";
 
+// 导入辅助工具
+import { isDice3dAvailable, testDice3d, showDiceAnimation, showMultipleDiceAnimation } from "./helpers/dice3d-helper.mjs";
+
 // 导入服务模块
 import {
   advanceActorRound,
@@ -176,6 +179,9 @@ Hooks.once('init', async function() {
 
 Hooks.once('ready', async function() {
   console.log('书海大陆 | 系统已就绪');
+
+  // 检查 Dice So Nice! 模组
+  isDice3dAvailable();
 
   // 等待字体加载
   await waitForFonts();
