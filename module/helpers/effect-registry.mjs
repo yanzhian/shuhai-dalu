@@ -238,13 +238,13 @@ export const EFFECT_TYPES = {
 
       // 恢复额外Cost
       const combatState = actor.getFlag('shuhai-dalu', 'combatState') || {
-        exResources: [false, false, false]
+        exResources: [true, true, true]  // 默认3个都可用
       };
 
       let restored = 0;
       for (let i = 0; i < combatState.exResources.length && restored < amount; i++) {
-        if (combatState.exResources[i]) {
-          combatState.exResources[i] = false;
+        if (!combatState.exResources[i]) {  // 如果是 false（已消耗）
+          combatState.exResources[i] = true;  // 改为 true（可用）
           restored++;
         }
       }
@@ -272,11 +272,11 @@ export const EFFECT_TYPES = {
       }
 
       const combatState = actor.getFlag('shuhai-dalu', 'combatState') || {
-        exResources: [false, false, false]
+        exResources: [true, true, true]  // 默认3个都可用
       };
 
-      // 检查是否有足够的Cost
-      const available = combatState.exResources.filter(r => !r).length;
+      // 检查是否有足够的Cost（true = 可用）
+      const available = combatState.exResources.filter(r => r).length;
       if (available < amount) {
         return { success: false, reason: `额外Cost不足（需要${amount}，拥有${available}）` };
       }
@@ -284,8 +284,8 @@ export const EFFECT_TYPES = {
       // 消耗Cost
       let consumed = 0;
       for (let i = 0; i < combatState.exResources.length && consumed < amount; i++) {
-        if (!combatState.exResources[i]) {
-          combatState.exResources[i] = true;
+        if (combatState.exResources[i]) {  // 如果是 true（可用）
+          combatState.exResources[i] = false;  // 改为 false（已消耗）
           consumed++;
         }
       }
