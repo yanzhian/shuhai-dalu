@@ -2,7 +2,8 @@
  * 书海大陆 对抗界面应用 - 重新设计
  * 用于响应战斗骰发起时的对抗
  */
-import { triggerItemActivities, triggerBleedEffect } from "../shuhai-dalu.mjs";
+import { triggerItemActivities } from "../services/activity-service.mjs";
+import { triggerBleedEffect } from "../services/combat-effects.mjs";
 
 export default class CounterAreaApplication extends Application {
 

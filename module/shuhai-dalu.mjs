@@ -1,6 +1,6 @@
 /**
  * 书海大陆 TRPG 系统
- * 主入口文件 - 完整版
+ * 主入口文件
  */
 
 import CharacterData from "./data/CharacterData.mjs";
@@ -19,7 +19,36 @@ import ShuhaiActorSheet from "./sheets/actor-sheet.mjs";
 import ShuhaiPlayerSheet from "./sheets/player-sheet.mjs";
 import ShuhaiItemSheet from "./sheets/item-sheet.mjs";
 import ItemCardSheet from "./sheets/item-card-sheet.mjs";
-import { BUFF_TYPES } from "./applications/combat-area.mjs";
+
+// 导入常量
+import { BUFF_TYPES } from "./constants/buff-types.mjs";
+
+// 导入服务模块
+import {
+  advanceActorRound,
+  triggerBleedEffect,
+  triggerRuptureEffect,
+  triggerCorruptionEffect,
+  triggerBreathEffect,
+  triggerTremorExplode
+} from "./services/combat-effects.mjs";
+
+import {
+  triggerItemActivities,
+  triggerItemActivitiesWithTarget
+} from "./services/activity-service.mjs";
+
+// 重新导出服务函数，供外部模块使用
+export {
+  advanceActorRound,
+  triggerBleedEffect,
+  triggerRuptureEffect,
+  triggerCorruptionEffect,
+  triggerBreathEffect,
+  triggerTremorExplode,
+  triggerItemActivities,
+  triggerItemActivitiesWithTarget
+};
 
 /* -------------------------------------------- */
 /*  初始化钩子                                    */
@@ -1046,6 +1075,8 @@ export async function triggerTremorExplode(target) {
     message: message
   };
 }
+// 注意：战斗效果函数已移至 services/combat-effects.mjs
+// 注意：Activity函数已移至 services/activity-service.mjs
 
 /**
  * 为聊天消息添加事件监听器
