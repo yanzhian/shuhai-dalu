@@ -324,6 +324,59 @@ export const EFFECT_TYPES = {
     }
   },
 
+  /**
+   * 恢复生命值
+   */
+  healHealth: {
+    name: '恢复生命值',
+    category: 'damage',
+    fields: ['amount', 'target'],
+    defaults: { amount: 0, target: 'self' },
+    execute: async (effect, context) => {
+      const targetActor = context.getTarget(effect.target);
+      if (!targetActor) {
+        return { success: false, reason: '找不到目标' };
+      }
+
+      // 解析恢复量（支持骰子公式，如 "1d8"）
+      let amount;
+      if (typeof effect.amount === 'string' && effect.amount.includes('d')) {
+        // 骰子公式
+        const roll = new Roll(effect.amount);
+        await roll.evaluate();
+        amount = roll.total;
+
+        // 发送骰子结果到聊天
+        await roll.toMessage({
+          speaker: ChatMessage.getSpeaker({ actor: context.actor }),
+          flavor: `${effect.name || '恢复生命值'} - ${effect.amount}`
+        });
+      } else {
+        // 普通数值或表达式
+        amount = ExpressionParser.parse(effect.amount, context);
+      }
+
+      if (amount <= 0) {
+        return { success: false, reason: '恢复量必须大于0' };
+      }
+
+      // 恢复生命值
+      const currentHP = targetActor.system.attributes?.hp?.value || 0;
+      const maxHP = targetActor.system.attributes?.hp?.max || 100;
+      const newHP = Math.min(currentHP + amount, maxHP);
+
+      await targetActor.update({
+        'system.attributes.hp.value': newHP
+      });
+
+      return {
+        success: true,
+        message: `${targetActor.name}恢复${amount}点生命值（${currentHP} → ${newHP}）`,
+        healAmount: amount
+      };
+    }
+  },
+
   // ===== 特殊效果 =====
 
   /**
@@ -401,7 +454,7 @@ export const EFFECT_CATEGORIES = {
   damage: {
     name: '伤害效果',
     icon: '⚔️',
-    effects: ['dealDamage']
+    effects: ['dealDamage', 'healHealth']
   },
   special: {
     name: '特殊效果',
