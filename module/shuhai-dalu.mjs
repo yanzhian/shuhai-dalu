@@ -346,56 +346,77 @@ export async function triggerItemActivities(actor, item, triggerType) {
 
   // 执行每个activity
   for (const activity of matchingActivities) {
-    // 获取回合时机
-    const roundTiming = activity.roundTiming || 'current';
+    // 检测新格式（使用 ActivityExecutor）还是旧格式
+    const isNewFormat = activity.effects && Array.isArray(activity.effects);
 
-    // 检查目标类型
-    const targetType = activity.target || 'self';
+    if (isNewFormat) {
+      // 新格式：使用 ActivityExecutor
+      try {
+        const { ActivityExecutor } = await import('./helpers/activity-executor.mjs');
+        const { createContext } = await import('./helpers/activity-executor.mjs');
 
-    // 目前只处理self目标
-    if (targetType !== 'self') {
-      continue;
-    }
+        const context = createContext(actor, actor, item, null, game.combat);
+        const result = await ActivityExecutor.execute(activity, context);
 
-    // 应用效果
-    if (activity.effects && Object.keys(activity.effects).length > 0) {
-      for (const [buffId, effectData] of Object.entries(activity.effects)) {
-        const layers = parseInt(effectData.layers) || 0;
-        const strength = parseInt(effectData.strength) || 0;
-
-        if (layers === 0) continue;
-
-        // 查找BUFF定义
-        const buffDef = allBuffs.find(b => b.id === buffId);
-        if (!buffDef) {
-          console.warn(`未找到 BUFF 定义: ${buffId}`);
-          continue;
-        }
-
-        // 检查是否已存在相同id和roundTiming的BUFF
-        const existingBuffIndex = combatState.buffs.findIndex(
-          b => b.id === buffId && b.roundTiming === roundTiming
-        );
-
-        if (existingBuffIndex !== -1) {
-          // 如果已存在，增加层数和强度
-          combatState.buffs[existingBuffIndex].layers += layers;
-          combatState.buffs[existingBuffIndex].strength += strength;
+        if (result.success) {
+          hasTriggered = true;
+          console.log('【Activity触发】执行成功:', result);
         } else {
-          // 如果不存在，添加新BUFF
-          combatState.buffs.push({
-            id: buffDef.id,
-            name: buffDef.name,
-            type: buffDef.type,
-            description: buffDef.description,
-            icon: buffDef.icon,
-            layers: layers,
-            strength: strength !== 0 ? strength : buffDef.defaultStrength,
-            roundTiming: roundTiming
-          });
+          console.warn('【Activity触发】执行失败:', result.reason);
         }
+      } catch (error) {
+        console.error('【Activity触发】执行异常:', error);
+      }
+    } else {
+      // 旧格式：使用原有的 BUFF 处理逻辑
+      const roundTiming = activity.roundTiming || 'current';
+      const targetType = activity.target || 'self';
 
-        hasTriggered = true;
+      // 目前只处理self目标
+      if (targetType !== 'self') {
+        continue;
+      }
+
+      // 应用效果
+      if (activity.effects && Object.keys(activity.effects).length > 0) {
+        for (const [buffId, effectData] of Object.entries(activity.effects)) {
+          const layers = parseInt(effectData.layers) || 0;
+          const strength = parseInt(effectData.strength) || 0;
+
+          if (layers === 0) continue;
+
+          // 查找BUFF定义
+          const buffDef = allBuffs.find(b => b.id === buffId);
+          if (!buffDef) {
+            console.warn(`未找到 BUFF 定义: ${buffId}`);
+            continue;
+          }
+
+          // 检查是否已存在相同id和roundTiming的BUFF
+          const existingBuffIndex = combatState.buffs.findIndex(
+            b => b.id === buffId && b.roundTiming === roundTiming
+          );
+
+          if (existingBuffIndex !== -1) {
+            // 如果已存在，增加层数和强度
+            combatState.buffs[existingBuffIndex].layers += layers;
+            combatState.buffs[existingBuffIndex].strength += strength;
+          } else {
+            // 如果不存在，添加新BUFF
+            combatState.buffs.push({
+              id: buffDef.id,
+              name: buffDef.name,
+              type: buffDef.type,
+              description: buffDef.description,
+              icon: buffDef.icon,
+              layers: layers,
+              strength: strength !== 0 ? strength : buffDef.defaultStrength,
+              roundTiming: roundTiming
+            });
+          }
+
+          hasTriggered = true;
+        }
       }
     }
   }
