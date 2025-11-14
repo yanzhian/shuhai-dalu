@@ -330,7 +330,7 @@ export async function triggerItemActivities(actor, item, triggerType) {
   // 获取战斗状态
   let combatState = actor.getFlag('shuhai-dalu', 'combatState') || {
     costResources: [false, false, false, false, false, false],
-    exResources: [false, false, false],
+    exResources: [true, true, true],  // 默认3个EX资源都可用
     activatedDice: [false, false, false, false, false, false],
     buffs: []
   };
