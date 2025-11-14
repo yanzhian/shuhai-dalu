@@ -14,14 +14,30 @@ export function isDice3dAvailable() {
   if (available) {
     console.log(`【Dice So Nice! 信息】版本:`, game.modules.get('dice-so-nice')?.version);
 
-    // 检查关键设置
-    const settings = {
-      enabled: game.settings.get('dice-so-nice', 'settings')?.enabled,
-      showForRolls: game.settings.get('dice-so-nice', 'enabledForCurrentUser'),
-      showGhostDice: game.settings.get('dice-so-nice', 'showGhostDice'),
-      enabledForUser: game.user.getFlag('dice-so-nice', 'settings')?.enabled,
-      appearance: game.user.getFlag('dice-so-nice', 'appearance'),
-    };
+    // 安全地检查关键设置（使用 try-catch 避免访问不存在的设置）
+    const settings = {};
+
+    try {
+      // 尝试读取全局设置
+      const globalSettings = game.settings.get('dice-so-nice', 'settings');
+      settings.globalEnabled = globalSettings?.enabled;
+    } catch (e) {
+      // 设置不存在，忽略
+    }
+
+    try {
+      // 尝试读取用户特定设置
+      const userSettings = game.user.getFlag('dice-so-nice', 'settings');
+      settings.userEnabled = userSettings?.enabled;
+    } catch (e) {
+      // 设置不存在，忽略
+    }
+
+    try {
+      settings.showGhostDice = game.settings.get('dice-so-nice', 'showGhostDice');
+    } catch (e) {
+      // 设置不存在，忽略
+    }
 
     console.log(`【Dice So Nice! 设置】:`, settings);
 
