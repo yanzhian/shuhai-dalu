@@ -1230,6 +1230,102 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     console.log('【调试】承受伤害流程完成');
   });
 
+  // 治疗按钮事件（healHealth效果生成的按钮）
+  html.find('.heal-button').click(async (event) => {
+    event.preventDefault();
+    const button = event.currentTarget;
+
+    console.log('【治疗】恢复按钮被点击');
+    console.log('【治疗】button.dataset:', button.dataset);
+
+    const actorId = button.dataset.actorId;
+    const healAmount = parseInt(button.dataset.amount) || 0;
+
+    console.log('【治疗】actorId:', actorId);
+    console.log('【治疗】healAmount:', healAmount);
+
+    // 获取目标角色
+    const targetActor = game.actors.get(actorId);
+    if (!targetActor) {
+      console.error('【治疗】无法找到角色, actorId:', actorId);
+      ui.notifications.error("无法找到目标角色");
+      return;
+    }
+
+    console.log('【治疗】找到角色:', targetActor.name);
+
+    // 记录恢复前的HP
+    const hpBefore = targetActor.system.attributes?.hp?.value || targetActor.system.derived?.hp?.value || 0;
+    const hpMax = targetActor.system.attributes?.hp?.max || targetActor.system.derived?.hp?.max || 100;
+
+    console.log('【治疗】恢复前HP:', hpBefore, '/', hpMax);
+
+    // 恢复生命值
+    const newHp = Math.min(hpMax, hpBefore + healAmount);
+    console.log('【治疗】准备更新HP到:', newHp);
+
+    try {
+      // 尝试两种数据路径
+      if (targetActor.system.attributes?.hp) {
+        await targetActor.update({ 'system.attributes.hp.value': newHp });
+      } else if (targetActor.system.derived?.hp) {
+        await targetActor.update({ 'system.derived.hp.value': newHp });
+      }
+      console.log('【治疗】HP更新成功');
+    } catch (error) {
+      console.error('【治疗】HP更新失败:', error);
+      ui.notifications.error(`更新HP失败: ${error.message}`);
+      return;
+    }
+
+    // 等待更新完成
+    await new Promise(resolve => setTimeout(resolve, 100));
+    const updatedActor = game.actors.get(actorId);
+    const finalHP = updatedActor.system.attributes?.hp?.value || updatedActor.system.derived?.hp?.value || 0;
+    console.log('【治疗】更新后HP:', finalHP);
+
+    // 禁用按钮
+    button.disabled = true;
+    button.textContent = '✓ 已恢复';
+    button.style.background = '#888';
+    button.style.borderColor = '#666';
+    button.style.cursor = 'not-allowed';
+    button.style.transform = 'none';
+
+    // 刷新所有打开的角色表单
+    if (updatedActor.sheet && updatedActor.sheet.rendered) {
+      updatedActor.sheet.render(false);
+      console.log('【治疗】角色表已刷新');
+    }
+
+    // 刷新战斗区域（如果有打开）
+    Object.values(ui.windows).forEach(app => {
+      if (app.constructor.name === 'CombatAreaApplication' && app.actor.id === actorId) {
+        app.render(false);
+        console.log('【治疗】战斗区域已刷新');
+      }
+    });
+
+    // 发送确认消息
+    ChatMessage.create({
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: updatedActor }),
+      content: `
+        <div style="background: #0F0D1B; border: 2px solid #5ec770; border-radius: 8px; padding: 12px; color: #EBBD68; text-align: center; font-family: 'Noto Sans SC', sans-serif;">
+          <div style="font-size: 16px; font-weight: bold; color: #5ec770; margin-bottom: 8px;">✓ 生命值已恢复</div>
+          <div style="margin-bottom: 8px;"><strong>${updatedActor.name}</strong> 恢复了 <span style="color: #5ec770; font-weight: bold;">${healAmount}</span> 点生命值</div>
+          <div style="padding: 8px; background: rgba(94, 199, 112, 0.1); border-radius: 4px;">
+            <div style="font-size: 14px; color: #888;">恢复前: ${hpBefore}/${hpMax}</div>
+            <div style="font-size: 16px; font-weight: bold; color: #5ec770; margin-top: 4px;">当前生命值: ${finalHP}/${hpMax}</div>
+          </div>
+        </div>
+      `
+    });
+
+    ui.notifications.info(`${updatedActor.name} 恢复了 ${healAmount} 点生命值，当前生命值: ${finalHP}/${hpMax}`);
+    console.log('【治疗】恢复流程完成');
+  });
+
   // 扣除选中Token生命值按钮（counter-result.hbs）
   html.find('.deduct-selected-token-hp-btn').click(async (event) => {
     event.preventDefault();
