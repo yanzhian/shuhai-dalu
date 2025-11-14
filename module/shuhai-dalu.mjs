@@ -305,13 +305,22 @@ async function getCurrentActor() {
  */
 export async function triggerItemActivities(actor, item, triggerType) {
   // 检查物品是否有activities
-  if (!item.system.activities || Object.keys(item.system.activities).length === 0) {
+  if (!item.system.activities) {
+    return false;
+  }
+
+  // 兼容数组和对象两种格式
+  const activitiesArray = Array.isArray(item.system.activities)
+    ? item.system.activities
+    : Object.values(item.system.activities);
+
+  if (activitiesArray.length === 0) {
     return false;
   }
 
   // 筛选出匹配的activities
-  const matchingActivities = Object.values(item.system.activities).filter(
-    activity => activity.trigger === triggerType
+  const matchingActivities = activitiesArray.filter(
+    activity => activity && activity.trigger === triggerType
   );
 
   if (matchingActivities.length === 0) {

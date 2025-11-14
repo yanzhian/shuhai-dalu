@@ -33,9 +33,15 @@ export default class SpecialDiceDialog extends Application {
     // 筛选出有对应触发类型的骰子
     const availableDice = [];
     for (const dice of equippedDice) {
-      if (dice.system.activities && Object.keys(dice.system.activities).length > 0) {
-        const matchingActivities = Object.values(dice.system.activities).filter(
-          activity => activity.trigger === this.triggerType
+      if (dice.system.activities) {
+        // 兼容数组和对象两种格式
+        const activitiesArray = Array.isArray(dice.system.activities)
+          ? dice.system.activities
+          : Object.values(dice.system.activities);
+
+        // 过滤出匹配的活动
+        const matchingActivities = activitiesArray.filter(
+          activity => activity && activity.trigger === this.triggerType
         );
 
         if (matchingActivities.length > 0) {
