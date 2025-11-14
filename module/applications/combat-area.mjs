@@ -1357,7 +1357,7 @@ export default class CombatAreaApplication extends Application {
       <form>
         <div class="form-group">
           <label>选择BUFF类型:</label>
-          <select name="buffId" style="width: 100%; padding: 0.5rem; background: #0F0D1B; border: 1px solid #EBBD68; color: #EBBD68; border-radius: 3px; font-size: 13px;">
+          <select name="buffId" id="buffIdSelect" style="width: 100%; padding: 0.5rem; background: #0F0D1B; border: 1px solid #EBBD68; color: #EBBD68; border-radius: 3px; font-size: 13px;">
             <optgroup label="增益BUFF" style="color: #4a7c2c;">
               ${BUFF_TYPES.positive.map(buff => `<option value="${buff.id}">${buff.name} - ${buff.description.substring(0, 50)}...</option>`).join('')}
             </optgroup>
@@ -1367,6 +1367,21 @@ export default class CombatAreaApplication extends Application {
             <optgroup label="效果BUFF" style="color: #EBBD68;">
               ${BUFF_TYPES.effect.map(buff => `<option value="${buff.id}">${buff.name} - ${buff.description.substring(0, 50)}...</option>`).join('')}
             </optgroup>
+            <optgroup label="自定义" style="color: #f3c267;">
+              <option value="custom">自定义BUFF</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="form-group" id="customNameGroup" style="margin-top: 1rem; display: none;">
+          <label>自定义名称:</label>
+          <input type="text" name="customName" placeholder="输入BUFF名称" style="width: 100%; padding: 0.5rem; background: #0F0D1B; border: 1px solid #EBBD68; color: #EBBD68; border-radius: 3px;"/>
+        </div>
+        <div class="form-group" style="margin-top: 1rem;">
+          <label>回合:</label>
+          <select name="roundTiming" style="width: 100%; padding: 0.5rem; background: #0F0D1B; border: 1px solid #EBBD68; color: #EBBD68; border-radius: 3px;">
+            <option value="current">本回合</option>
+            <option value="next">下回合</option>
+            <option value="both">本回合和下回合</option>
           </select>
         </div>
         <div class="form-group" style="margin-top: 1rem;">
@@ -1380,7 +1395,7 @@ export default class CombatAreaApplication extends Application {
       </form>
     `;
 
-    new Dialog({
+    const dialog = new Dialog({
       title: "添加新的BUFF",
       content: content,
       buttons: {
@@ -1389,23 +1404,49 @@ export default class CombatAreaApplication extends Application {
           label: "添加",
           callback: async (html) => {
             const buffId = html.find('[name="buffId"]').val();
+            const customName = html.find('[name="customName"]').val();
+            const roundTiming = html.find('[name="roundTiming"]').val();
             const layers = parseInt(html.find('[name="layers"]').val()) || 1;
             const strength = parseInt(html.find('[name="strength"]').val()) || 0;
 
-            // 查找BUFF定义
-            const buffDef = allBuffs.find(b => b.id === buffId);
-            if (!buffDef) return;
+            let newBuff;
+
+            if (buffId === 'custom') {
+              // 自定义BUFF
+              if (!customName || customName.trim() === '') {
+                ui.notifications.warn('请输入自定义BUFF名称');
+                return;
+              }
+
+              newBuff = {
+                id: 'custom',
+                name: customName.trim(),
+                type: 'effect',
+                description: '自定义效果',
+                icon: 'icons/svg/mystery-man.svg',
+                layers: layers,
+                strength: strength,
+                roundTiming: roundTiming
+              };
+            } else {
+              // 预设BUFF
+              const buffDef = allBuffs.find(b => b.id === buffId);
+              if (!buffDef) return;
+
+              newBuff = {
+                id: buffDef.id,
+                name: buffDef.name,
+                type: buffDef.type,
+                description: buffDef.description,
+                icon: buffDef.icon,
+                layers: layers,
+                strength: strength,
+                roundTiming: roundTiming
+              };
+            }
 
             // 添加到BUFF列表
-            this.combatState.buffs.push({
-              id: buffDef.id,
-              name: buffDef.name,
-              type: buffDef.type,
-              description: buffDef.description,
-              icon: buffDef.icon,
-              layers: layers,
-              strength: strength
-            });
+            this.combatState.buffs.push(newBuff);
 
             await this._saveCombatState();
             this.render();
@@ -1416,7 +1457,20 @@ export default class CombatAreaApplication extends Application {
           label: "取消"
         }
       },
-      default: "add"
+      default: "add",
+      render: (html) => {
+        // 监听BUFF类型选择变化
+        html.find('#buffIdSelect').change((e) => {
+          const selectedValue = $(e.currentTarget).val();
+          const customNameGroup = html.find('#customNameGroup');
+
+          if (selectedValue === 'custom') {
+            customNameGroup.show();
+          } else {
+            customNameGroup.hide();
+          }
+        });
+      }
     }).render(true);
   }
 
@@ -1505,9 +1559,42 @@ export default class CombatAreaApplication extends Application {
     for (const target of targets) {
       const success = await this._applyActivityEffects(target, activity, item);
       if (success) hasSuccess = true;
+
+      // 执行特殊动作
+      if (target && activity.specialActions) {
+        await this._executeSpecialActions(target, activity.specialActions, item);
+      }
     }
 
     return hasSuccess;
+  }
+
+  /**
+   * 执行特殊动作
+   * @param {Actor} targetActor - 目标角色
+   * @param {object} specialActions - 特殊动作对象
+   * @param {Item} sourceItem - 源物品
+   */
+  async _executeSpecialActions(targetActor, specialActions, sourceItem) {
+    if (!specialActions) return;
+
+    // 震颤引爆
+    if (specialActions.tremorExplode) {
+      const { triggerTremorExplode } = await import('../shuhai-dalu.mjs');
+      const result = await triggerTremorExplode(targetActor);
+
+      if (result.triggered) {
+        await this._sendChatMessage(`
+          <div style="border: 2px solid #EECBA2; border-radius: 4px; padding: 12px;">
+            <h3 style="margin: 0 0 8px 0; color: #EECBA2;">特殊动作触发</h3>
+            <div style="color: #EBBD68;">来源: ${sourceItem.name}</div>
+            <div style="color: #EBBD68; margin-top: 8px;">
+              ${result.message}
+            </div>
+          </div>
+        `);
+      }
+    }
   }
 
   /**
