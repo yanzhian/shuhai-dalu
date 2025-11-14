@@ -353,6 +353,18 @@ export default class ShuhaiActor extends Actor {
   }
 
   /**
+   * 获取先攻投掷
+   * 覆盖 Foundry 默认的先攻投掷，使用 totalSpeed 作为先攻值（不投骰）
+   */
+  getInitiativeRoll(formula = null) {
+    // 获取总速度作为先攻值
+    const totalSpeed = this.system.derived?.totalSpeed || 0;
+
+    // 返回一个固定值的 Roll 对象（不投骰子）
+    return new Roll(String(totalSpeed));
+  }
+
+  /**
    * 长休 - 恢复生命值和侵蚀值
    */
   async longRest() {
