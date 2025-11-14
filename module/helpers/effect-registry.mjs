@@ -472,6 +472,119 @@ export const EFFECT_TYPES = {
 
       return { success: true, message: `免疫${effect.effectType}的${effect.immunityType}` };
     }
+  },
+
+  /**
+   * 增加额外目标
+   */
+  additionalTarget: {
+    name: '增加额外目标',
+    category: 'combat',
+    fields: ['maxAdditional', 'targetFilter', 'description'],
+    defaults: { maxAdditional: 1, targetFilter: 'adjacent', description: '行动顺序相邻的目标' },
+    execute: async (effect, context) => {
+      const { actor, combat } = context;
+
+      if (!combat) {
+        return { success: false, reason: '不在战斗中' };
+      }
+
+      // 获取当前actor在行动顺序中的位置
+      const currentCombatant = combat.combatants.find(c => c.actor?.id === actor.id);
+      if (!currentCombatant) {
+        return { success: false, reason: '未找到当前战斗者' };
+      }
+
+      const currentIndex = combat.turns.indexOf(currentCombatant);
+      const maxAdditional = ExpressionParser.parse(effect.maxAdditional, context);
+
+      // 根据过滤条件查找可选目标
+      let availableTargets = [];
+      if (effect.targetFilter === 'adjacent') {
+        // 查找行动顺序相邻的目标
+        const adjacentIndices = [currentIndex - 1, currentIndex + 1];
+        availableTargets = adjacentIndices
+          .filter(i => i >= 0 && i < combat.turns.length)
+          .map(i => combat.turns[i])
+          .filter(c => c.actor && c.actor.id !== actor.id);
+      } else {
+        // 所有其他目标
+        availableTargets = combat.turns
+          .filter(c => c.actor && c.actor.id !== actor.id);
+      }
+
+      // 限制最多额外选择数量
+      availableTargets = availableTargets.slice(0, maxAdditional);
+
+      // 存储额外目标信息（供后续使用）
+      await actor.setFlag('shuhai-dalu', 'additionalTargets', {
+        targets: availableTargets.map(c => c.actor.id),
+        description: effect.description,
+        maxCount: maxAdditional
+      });
+
+      const targetNames = availableTargets.map(c => c.actor.name).join('、');
+      return {
+        success: true,
+        message: availableTargets.length > 0
+          ? `可额外选择目标（最多${maxAdditional}个）：${targetNames}`
+          : `没有可选的额外目标`
+      };
+    }
+  },
+
+  /**
+   * 再次使用骰子
+   */
+  reuseDice: {
+    name: '再次使用骰子',
+    category: 'combat',
+    fields: ['diceId', 'limitPerRound', 'condition'],
+    defaults: { limitPerRound: 1, condition: null },
+    execute: async (effect, context) => {
+      const { actor, item, combat } = context;
+
+      // 检查是否在战斗中
+      if (!combat) {
+        return { success: false, reason: '不在战斗中' };
+      }
+
+      // 检查本回合使用次数限制
+      const roundId = `round-${combat.round}`;
+      const usageKey = `reuseDice-${item.id}-${roundId}`;
+      const usageCount = actor.getFlag('shuhai-dalu', usageKey) || 0;
+
+      const limitPerRound = ExpressionParser.parse(effect.limitPerRound, context);
+      if (usageCount >= limitPerRound) {
+        return {
+          success: false,
+          reason: `本回合已达使用次数限制（${limitPerRound}次）`
+        };
+      }
+
+      // 检查条件
+      if (effect.condition) {
+        const conditionMet = ExpressionParser.parse(effect.condition, context);
+        if (!conditionMet) {
+          return { success: false, reason: '条件不满足' };
+        }
+      }
+
+      // 增加使用计数
+      await actor.setFlag('shuhai-dalu', usageKey, usageCount + 1);
+
+      // 设置重用标记（供骰子系统读取）
+      await actor.setFlag('shuhai-dalu', 'pendingReuseDice', {
+        itemId: item.id,
+        itemName: item.name,
+        timestamp: Date.now()
+      });
+
+      return {
+        success: true,
+        message: `将再次使用【${item.name}】（本回合第${usageCount + 1}/${limitPerRound}次）`
+      };
+    }
   }
 };
 
@@ -498,6 +611,11 @@ export const EFFECT_CATEGORIES = {
     name: '伤害效果',
     icon: '⚔️',
     effects: ['dealDamage', 'healHealth']
+  },
+  combat: {
+    name: '战斗效果',
+    icon: '⚔️',
+    effects: ['additionalTarget', 'reuseDice']
   },
   special: {
     name: '特殊效果',
