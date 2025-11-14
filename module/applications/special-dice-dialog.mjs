@@ -23,6 +23,8 @@ export default class SpecialDiceDialog extends Application {
   getData() {
     const data = super.getData();
 
+    console.log(`【特殊骰子对话框】触发类型: ${this.triggerType}`);
+
     // 获取所有装备的战斗骰
     const equippedDice = this.actor.items.filter(item =>
       item.type === 'item' &&
@@ -30,13 +32,19 @@ export default class SpecialDiceDialog extends Application {
       item.system.itemType === '战斗骰'
     );
 
+    console.log(`【特殊骰子对话框】装备的战斗骰数量: ${equippedDice.length}`);
+
     // 筛选出有对应触发类型的骰子
     const availableDice = [];
     for (const dice of equippedDice) {
+      console.log(`【特殊骰子对话框】检查骰子: ${dice.name}`, dice.system.activities);
+
       if (dice.system.activities && Object.keys(dice.system.activities).length > 0) {
         const matchingActivities = Object.values(dice.system.activities).filter(
           activity => activity.trigger === this.triggerType
         );
+
+        console.log(`【特殊骰子对话框】${dice.name} 匹配的activities: ${matchingActivities.length}`, matchingActivities);
 
         if (matchingActivities.length > 0) {
           availableDice.push({
@@ -51,6 +59,8 @@ export default class SpecialDiceDialog extends Application {
         }
       }
     }
+
+    console.log(`【特殊骰子对话框】可用骰子数量: ${availableDice.length}`, availableDice);
 
     data.actor = this.actor;
     data.triggerType = this.triggerType;
