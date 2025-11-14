@@ -24,7 +24,7 @@ import ItemCardSheet from "./sheets/item-card-sheet.mjs";
 import { BUFF_TYPES } from "./constants/buff-types.mjs";
 
 // 导入辅助工具
-import { isDice3dAvailable, testDice3d, showDiceAnimation, showMultipleDiceAnimation } from "./helpers/dice3d-helper.mjs";
+import { showDiceAnimation, showMultipleDiceAnimation } from "./helpers/dice3d-helper.mjs";
 
 // 导入服务模块
 import {
@@ -196,24 +196,7 @@ Hooks.once('ready', async function() {
 /* -------------------------------------------- */
 /*  Dice So Nice! 集成                           */
 /* -------------------------------------------- */
-
-// 监听 Dice So Nice! 就绪事件
-Hooks.once('diceSoNiceReady', (dice3d) => {
-  console.log('【Dice So Nice!】模组已就绪');
-  isDice3dAvailable();
-});
-
-// 如果 Dice So Nice! 在系统之前就绪，也要检查
-Hooks.once('ready', () => {
-  // 延迟检查，确保所有模组都已加载
-  setTimeout(() => {
-    if (game.dice3d) {
-      console.log('【Dice So Nice!】已可用');
-    } else {
-      console.log('【Dice So Nice!】未检测到，3D骰子动画将被禁用');
-    }
-  }, 1000);
-});
+// Dice So Nice! 模组会自动拦截 Roll.toMessage() 显示3D骰子
 
 /* -------------------------------------------- */
 /*  Token双击打开角色卡                           */
