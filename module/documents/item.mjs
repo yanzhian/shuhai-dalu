@@ -469,7 +469,7 @@ export class CombatDiceData extends foundry.abstract.TypeDataModel {
         new fields.SchemaField({
           trigger: new fields.StringField({
             initial: "onUse",
-            choices: ["onUse", "onAttack", "onCounter", "onCounterSuccess", "onCounterFail", "onHit", "onDamaged", "onTurnStart", "onTurnEnd"],
+            choices: ["onUse", "onAttack", "onCounter", "onCounterSuccess", "onCounterFail", "onHit", "onDamaged", "onTurnStart", "onTurnEnd", "onTremorExplode", "onFlashStrike", "onDiscard"],
             label: "触发时机"
           }),
           hasConsume: new fields.BooleanField({
@@ -563,7 +563,7 @@ export class DefenseDiceData extends foundry.abstract.TypeDataModel {
         new fields.SchemaField({
           trigger: new fields.StringField({
             initial: "onUse",
-            choices: ["onUse", "onAttack", "onCounter", "onCounterSuccess", "onCounterFail", "onHit", "onDamaged", "onTurnStart", "onTurnEnd"],
+            choices: ["onUse", "onAttack", "onCounter", "onCounterSuccess", "onCounterFail", "onHit", "onDamaged", "onTurnStart", "onTurnEnd", "onTremorExplode", "onFlashStrike", "onDiscard"],
             label: "触发时机"
           }),
           hasConsume: new fields.BooleanField({
@@ -654,7 +654,7 @@ export class TriggerDiceData extends foundry.abstract.TypeDataModel {
         new fields.SchemaField({
           trigger: new fields.StringField({
             initial: "onUse",
-            choices: ["onUse", "onAttack", "onCounter", "onCounterSuccess", "onCounterFail", "onHit", "onDamaged", "onTurnStart", "onTurnEnd"],
+            choices: ["onUse", "onAttack", "onCounter", "onCounterSuccess", "onCounterFail", "onHit", "onDamaged", "onTurnStart", "onTurnEnd", "onTremorExplode", "onFlashStrike", "onDiscard"],
             label: "触发时机"
           }),
           hasConsume: new fields.BooleanField({ initial: false, label: "是否消耗" }),
@@ -743,7 +743,7 @@ export class PassiveDiceData extends foundry.abstract.TypeDataModel {
         new fields.SchemaField({
           trigger: new fields.StringField({
             initial: "onUse",
-            choices: ["onUse", "onAttack", "onCounter", "onCounterSuccess", "onCounterFail", "onHit", "onDamaged", "onTurnStart", "onTurnEnd"],
+            choices: ["onUse", "onAttack", "onCounter", "onCounterSuccess", "onCounterFail", "onHit", "onDamaged", "onTurnStart", "onTurnEnd", "onTremorExplode", "onFlashStrike", "onDiscard"],
             label: "触发时机"
           }),
           hasConsume: new fields.BooleanField({ initial: false, label: "是否消耗" }),
@@ -830,7 +830,7 @@ export class WeaponData extends foundry.abstract.TypeDataModel {
         new fields.SchemaField({
           trigger: new fields.StringField({
             initial: "onUse",
-            choices: ["onUse", "onAttack", "onCounter", "onCounterSuccess", "onCounterFail", "onHit", "onDamaged", "onTurnStart", "onTurnEnd"],
+            choices: ["onUse", "onAttack", "onCounter", "onCounterSuccess", "onCounterFail", "onHit", "onDamaged", "onTurnStart", "onTurnEnd", "onTremorExplode", "onFlashStrike", "onDiscard"],
             label: "触发时机"
           }),
           hasConsume: new fields.BooleanField({ initial: false, label: "是否消耗" }),
@@ -918,7 +918,7 @@ export class ArmorData extends foundry.abstract.TypeDataModel {
         new fields.SchemaField({
           trigger: new fields.StringField({
             initial: "onUse",
-            choices: ["onUse", "onAttack", "onCounter", "onCounterSuccess", "onCounterFail", "onHit", "onDamaged", "onTurnStart", "onTurnEnd"],
+            choices: ["onUse", "onAttack", "onCounter", "onCounterSuccess", "onCounterFail", "onHit", "onDamaged", "onTurnStart", "onTurnEnd", "onTremorExplode", "onFlashStrike", "onDiscard"],
             label: "触发时机"
           }),
           hasConsume: new fields.BooleanField({ initial: false, label: "是否消耗" }),
@@ -1005,7 +1005,7 @@ export class ItemData extends foundry.abstract.TypeDataModel {
         new fields.SchemaField({
           trigger: new fields.StringField({
             initial: "onUse",
-            choices: ["onUse", "onAttack", "onCounter", "onCounterSuccess", "onCounterFail", "onHit", "onDamaged", "onTurnStart", "onTurnEnd"],
+            choices: ["onUse", "onAttack", "onCounter", "onCounterSuccess", "onCounterFail", "onHit", "onDamaged", "onTurnStart", "onTurnEnd", "onTremorExplode", "onFlashStrike", "onDiscard"],
             label: "触发时机"
           }),
           hasConsume: new fields.BooleanField({ initial: false, label: "是否消耗" }),
@@ -1092,7 +1092,7 @@ export class EquipmentData extends foundry.abstract.TypeDataModel {
         new fields.SchemaField({
           trigger: new fields.StringField({
             initial: "onUse",
-            choices: ["onUse", "onAttack", "onCounter", "onCounterSuccess", "onCounterFail", "onHit", "onDamaged", "onTurnStart", "onTurnEnd"],
+            choices: ["onUse", "onAttack", "onCounter", "onCounterSuccess", "onCounterFail", "onHit", "onDamaged", "onTurnStart", "onTurnEnd", "onTremorExplode", "onFlashStrike", "onDiscard"],
             label: "触发时机"
           }),
           hasConsume: new fields.BooleanField({ initial: false, label: "是否消耗" }),
@@ -1184,7 +1184,7 @@ export class ItemCardData extends foundry.abstract.TypeDataModel {
         new fields.SchemaField({
           trigger: new fields.StringField({
             initial: "onUse",
-            choices: ["onUse", "onAttack", "onCounter", "onCounterSuccess", "onCounterFail", "onHit", "onDamaged", "onTurnStart", "onTurnEnd"],
+            choices: ["onUse", "onAttack", "onCounter", "onCounterSuccess", "onCounterFail", "onHit", "onDamaged", "onTurnStart", "onTurnEnd", "onTremorExplode", "onFlashStrike", "onDiscard"],
             label: "触发时机"
           }),
           hasConsume: new fields.BooleanField({
