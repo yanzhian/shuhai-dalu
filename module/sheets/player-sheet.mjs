@@ -1650,8 +1650,6 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
             ...u.update
           }));
 
-          console.log('【拖放排序】应用更新:', updateData);
-
           await Item.updateDocuments(updateData, {parent: this.actor});
 
           // 由于Foundry的items集合可能延迟更新，我们手动更新本地item对象的sort值
@@ -1661,7 +1659,6 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
             if (itemToUpdate && update.update.sort !== undefined) {
               // 直接更新item对象的_source.sort，这样get()能立即读取到新值
               itemToUpdate._source.sort = update.update.sort;
-              console.log(`【拖放排序】本地更新 ${itemToUpdate.name} sort: ${update.update.sort}`);
             }
           }
 
