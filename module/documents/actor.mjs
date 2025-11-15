@@ -360,10 +360,14 @@ export default class ShuhaiActor extends Actor {
     // 获取总速度作为先攻值
     let totalSpeed = this.system.derived?.totalSpeed || 0;
 
+    console.log(`【先攻】${this.name} - 当前totalSpeed:`, totalSpeed);
+
     // 如果totalSpeed为0，自动计算速度值（速度1+速度2+速度3）
     if (totalSpeed === 0) {
       const constitution = this.system.attributes?.constitution || 0;
       const dexterity = this.system.attributes?.dexterity || 0;
+
+      console.log(`【先攻】${this.name} - 体质:${constitution}, 敏捷:${dexterity}`);
 
       // 基础骰子大小（体质<9用d6，否则用d4）
       const diceSize = constitution < 9 ? 6 : 4;
@@ -377,12 +381,24 @@ export default class ShuhaiActor extends Actor {
       const speed3 = Math.floor(Math.random() * diceSize) + 1 + bonus;
       totalSpeed = speed1 + speed2 + speed3;
 
+      console.log(`【先攻】${this.name} - 速度值: ${speed1}+${speed2}+${speed3}=${totalSpeed}`);
+
       // 异步更新totalSpeed到角色数据（不阻塞返回）
       this.update({ 'system.derived.totalSpeed': totalSpeed });
+
+      // 发送聊天消息显示速度值
+      ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this }),
+        content: `<div style="border: 2px solid #4a90e2; border-radius: 4px; padding: 8px; background: #0F0D1B; color: #EBBD68;">
+          <strong>${this.name}</strong> 先攻速度：${speed1} + ${speed2} + ${speed3} = <strong>${totalSpeed}</strong>
+        </div>`
+      });
     }
 
     // 确保 totalSpeed 是一个有效的数字
     const speedValue = Number(totalSpeed) || 0;
+
+    console.log(`【先攻】${this.name} - 最终先攻值:`, speedValue);
 
     // 返回一个固定值的 Roll 对象（不投骰子）
     return new Roll(String(speedValue));
