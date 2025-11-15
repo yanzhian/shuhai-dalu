@@ -8,6 +8,7 @@
 .chat-message {
   background: #0f0d1b !important;
   background-image: none !important;
+  border: 1px solid var(--chat-message-border-color);
 }
 
 /* === 全局样式 === */
