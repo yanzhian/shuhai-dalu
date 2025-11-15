@@ -360,8 +360,11 @@ export default class ShuhaiActor extends Actor {
     // 获取总速度作为先攻值
     const totalSpeed = this.system.derived?.totalSpeed || 0;
 
+    // 确保 totalSpeed 是一个有效的数字
+    const speedValue = Number(totalSpeed) || 0;
+
     // 返回一个固定值的 Roll 对象（不投骰子）
-    return new Roll(String(totalSpeed));
+    return new Roll(String(speedValue));
   }
 
   /**

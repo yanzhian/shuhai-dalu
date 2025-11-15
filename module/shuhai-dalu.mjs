@@ -72,6 +72,12 @@ Hooks.once('init', async function() {
   CONFIG.Actor.documentClass = ShuhaiActor;
   CONFIG.Item.documentClass = ShuhaiItem;
 
+  // 配置先攻公式（使用总速度）
+  CONFIG.Combat.initiative = {
+    formula: "0",  // 默认公式，实际值由 Actor.getInitiativeRoll() 提供
+    decimals: 0
+  };
+
   // 注册战斗HUD的游戏设置
   game.settings.register('shuhai-dalu', 'battleActors', {
     name: '参战角色列表',
