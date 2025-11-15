@@ -13,7 +13,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       dragDrop: [
         { dragSelector: ".inventory-row", dropSelector: ".slot-content, .inventory-list" }
       ],
-      scrollY: [".skills-section", ".equipment-section", ".inventory-list"]
+      scrollY: [".collapsible-sections-container", ".inventory-list"]
     });
   }
 
@@ -23,6 +23,45 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   }
 
   /* -------------------------------------------- */
+
+  /** @override */
+  async _render(force, options) {
+    // 保存滚动位置
+    const scrollPositions = {};
+    if (this.element && this.element.length > 0) {
+      const scrollElements = [
+        { selector: '.collapsible-sections-container', key: 'sections' },
+        { selector: '.inventory-list', key: 'inventory' }
+      ];
+
+      scrollElements.forEach(({ selector, key }) => {
+        const element = this.element.find(selector)[0];
+        if (element) {
+          scrollPositions[key] = element.scrollTop;
+        }
+      });
+    }
+
+    // 执行渲染
+    await super._render(force, options);
+
+    // 恢复滚动位置
+    if (Object.keys(scrollPositions).length > 0) {
+      setTimeout(() => {
+        const scrollElements = [
+          { selector: '.collapsible-sections-container', key: 'sections' },
+          { selector: '.inventory-list', key: 'inventory' }
+        ];
+
+        scrollElements.forEach(({ selector, key }) => {
+          const element = this.element.find(selector)[0];
+          if (element && scrollPositions[key] !== undefined) {
+            element.scrollTop = scrollPositions[key];
+          }
+        });
+      }, 0);
+    }
+  }
 
   /** @override */
   async getData() {
@@ -353,11 +392,6 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    */
   async _onToggleLock(event) {
     event.preventDefault();
-
-    // 保存滚动位置
-    const scrollElement = this.element.find('.collapsible-sections-container')[0];
-    const scrollPos = scrollElement?.scrollTop || 0;
-
     const currentLocked = this.actor.getFlag('shuhai-dalu', 'isLocked') ?? true;
     const newLocked = !currentLocked;
     await this.actor.setFlag('shuhai-dalu', 'isLocked', newLocked);
@@ -370,12 +404,6 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     }
 
     this.render(false);
-
-    // 恢复滚动位置
-    setTimeout(() => {
-      const newScrollElement = this.element.find('.collapsible-sections-container')[0];
-      if (newScrollElement) newScrollElement.scrollTop = scrollPos;
-    }, 50);
   }
 
   /**
@@ -490,17 +518,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       return;
     }
 
-    // 保存滚动位置（现在滚动条在父容器上）
-    const scrollElement = this.element.find('.collapsible-sections-container')[0];
-    const scrollPos = scrollElement?.scrollTop || 0;
-
     await this.actor.update({ [`system.skills.${skillKey}`]: currentValue + 1 });
-
-    // 恢复滚动位置
-    setTimeout(() => {
-      const newScrollElement = this.element.find('.collapsible-sections-container')[0];
-      if (newScrollElement) newScrollElement.scrollTop = scrollPos;
-    }, 100);
   }
 
   /**
@@ -514,17 +532,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     const currentValue = this.actor.system.skills[skillKey];
     if (currentValue <= 0) return;
 
-    // 保存滚动位置（现在滚动条在父容器上）
-    const scrollElement = this.element.find('.collapsible-sections-container')[0];
-    const scrollPos = scrollElement?.scrollTop || 0;
-
     await this.actor.update({ [`system.skills.${skillKey}`]: currentValue - 1 });
-
-    // 恢复滚动位置
-    setTimeout(() => {
-      const newScrollElement = this.element.find('.collapsible-sections-container')[0];
-      if (newScrollElement) newScrollElement.scrollTop = scrollPos;
-    }, 100);
   }
 
   /**
@@ -570,17 +578,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     const slotIndex = event.currentTarget.dataset.slotIndex !== undefined ?
       parseInt(event.currentTarget.dataset.slotIndex) : null;
 
-    // 保存滚动位置（现在滚动条在父容器上）
-    const scrollElement = this.element.find('.collapsible-sections-container')[0];
-    const scrollPos = scrollElement?.scrollTop || 0;
-
     await game.shuhai.unequipItem(this.actor, slotType, slotIndex);
-
-    // 恢复滚动位置
-    setTimeout(() => {
-      const newScrollElement = this.element.find('.collapsible-sections-container')[0];
-      if (newScrollElement) newScrollElement.scrollTop = scrollPos;
-    }, 100);
   }
 
   /**
