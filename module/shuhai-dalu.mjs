@@ -243,8 +243,12 @@ Hooks.on('preUpdateCombatant', async (combatant, updateData, options, userId) =>
 
   console.log(`【先攻】拦截到 ${actor.name} 的先攻掷骰`);
 
+  // 禁用默认的先攻掷骰聊天消息
+  options.skipChatMessage = true;
+
   // 获取或计算总速度
   let totalSpeed = actor.system.derived?.totalSpeed || 0;
+  let speed1, speed2, speed3;
 
   if (totalSpeed === 0) {
     const constitution = actor.system.attributes?.constitution || 0;
@@ -259,28 +263,43 @@ Hooks.on('preUpdateCombatant', async (combatant, updateData, options, userId) =>
     const bonus = Math.floor(dexterity / 3);
 
     // 生成3个速度值并求和
-    const speed1 = Math.floor(Math.random() * diceSize) + 1 + bonus;
-    const speed2 = Math.floor(Math.random() * diceSize) + 1 + bonus;
-    const speed3 = Math.floor(Math.random() * diceSize) + 1 + bonus;
+    speed1 = Math.floor(Math.random() * diceSize) + 1 + bonus;
+    speed2 = Math.floor(Math.random() * diceSize) + 1 + bonus;
+    speed3 = Math.floor(Math.random() * diceSize) + 1 + bonus;
     totalSpeed = speed1 + speed2 + speed3;
 
     console.log(`【先攻】${actor.name} - 速度值: ${speed1}+${speed2}+${speed3}=${totalSpeed}`);
 
     // 保存totalSpeed到角色数据
     await actor.update({ 'system.derived.totalSpeed': totalSpeed });
+  } else {
+    // 如果totalSpeed已存在，从聊天记录或combat state获取原始速度值（用于显示）
+    // 这里简化处理，直接显示总速度
+    console.log(`【先攻】${actor.name} - 使用已有总速度: ${totalSpeed}`);
+  }
 
-    // 发送聊天消息显示速度值
+  // 替换先攻值为总速度
+  updateData.initiative = totalSpeed;
+  console.log(`【先攻】${actor.name} - 设置先攻值为: ${totalSpeed}`);
+
+  // 发送自定义聊天消息
+  if (speed1 !== undefined) {
+    // 新计算的速度，显示详细过程
     ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor }),
       content: `<div style="border: 2px solid #4a90e2; border-radius: 4px; padding: 8px; background: #0F0D1B; color: #EBBD68;">
         <strong>${actor.name}</strong> 先攻速度：${speed1} + ${speed2} + ${speed3} = <strong>${totalSpeed}</strong>
       </div>`
     });
+  } else {
+    // 已有的总速度，显示简化消息
+    ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor }),
+      content: `<div style="border: 2px solid #4a90e2; border-radius: 4px; padding: 8px; background: #0F0D1B; color: #EBBD68;">
+        <strong>${actor.name}</strong> 先攻速度：<strong>${totalSpeed}</strong>
+      </div>`
+    });
   }
-
-  // 替换先攻值为总速度
-  updateData.initiative = totalSpeed;
-  console.log(`【先攻】${actor.name} - 设置先攻值为: ${totalSpeed}`);
 });
 
 /* -------------------------------------------- */
