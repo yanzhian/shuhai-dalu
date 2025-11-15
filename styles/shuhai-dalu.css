@@ -3,7 +3,12 @@
    ======================================== *//* 导入 Player Sheet 样式 */
 @import url("player-sheet.css");
 
-
+/* === 覆盖Foundry默认样式 === */
+/* 聊天消息背景 - 使用纯色替代图片背景 */
+.chat-message {
+  background: #0f0d1b !important;
+  background-image: none !important;
+}
 
 /* === 全局样式 === */
 .shuhai-dalu {
