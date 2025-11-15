@@ -226,6 +226,64 @@ Hooks.once('ready', () => {
 });
 
 /* -------------------------------------------- */
+/*  战斗先攻Hook - 使用自定义先攻值计算             */
+/* -------------------------------------------- */
+
+Hooks.on('combatStart', async (combat, updateData) => {
+  console.log('【战斗】战斗开始，准备掷先攻');
+});
+
+// 拦截先攻掷骰，使用自定义逻辑计算总速度
+Hooks.on('preUpdateCombatant', async (combatant, updateData, options, userId) => {
+  // 只处理先攻值更新
+  if (updateData.initiative === undefined) return;
+
+  const actor = combatant.actor;
+  if (!actor) return;
+
+  console.log(`【先攻】拦截到 ${actor.name} 的先攻掷骰`);
+
+  // 获取或计算总速度
+  let totalSpeed = actor.system.derived?.totalSpeed || 0;
+
+  if (totalSpeed === 0) {
+    const constitution = actor.system.attributes?.constitution || 0;
+    const dexterity = actor.system.attributes?.dexterity || 0;
+
+    console.log(`【先攻】${actor.name} - 体质:${constitution}, 敏捷:${dexterity}`);
+
+    // 基础骰子大小（体质<9用d6，否则用d4）
+    const diceSize = constitution < 9 ? 6 : 4;
+
+    // 固定加值（敏捷/3向下取整）
+    const bonus = Math.floor(dexterity / 3);
+
+    // 生成3个速度值并求和
+    const speed1 = Math.floor(Math.random() * diceSize) + 1 + bonus;
+    const speed2 = Math.floor(Math.random() * diceSize) + 1 + bonus;
+    const speed3 = Math.floor(Math.random() * diceSize) + 1 + bonus;
+    totalSpeed = speed1 + speed2 + speed3;
+
+    console.log(`【先攻】${actor.name} - 速度值: ${speed1}+${speed2}+${speed3}=${totalSpeed}`);
+
+    // 保存totalSpeed到角色数据
+    await actor.update({ 'system.derived.totalSpeed': totalSpeed });
+
+    // 发送聊天消息显示速度值
+    ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor }),
+      content: `<div style="border: 2px solid #4a90e2; border-radius: 4px; padding: 8px; background: #0F0D1B; color: #EBBD68;">
+        <strong>${actor.name}</strong> 先攻速度：${speed1} + ${speed2} + ${speed3} = <strong>${totalSpeed}</strong>
+      </div>`
+    });
+  }
+
+  // 替换先攻值为总速度
+  updateData.initiative = totalSpeed;
+  console.log(`【先攻】${actor.name} - 设置先攻值为: ${totalSpeed}`);
+});
+
+/* -------------------------------------------- */
 /*  Actor创建钩子 - 初始化新角色HP和原型Token      */
 /* -------------------------------------------- */
 
