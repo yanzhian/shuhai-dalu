@@ -889,7 +889,6 @@ input.attr-value {
   font-size: 14px;
   color: #EBBD68;
   transition: all 0.2s;
-  cursor: move;
 }
 
 .inventory-row:hover {

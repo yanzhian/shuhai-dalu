@@ -1592,17 +1592,42 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       await game.shuhai.equipItem(this.actor, item, slotType, slotIndex);
 
       return false;
-    } else {
-      // 拖放到物品栏的逻辑（没有找到 .slot-content）
-      // 检查是否是从其他角色或外部拖入
-      if (!item.parent || item.parent.id !== this.actor.id) {
-        delete itemData._id;
-        return this.actor.createEmbeddedDocuments("Item", [itemData]);
-      }
-
-      // 如果是自己的物品在自己的物品栏内拖放，使用父类的默认排序逻辑
-      return super._onDropItem(event, data);
     }
+
+    // 拖放到物品栏的逻辑（没有找到 .slot-content）
+    // 检查是否是从其他角色或外部拖入
+    if (!item.parent || item.parent.id !== this.actor.id) {
+      delete itemData._id;
+      return this.actor.createEmbeddedDocuments("Item", [itemData]);
+    }
+
+    // 如果是自己的物品在自己的物品栏内拖放，进行排序
+    const inventoryRow = event.target.closest('.inventory-row');
+    if (inventoryRow) {
+      // 获取目标物品的 ID
+      const targetItemId = inventoryRow.dataset.itemId;
+      const targetItem = this.actor.items.get(targetItemId);
+
+      if (targetItem && targetItem.id !== item.id) {
+        // 使用 Foundry 的 sortRelative 方法重新排序
+        const sortUpdates = SortingHelpers.performIntegerSort(item, {
+          target: targetItem,
+          siblings: this.actor.items.filter(i => i.id !== item.id),
+          sortKey: "sort"
+        });
+
+        // 应用排序更新
+        const updateData = sortUpdates.map(u => {
+          return { _id: u.target.id, sort: u.update.sort };
+        });
+
+        await this.actor.updateEmbeddedDocuments("Item", updateData);
+        return false;
+      }
+    }
+
+    // 默认行为：使用父类的排序逻辑
+    return super._onDropItem(event, data);
   }
 
   /**
