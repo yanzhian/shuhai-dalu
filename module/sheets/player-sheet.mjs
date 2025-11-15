@@ -1638,8 +1638,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
           // 获取所有兄弟物品
           const siblings = this.actor.items.filter(i => i.id !== item.id);
 
-          // 计算新的排序值
-          const sortUpdates = SortingHelpers.performIntegerSort(item, {
+          // 计算新的排序值（使用新的API）
+          const sortUpdates = foundry.utils.performIntegerSort(item, {
             target: targetItem,
             siblings: siblings
           });
@@ -1650,11 +1650,24 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
             ...u.update
           }));
 
+          console.log('【拖放排序】应用更新:', updateData);
+
           await Item.updateDocuments(updateData, {parent: this.actor});
 
-          // 触发重新渲染以显示正确的排序结果
-          // _render() 会保存和恢复滚动位置，所以不会跳动
-          await this.render(false);
+          // 由于Foundry的items集合可能延迟更新，我们手动更新本地item对象的sort值
+          // 确保_sortInventoryItems()能读取到最新的sort值
+          for (const update of sortUpdates) {
+            const itemToUpdate = this.actor.items.get(update.target.id);
+            if (itemToUpdate && update.update.sort !== undefined) {
+              // 直接更新item对象的_source.sort，这样get()能立即读取到新值
+              itemToUpdate._source.sort = update.update.sort;
+              console.log(`【拖放排序】本地更新 ${itemToUpdate.name} sort: ${update.update.sort}`);
+            }
+          }
+
+          // 直接调用_sortInventoryItems()重新排序DOM
+          // 现在它能读取到我们刚刚更新的sort值了
+          this._sortInventoryItems();
 
           return false;
         }
