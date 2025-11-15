@@ -1651,6 +1651,11 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
           }));
 
           await Item.updateDocuments(updateData, {parent: this.actor});
+
+          // 触发重新渲染以显示正确的排序结果
+          // _render() 会保存和恢复滚动位置，所以不会跳动
+          await this.render(false);
+
           return false;
         }
       }
