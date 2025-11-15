@@ -11,7 +11,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       height: 1180,
       tabs: [],
       dragDrop: [
-        { dragSelector: ".item-icon-wrapper[draggable]", dropSelector: ".slot-content, .inventory-list" }
+        { dragSelector: ".inventory-row", dropSelector: ".slot-content, .inventory-list" }
       ],
       scrollY: [".skills-section", ".equipment-section", ".inventory-list"]
     });
@@ -353,16 +353,29 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
    */
   async _onToggleLock(event) {
     event.preventDefault();
+
+    // 保存滚动位置
+    const scrollElement = this.element.find('.collapsible-sections-container')[0];
+    const scrollPos = scrollElement?.scrollTop || 0;
+
     const currentLocked = this.actor.getFlag('shuhai-dalu', 'isLocked') ?? true;
     const newLocked = !currentLocked;
     await this.actor.setFlag('shuhai-dalu', 'isLocked', newLocked);
+
     // 显示提示
     if (newLocked) {
       ui.notifications.info("已切换到游玩模式（锁定）");
     } else {
       ui.notifications.info("已切换到编辑模式（解锁）");
     }
+
     this.render(false);
+
+    // 恢复滚动位置
+    setTimeout(() => {
+      const newScrollElement = this.element.find('.collapsible-sections-container')[0];
+      if (newScrollElement) newScrollElement.scrollTop = scrollPos;
+    }, 50);
   }
 
   /**
@@ -1253,9 +1266,9 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   }
 
   /**
-  * 单击物品图标：编辑物品信息
+  * 单击物品图标：使用物品
    */
-  _onItemIconClick(event) {
+  async _onItemIconClick(event) {
     event.preventDefault();
     event.stopPropagation();
 
@@ -1263,7 +1276,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     const item = this.actor.items.get(itemId);
 
     if (item) {
-      item.sheet.render(true);
+      // 调用使用物品的方法
+      await this._onItemUse({ preventDefault: () => {}, stopPropagation: () => {}, currentTarget: { dataset: { itemId } } });
     }
   }
 
@@ -1352,7 +1366,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   }
 
   /**
-   * 搜索物品
+   * 搜索物品（搜索名称和标签）
    */
   _onSearchItems(event) {
     const searchTerm = event.currentTarget.value.toLowerCase();
@@ -1360,9 +1374,19 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
     items.each((i, item) => {
       const $item = $(item);
-      const itemName = $item.find('.col-name').text().toLowerCase();
+      const itemId = $item.data('item-id');
+      const itemDoc = this.actor.items.get(itemId);
 
-      if (itemName.includes(searchTerm)) {
+      if (!itemDoc) {
+        $item.attr('data-filtered', 'true');
+        return;
+      }
+
+      const itemName = itemDoc.name.toLowerCase();
+      const itemTags = (itemDoc.system.tags || '').toLowerCase();
+
+      // 搜索名称或标签
+      if (itemName.includes(searchTerm) || itemTags.includes(searchTerm)) {
         $item.attr('data-filtered', 'false');
       } else {
         $item.attr('data-filtered', 'true');

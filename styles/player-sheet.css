@@ -703,8 +703,9 @@ input.level-value {
 
 /* 分割线 */
 .divider {
-  height: 1px;
-  background: #EBBD68;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #E3B767, transparent);
+  margin: 8px 0;
   flex-shrink: 0;
 }
 
@@ -888,6 +889,7 @@ input.attr-value {
   font-size: 14px;
   color: #EBBD68;
   transition: all 0.2s;
+  cursor: move;
 }
 
 .inventory-row:hover {
@@ -930,6 +932,8 @@ input.attr-value {
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s;
+  position: relative;
+  z-index: 1;
 }
 
 .item-icon-wrapper:hover {
