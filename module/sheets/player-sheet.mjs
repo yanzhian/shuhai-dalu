@@ -257,38 +257,51 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     html.find('.favorite-filter-btn').click(this._onFavoriteFilter.bind(this));
     html.find('.advanced-filter-btn').click(this._onAdvancedFilter.bind(this));
     html.find('.sort-btn').click(this._onSortItems.bind(this));
+
+    // 初始化排序按钮状态
+    const sortBtn = html.find('.sort-btn');
+    if (!this.sortState) {
+      this.sortState = 'manual';
+    }
+    if (this.sortState === 'manual') {
+      sortBtn.html('<i class="fas fa-sort"></i>');
+      sortBtn.attr('title', '排序：手动排序（可拖动）');
+    } else {
+      sortBtn.html('<i class="fas fa-sort-alpha-down"></i>');
+      sortBtn.attr('title', '排序：类型排序');
+    }
   }
 
   /**
-   * 排序物品
+   * 排序物品 - 切换类型排序和手动排序
    */
   _onSortItems(event) {
     event.preventDefault();
 
-    // 获取当前排序状态
-    const currentSort = this.sortState || 'cost-asc';
+    // 获取当前排序状态（默认为手动排序）
+    const currentSort = this.sortState || 'manual';
 
-    // 循环切换排序状态：费用升序 -> 费用降序 -> 星光升序 -> 星光降序 -> 费用升序
-    const sortStates = ['cost-asc', 'cost-desc', 'starlight-asc', 'starlight-desc'];
-    const currentIndex = sortStates.indexOf(currentSort);
-    const nextIndex = (currentIndex + 1) % sortStates.length;
-    this.sortState = sortStates[nextIndex];
+    // 切换排序模式：手动排序 <-> 类型排序
+    if (currentSort === 'manual') {
+      this.sortState = 'type';
+    } else {
+      this.sortState = 'manual';
+    }
 
-    // 更新按钮显示（只显示图标，使用 title 提示）
+    // 更新按钮显示
     const btn = $(event.currentTarget);
-    const sortLabels = {
-      'cost-asc': '费用↑',
-      'cost-desc': '费用↓',
-      'starlight-asc': '星光↑',
-      'starlight-desc': '星光↓'
-    };
-    btn.html(`<i class="fas fa-sort"></i>`);
-    btn.attr('title', `排序：${sortLabels[this.sortState]}`);
+    if (this.sortState === 'manual') {
+      btn.html('<i class="fas fa-sort"></i>');
+      btn.attr('title', '排序：手动排序（可拖动）');
+      ui.notifications.info('已切换到手动排序（可拖动物品重新排列）');
+    } else {
+      btn.html('<i class="fas fa-sort-alpha-down"></i>');
+      btn.attr('title', '排序：类型排序');
+      ui.notifications.info('已切换到类型排序');
+    }
 
     // 执行排序
     this._sortInventoryItems();
-
-    ui.notifications.info(`按${sortLabels[this.sortState]}排序`);
   }
 
   /**
@@ -306,23 +319,31 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
       if (!aItem || !bItem) return 0;
 
-      let aVal, bVal;
+      if (this.sortState === 'type') {
+        // 类型排序：按类型分组
+        const typeOrder = {
+          'combatDice': 1,
+          'shootDice': 2,
+          'defenseDice': 3,
+          'triggerDice': 4,
+          'passiveDice': 5,
+          'weapon': 6,
+          'armor': 7,
+          'equipment': 8,
+          'item': 9
+        };
 
-      if (this.sortState.startsWith('cost')) {
-        // 费用排序：需要解析费用字符串
-        aVal = this._parseCost(aItem.system.cost);
-        bVal = this._parseCost(bItem.system.cost);
-      } else {
-        // 星光排序
-        aVal = aItem.system.starlightCost || 0;
-        bVal = bItem.system.starlightCost || 0;
-      }
+        const aTypeOrder = typeOrder[aItem.type] || 99;
+        const bTypeOrder = typeOrder[bItem.type] || 99;
 
-      // 升序或降序
-      if (this.sortState.endsWith('asc')) {
-        return aVal - bVal;
+        if (aTypeOrder !== bTypeOrder) {
+          return aTypeOrder - bTypeOrder;
+        }
+        // 同类型按名称排序
+        return aItem.name.localeCompare(bItem.name, 'zh-CN');
       } else {
-        return bVal - aVal;
+        // 手动排序：按sort值排序
+        return (aItem.sort || 0) - (bItem.sort || 0);
       }
     });
 
@@ -330,29 +351,27 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     items.forEach(item => {
       inventoryList.append(item);
     });
-  }
 
-  /**
-   * 解析费用字符串为数字
-   */
-  _parseCost(costStr) {
-    if (!costStr || costStr === '-') return 0;
-
-    // 如果是纯数字
-    const num = parseFloat(costStr);
-    if (!isNaN(num)) return num;
-
-    // 如果包含Cost:或San:前缀
-    const match = costStr.match(/(?:Cost:|San:)?(\d+)/);
-    if (match) {
-      return parseFloat(match[1]);
+    // 更新拖动状态
+    const rows = inventoryList.find('.inventory-row');
+    if (this.sortState === 'type') {
+      // 类型排序模式：禁用拖动
+      rows.attr('draggable', 'false');
+      rows.css('opacity', '1');
+    } else {
+      // 手动排序模式：启用拖动
+      rows.attr('draggable', 'true');
+      rows.css('opacity', '1');
     }
-
-    return 0;
   }
 
   /** @override */
   _canDragStart(selector) {
+    // 检查是否为物品栏拖动
+    if (selector === '.inventory-row') {
+      // 只有在手动排序模式下才允许拖动物品栏
+      return this.isEditable && this.sortState !== 'type';
+    }
     return this.isEditable;
   }
 
@@ -1609,6 +1628,12 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       const targetItem = this.actor.items.get(targetItemId);
 
       if (targetItem && targetItem.id !== item.id) {
+        // 检查当前是否为手动排序模式
+        if (this.sortState === 'type') {
+          ui.notifications.warn('请先切换到手动排序模式才能拖动排序');
+          return false;
+        }
+
         // 使用 Foundry 的 sortRelative 方法重新排序
         const sortUpdates = SortingHelpers.performIntegerSort(item, {
           target: targetItem,
@@ -1618,10 +1643,18 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
         // 应用排序更新
         const updateData = sortUpdates.map(u => {
-          return { _id: u.target.id, sort: u.update.sort };
-        });
+          const id = u.target?.id || u.target?._id;
+          const sort = u.update?.sort;
+          if (id && sort !== undefined) {
+            return { _id: id, sort: sort };
+          }
+          return null;
+        }).filter(u => u !== null);
 
-        await this.actor.updateEmbeddedDocuments("Item", updateData);
+        if (updateData.length > 0) {
+          await this.actor.updateEmbeddedDocuments("Item", updateData);
+          ui.notifications.info(`已移动 ${item.name}`);
+        }
         return false;
       }
     }
