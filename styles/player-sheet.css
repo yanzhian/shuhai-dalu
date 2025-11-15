@@ -7,8 +7,8 @@
 .player-sheet {
   background: #0F0D1B;
   color: #ECE4D6;
-  font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
-  padding: 8px;
+  /* font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif; */
+  /* padding: 8px; */
   height: 100%;
   overflow: hidden;
 }
@@ -446,8 +446,8 @@
 
 .slot-content .slot-cost {
   position: absolute;
-  top: 4px;
-  left: 4px;
+  top: -1px;
+  left: -1px;
   width: 24px;
   height: 24px;
   background: #E1AA43;
@@ -463,8 +463,8 @@
 
 .slot-content .unequip-btn {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: -1px;
+  right: -1px;
   width: 20px;
   height: 20px;
   background: #E1AA43;
@@ -490,8 +490,8 @@
 
 .slot-content .slot-dice {
   position: absolute;
-  bottom: 4px;
-  right: 4px;
+  bottom: -1px;
+  right: -1px;
   background: #E1AA43;
   border-radius: 4px;
   color: #0F0D1B;
