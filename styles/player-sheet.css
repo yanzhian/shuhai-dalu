@@ -7,11 +7,15 @@
 .player-sheet {
   background: #0F0D1B;
   color: #ECE4D6;
-  border: 2px solid #EBBD68;
   font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
   padding: 8px;
   height: 100%;
   overflow: hidden;
+}
+
+/* 只给窗口应用添加边框 */
+.window-app.player-sheet {
+  border: 2px solid #EBBD68;
 }
 
 .player-sheet form {
