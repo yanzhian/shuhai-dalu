@@ -5,7 +5,7 @@
       {{#if success}}✓ 成功{{else}}✗ 失败{{/if}}
     </div>
   </div>
-  
+
   <div class="dice-results">
     <div class="dice-row">
       <div class="dice hope-dice" title="希望骰">
@@ -17,7 +17,7 @@
         <span class="dice-value">{{corruptDice}}</span>
       </div>
     </div>
-    
+
     <div class="calculation">
       <div class="calc-line">
         <span class="dice-sum">{{hopeDice}} + {{corruptDice}}</span>
@@ -30,7 +30,7 @@
         <span class="equals">=</span>
         <span class="total">{{total}}</span>
       </div>
-      
+
       <div class="difficulty-line">
         🎯 难度值: {{difficulty}}
         {{#if (eq hopeDice corruptDice)}}
@@ -41,7 +41,7 @@
       </div>
     </div>
   </div>
-  
+
   <div class="result-message {{type}}">
     <div class="message-icon">
       {{#if (eq type "critical")}}🎉
@@ -57,22 +57,49 @@
 
 <style>
 .shuhai-check-result {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #0F0D1B;
   border-radius: 8px;
   padding: 1rem;
-  color: white;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  color: #ECE4D6;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
   margin: 0.5rem 0;
+  border: 2px solid #666;
 }
 
+/* 希望成功 - 金色边框 */
+.shuhai-check-result.hope-success {
+  border: 3px solid #EBBD68;
+  box-shadow: 0 0 20px rgba(235, 189, 104, 0.4);
+}
+
+/* 希望失败 - 金色边框（稍淡） */
+.shuhai-check-result.hope-failure {
+  border: 3px solid #EBBD68;
+  box-shadow: 0 0 15px rgba(235, 189, 104, 0.3);
+}
+
+/* 侵蚀成功 - 紫蓝色边框 */
+.shuhai-check-result.corrupt-success {
+  border: 3px solid #9b59b6;
+  box-shadow: 0 0 20px rgba(155, 89, 182, 0.4);
+}
+
+/* 侵蚀失败 - 紫蓝色边框（稍淡） */
+.shuhai-check-result.corrupt-failure {
+  border: 3px solid #9b59b6;
+  box-shadow: 0 0 15px rgba(155, 89, 182, 0.3);
+}
+
+/* 大成功 - 彩虹边框 */
 .shuhai-check-result.critical {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border: 3px solid #f5576c;
+  box-shadow: 0 0 25px rgba(245, 87, 108, 0.6);
   animation: pulse 1s ease-in-out infinite;
 }
 
 @keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
+  0%, 100% { transform: scale(1); box-shadow: 0 0 25px rgba(245, 87, 108, 0.6); }
+  50% { transform: scale(1.02); box-shadow: 0 0 35px rgba(245, 87, 108, 0.8); }
 }
 
 .check-header {
@@ -81,12 +108,13 @@
   align-items: center;
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(255,255,255,0.3);
+  border-bottom: 2px solid rgba(235, 189, 104, 0.3);
 }
 
 .check-header h3 {
   margin: 0;
   font-size: 1.1rem;
+  color: #EBBD68;
 }
 
 .result-badge {
@@ -98,17 +126,20 @@
 
 .result-badge.success {
   background: rgba(76, 175, 80, 0.9);
+  color: white;
 }
 
 .result-badge.failure {
   background: rgba(244, 67, 54, 0.9);
+  color: white;
 }
 
 .dice-results {
-  background: rgba(0,0,0,0.2);
+  background: rgba(0,0,0,0.3);
   border-radius: 6px;
   padding: 1rem;
   margin-bottom: 1rem;
+  border: 1px solid rgba(235, 189, 104, 0.2);
 }
 
 .dice-row {
@@ -123,6 +154,7 @@
   padding: 0.75rem;
   border-radius: 6px;
   transition: transform 0.3s ease;
+  border: 2px solid;
 }
 
 .dice:hover {
@@ -130,13 +162,15 @@
 }
 
 .hope-dice {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  box-shadow: 0 0 20px rgba(79, 172, 254, 0.5);
+  background: rgba(79, 172, 254, 0.2);
+  border-color: #4facfe;
+  box-shadow: 0 0 15px rgba(79, 172, 254, 0.3);
 }
 
 .corrupt-dice {
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-  box-shadow: 0 0 20px rgba(250, 112, 154, 0.5);
+  background: rgba(155, 89, 182, 0.2);
+  border-color: #9b59b6;
+  box-shadow: 0 0 15px rgba(155, 89, 182, 0.3);
 }
 
 .dice-label {
@@ -144,18 +178,20 @@
   font-size: 0.875rem;
   margin-bottom: 0.25rem;
   font-weight: bold;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  color: #ECE4D6;
 }
 
 .dice-value {
   display: block;
   font-size: 2rem;
   font-weight: bold;
+  color: #EBBD68;
   text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
 .calculation {
   text-align: center;
+  color: #ECE4D6;
 }
 
 .calc-line {
@@ -171,17 +207,18 @@
 .calc-line .total {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #ffd700;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  color: #EBBD68;
+  text-shadow: 0 0 10px rgba(235, 189, 104, 0.5);
 }
 
 .difficulty-line {
   font-size: 0.95rem;
+  color: #ECE4D6;
   opacity: 0.9;
 }
 
 .critical-mark {
-  color: #ffd700;
+  color: #f5576c;
   font-weight: bold;
   animation: blink 1s ease-in-out infinite;
 }
@@ -192,12 +229,13 @@
 }
 
 .result-message {
-  background: rgba(255,255,255,0.1);
+  background: rgba(235, 189, 104, 0.1);
   border-radius: 6px;
   padding: 1rem;
   display: flex;
   gap: 1rem;
   align-items: start;
+  border: 1px solid rgba(235, 189, 104, 0.2);
 }
 
 .message-icon {
@@ -214,5 +252,6 @@
   flex: 1;
   line-height: 1.5;
   white-space: pre-line;
+  color: #ECE4D6;
 }
 </style>
