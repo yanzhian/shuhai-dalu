@@ -1,7 +1,7 @@
 <div class="battle-hud-window {{#if hudState.minimized}}minimized{{/if}}">
   {{!-- HUD头部 (可拖动区域) --}}
   <div class="hud-header">
-    <div class="hud-title">玩家信息表</div>
+    <div class="hud-title">敌方信息表</div>
     <div class="hud-controls">
       <button class="hud-control-btn hud-scale-down" title="缩小"><i class="fas fa-search-minus"></i></button>
       <button class="hud-control-btn hud-scale-up" title="放大"><i class="fas fa-search-plus"></i></button>
@@ -95,7 +95,6 @@
 
           {{!-- BUFF信息区域 --}}
           <div class="hud-buff-area">
-            <div class="hud-section-title">BUFF</div>
             <div class="hud-buff-slots">
               {{#each player.combatState.buffs as |buff index|}}
                 <div class="hud-buff-slot" data-buff-index="{{index}}" title="{{buff.name}}&#10;{{buff.description}}">

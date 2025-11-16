@@ -83,14 +83,14 @@
 /* ========================================
    HUD内容区域
    ======================================== */
-
+/* 
 .enemy-battle-area-hud .hud-content {
   background: rgba(15, 13, 27, 0.95);
   border: 2px solid #C14545;
   border-top: none;
   border-radius: 0 0 8px 8px;
   padding: 12px;
-}
+} */
 
 /* ========================================
    玩家卡片容器
@@ -197,7 +197,7 @@
 
 /* 头像 (92px × 92px) */
 .enemy-battle-area-hud .hud-avatar {
-  width: 92px;
+  width: 52px;
   height: 92px;
   flex-shrink: 0;
   background: #0F0D1B;

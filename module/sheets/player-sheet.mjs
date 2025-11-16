@@ -11,9 +11,9 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       height: 1180,
       tabs: [],
       dragDrop: [
-        { dragSelector: ".item-icon-wrapper[draggable]", dropSelector: ".slot-content, .inventory-list" }
+        { dragSelector: ".inventory-row", dropSelector: ".slot-content, .inventory-row, .inventory-list" }
       ],
-      scrollY: [".skills-section", ".equipment-section", ".inventory-list"]
+      scrollY: [".collapsible-sections-container", ".inventory-list"]
     });
   }
 
@@ -23,6 +23,45 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   }
 
   /* -------------------------------------------- */
+
+  /** @override */
+  async _render(force, options) {
+    // 保存滚动位置
+    const scrollPositions = {};
+    if (this.element && this.element.length > 0) {
+      const scrollElements = [
+        { selector: '.collapsible-sections-container', key: 'sections' },
+        { selector: '.inventory-list', key: 'inventory' }
+      ];
+
+      scrollElements.forEach(({ selector, key }) => {
+        const element = this.element.find(selector)[0];
+        if (element) {
+          scrollPositions[key] = element.scrollTop;
+        }
+      });
+    }
+
+    // 执行渲染
+    await super._render(force, options);
+
+    // 恢复滚动位置
+    if (Object.keys(scrollPositions).length > 0) {
+      setTimeout(() => {
+        const scrollElements = [
+          { selector: '.collapsible-sections-container', key: 'sections' },
+          { selector: '.inventory-list', key: 'inventory' }
+        ];
+
+        scrollElements.forEach(({ selector, key }) => {
+          const element = this.element.find(selector)[0];
+          if (element && scrollPositions[key] !== undefined) {
+            element.scrollTop = scrollPositions[key];
+          }
+        });
+      }, 0);
+    }
+  }
 
   /** @override */
   async getData() {
@@ -218,38 +257,51 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     html.find('.favorite-filter-btn').click(this._onFavoriteFilter.bind(this));
     html.find('.advanced-filter-btn').click(this._onAdvancedFilter.bind(this));
     html.find('.sort-btn').click(this._onSortItems.bind(this));
+
+    // 初始化排序按钮状态
+    const sortBtn = html.find('.sort-btn');
+    if (!this.sortState) {
+      this.sortState = 'manual';
+    }
+    if (this.sortState === 'manual') {
+      sortBtn.html('<i class="fas fa-sort"></i>');
+      sortBtn.attr('title', '排序：手动排序（可拖动）');
+    } else {
+      sortBtn.html('<i class="fas fa-sort-alpha-down"></i>');
+      sortBtn.attr('title', '排序：类型排序');
+    }
   }
 
   /**
-   * 排序物品
+   * 排序物品 - 切换类型排序和手动排序
    */
   _onSortItems(event) {
     event.preventDefault();
 
-    // 获取当前排序状态
-    const currentSort = this.sortState || 'cost-asc';
+    // 获取当前排序状态（默认为手动排序）
+    const currentSort = this.sortState || 'manual';
 
-    // 循环切换排序状态：费用升序 -> 费用降序 -> 星光升序 -> 星光降序 -> 费用升序
-    const sortStates = ['cost-asc', 'cost-desc', 'starlight-asc', 'starlight-desc'];
-    const currentIndex = sortStates.indexOf(currentSort);
-    const nextIndex = (currentIndex + 1) % sortStates.length;
-    this.sortState = sortStates[nextIndex];
+    // 切换排序模式：手动排序 <-> 类型排序
+    if (currentSort === 'manual') {
+      this.sortState = 'type';
+    } else {
+      this.sortState = 'manual';
+    }
 
-    // 更新按钮显示（只显示图标，使用 title 提示）
+    // 更新按钮显示
     const btn = $(event.currentTarget);
-    const sortLabels = {
-      'cost-asc': '费用↑',
-      'cost-desc': '费用↓',
-      'starlight-asc': '星光↑',
-      'starlight-desc': '星光↓'
-    };
-    btn.html(`<i class="fas fa-sort"></i>`);
-    btn.attr('title', `排序：${sortLabels[this.sortState]}`);
+    if (this.sortState === 'manual') {
+      btn.html('<i class="fas fa-sort"></i>');
+      btn.attr('title', '排序：手动排序（可拖动）');
+      ui.notifications.info('已切换到手动排序（可拖动物品重新排列）');
+    } else {
+      btn.html('<i class="fas fa-sort-alpha-down"></i>');
+      btn.attr('title', '排序：类型排序');
+      ui.notifications.info('已切换到类型排序');
+    }
 
     // 执行排序
     this._sortInventoryItems();
-
-    ui.notifications.info(`按${sortLabels[this.sortState]}排序`);
   }
 
   /**
@@ -267,23 +319,31 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
       if (!aItem || !bItem) return 0;
 
-      let aVal, bVal;
+      if (this.sortState === 'type') {
+        // 类型排序：按类型分组
+        const typeOrder = {
+          'combatDice': 1,
+          'shootDice': 2,
+          'defenseDice': 3,
+          'triggerDice': 4,
+          'passiveDice': 5,
+          'weapon': 6,
+          'armor': 7,
+          'equipment': 8,
+          'item': 9
+        };
 
-      if (this.sortState.startsWith('cost')) {
-        // 费用排序：需要解析费用字符串
-        aVal = this._parseCost(aItem.system.cost);
-        bVal = this._parseCost(bItem.system.cost);
-      } else {
-        // 星光排序
-        aVal = aItem.system.starlightCost || 0;
-        bVal = bItem.system.starlightCost || 0;
-      }
+        const aTypeOrder = typeOrder[aItem.type] || 99;
+        const bTypeOrder = typeOrder[bItem.type] || 99;
 
-      // 升序或降序
-      if (this.sortState.endsWith('asc')) {
-        return aVal - bVal;
+        if (aTypeOrder !== bTypeOrder) {
+          return aTypeOrder - bTypeOrder;
+        }
+        // 同类型按名称排序
+        return aItem.name.localeCompare(bItem.name, 'zh-CN');
       } else {
-        return bVal - aVal;
+        // 手动排序：按sort值排序
+        return (aItem.sort || 0) - (bItem.sort || 0);
       }
     });
 
@@ -291,29 +351,27 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     items.forEach(item => {
       inventoryList.append(item);
     });
-  }
 
-  /**
-   * 解析费用字符串为数字
-   */
-  _parseCost(costStr) {
-    if (!costStr || costStr === '-') return 0;
-
-    // 如果是纯数字
-    const num = parseFloat(costStr);
-    if (!isNaN(num)) return num;
-
-    // 如果包含Cost:或San:前缀
-    const match = costStr.match(/(?:Cost:|San:)?(\d+)/);
-    if (match) {
-      return parseFloat(match[1]);
+    // 更新拖动状态
+    const rows = inventoryList.find('.inventory-row');
+    if (this.sortState === 'type') {
+      // 类型排序模式：禁用拖动
+      rows.attr('draggable', 'false');
+      rows.css('opacity', '1');
+    } else {
+      // 手动排序模式：启用拖动
+      rows.attr('draggable', 'true');
+      rows.css('opacity', '1');
     }
-
-    return 0;
   }
 
   /** @override */
   _canDragStart(selector) {
+    // 检查是否为物品栏拖动
+    if (selector === '.inventory-row') {
+      // 只有在手动排序模式下才允许拖动物品栏
+      return this.isEditable && this.sortState !== 'type';
+    }
     return this.isEditable;
   }
 
@@ -356,12 +414,14 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     const currentLocked = this.actor.getFlag('shuhai-dalu', 'isLocked') ?? true;
     const newLocked = !currentLocked;
     await this.actor.setFlag('shuhai-dalu', 'isLocked', newLocked);
+
     // 显示提示
     if (newLocked) {
       ui.notifications.info("已切换到游玩模式（锁定）");
     } else {
       ui.notifications.info("已切换到编辑模式（解锁）");
     }
+
     this.render(false);
   }
 
@@ -477,17 +537,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       return;
     }
 
-    // 保存滚动位置（现在滚动条在父容器上）
-    const scrollElement = this.element.find('.collapsible-sections-container')[0];
-    const scrollPos = scrollElement?.scrollTop || 0;
-
     await this.actor.update({ [`system.skills.${skillKey}`]: currentValue + 1 });
-
-    // 恢复滚动位置
-    setTimeout(() => {
-      const newScrollElement = this.element.find('.collapsible-sections-container')[0];
-      if (newScrollElement) newScrollElement.scrollTop = scrollPos;
-    }, 100);
   }
 
   /**
@@ -501,17 +551,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     const currentValue = this.actor.system.skills[skillKey];
     if (currentValue <= 0) return;
 
-    // 保存滚动位置（现在滚动条在父容器上）
-    const scrollElement = this.element.find('.collapsible-sections-container')[0];
-    const scrollPos = scrollElement?.scrollTop || 0;
-
     await this.actor.update({ [`system.skills.${skillKey}`]: currentValue - 1 });
-
-    // 恢复滚动位置
-    setTimeout(() => {
-      const newScrollElement = this.element.find('.collapsible-sections-container')[0];
-      if (newScrollElement) newScrollElement.scrollTop = scrollPos;
-    }, 100);
   }
 
   /**
@@ -557,17 +597,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     const slotIndex = event.currentTarget.dataset.slotIndex !== undefined ?
       parseInt(event.currentTarget.dataset.slotIndex) : null;
 
-    // 保存滚动位置（现在滚动条在父容器上）
-    const scrollElement = this.element.find('.collapsible-sections-container')[0];
-    const scrollPos = scrollElement?.scrollTop || 0;
-
     await game.shuhai.unequipItem(this.actor, slotType, slotIndex);
-
-    // 恢复滚动位置
-    setTimeout(() => {
-      const newScrollElement = this.element.find('.collapsible-sections-container')[0];
-      if (newScrollElement) newScrollElement.scrollTop = scrollPos;
-    }, 100);
   }
 
   /**
@@ -1253,9 +1283,9 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   }
 
   /**
-  * 单击物品图标：编辑物品信息
+  * 单击物品图标：使用物品
    */
-  _onItemIconClick(event) {
+  async _onItemIconClick(event) {
     event.preventDefault();
     event.stopPropagation();
 
@@ -1263,7 +1293,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     const item = this.actor.items.get(itemId);
 
     if (item) {
-      item.sheet.render(true);
+      // 调用使用物品的方法
+      await this._onItemUse({ preventDefault: () => {}, stopPropagation: () => {}, currentTarget: { dataset: { itemId } } });
     }
   }
 
@@ -1352,7 +1383,7 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
   }
 
   /**
-   * 搜索物品
+   * 搜索物品（搜索名称和标签）
    */
   _onSearchItems(event) {
     const searchTerm = event.currentTarget.value.toLowerCase();
@@ -1360,9 +1391,19 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
     items.each((i, item) => {
       const $item = $(item);
-      const itemName = $item.find('.col-name').text().toLowerCase();
+      const itemId = $item.data('item-id');
+      const itemDoc = this.actor.items.get(itemId);
 
-      if (itemName.includes(searchTerm)) {
+      if (!itemDoc) {
+        $item.attr('data-filtered', 'true');
+        return;
+      }
+
+      const itemName = itemDoc.name.toLowerCase();
+      const itemTags = (itemDoc.system.tags || '').toLowerCase();
+
+      // 搜索名称或标签
+      if (itemName.includes(searchTerm) || itemTags.includes(searchTerm)) {
         $item.attr('data-filtered', 'false');
       } else {
         $item.attr('data-filtered', 'true');
@@ -1517,6 +1558,8 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
     // 检查拖放目标 - 优先检查是否拖放到装备槽
     const dropTarget = event.target.closest('.slot-content');
+    const inventoryRow = event.target.closest('.inventory-row');
+    const inventoryList = event.target.closest('.inventory-list');
 
     if (dropTarget) {
       // 拖放到装备槽的逻辑
@@ -1570,17 +1613,69 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       await game.shuhai.equipItem(this.actor, item, slotType, slotIndex);
 
       return false;
-    } else {
-      // 拖放到物品栏的逻辑（没有找到 .slot-content）
+    }
+
+    // 拖放到物品栏的逻辑（没有找到 .slot-content）
+    if (inventoryRow || inventoryList) {
       // 检查是否是从其他角色或外部拖入
       if (!item.parent || item.parent.id !== this.actor.id) {
         delete itemData._id;
         return this.actor.createEmbeddedDocuments("Item", [itemData]);
       }
 
-      // 如果是自己的物品在自己的物品栏内拖放，使用父类的默认排序逻辑
+      // 检查当前是否为类型排序模式
+      if (this.sortState === 'type') {
+        ui.notifications.warn('请先切换到手动排序模式才能拖动排序');
+        return false;
+      }
+
+      // 如果拖放到特定的物品行，需要设置 sortBefore
+      if (inventoryRow) {
+        const targetItemId = inventoryRow.dataset.itemId;
+        const targetItem = this.actor.items.get(targetItemId);
+
+        if (targetItem && targetItem.id !== item.id) {
+          // 获取所有兄弟物品
+          const siblings = this.actor.items.filter(i => i.id !== item.id);
+
+          // 计算新的排序值（使用新的API）
+          const sortUpdates = foundry.utils.performIntegerSort(item, {
+            target: targetItem,
+            siblings: siblings
+          });
+
+          // 应用更新
+          const updateData = sortUpdates.map(u => ({
+            _id: u.target.id,
+            ...u.update
+          }));
+
+          await Item.updateDocuments(updateData, {parent: this.actor});
+
+          // 由于Foundry的items集合可能延迟更新，我们手动更新本地item对象的sort值
+          // 确保_sortInventoryItems()能读取到最新的sort值
+          for (const update of sortUpdates) {
+            const itemToUpdate = this.actor.items.get(update.target.id);
+            if (itemToUpdate && update.update.sort !== undefined) {
+              // 直接更新item对象的_source.sort，这样get()能立即读取到新值
+              itemToUpdate._source.sort = update.update.sort;
+            }
+          }
+
+          // 直接调用_sortInventoryItems()重新排序DOM
+          // 现在它能读取到我们刚刚更新的sort值了
+          this._sortInventoryItems();
+
+          return false;
+        }
+      }
+
+      // 默认使用父类的排序逻辑
       return super._onDropItem(event, data);
     }
+
+    // 其他情况使用默认逻辑
+    return super._onDropItem(event, data);
   }
 
   /**

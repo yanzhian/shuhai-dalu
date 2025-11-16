@@ -72,6 +72,12 @@ Hooks.once('init', async function() {
   CONFIG.Actor.documentClass = ShuhaiActor;
   CONFIG.Item.documentClass = ShuhaiItem;
 
+  // 配置先攻公式（使用总速度）
+  CONFIG.Combat.initiative = {
+    formula: "0",  // 默认公式，实际值由 Actor.getInitiativeRoll() 提供
+    decimals: 0
+  };
+
   // 注册战斗HUD的游戏设置
   game.settings.register('shuhai-dalu', 'battleActors', {
     name: '参战角色列表',
@@ -217,6 +223,83 @@ Hooks.once('ready', () => {
   };
 
   console.log('书海大陆 | Token双击行为已覆盖');
+});
+
+/* -------------------------------------------- */
+/*  战斗先攻Hook - 使用自定义先攻值计算             */
+/* -------------------------------------------- */
+
+Hooks.on('combatStart', async (combat, updateData) => {
+  console.log('【战斗】战斗开始，准备掷先攻');
+});
+
+// 拦截先攻掷骰，使用自定义逻辑计算总速度
+Hooks.on('preUpdateCombatant', async (combatant, updateData, options, userId) => {
+  // 只处理先攻值更新
+  if (updateData.initiative === undefined) return;
+
+  const actor = combatant.actor;
+  if (!actor) return;
+
+  console.log(`【先攻】拦截到 ${actor.name} 的先攻掷骰`);
+
+  // 禁用默认的先攻掷骰聊天消息
+  options.skipChatMessage = true;
+
+  // 获取或计算总速度
+  let totalSpeed = actor.system.derived?.totalSpeed || 0;
+  let speed1, speed2, speed3;
+
+  if (totalSpeed === 0) {
+    const constitution = actor.system.attributes?.constitution || 0;
+    const dexterity = actor.system.attributes?.dexterity || 0;
+
+    console.log(`【先攻】${actor.name} - 体质:${constitution}, 敏捷:${dexterity}`);
+
+    // 基础骰子大小（体质<9用d6，否则用d4）
+    const diceSize = constitution < 9 ? 6 : 4;
+
+    // 固定加值（敏捷/3向下取整）
+    const bonus = Math.floor(dexterity / 3);
+
+    // 生成3个速度值并求和
+    speed1 = Math.floor(Math.random() * diceSize) + 1 + bonus;
+    speed2 = Math.floor(Math.random() * diceSize) + 1 + bonus;
+    speed3 = Math.floor(Math.random() * diceSize) + 1 + bonus;
+    totalSpeed = speed1 + speed2 + speed3;
+
+    console.log(`【先攻】${actor.name} - 速度值: ${speed1}+${speed2}+${speed3}=${totalSpeed}`);
+
+    // 保存totalSpeed到角色数据
+    await actor.update({ 'system.derived.totalSpeed': totalSpeed });
+  } else {
+    // 如果totalSpeed已存在，从聊天记录或combat state获取原始速度值（用于显示）
+    // 这里简化处理，直接显示总速度
+    console.log(`【先攻】${actor.name} - 使用已有总速度: ${totalSpeed}`);
+  }
+
+  // 替换先攻值为总速度
+  updateData.initiative = totalSpeed;
+  console.log(`【先攻】${actor.name} - 设置先攻值为: ${totalSpeed}`);
+
+  // 发送自定义聊天消息
+  if (speed1 !== undefined) {
+    // 新计算的速度，显示详细过程
+    ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor }),
+      content: `<div style="border: 2px solid #4a90e2; border-radius: 4px; padding: 8px; background: #0F0D1B; color: #EBBD68;">
+        <strong>${actor.name}</strong> 先攻速度：${speed1} + ${speed2} + ${speed3} = <strong>${totalSpeed}</strong>
+      </div>`
+    });
+  } else {
+    // 已有的总速度，显示简化消息
+    ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor }),
+      content: `<div style="border: 2px solid #4a90e2; border-radius: 4px; padding: 8px; background: #0F0D1B; color: #EBBD68;">
+        <strong>${actor.name}</strong> 先攻速度：<strong>${totalSpeed}</strong>
+      </div>`
+    });
+  }
 });
 
 /* -------------------------------------------- */

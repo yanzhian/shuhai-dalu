@@ -197,8 +197,8 @@
 
 /* 头像 (92px × 92px) */
 .battle-area-hud .hud-avatar {
-  width: 32px;
-  height: 32px;
+  width: 52px;
+  height: 92px;
   /* flex-shrink: 0;
   background: #0F0D1B; */
   /* border: 2px solid #E3B767; */
