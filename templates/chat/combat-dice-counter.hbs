@@ -1,0 +1,81 @@
+{{!-- 对抗者响应聊天卡片 --}}
+<div class="combat-dice-counter-card" style="background: #0F0D1B; border: 2px solid #4a7c9e; border-radius: 8px; padding: 16px; color: #EBBD68; font-family: 'Noto Sans SC', sans-serif;">
+
+  {{!-- 顶部标题 --}}
+  <div class="counter-header" style="text-align: center; padding: 8px 0; border-bottom: 1px solid #4a7c9e; margin-bottom: 12px;">
+    <h3 style="margin: 0; font-size: 16px; color: #4a7c9e;">
+      "{{counterName}}"选择骰子进行对抗
+    </h3>
+  </div>
+
+  {{!-- 上半部分：骰子和基本信息 --}}
+  <div class="counter-content-top" style="display: flex; gap: 16px; align-items: flex-start; margin-bottom: 12px;">
+
+    {{!-- 左侧：战斗骰图标 --}}
+    <div class="dice-visual" style="display: flex; flex-direction: column; gap: 12px; align-items: center;">
+
+      {{!-- 战斗骰卡片 --}}
+      <div class="dice-card" style="position: relative; width: 75px; height: 75px; border: 2px solid #4a7c9e; border-radius: 6px; background: transparent; display: flex; align-items: center; justify-content: center;">
+        <img src="{{diceImg}}" alt="{{diceName}}" style="width: 100%; height: 100%; object-fit: contain; padding: 4px;" />
+
+        {{!-- 左上角费用 --}}
+        <div class="dice-cost" style="position: absolute; top: -4px; left: -4px; width: 20px; height: 20px; background: #6ca8d4; color: #0F0D1B; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;">
+          {{diceCost}}
+        </div>
+
+        {{!-- 右下角骰数公式 --}}
+        <div class="dice-count" style="position: absolute; bottom: -4px; right: -4px; padding: 2px 6px; background: #6ca8d4; color: #0F0D1B; border-radius: 4px; font-size: 11px; font-weight: bold;">
+          {{diceFormula}}
+        </div>
+
+        {{!-- 未投骰标记 --}}
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(15, 13, 27, 0.8); color: #4a7c9e; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold;">
+          ?
+        </div>
+      </div>
+
+      {{!-- 对抗标识 --}}
+      <div style="padding: 6px 12px; background: rgba(74, 124, 158, 0.3); border: 1px solid #4a7c9e; border-radius: 4px; font-size: 12px; font-weight: bold; color: #4a7c9e;">
+        🛡️ 对抗
+      </div>
+    </div>
+
+    {{!-- 右侧：战斗骰基本信息 --}}
+    <div class="dice-info" style="flex: 1; display: flex; flex-direction: column; gap: 8px; justify-content: center;">
+
+      {{!-- 骰子名称 --}}
+      <div class="dice-name" style="font-size: 15px; font-weight: bold; color: #6ca8d4;">
+        {{diceName}}{{#if consumedEx}} (消耗1EX){{/if}}
+      </div>
+
+      {{!-- 骰子类型 --}}
+      <div class="dice-type" style="font-size: 14px; color: #EBBD68;">
+        类型: {{diceType}}
+      </div>
+
+      {{!-- 骰子分类 --}}
+      <div class="dice-category" style="font-size: 14px; color: #EBBD68;">
+        分类: {{diceCategory}}
+      </div>
+
+      {{!-- 调整值（如果有） --}}
+      {{#if adjustment}}
+      <div class="dice-adjustment" style="font-size: 14px; color: #EBBD68;">
+        调整值: {{#if (gt adjustment 0)}}+{{/if}}{{adjustment}}
+      </div>
+      {{/if}}
+    </div>
+
+  </div>
+
+  {{!-- 下半部分：效果描述 --}}
+  {{#if diceEffect}}
+  <div class="counter-content-bottom">
+    <div class="dice-effect" style="font-size: 13px; color: #EBBD68; line-height: 1.6; padding: 10px; background: rgba(74, 124, 158, 0.1); border-radius: 4px; border: 1px solid rgba(74, 124, 158, 0.2); white-space: pre-line;">
+      <div style="font-weight: bold; margin-bottom: 4px; color: #6ca8d4;">效果:</div>
+      {{diceEffect}}
+    </div>
+  </div>
+  {{/if}}
+
+</div>
