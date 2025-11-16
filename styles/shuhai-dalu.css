@@ -9,6 +9,11 @@
   background: #0f0d1b !important;
   background-image: none !important;
   border: 1px solid var(--chat-message-border-color);
+  color: #CAC2B8;
+}
+
+.message-header{
+  color: #CAC2B8;
 }
 
 /* === 全局样式 === */
