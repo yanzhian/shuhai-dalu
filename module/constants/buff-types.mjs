@@ -179,6 +179,146 @@ export const BUFF_TYPES = {
       defaultLayers: 1,
       defaultStrength: 0
     }
+  ],
+
+  // 衍生BUFF - 增益类（只对特定攻击类别生效）
+  derivedPositive: [
+    // 斩击强壮
+    {
+      id: 'strong_slash',
+      name: '斩击强壮',
+      type: 'derivedPositive',
+      category: 'slash',
+      description: '一回合内 "斩击" 类别的 "战斗骰" 的 "骰数" 增加 等同于本效果层数的数值。',
+      icon: 'icons/svg/upgrade.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    },
+    // 突刺强壮
+    {
+      id: 'strong_pierce',
+      name: '突刺强壮',
+      type: 'derivedPositive',
+      category: 'pierce',
+      description: '一回合内 "突刺" 类别的 "战斗骰" 的 "骰数" 增加 等同于本效果层数的数值。',
+      icon: 'icons/svg/upgrade.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    },
+    // 打击强壮
+    {
+      id: 'strong_blunt',
+      name: '打击强壮',
+      type: 'derivedPositive',
+      category: 'blunt',
+      description: '一回合内 "打击" 类别的 "战斗骰" 的 "骰数" 增加 等同于本效果层数的数值。',
+      icon: 'icons/svg/upgrade.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    },
+    // 斩击守护
+    {
+      id: 'guard_slash',
+      name: '斩击守护',
+      type: 'derivedPositive',
+      category: 'slash',
+      description: '一回合内 受到 "斩击" 类别的攻击时 受到 最终伤害 减少 等同于本效果层数的数值。',
+      icon: 'icons/svg/shield.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    },
+    // 突刺守护
+    {
+      id: 'guard_pierce',
+      name: '突刺守护',
+      type: 'derivedPositive',
+      category: 'pierce',
+      description: '一回合内 受到 "突刺" 类别的攻击时 受到 最终伤害 减少 等同于本效果层数的数值。',
+      icon: 'icons/svg/shield.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    },
+    // 打击守护
+    {
+      id: 'guard_blunt',
+      name: '打击守护',
+      type: 'derivedPositive',
+      category: 'blunt',
+      description: '一回合内 受到 "打击" 类别的攻击时 受到 最终伤害 减少 等同于本效果层数的数值。',
+      icon: 'icons/svg/shield.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    }
+  ],
+
+  // 衍生BUFF - 减益类（只对特定攻击类别生效）
+  derivedNegative: [
+    // 斩击虚弱
+    {
+      id: 'weak_slash',
+      name: '斩击虚弱',
+      type: 'derivedNegative',
+      category: 'slash',
+      description: '一回合内 "斩击" 类别的 "战斗骰" 的 "骰数" 减少 等同于本效果层数的数值。',
+      icon: 'icons/svg/downgrade.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    },
+    // 突刺虚弱
+    {
+      id: 'weak_pierce',
+      name: '突刺虚弱',
+      type: 'derivedNegative',
+      category: 'pierce',
+      description: '一回合内 "突刺" 类别的 "战斗骰" 的 "骰数" 减少 等同于本效果层数的数值。',
+      icon: 'icons/svg/downgrade.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    },
+    // 打击虚弱
+    {
+      id: 'weak_blunt',
+      name: '打击虚弱',
+      type: 'derivedNegative',
+      category: 'blunt',
+      description: '一回合内 "打击" 类别的 "战斗骰" 的 "骰数" 减少 等同于本效果层数的数值。',
+      icon: 'icons/svg/downgrade.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    },
+    // 斩击易损
+    {
+      id: 'vulnerable_slash',
+      name: '斩击易损',
+      type: 'derivedNegative',
+      category: 'slash',
+      description: '一回合内 受到 "斩击" 类别的攻击时 受到 最终伤害 增加 等同于本效果层数的数值。',
+      icon: 'icons/svg/break.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    },
+    // 突刺易损
+    {
+      id: 'vulnerable_pierce',
+      name: '突刺易损',
+      type: 'derivedNegative',
+      category: 'pierce',
+      description: '一回合内 受到 "突刺" 类别的攻击时 受到 最终伤害 增加 等同于本效果层数的数值。',
+      icon: 'icons/svg/break.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    },
+    // 打击易损
+    {
+      id: 'vulnerable_blunt',
+      name: '打击易损',
+      type: 'derivedNegative',
+      category: 'blunt',
+      description: '一回合内 受到 "打击" 类别的攻击时 受到 最终伤害 增加 等同于本效果层数的数值。',
+      icon: 'icons/svg/break.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
+    }
   ]
 };
 
@@ -190,7 +330,9 @@ export function getAllBuffs() {
   return [
     ...BUFF_TYPES.positive,
     ...BUFF_TYPES.negative,
-    ...BUFF_TYPES.effect
+    ...BUFF_TYPES.effect,
+    ...BUFF_TYPES.derivedPositive,
+    ...BUFF_TYPES.derivedNegative
   ];
 }
 

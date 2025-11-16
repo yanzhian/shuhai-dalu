@@ -91,6 +91,43 @@
       "Items": "物品",
       "Biography": "背景"
     },
-    "Biography": "角色背景"
+    "Biography": "角色背景",
+    "Buff": {
+      "strong": "强壮",
+      "guard": "守护",
+      "swift": "迅捷",
+      "endure": "忍耐",
+      "weak": "虚弱",
+      "vulnerable": "易损",
+      "bound": "束缚",
+      "flaw": "破绽",
+      "rupture": "破裂",
+      "bleed": "流血",
+      "corruption_effect": "沉沦",
+      "burn": "燃烧",
+      "breath": "呼吸",
+      "charge": "充能",
+      "tremor": "震颤",
+      "ammo": "弹药",
+      "chant": "吟唱",
+      "paralyze": "麻痹",
+      "strong_slash": "斩击强壮",
+      "strong_pierce": "突刺强壮",
+      "strong_blunt": "打击强壮",
+      "guard_slash": "斩击守护",
+      "guard_pierce": "突刺守护",
+      "guard_blunt": "打击守护",
+      "weak_slash": "斩击虚弱",
+      "weak_pierce": "突刺虚弱",
+      "weak_blunt": "打击虚弱",
+      "vulnerable_slash": "斩击易损",
+      "vulnerable_pierce": "突刺易损",
+      "vulnerable_blunt": "打击易损"
+    },
+    "Category": {
+      "slash": "斩击",
+      "pierce": "突刺",
+      "blunt": "打击"
+    }
   }
 }
