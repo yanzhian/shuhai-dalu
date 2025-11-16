@@ -510,9 +510,7 @@ export default class CounterAreaApplication extends Application {
           counterAdjustment: adjustment,
           resultDescription: resultDescription
         }),
-        sound: CONFIG.sounds.dice,
-        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-        rolls: [roll]
+        sound: CONFIG.sounds.dice
       };
 
       await ChatMessage.create(chatData);
@@ -634,9 +632,7 @@ export default class CounterAreaApplication extends Application {
         winnerDiceId: initiatorWon ? this.initiateData.diceId : dice.id,
         finalDamage: finalDamage
       }),
-      sound: CONFIG.sounds.dice,
-      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-      rolls: [roll]
+      sound: CONFIG.sounds.dice
     };
 
     await ChatMessage.create(chatData);
@@ -895,9 +891,7 @@ export default class CounterAreaApplication extends Application {
         loserId: loserId,
         finalDamage: finalDamage
       }),
-      sound: CONFIG.sounds.dice,
-      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-      rolls: [roll]
+      sound: CONFIG.sounds.dice
     };
 
     await ChatMessage.create(chatData);
@@ -980,9 +974,7 @@ export default class CounterAreaApplication extends Application {
         initiatorDescription: initiatorDescription,
         initiatorAttackType: this.initiateData.diceCategory || '无属性'
       }),
-      sound: CONFIG.sounds.dice,
-      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-      rolls: [roll]
+      sound: CONFIG.sounds.dice
     };
 
     await ChatMessage.create(chatData);
@@ -1083,9 +1075,7 @@ export default class CounterAreaApplication extends Application {
         loserId: loser.id,
         finalDamage: finalDamage
       }),
-      sound: CONFIG.sounds.dice,
-      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-      rolls: [roll]
+      sound: CONFIG.sounds.dice
     };
 
     await ChatMessage.create(chatData);
@@ -1169,9 +1159,7 @@ export default class CounterAreaApplication extends Application {
         loserId: this.actor.id,
         finalDamage: finalDamage
       }),
-      sound: CONFIG.sounds.dice,
-      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-      rolls: [roll]
+      sound: CONFIG.sounds.dice
     };
 
     await ChatMessage.create(chatData);
@@ -1264,9 +1252,7 @@ export default class CounterAreaApplication extends Application {
         loserId: defenseSuccess ? null : this.actor.id,
         finalDamage: finalDamage
       }),
-      sound: CONFIG.sounds.dice,
-      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-      rolls: [roll]
+      sound: CONFIG.sounds.dice
     };
 
     await ChatMessage.create(chatData);
