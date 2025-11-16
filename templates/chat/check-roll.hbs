@@ -78,16 +78,16 @@
   box-shadow: 0 0 15px rgba(235, 189, 104, 0.3);
 }
 
-/* 侵蚀成功 - 紫蓝色边框 */
+/* 侵蚀成功 - 忧蓝色边框 */
 .shuhai-check-result.corrupt-success {
-  border: 3px solid #9b59b6;
-  box-shadow: 0 0 20px rgba(155, 89, 182, 0.4);
+  border: 3px solid #4a7c9e;
+  box-shadow: 0 0 20px rgba(74, 124, 158, 0.5);
 }
 
-/* 侵蚀失败 - 紫蓝色边框（稍淡） */
+/* 侵蚀失败 - 忧蓝色边框（稍淡） */
 .shuhai-check-result.corrupt-failure {
-  border: 3px solid #9b59b6;
-  box-shadow: 0 0 15px rgba(155, 89, 182, 0.3);
+  border: 3px solid #4a7c9e;
+  box-shadow: 0 0 15px rgba(74, 124, 158, 0.4);
 }
 
 /* 大成功 - 彩虹边框 */
@@ -111,10 +111,15 @@
   border-bottom: 2px solid rgba(235, 189, 104, 0.3);
 }
 
-.check-header h3 {
-  margin: 0;
-  font-size: 1.1rem;
+.shuhai-check-result .check-header h3 {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 1.1rem !important;
+  font-weight: bold !important;
   color: #EBBD68 !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8) !important;
+  background: none !important;
+  border: none !important;
 }
 
 .result-badge {
@@ -253,5 +258,26 @@
   line-height: 1.5;
   white-space: pre-line;
   color: #ECE4D6;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* 确保聊天消息中的所有文字都清晰可见 */
+.chat-message .shuhai-check-result,
+.chat-message .shuhai-check-result * {
+  color: #ECE4D6;
+}
+
+.chat-message .shuhai-check-result .check-header h3,
+.chat-message .shuhai-check-result h3 {
+  color: #EBBD68 !important;
+}
+
+.chat-message .shuhai-check-result .dice-value {
+  color: #EBBD68 !important;
+}
+
+.chat-message .shuhai-check-result .total {
+  color: #EBBD68 !important;
 }
 </style>
