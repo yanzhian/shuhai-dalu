@@ -1760,6 +1760,7 @@ async function preloadHandlebarsTemplates() {
     "systems/shuhai-dalu/templates/chat/item-card.hbs",
     "systems/shuhai-dalu/templates/chat/combat-dice-challenge.hbs",
     "systems/shuhai-dalu/templates/chat/combat-dice-initiate.hbs",
+    "systems/shuhai-dalu/templates/chat/combat-dice-counter.hbs",
     "systems/shuhai-dalu/templates/chat/counter-result.hbs",
     "systems/shuhai-dalu/templates/chat/counter-draw.hbs",
     "systems/shuhai-dalu/templates/chat/contest-result.hbs",

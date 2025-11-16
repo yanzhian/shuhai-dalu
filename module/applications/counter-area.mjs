@@ -368,9 +368,45 @@ export default class CounterAreaApplication extends Application {
   }
 
   /**
+   * 发送对抗者骰子信息到聊天
+   */
+  async _sendCounterDiceMessage(dice, adjustment, consumedEx) {
+    const counterDiceData = {
+      counterName: this.actor.name,
+      diceId: dice.id,
+      diceName: dice.name,
+      diceImg: dice.img,
+      diceCost: dice.system.cost,
+      diceFormula: dice.system.diceFormula,
+      diceType: dice.type === 'defenseDice' ? '守备骰' :
+                dice.type === 'triggerDice' ? '触发骰' :
+                dice.type === 'shootDice' ? '射击骰' : '战斗骰',
+      diceCategory: dice.system.category || '-',
+      diceEffect: dice.system.effect || '',
+      adjustment: adjustment,
+      consumedEx: consumedEx
+    };
+
+    const content = await renderTemplate(
+      "systems/shuhai-dalu/templates/chat/combat-dice-counter.hbs",
+      counterDiceData
+    );
+
+    await ChatMessage.create({
+      user: game.user.id,
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      content: content,
+      sound: null // 不播放声音，等投骰时再播放
+    });
+  }
+
+  /**
    * 执行对抗
    */
   async _performCounter(dice, adjustment, consumedEx = false, diceIndex = null) {
+    // 先发送对抗者选择骰子的聊天消息
+    await this._sendCounterDiceMessage(dice, adjustment, consumedEx);
+
     // 触发防守方的【攻击时】activities（防守方使用战斗骰进行对抗）
     await triggerItemActivities(this.actor, dice, 'onAttack');
 
@@ -474,9 +510,7 @@ export default class CounterAreaApplication extends Application {
           counterAdjustment: adjustment,
           resultDescription: resultDescription
         }),
-        sound: CONFIG.sounds.dice,
-        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-        rolls: [roll]
+        sound: CONFIG.sounds.dice
       };
 
       await ChatMessage.create(chatData);
@@ -598,9 +632,7 @@ export default class CounterAreaApplication extends Application {
         winnerDiceId: initiatorWon ? this.initiateData.diceId : dice.id,
         finalDamage: finalDamage
       }),
-      sound: CONFIG.sounds.dice,
-      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-      rolls: [roll]
+      sound: CONFIG.sounds.dice
     };
 
     await ChatMessage.create(chatData);
@@ -859,9 +891,7 @@ export default class CounterAreaApplication extends Application {
         loserId: loserId,
         finalDamage: finalDamage
       }),
-      sound: CONFIG.sounds.dice,
-      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-      rolls: [roll]
+      sound: CONFIG.sounds.dice
     };
 
     await ChatMessage.create(chatData);
@@ -944,9 +974,7 @@ export default class CounterAreaApplication extends Application {
         initiatorDescription: initiatorDescription,
         initiatorAttackType: this.initiateData.diceCategory || '无属性'
       }),
-      sound: CONFIG.sounds.dice,
-      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-      rolls: [roll]
+      sound: CONFIG.sounds.dice
     };
 
     await ChatMessage.create(chatData);
@@ -1047,9 +1075,7 @@ export default class CounterAreaApplication extends Application {
         loserId: loser.id,
         finalDamage: finalDamage
       }),
-      sound: CONFIG.sounds.dice,
-      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-      rolls: [roll]
+      sound: CONFIG.sounds.dice
     };
 
     await ChatMessage.create(chatData);
@@ -1133,9 +1159,7 @@ export default class CounterAreaApplication extends Application {
         loserId: this.actor.id,
         finalDamage: finalDamage
       }),
-      sound: CONFIG.sounds.dice,
-      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-      rolls: [roll]
+      sound: CONFIG.sounds.dice
     };
 
     await ChatMessage.create(chatData);
@@ -1228,9 +1252,7 @@ export default class CounterAreaApplication extends Application {
         loserId: defenseSuccess ? null : this.actor.id,
         finalDamage: finalDamage
       }),
-      sound: CONFIG.sounds.dice,
-      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-      rolls: [roll]
+      sound: CONFIG.sounds.dice
     };
 
     await ChatMessage.create(chatData);
