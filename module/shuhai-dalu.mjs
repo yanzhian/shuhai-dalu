@@ -171,9 +171,12 @@ Hooks.once('init', async function() {
   });
   
   console.log('书海大陆 | 表单已注册');
-  
+
   // 预加载 Handlebars 模板
-  return preloadHandlebarsTemplates();
+  await preloadHandlebarsTemplates();
+
+  // 手动注册 Activity 编辑器 V2 的 partials
+  await registerActivityEditorPartials();
 });
 
 /* -------------------------------------------- */
@@ -1777,6 +1780,32 @@ async function preloadHandlebarsTemplates() {
     "systems/shuhai-dalu/templates/hud/battle-area-hud.hbs"
   ]);
 }
+
+/**
+ * 手动注册 Activity 编辑器 V2 的 partials
+ * 确保它们在使用前已经注册
+ */
+async function registerActivityEditorPartials() {
+  const partials = [
+    { name: 'item-card/partials/trigger-editor', path: 'systems/shuhai-dalu/templates/item-card/partials/trigger-editor.hbs' },
+    { name: 'item-card/partials/condition-editor', path: 'systems/shuhai-dalu/templates/item-card/partials/condition-editor.hbs' },
+    { name: 'item-card/partials/consume-editor', path: 'systems/shuhai-dalu/templates/item-card/partials/consume-editor.hbs' },
+    { name: 'item-card/partials/effect-editor', path: 'systems/shuhai-dalu/templates/item-card/partials/effect-editor.hbs' },
+    { name: 'item-card/partials/usage-limit-editor', path: 'systems/shuhai-dalu/templates/item-card/partials/usage-limit-editor.hbs' }
+  ];
+
+  for (const partial of partials) {
+    try {
+      const response = await fetch(partial.path);
+      const template = await response.text();
+      Handlebars.registerPartial(partial.name, template);
+      console.log(`【系统初始化】已注册 partial: ${partial.name}`);
+    } catch (error) {
+      console.error(`【系统初始化】注册 partial 失败: ${partial.name}`, error);
+    }
+  }
+}
+
 
 /* -------------------------------------------- */
 /*  工具函数                                      */
