@@ -375,7 +375,8 @@
     console.log('  - 触发:', EXAMPLE_5.trigger.type);
     console.log('  - 被动:', EXAMPLE_5.trigger.passive);
     console.log('  - 类别过滤:', EXAMPLE_5.trigger.category);
-    console.log('  - 条件:', EXAMPLE_5.conditions[0].type, EXAMPLE_5.conditions[0].operator, EXAMPLE_5.conditions[0].value);
+    console.log('  - 条件数量:', EXAMPLE_5.conditions.length);
+    console.log('  - 效果:', EXAMPLE_5.effects[0].type);
 
     console.log('\n✅ 测试8完成');
   }
