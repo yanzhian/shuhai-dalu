@@ -141,6 +141,9 @@
       return;
     }
 
+    // 清理测试 BUFF（避免累加）
+    await actor.clearBuff('burn');
+
     // 准备测试：添加 BUFF
     await actor.addBuff('burn', 12, 0, 'current');
 
@@ -186,9 +189,10 @@
       return;
     }
 
-    // 清除现有 BUFF
+    // 清除现有 BUFF（避免累加）
     await actor.clearBuff('strong');
     await actor.clearBuff('guard');
+    await actor.clearBuff('charge');
 
     const context = createContext(actor, null, null, null, game.combat);
 
@@ -231,6 +235,11 @@
       console.error('❌ 没有找到测试 Actor');
       return;
     }
+
+    // 清除测试 BUFF（避免累加）
+    await actor.clearBuff('chant');
+    await actor.clearBuff('charge');
+    await actor.clearBuff('ammo');
 
     // 准备测试：添加资源
     await actor.addBuff('chant', 10, 0, 'current');
@@ -286,11 +295,11 @@
       return;
     }
 
-    // 清除测试 BUFF
-    await actor.clearBuff('strong');
+    // 清除测试 BUFF（避免累加）
+    await actor.clearBuff('guard');
     await actor.clearBuff('charge');
 
-    // 使用 EXAMPLE_1：使用时获得双重增益
+    // 使用 EXAMPLE_1：使用时获得双重增益（添加 guard(2层) 和 charge(5层)）
     const activity = EXAMPLE_1;
 
     const context = createContext(actor, null, null, null, game.combat);
@@ -298,13 +307,13 @@
 
     const result = await ActivityExecutor.execute(activity, context);
 
-    const strongBuff = actor.getBuff('strong');
+    const guardBuff = actor.getBuff('guard');
     const chargeBuff = actor.getBuff('charge');
 
     console.log('6.1 完整执行 EXAMPLE_1:', result.success ? '✅' : '❌',
       `(执行${result.success ? '成功' : '失败'})`);
-    console.log('6.2 强壮层数:', strongBuff?.layers === 2 ? '✅' : '❌',
-      `(期望: 2, 实际: ${strongBuff?.layers})`);
+    console.log('6.2 守护层数:', guardBuff?.layers === 2 ? '✅' : '❌',
+      `(期望: 2, 实际: ${guardBuff?.layers})`);
     console.log('6.3 充能层数:', chargeBuff?.layers === 5 ? '✅' : '❌',
       `(期望: 5, 实际: ${chargeBuff?.layers})`);
     console.log('6.4 效果结果数量:', result.effectResults?.length === 2 ? '✅' : '❌',
