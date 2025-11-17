@@ -9,7 +9,7 @@
 - **Foundry Compatibility**: v13+ (verified: v13.5)
 - **Language**: JavaScript ES6 Modules (.mjs)
 - **Localization**: 简体中文 (zh-CN)
-- **Codebase Size**: ~12,640+ lines across 21 modules
+- **Codebase Size**: ~12,939+ lines across 22 modules
 
 ### Key Features
 - Dual-dice check system (Hope vs Corruption)
@@ -47,24 +47,25 @@
 ```
 shuhai-dalu/
 ├── module/                      # Core JavaScript modules
-│   ├── shuhai-dalu.mjs         # Main entry point (2,014 lines)
+│   ├── shuhai-dalu.mjs         # Main entry point (2,097 lines)
 │   │
 │   ├── applications/           # UI Applications
 │   │   ├── combat-area.mjs     # Individual combat interface
 │   │   ├── counter-area.mjs    # Counter/accept dialog
 │   │   ├── battle-area-hud.mjs # Player party HUD
-│   │   └── enemy-battle-area-hud.mjs # Enemy HUD
+│   │   ├── enemy-battle-area-hud.mjs # Enemy HUD
+│   │   └── special-dice-dialog.mjs # Special dice selection dialog
 │   │
 │   ├── constants/              # System Constants
-│   │   ├── buff-types.mjs      # BUFF definitions
+│   │   ├── buff-types.mjs      # BUFF definitions (includes derived types)
 │   │   └── activity-types.mjs  # Activity triggers/targets
 │   │
 │   ├── data/                   # Data Models
-│   │   └── CharacterData.mjs   # Character schema (265 lines)
+│   │   └── CharacterData.mjs   # Character schema (264 lines)
 │   │
 │   ├── documents/              # Document Extensions
-│   │   ├── actor.mjs           # Actor logic (588 lines)
-│   │   └── item.mjs            # Item logic (1,125 lines)
+│   │   ├── actor.mjs           # Actor logic (627 lines)
+│   │   └── item.mjs            # Item logic (1,218 lines)
 │   │
 │   ├── helpers/                # Utility Functions
 │   │   ├── effect-registry.mjs # Effect implementations
@@ -72,13 +73,16 @@ shuhai-dalu/
 │   │   └── activity-executor.mjs # Activity execution engine
 │   │
 │   ├── services/               # Business Logic
-│   │   └── combat-effects.mjs  # Combat effect processing
+│   │   ├── combat-effects.mjs  # Combat effect processing
+│   │   └── activity-service.mjs # Activity trigger service
 │   │
 │   └── sheets/                 # Sheet Classes
 │       ├── actor-sheet.mjs     # Base actor sheet
 │       ├── player-sheet.mjs    # Player-specific sheet
 │       ├── item-sheet.mjs      # Item editor
-│       └── item-card-sheet.mjs # Item card view
+│       ├── item-sheet-new.mjs  # New item editor (experimental)
+│       ├── item-card-sheet.mjs # Item card view
+│       └── activity-editor.mjs # Activity editor component
 │
 ├── templates/                  # Handlebars Templates
 │   ├── actor/                  # Character sheets
@@ -86,7 +90,8 @@ shuhai-dalu/
 │   ├── combat/                 # Combat UI templates
 │   ├── dialog/                 # Dialog templates
 │   ├── hud/                    # HUD overlay templates
-│   └── item/                   # Item sheets & partials
+│   ├── item/                   # Item sheets & partials
+│   └── item-card/              # Item card templates
 │
 ├── styles/                     # CSS Stylesheets
 │   ├── shuhai-dalu.css        # Main styles
@@ -98,6 +103,11 @@ shuhai-dalu/
 │   └── zh-CN.json             # Chinese translations
 │
 ├── assets/                     # Icons and Images
+│   └── icons/                  # Icon files
+│
+├── ui/                         # UI Assets
+│   ├── parchment.jpg           # Background texture
+│   └── resize-handle.webp      # Window resize handle
 │
 ├── system.json                 # System manifest
 ├── debug.mjs                   # Browser debugging script
@@ -265,6 +275,24 @@ Skip defense roll (saves resources)
 - **吟唱 (Chant)**: Resource for spells
 - **麻痹 (Paralyze)**: Halve next attack
 
+#### Derived BUFFs (category-specific, one-round)
+
+**Derived Positive BUFFs** (only affect specific attack categories):
+- **斩击强壮 (Slash Strong)**: +layers to slash attack dice
+- **突刺强壮 (Pierce Strong)**: +layers to pierce attack dice
+- **打击强壮 (Blunt Strong)**: +layers to blunt attack dice
+- **斩击守护 (Slash Guard)**: -layers damage from slash attacks
+- **突刺守护 (Pierce Guard)**: -layers damage from pierce attacks
+- **打击守护 (Blunt Guard)**: -layers damage from blunt attacks
+
+**Derived Negative BUFFs** (only affect specific attack categories):
+- **斩击虚弱 (Slash Weak)**: -layers to slash attack dice
+- **突刺虚弱 (Pierce Weak)**: -layers to pierce attack dice
+- **打击虚弱 (Blunt Weak)**: -layers to blunt attack dice
+- **斩击易损 (Slash Vulnerable)**: +layers damage from slash attacks
+- **突刺易损 (Pierce Vulnerable)**: +layers damage from pierce attacks
+- **打击易损 (Blunt Vulnerable)**: +layers damage from blunt attacks
+
 #### Round Timing System
 ```javascript
 roundTiming: "current" | "next" | "both"
@@ -422,6 +450,45 @@ effectRegistry.onDamaged.myNewBuff = async function(actor, buff, context) {
   "SHUHAI.Buff.myNewBuffDesc": "效果描述"
 }
 ```
+
+### Using Derived BUFF Types
+
+Derived BUFFs are category-specific versions of standard BUFFs that only affect certain attack types:
+
+**When to use derived BUFFs**:
+- When you want to grant bonuses/penalties only to specific attack categories
+- For abilities that enhance particular weapon types (slash, pierce, blunt)
+- For enemies with specific resistances or vulnerabilities
+
+**Available derived BUFF IDs**:
+- Positive: `strong_slash`, `strong_pierce`, `strong_blunt`, `guard_slash`, `guard_pierce`, `guard_blunt`
+- Negative: `weak_slash`, `weak_pierce`, `weak_blunt`, `vulnerable_slash`, `vulnerable_pierce`, `vulnerable_blunt`
+
+**Example usage in activities**:
+```javascript
+effects: [
+  {
+    type: 'addBuff',
+    buffId: 'strong_slash',  // Only boosts slash attacks
+    target: 'self',
+    layers: 3,
+    roundTiming: 'current'
+  },
+  {
+    type: 'addBuff',
+    buffId: 'vulnerable_pierce',  // Only vulnerable to pierce
+    target: 'opponent',
+    layers: 2,
+    roundTiming: 'next'
+  }
+]
+```
+
+**Implementation notes**:
+- Derived BUFFs follow the same timing rules as standard one-round BUFFs
+- They are cleared at round end along with other one-round BUFFs
+- The `category` property in BUFF definition determines which attack type is affected
+- System checks both standard BUFFs and derived BUFFs when calculating combat modifiers
 
 ### Adding a New Activity Trigger
 
@@ -676,7 +743,9 @@ console.log('【伤害】Applying damage:', damage, 'to', actor.name);
 - **`module/applications/combat-area.mjs`**: Individual combat UI
 - **`module/applications/counter-area.mjs`**: Counter/accept dialog
 - **`module/applications/battle-area-hud.mjs`**: Party HUD
+- **`module/applications/special-dice-dialog.mjs`**: Special dice selection dialog
 - **`module/services/combat-effects.mjs`**: Combat effect processing
+- **`module/services/activity-service.mjs`**: Activity trigger service
 
 ### Activity System
 - **`module/helpers/activity-executor.mjs`**: Activity execution engine
@@ -691,8 +760,10 @@ console.log('【伤害】Applying damage:', damage, 'to', actor.name);
 ### UI Sheets
 - **`module/sheets/actor-sheet.mjs`**: Base actor sheet
 - **`module/sheets/player-sheet.mjs`**: Player-specific sheet
+- **`module/sheets/item-sheet.mjs`**: Item editor
+- **`module/sheets/item-sheet-new.mjs`**: New item editor (experimental)
 - **`module/sheets/item-card-sheet.mjs`**: Item card editor
-- **`module/sheets/activity-editor.mjs`**: Activity editor
+- **`module/sheets/activity-editor.mjs`**: Activity editor component
 
 ### Templates
 - **`templates/actor/actor-player-sheet.hbs`**: Main character sheet
@@ -981,6 +1052,10 @@ ui.notifications.error('Error message');
 ### v2.0.0 (Current)
 - Refactored activities system
 - Added Actor BUFF management methods
+- Added derived BUFF types for specific attack categories (slash, pierce, blunt)
+- Added special dice selection dialog
+- Added activity service module
+- Fixed check roll visibility issues
 - Fixed initiative roll errors
 - Fixed combat dice type filtering
 - Fixed Flash Strike (☪) and Discard (✦) functionality
@@ -1041,5 +1116,5 @@ ui.notifications.error('Error message');
 
 ---
 
-*Last Updated: 2025-11-15*
-*Document Version: 1.0*
+*Last Updated: 2025-11-17*
+*Document Version: 1.1*
