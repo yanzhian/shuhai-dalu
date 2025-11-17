@@ -33,8 +33,9 @@ export const EFFECT_TYPES = {
       const layers = ExpressionParser.parse(effect.layers, context);
       const strength = ExpressionParser.parse(effect.strength, context);
 
-      // 添加BUFF
-      await targetActor.addBuff(effect.buffId, layers, strength);
+      // 添加BUFF（使用 context.roundTiming 如果有的话）
+      const roundTiming = context.roundTiming || 'current';
+      await targetActor.addBuff(effect.buffId, layers, strength, roundTiming);
 
       return { success: true, message: `为${targetActor.name}添加${layers}层${effect.buffId}` };
     }

@@ -5,6 +5,8 @@
  * 处理物品活动（Activity）的触发和效果应用
  */
 
+import { EFFECT_TYPES } from '../helpers/effect-registry.mjs';
+
 /**
  * 触发物品活动
  * @param {Actor} actor - 角色
@@ -42,8 +44,46 @@ export async function triggerItemActivities(actor, item, triggerType) {
       continue;
     }
 
-    // 应用效果
-    if (activity.effects && Object.keys(activity.effects).length > 0) {
+    // 应用效果 - 支持新旧两种格式
+    if (activity.effectsList && Array.isArray(activity.effectsList) && activity.effectsList.length > 0) {
+      // 新格式：effectsList 数组
+      console.log('【Activity执行】执行新格式效果:', activity.effectsList);
+
+      for (const effect of activity.effectsList) {
+        const effectType = EFFECT_TYPES[effect.type];
+        if (!effectType) {
+          console.warn('【Activity执行】未知效果类型:', effect.type);
+          continue;
+        }
+
+        // 创建执行上下文
+        const context = {
+          actor,
+          item,
+          roundTiming,
+          getTarget: (targetType) => {
+            if (targetType === 'self') return actor;
+            return actor; // 默认返回自己
+          }
+        };
+
+        try {
+          // 执行效果
+          const result = await effectType.execute(effect.params, context);
+          if (result.success) {
+            console.log('【Activity执行】效果执行成功:', effect.type, result.message);
+            hasTriggered = true;
+          } else {
+            console.warn('【Activity执行】效果执行失败:', effect.type, result.reason);
+          }
+        } catch (error) {
+          console.error('【Activity执行】效果执行错误:', effect.type, error);
+        }
+      }
+    } else if (activity.effects && Object.keys(activity.effects).length > 0) {
+      // 旧格式：effects 对象（向后兼容）
+      console.log('【Activity执行】执行旧格式效果:', activity.effects);
+
       for (const [buffId, effectData] of Object.entries(activity.effects)) {
         const layers = parseInt(effectData.layers) || 0;
         const strength = parseInt(effectData.strength) || 0;
@@ -108,8 +148,47 @@ export async function triggerItemActivitiesWithTarget(sourceActor, item, trigger
       continue;
     }
 
-    // 应用效果
-    if (activity.effects && Object.keys(activity.effects).length > 0) {
+    // 应用效果 - 支持新旧两种格式
+    if (activity.effectsList && Array.isArray(activity.effectsList) && activity.effectsList.length > 0) {
+      // 新格式：effectsList 数组
+      console.log('【Activity执行】执行新格式效果 (带目标):', activity.effectsList);
+
+      for (const effect of activity.effectsList) {
+        const effectType = EFFECT_TYPES[effect.type];
+        if (!effectType) {
+          console.warn('【Activity执行】未知效果类型:', effect.type);
+          continue;
+        }
+
+        // 创建执行上下文
+        const context = {
+          actor: sourceActor,
+          item,
+          roundTiming,
+          getTarget: (targetType) => {
+            if (targetType === 'self') return sourceActor;
+            if (targetType === 'selected' || targetType === 'target') return actualTarget;
+            return actualTarget; // 默认返回实际目标
+          }
+        };
+
+        try {
+          // 执行效果
+          const result = await effectType.execute(effect.params, context);
+          if (result.success) {
+            console.log('【Activity执行】效果执行成功:', effect.type, result.message);
+            hasTriggered = true;
+          } else {
+            console.warn('【Activity执行】效果执行失败:', effect.type, result.reason);
+          }
+        } catch (error) {
+          console.error('【Activity执行】效果执行错误:', effect.type, error);
+        }
+      }
+    } else if (activity.effects && Object.keys(activity.effects).length > 0) {
+      // 旧格式：effects 对象（向后兼容）
+      console.log('【Activity执行】执行旧格式效果 (带目标):', activity.effects);
+
       for (const [buffId, effectData] of Object.entries(activity.effects)) {
         const layers = parseInt(effectData.layers) || 0;
         const strength = parseInt(effectData.strength) || 0;
