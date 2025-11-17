@@ -136,8 +136,8 @@ export default class SpecialDiceDialog extends Application {
       console.warn(`【警告】骰子索引无效: ${diceIndex}`);
     }
 
-    // 触发效果
-    const { triggerItemActivities } = await import('../shuhai-dalu.mjs');
+    // 触发效果（使用新的 Activity 系统）
+    const { triggerItemActivities } = await import('../services/activity-service.mjs');
     const triggered = await triggerItemActivities(this.actor, dice, this.triggerType);
 
     if (triggered) {

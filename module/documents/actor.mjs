@@ -611,8 +611,11 @@ export default class ShuhaiActor extends Actor {
    * 受到伤害
    * @param {number} amount - 伤害量
    * @param {string} type - 伤害类型 (direct/normal等)
+   * @param {Object} options - 额外选项
+   * @param {Actor} options.attacker - 攻击者（用于触发 Activities）
+   * @param {string} options.damageType - 伤害类型（slash/pierce/blunt）
    */
-  async takeDamage(amount, type = 'normal') {
+  async takeDamage(amount, type = 'normal', options = {}) {
     const currentHP = this.system.attributes?.hp?.value || this.system.derived?.hp?.value || 0;
     const newHP = Math.max(0, currentHP - amount);
 
@@ -622,6 +625,13 @@ export default class ShuhaiActor extends Actor {
     } else if (this.system.derived?.hp) {
       await this.update({ 'system.derived.hp.value': newHP });
     }
+
+    // 触发 onDamaged 活动
+    await this.executeActivities('onDamaged', {
+      target: options.attacker,
+      damage: amount,
+      damageType: options.damageType
+    });
 
     return newHP;
   }
