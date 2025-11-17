@@ -1,0 +1,310 @@
+{{!-- 标签页切换 --}}
+<div class="tabs">
+  <button type="button" class="tab-btn {{#if isBasicMode}}active{{/if}}" data-mode="basic">基础编辑器</button>
+  <button type="button" class="tab-btn {{#if isAdvancedMode}}active{{/if}}" data-mode="advanced">高级(JSON)</button>
+</div>
+
+{{!-- 基础编辑器 --}}
+{{#if isBasicMode}}
+<form class="activity-editor-form">
+
+  {{!-- Activity 名称 --}}
+  <div class="form-group">
+    <label>活动名称</label>
+    <input type="text" name="name" value="{{activity.name}}" placeholder="例如：攻击命中时-燃烧效果" />
+  </div>
+
+  {{!-- 触发时机 --}}
+  <div class="form-group">
+    <label>触发时机</label>
+    <select name="trigger">
+      <option value="onUse" {{#if (eq activity.trigger "onUse")}}selected{{/if}}>使用时</option>
+      <option value="onAttack" {{#if (eq activity.trigger "onAttack")}}selected{{/if}}>攻击时</option>
+      <option value="onCounter" {{#if (eq activity.trigger "onCounter")}}selected{{/if}}>对抗时</option>
+      <option value="onCounterSuccess" {{#if (eq activity.trigger "onCounterSuccess")}}selected{{/if}}>对抗成功</option>
+      <option value="onCounterFail" {{#if (eq activity.trigger "onCounterFail")}}selected{{/if}}>对抗失败</option>
+      <option value="onHit" {{#if (eq activity.trigger "onHit")}}selected{{/if}}>攻击命中</option>
+      <option value="onDamaged" {{#if (eq activity.trigger "onDamaged")}}selected{{/if}}>受到伤害</option>
+      <option value="onTurnStart" {{#if (eq activity.trigger "onTurnStart")}}selected{{/if}}>回合开始</option>
+      <option value="onTurnEnd" {{#if (eq activity.trigger "onTurnEnd")}}selected{{/if}}>回合结束</option>
+      <option value="onFlashStrike" {{#if (eq activity.trigger "onFlashStrike")}}selected{{/if}}>闪击☪</option>
+      <option value="onDiscard" {{#if (eq activity.trigger "onDiscard")}}selected{{/if}}>丢弃✦</option>
+    </select>
+  </div>
+
+  {{!-- 目标选择 --}}
+  <div class="form-group">
+    <label>目标</label>
+    <select name="target">
+      <option value="selected" {{#if (eq activity.target "selected")}}selected{{/if}}>选择的目标</option>
+      <option value="self" {{#if (eq activity.target "self")}}selected{{/if}}>自己</option>
+      <option value="multiple" {{#if (eq activity.target "multiple")}}selected{{/if}}>多个目标</option>
+    </select>
+  </div>
+
+  {{!-- 回合计数选择 --}}
+  <div class="form-group">
+    <label>回合</label>
+    <select name="roundTiming">
+      <option value="current" {{#unless activity.roundTiming}}selected{{/unless}}{{#if (eq activity.roundTiming "current")}}selected{{/if}}>本回合</option>
+      <option value="next" {{#if (eq activity.roundTiming "next")}}selected{{/if}}>下回合</option>
+      <option value="both" {{#if (eq activity.roundTiming "both")}}selected{{/if}}>本回合和下回合</option>
+    </select>
+  </div>
+
+  {{!-- 消耗列表 --}}
+  <div class="form-group">
+    <label>
+      <input type="checkbox" name="hasConsume" {{#if activity.hasConsume}}checked{{/if}} class="has-consume-checkbox" />
+      需要消耗
+    </label>
+    {{#if activity.hasConsume}}
+      <div class="dynamic-list consumes-list">
+        {{#each activity.consumes as |consume idx|}}
+          <div class="dynamic-row" data-index="{{idx}}">
+            <select name="consumes.{{idx}}.buffId">
+              {{#each ../buffPresets as |buff|}}
+                <option value="{{buff.id}}" {{#if (eq buff.id consume.buffId)}}selected{{/if}}>{{buff.name}}</option>
+              {{/each}}
+            </select>
+            <input type="number" name="consumes.{{idx}}.layers" value="{{consume.layers}}" placeholder="层数" />
+            <input type="number" name="consumes.{{idx}}.strength" value="{{consume.strength}}" placeholder="强度" />
+            <button type="button" class="remove-btn remove-consume-btn" data-index="{{idx}}"><i class="fas fa-times"></i></button>
+          </div>
+        {{/each}}
+        <button type="button" class="add-btn add-consume-btn"><i class="fas fa-plus"></i> 添加消耗</button>
+      </div>
+    {{/if}}
+  </div>
+
+  {{!-- 效果添加 --}}
+  <div class="form-group">
+    <label>效果添加</label>
+    <div class="dynamic-list effects-list">
+      {{#each activity.effectsList as |effect idx|}}
+        <div class="dynamic-row" data-index="{{idx}}">
+          <select name="effects.{{idx}}.buffId" class="effect-select">
+            {{#each ../buffPresets as |buff|}}
+              <option value="{{buff.id}}" {{#if (eq buff.id effect.buffId)}}selected{{/if}}>{{buff.name}}</option>
+            {{/each}}
+          </select>
+          <input type="text" name="effects.{{idx}}.layers" value="{{effect.layers}}" placeholder="层数(可用骰子)" />
+          <input type="text" name="effects.{{idx}}.strength" value="{{effect.strength}}" placeholder="强度(可用骰子)" />
+          <button type="button" class="remove-btn remove-effect-btn" data-index="{{idx}}"><i class="fas fa-times"></i></button>
+        </div>
+      {{/each}}
+      <button type="button" class="add-btn add-effect-btn"><i class="fas fa-plus"></i> 添加效果</button>
+    </div>
+  </div>
+
+  {{!-- 自定义效果 --}}
+  <div class="form-group">
+    <label>
+      <input type="checkbox" name="customEffect.enabled" {{#if activity.customEffect.enabled}}checked{{/if}} class="custom-effect-checkbox" />
+      其他效果
+    </label>
+    {{#if activity.customEffect.enabled}}
+      <div class="custom-effect-fields">
+        <input type="text" name="customEffect.name" value="{{activity.customEffect.name}}" placeholder="效果名称" />
+        <input type="text" name="customEffect.layers" value="{{activity.customEffect.layers}}" placeholder="层数(可用骰子)" />
+        <input type="text" name="customEffect.strength" value="{{activity.customEffect.strength}}" placeholder="强度(可用骰子)" />
+      </div>
+    {{/if}}
+  </div>
+
+  {{!-- 保存和取消按钮 --}}
+  <div class="form-actions">
+    <button type="button" class="cancel-btn">取消</button>
+    <button type="submit" class="save-btn">保存</button>
+  </div>
+
+</form>
+{{/if}}
+
+{{!-- 高级JSON编辑器 --}}
+{{#if isAdvancedMode}}
+<div class="json-editor-container">
+  <div class="json-toolbar">
+    <button type="button" class="validate-json-btn">验证</button>
+    <button type="button" class="format-json-btn">格式化</button>
+  </div>
+  <textarea class="json-editor" rows="20" spellcheck="false">{{activityJSON}}</textarea>
+  <div class="json-preview"></div>
+  <div class="form-actions">
+    <button type="button" class="cancel-btn">取消</button>
+    <button type="button" class="save-btn">保存</button>
+  </div>
+</div>
+{{/if}}
+
+<style>
+.tabs {
+  display: flex;
+  border-bottom: 2px solid #444;
+  margin-bottom: 1rem;
+}
+
+.tab-btn {
+  padding: 0.5rem 1rem;
+  background: none;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+
+.tab-btn.active {
+  color: #fff;
+  border-bottom-color: #EBBD68;
+}
+
+.tab-btn:hover {
+  color: #ddd;
+}
+
+.json-editor-container {
+  padding: 1rem;
+}
+
+.json-toolbar {
+  margin-bottom: 0.5rem;
+}
+
+.json-toolbar button {
+  margin-right: 0.5rem;
+}
+
+.json-editor {
+  width: 100%;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  background: #1a1a1a;
+  color: #fff;
+  border: 1px solid #444;
+  padding: 0.5rem;
+  resize: vertical;
+}
+
+.json-preview {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #aaa;
+}
+
+.activity-editor-form .form-group {
+  margin-bottom: 1rem;
+}
+
+.activity-editor-form label {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #EBBD68;
+}
+
+.activity-editor-form input[type="text"],
+.activity-editor-form input[type="number"],
+.activity-editor-form select {
+  width: 100%;
+  padding: 0.5rem;
+  background: #222;
+  border: 1px solid #444;
+  color: #fff;
+  border-radius: 4px;
+}
+
+.dynamic-list {
+  margin-top: 0.5rem;
+}
+
+.dynamic-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+.dynamic-row select {
+  flex: 2;
+}
+
+.dynamic-row input {
+  flex: 1;
+}
+
+.remove-btn {
+  padding: 0.25rem 0.5rem;
+  background: #c44;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.remove-btn:hover {
+  background: #d55;
+}
+
+.add-btn {
+  padding: 0.5rem 1rem;
+  background: #4c8;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.add-btn:hover {
+  background: #5d9;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #444;
+}
+
+.cancel-btn, .save-btn {
+  padding: 0.5rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.cancel-btn {
+  background: #666;
+  color: #fff;
+}
+
+.cancel-btn:hover {
+  background: #777;
+}
+
+.save-btn {
+  background: #EBBD68;
+  color: #0F0D1B;
+}
+
+.save-btn:hover {
+  background: #f3c267;
+}
+
+.custom-effect-fields {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.custom-effect-fields input {
+  flex: 1;
+}
+</style>
