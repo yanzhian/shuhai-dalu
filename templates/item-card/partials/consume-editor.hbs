@@ -1,0 +1,113 @@
+<div class="form-section consume-editor">
+  <h3 style="color: #D0021B;">
+    <i class="fas fa-battery-half"></i> 消耗
+  </h3>
+
+  <div class="form-group">
+    <label>消耗模式</label>
+    <select name="consume.mode">
+      {{#each consumeModes}}
+        <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+      {{/each}}
+    </select>
+  </div>
+
+  {{!-- 强制消耗模式 --}}
+  {{#if (eq activity.consume.mode 'mandatory')}}
+    <div class="mandatory-consume">
+      <h4>
+        强制消耗资源
+        <button type="button" class="add-consume-resource-btn icon-btn" title="添加资源">
+          <i class="fas fa-plus"></i>
+        </button>
+      </h4>
+
+      {{#if activity.consume.resources}}
+        {{#each activity.consume.resources}}
+          <div class="consume-resource-item">
+            <div class="form-row">
+              <div class="form-group">
+                <label>类型</label>
+                <select name="consume.resources.{{@index}}.type">
+                  <option value="buff" {{#if (eq this.type 'buff')}}selected{{/if}}>BUFF</option>
+                  <option value="resource" {{#if (eq this.type 'resource')}}selected{{/if}}>资源</option>
+                </select>
+              </div>
+
+              {{#if (eq this.type 'buff')}}
+                <div class="form-group">
+                  <label>BUFF ID</label>
+                  <input type="text" name="consume.resources.{{@index}}.buffId" value="{{this.buffId}}" placeholder="charge" />
+                </div>
+                <div class="form-group">
+                  <label>层数</label>
+                  <input type="number" name="consume.resources.{{@index}}.layers" value="{{this.layers}}" placeholder="1" />
+                </div>
+              {{/if}}
+
+              {{#if (eq this.type 'resource')}}
+                <div class="form-group">
+                  <label>资源类型</label>
+                  <select name="consume.resources.{{@index}}.resourceType">
+                    <option value="cost" {{#if (eq this.resourceType 'cost')}}selected{{/if}}>Cost</option>
+                    <option value="ex" {{#if (eq this.resourceType 'ex')}}selected{{/if}}>EX</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>数量</label>
+                  <input type="number" name="consume.resources.{{@index}}.count" value="{{this.count}}" placeholder="1" />
+                </div>
+              {{/if}}
+
+              <button type="button" class="remove-consume-resource-btn icon-btn" data-index="{{@index}}" title="删除">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        {{/each}}
+      {{else}}
+        <div class="empty-state small">
+          <p>点击 + 添加消耗资源</p>
+        </div>
+      {{/if}}
+    </div>
+  {{/if}}
+
+  {{!-- 可选消耗模式 --}}
+  {{#if (eq activity.consume.mode 'optional')}}
+    <div class="optional-consume">
+      <h4>
+        可选消耗（2-3选项）
+        <button type="button" class="add-consume-option-btn icon-btn" title="添加选项">
+          <i class="fas fa-plus"></i>
+        </button>
+      </h4>
+
+      <div class="help-text">玩家可以选择其中一个选项进行消耗</div>
+
+      {{#if activity.consume.options}}
+        {{#each activity.consume.options}}
+          <div class="consume-option-item">
+            <div class="option-header">
+              <span>选项 {{inc @index}}</span>
+              <button type="button" class="remove-consume-option-btn icon-btn" data-index="{{@index}}" title="删除">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="option-summary">
+              {{!-- 简化显示，详细编辑需要通过对话框 --}}
+              <span class="badge">{{this.length}} 个资源</span>
+              <button type="button" class="edit-consume-option-btn" data-index="{{@index}}">
+                <i class="fas fa-edit"></i> 编辑选项
+              </button>
+            </div>
+          </div>
+        {{/each}}
+      {{else}}
+        <div class="empty-state small">
+          <p>点击 + 添加消耗选项</p>
+        </div>
+      {{/if}}
+    </div>
+  {{/if}}
+</div>

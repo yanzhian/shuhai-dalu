@@ -1,0 +1,101 @@
+<div class="form-section condition-editor">
+  <h3 style="color: #F5A623;">
+    <i class="fas fa-filter"></i> 前置条件
+    <button type="button" class="add-condition-btn icon-btn" title="添加条件">
+      <i class="fas fa-plus"></i>
+    </button>
+  </h3>
+
+  <div class="help-text">只有满足所有条件时，Activity 才会生效</div>
+
+  {{#if activity.conditions}}
+    {{#each activity.conditions}}
+      <div class="condition-item">
+        <div class="condition-header">
+          <span class="condition-index">条件 {{inc @index}}</span>
+          <button type="button" class="remove-condition-btn icon-btn" data-index="{{@index}}" title="删除">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="condition-fields">
+          <div class="form-group">
+            <label>条件类型</label>
+            <select name="conditions.{{@index}}.type">
+              <option value="hasBuff" {{#if (eq this.type 'hasBuff')}}selected{{/if}}>拥有BUFF</option>
+              <option value="buffLayer" {{#if (eq this.type 'buffLayer')}}selected{{/if}}>BUFF层数</option>
+              <option value="resourceCount" {{#if (eq this.type 'resourceCount')}}selected{{/if}}>资源数量</option>
+              <option value="healthPercent" {{#if (eq this.type 'healthPercent')}}selected{{/if}}>生命值%</option>
+            </select>
+          </div>
+
+          {{!-- hasBuff: 只需要 buffId --}}
+          {{#if (eq this.type 'hasBuff')}}
+            <div class="form-group">
+              <label>BUFF ID</label>
+              <input type="text" name="conditions.{{@index}}.buffId" value="{{this.buffId}}" placeholder="strong" />
+            </div>
+          {{/if}}
+
+          {{!-- buffLayer: 需要 buffId + operator + value --}}
+          {{#if (eq this.type 'buffLayer')}}
+            <div class="form-group">
+              <label>BUFF ID</label>
+              <input type="text" name="conditions.{{@index}}.buffId" value="{{this.buffId}}" placeholder="charge" />
+            </div>
+            <div class="form-group inline-group">
+              <label>比较</label>
+              <select name="conditions.{{@index}}.operator" class="narrow">
+                <option value=">=" {{#if (eq this.operator '>=')}}selected{{/if}}>>=</option>
+                <option value=">" {{#if (eq this.operator '>')}}selected{{/if}}>&gt;</option>
+                <option value="<=" {{#if (eq this.operator '<=')}}selected{{/if}}><=</option>
+                <option value="<" {{#if (eq this.operator '<')}}selected{{/if}}>&lt;</option>
+                <option value="==" {{#if (eq this.operator '==')}}selected{{/if}}>==</option>
+              </select>
+              <input type="number" name="conditions.{{@index}}.value" value="{{this.value}}" class="narrow" />
+            </div>
+          {{/if}}
+
+          {{!-- resourceCount: 需要 resourceType + operator + value --}}
+          {{#if (eq this.type 'resourceCount')}}
+            <div class="form-group">
+              <label>资源类型</label>
+              <select name="conditions.{{@index}}.resourceType">
+                <option value="cost" {{#if (eq this.resourceType 'cost')}}selected{{/if}}>Cost</option>
+                <option value="ex" {{#if (eq this.resourceType 'ex')}}selected{{/if}}>EX</option>
+              </select>
+            </div>
+            <div class="form-group inline-group">
+              <label>比较</label>
+              <select name="conditions.{{@index}}.operator" class="narrow">
+                <option value=">=" {{#if (eq this.operator '>=')}}selected{{/if}}>>=</option>
+                <option value=">" {{#if (eq this.operator '>')}}selected{{/if}}>&gt;</option>
+              </select>
+              <input type="number" name="conditions.{{@index}}.value" value="{{this.value}}" class="narrow" />
+            </div>
+          {{/if}}
+
+          {{!-- healthPercent: operator + value --}}
+          {{#if (eq this.type 'healthPercent')}}
+            <div class="form-group inline-group">
+              <label>生命值%</label>
+              <select name="conditions.{{@index}}.operator" class="narrow">
+                <option value=">=" {{#if (eq this.operator '>=')}}selected{{/if}}>>=</option>
+                <option value=">" {{#if (eq this.operator '>')}}selected{{/if}}>&gt;</option>
+                <option value="<=" {{#if (eq this.operator '<=')}}selected{{/if}}><=</option>
+                <option value="<" {{#if (eq this.operator '<')}}selected{{/if}}>&lt;</option>
+              </select>
+              <input type="number" name="conditions.{{@index}}.value" value="{{this.value}}" class="narrow" min="0" max="100" />
+              <span>%</span>
+            </div>
+          {{/if}}
+        </div>
+      </div>
+    {{/each}}
+  {{else}}
+    <div class="empty-state">
+      <i class="fas fa-inbox"></i>
+      <p>暂无条件，点击右上角 + 添加</p>
+    </div>
+  {{/if}}
+</div>

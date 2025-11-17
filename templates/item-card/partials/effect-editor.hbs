@@ -1,0 +1,196 @@
+<div class="form-section effect-editor">
+  <h3 style="color: #7ED321;">
+    <i class="fas fa-magic"></i> 效果
+    <button type="button" class="add-effect-btn icon-btn" title="添加效果">
+      <i class="fas fa-plus"></i>
+    </button>
+  </h3>
+
+  {{#if activity.effects}}
+    {{#each activity.effects}}
+      <div class="effect-item">
+        <div class="effect-header">
+          <span class="effect-index">效果 {{inc @index}}</span>
+          <button type="button" class="remove-effect-btn icon-btn" data-index="{{@index}}" title="删除">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="effect-fields">
+          <div class="form-group">
+            <label>效果类型</label>
+            <select name="effects.{{@index}}.type" class="effect-type-select" data-index="{{@index}}">
+              <option value="addBuff" {{#if (eq this.type 'addBuff')}}selected{{/if}}>添加BUFF</option>
+              <option value="consumeBuff" {{#if (eq this.type 'consumeBuff')}}selected{{/if}}>消耗BUFF</option>
+              <option value="heal" {{#if (eq this.type 'heal')}}selected{{/if}}>恢复生命</option>
+              <option value="dealDamage" {{#if (eq this.type 'dealDamage')}}selected{{/if}}>造成伤害</option>
+              <option value="modifyDice" {{#if (eq this.type 'modifyDice')}}selected{{/if}}>修正骰子</option>
+              <option value="restoreResource" {{#if (eq this.type 'restoreResource')}}selected{{/if}}>恢复资源</option>
+              <option value="deductResource" {{#if (eq this.type 'deductResource')}}selected{{/if}}>扣除资源</option>
+            </select>
+          </div>
+
+          {{!-- addBuff: buffId, layers, strength, target, roundTiming --}}
+          {{#if (eq this.type 'addBuff')}}
+            <div class="form-group">
+              <label>BUFF ID</label>
+              <input type="text" name="effects.{{@index}}.buffId" value="{{this.buffId}}" placeholder="strong" />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>层数</label>
+                <input type="text" name="effects.{{@index}}.layers" value="{{this.layers}}" placeholder="1 或 1d4" />
+              </div>
+              <div class="form-group">
+                <label>强度</label>
+                <input type="text" name="effects.{{@index}}.strength" value="{{this.strength}}" placeholder="0" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>目标</label>
+                <select name="effects.{{@index}}.target">
+                  <option value="self" {{#if (eq this.target 'self')}}selected{{/if}}>自己</option>
+                  <option value="target" {{#if (eq this.target 'target')}}selected{{/if}}>目标</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>回合时机</label>
+                <select name="effects.{{@index}}.roundTiming">
+                  <option value="current" {{#if (eq this.roundTiming 'current')}}selected{{/if}}>本回合</option>
+                  <option value="next" {{#if (eq this.roundTiming 'next')}}selected{{/if}}>下回合</option>
+                  <option value="both" {{#if (eq this.roundTiming 'both')}}selected{{/if}}>本回合和下回合</option>
+                </select>
+              </div>
+            </div>
+          {{/if}}
+
+          {{!-- consumeBuff: buffId, layers, target --}}
+          {{#if (eq this.type 'consumeBuff')}}
+            <div class="form-group">
+              <label>BUFF ID</label>
+              <input type="text" name="effects.{{@index}}.buffId" value="{{this.buffId}}" placeholder="charge" />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>层数</label>
+                <input type="text" name="effects.{{@index}}.layers" value="{{this.layers}}" placeholder="1" />
+              </div>
+              <div class="form-group">
+                <label>目标</label>
+                <select name="effects.{{@index}}.target">
+                  <option value="self" {{#if (eq this.target 'self')}}selected{{/if}}>自己</option>
+                  <option value="target" {{#if (eq this.target 'target')}}selected{{/if}}>目标</option>
+                </select>
+              </div>
+            </div>
+          {{/if}}
+
+          {{!-- heal: formula, target --}}
+          {{#if (eq this.type 'heal')}}
+            <div class="form-row">
+              <div class="form-group">
+                <label>恢复公式</label>
+                <input type="text" name="effects.{{@index}}.formula" value="{{this.formula}}" placeholder="1d6 或 {burn.layers}" />
+              </div>
+              <div class="form-group">
+                <label>目标</label>
+                <select name="effects.{{@index}}.target">
+                  <option value="self" {{#if (eq this.target 'self')}}selected{{/if}}>自己</option>
+                  <option value="target" {{#if (eq this.target 'target')}}selected{{/if}}>目标</option>
+                </select>
+              </div>
+            </div>
+          {{/if}}
+
+          {{!-- dealDamage: formula, target --}}
+          {{#if (eq this.type 'dealDamage')}}
+            <div class="form-row">
+              <div class="form-group">
+                <label>伤害公式</label>
+                <input type="text" name="effects.{{@index}}.formula" value="{{this.formula}}" placeholder="2d6 或 {charge.layers}" />
+              </div>
+              <div class="form-group">
+                <label>目标</label>
+                <select name="effects.{{@index}}.target">
+                  <option value="self" {{#if (eq this.target 'self')}}selected{{/if}}>自己</option>
+                  <option value="target" {{#if (eq this.target 'target')}}selected{{/if}}>目标</option>
+                </select>
+              </div>
+            </div>
+          {{/if}}
+
+          {{!-- modifyDice: modifier --}}
+          {{#if (eq this.type 'modifyDice')}}
+            <div class="form-group">
+              <label>修正值</label>
+              <input type="text" name="effects.{{@index}}.modifier" value="{{this.modifier}}" placeholder="+2 或 {charge.layers}" />
+            </div>
+          {{/if}}
+
+          {{!-- restoreResource: resourceType, count, target --}}
+          {{#if (eq this.type 'restoreResource')}}
+            <div class="form-row">
+              <div class="form-group">
+                <label>资源类型</label>
+                <select name="effects.{{@index}}.resourceType">
+                  <option value="cost" {{#if (eq this.resourceType 'cost')}}selected{{/if}}>Cost</option>
+                  <option value="ex" {{#if (eq this.resourceType 'ex')}}selected{{/if}}>EX</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>数量</label>
+                <input type="number" name="effects.{{@index}}.count" value="{{this.count}}" placeholder="1" />
+              </div>
+              <div class="form-group">
+                <label>目标</label>
+                <select name="effects.{{@index}}.target">
+                  <option value="self" {{#if (eq this.target 'self')}}selected{{/if}}>自己</option>
+                  <option value="target" {{#if (eq this.target 'target')}}selected{{/if}}>目标</option>
+                </select>
+              </div>
+            </div>
+          {{/if}}
+
+          {{!-- deductResource: resourceType, count, target --}}
+          {{#if (eq this.type 'deductResource')}}
+            <div class="form-row">
+              <div class="form-group">
+                <label>资源类型</label>
+                <select name="effects.{{@index}}.resourceType">
+                  <option value="cost" {{#if (eq this.resourceType 'cost')}}selected{{/if}}>Cost</option>
+                  <option value="ex" {{#if (eq this.resourceType 'ex')}}selected{{/if}}>EX</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>数量</label>
+                <input type="number" name="effects.{{@index}}.count" value="{{this.count}}" placeholder="1" />
+              </div>
+              <div class="form-group">
+                <label>目标</label>
+                <select name="effects.{{@index}}.target">
+                  <option value="self" {{#if (eq this.target 'self')}}selected{{/if}}>自己</option>
+                  <option value="target" {{#if (eq this.target 'target')}}selected{{/if}}>目标</option>
+                </select>
+              </div>
+            </div>
+          {{/if}}
+        </div>
+      </div>
+    {{/each}}
+  {{else}}
+    <div class="empty-state">
+      <i class="fas fa-inbox"></i>
+      <p>暂无效果，点击右上角 + 添加</p>
+    </div>
+  {{/if}}
+
+  <div class="expression-help">
+    <strong>表达式示例:</strong>
+    <ul>
+      <li><code>1d4+3</code> - 骰子公式</li>
+      <li><code>{burn.layers}</code> - BUFF层数</li>
+      <li><code>floor({charge.layers}/2)</code> - 函数表达式</li>
+    </ul>
+  </div>
+</div>

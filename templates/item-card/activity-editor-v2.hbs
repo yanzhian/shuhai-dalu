@@ -1,0 +1,84 @@
+<div class="activity-editor-v2">
+  {{!-- 模式切换标签 --}}
+  <div class="mode-tabs">
+    <button type="button" class="tab-btn {{#if isBasicMode}}active{{/if}}" data-mode="basic">
+      <i class="fas fa-edit"></i> 基础编辑器
+    </button>
+    <button type="button" class="tab-btn {{#if isAdvancedMode}}active{{/if}}" data-mode="advanced">
+      <i class="fas fa-code"></i> 高级 JSON
+    </button>
+  </div>
+
+  {{#if needsMigration}}
+    <div class="migration-notice">
+      <i class="fas fa-info-circle"></i>
+      已自动从旧格式迁移，保存后将使用新格式
+    </div>
+  {{/if}}
+
+  {{#if isBasicMode}}
+    {{!-- 基础编辑器 --}}
+    <form class="basic-editor">
+      {{!-- 基础信息 --}}
+      <div class="form-section">
+        <h3><i class="fas fa-tag"></i> 基础信息</h3>
+        <div class="form-group">
+          <label>活动名称</label>
+          <input type="text" name="name" value="{{activity.name}}" placeholder="输入活动名称..." required />
+        </div>
+      </div>
+
+      {{!-- 触发时机 --}}
+      {{> "systems/shuhai-dalu/templates/item-card/partials/trigger-editor.hbs"}}
+
+      {{!-- 条件 --}}
+      {{> "systems/shuhai-dalu/templates/item-card/partials/condition-editor.hbs"}}
+
+      {{!-- 消耗 --}}
+      {{> "systems/shuhai-dalu/templates/item-card/partials/consume-editor.hbs"}}
+
+      {{!-- 效果 --}}
+      {{> "systems/shuhai-dalu/templates/item-card/partials/effect-editor.hbs"}}
+
+      {{!-- 次数限制 --}}
+      {{> "systems/shuhai-dalu/templates/item-card/partials/usage-limit-editor.hbs"}}
+
+      {{!-- 操作按钮 --}}
+      <div class="form-actions">
+        <button type="submit" class="save-btn">
+          <i class="fas fa-save"></i> 保存
+        </button>
+        <button type="button" class="cancel-btn">
+          <i class="fas fa-times"></i> 取消
+        </button>
+      </div>
+    </form>
+  {{/if}}
+
+  {{#if isAdvancedMode}}
+    {{!-- JSON 编辑器 --}}
+    <div class="json-editor-container">
+      <div class="json-toolbar">
+        <button type="button" class="validate-json-btn">
+          <i class="fas fa-check-circle"></i> 验证
+        </button>
+        <button type="button" class="format-json-btn">
+          <i class="fas fa-align-left"></i> 格式化
+        </button>
+      </div>
+
+      <textarea class="json-editor" spellcheck="false">{{activityJSON}}</textarea>
+
+      <div class="json-preview"></div>
+
+      <div class="form-actions">
+        <button type="button" class="save-btn">
+          <i class="fas fa-save"></i> 保存
+        </button>
+        <button type="button" class="cancel-btn">
+          <i class="fas fa-times"></i> 取消
+        </button>
+      </div>
+    </div>
+  {{/if}}
+</div>
