@@ -5,20 +5,23 @@
  *
  * 使用方法：
  * 1. 在 Foundry 中按 F12 打开开发者工具
- * 2. 复制本文件内容到控制台执行
- * 3. 运行测试函数
+ * 2. 粘贴以下代码到控制台：
+ *    const script = await fetch('/systems/shuhai-dalu/test-activity-migration.mjs').then(r => r.text());
+ *    eval(script);
+ * 3. 运行 await testActivityMigration.runAllTests()
  */
 
-// 导入迁移工具
-const { migrateActivity, migrateItemActivities, isNewFormat, migrateWorldItems } = await import('./module/helpers/activity-migration.mjs');
-const { createDefaultActivity, EXAMPLE_1, EXAMPLE_2, EXAMPLE_3, EXAMPLE_4, EXAMPLE_5 } = await import('./module/constants/activity-schema.mjs');
+(async function() {
+  // 导入迁移工具
+  const { migrateActivity, migrateItemActivities, isNewFormat, migrateWorldItems } = await import('/systems/shuhai-dalu/module/helpers/activity-migration.mjs');
+  const { createDefaultActivity, EXAMPLE_1, EXAMPLE_2, EXAMPLE_3, EXAMPLE_4, EXAMPLE_5 } = await import('/systems/shuhai-dalu/module/constants/activity-schema.mjs');
 
-console.log('【测试】Activity 迁移测试脚本已加载');
+  console.log('【测试】Activity 迁移测试脚本已加载');
 
-/**
- * 测试1：测试单个 activity 迁移
- */
-function testSingleMigration() {
+  /**
+   * 测试1：测试单个 activity 迁移
+   */
+  function testSingleMigration() {
   console.log('\n===== 测试1：单个 Activity 迁移 =====\n');
 
   // 旧格式数据
@@ -55,7 +58,7 @@ function testSingleMigration() {
 /**
  * 测试2：测试 effectsList 格式迁移
  */
-function testEffectsListMigration() {
+  function testEffectsListMigration() {
   console.log('\n===== 测试2：EffectsList 格式迁移 =====\n');
 
   const oldActivity = {
@@ -84,7 +87,7 @@ function testEffectsListMigration() {
 /**
  * 测试3：测试自定义效果迁移
  */
-function testCustomEffectMigration() {
+  function testCustomEffectMigration() {
   console.log('\n===== 测试3：自定义效果迁移 =====\n');
 
   const oldActivity = {
@@ -113,7 +116,7 @@ function testCustomEffectMigration() {
 /**
  * 测试4：测试新格式识别
  */
-function testNewFormatDetection() {
+  function testNewFormatDetection() {
   console.log('\n===== 测试4：新格式识别 =====\n');
 
   console.log('示例1 是新格式?', isNewFormat(EXAMPLE_1));
@@ -135,7 +138,7 @@ function testNewFormatDetection() {
 /**
  * 测试5：测试示例数据
  */
-function testExamples() {
+  function testExamples() {
   console.log('\n===== 测试5：示例数据 =====\n');
 
   console.log('示例1 - 使用时双重增益:', EXAMPLE_1);
@@ -150,7 +153,7 @@ function testExamples() {
 /**
  * 测试6：测试选中 Actor 的 Items 迁移（只测试，不实际执行）
  */
-async function testActorItemsMigration() {
+  async function testActorItemsMigration() {
   console.log('\n===== 测试6：Actor Items 迁移测试 =====\n');
 
   const actor = game.user.character || game.actors.contents[0];
@@ -164,7 +167,7 @@ async function testActorItemsMigration() {
   console.log(`Items 数量: ${actor.items.size}`);
 
   let needMigration = 0;
-  let already New = 0;
+  let alreadyNew = 0;
 
   for (const item of actor.items) {
     if (!item.system.activities || Object.keys(item.system.activities).length === 0) {
@@ -194,7 +197,7 @@ async function testActorItemsMigration() {
 /**
  * 执行迁移：迁移选中 Actor 的所有 Items
  */
-async function migrateSelectedActor() {
+  async function migrateSelectedActor() {
   const actor = game.user.character || game.actors.contents[0];
 
   if (!actor) {
@@ -230,14 +233,14 @@ async function migrateSelectedActor() {
 /**
  * 执行迁移：迁移整个世界的所有 Items
  */
-async function migrateWorld() {
+  async function migrateWorld() {
   console.log('\n⚠️  警告：这将迁移世界中所有 Actor 和 Item 的 activities');
   console.log('⚠️  建议先备份世界数据！');
   console.log('');
   console.log('如果确定要继续，请运行: confirmMigrateWorld()');
 }
 
-async function confirmMigrateWorld() {
+  async function confirmMigrateWorld() {
   console.log('\n开始迁移整个世界...');
 
   const stats = await migrateWorldItems();
@@ -252,7 +255,7 @@ async function confirmMigrateWorld() {
 /**
  * 运行所有测试
  */
-async function runAllTests() {
+  async function runAllTests() {
   console.log('\n========================================');
   console.log('   Activity 数据迁移测试套件');
   console.log('========================================');
@@ -274,32 +277,33 @@ async function runAllTests() {
   }
 }
 
-// 导出测试函数到全局
-window.testActivityMigration = {
-  runAllTests,
-  testSingleMigration,
-  testEffectsListMigration,
-  testCustomEffectMigration,
-  testNewFormatDetection,
-  testExamples,
-  testActorItemsMigration,
-  migrateSelectedActor,
-  migrateWorld,
-  confirmMigrateWorld
-};
+  // 导出测试函数到全局
+  window.testActivityMigration = {
+    runAllTests,
+    testSingleMigration,
+    testEffectsListMigration,
+    testCustomEffectMigration,
+    testNewFormatDetection,
+    testExamples,
+    testActorItemsMigration,
+    migrateSelectedActor,
+    migrateWorld,
+    confirmMigrateWorld
+  };
 
-console.log('\n✅ 测试脚本已加载');
-console.log('📖 运行 runAllTests() 来执行所有测试');
-console.log('📖 或使用 window.testActivityMigration 访问单个测试函数');
-console.log('');
-console.log('可用函数:');
-console.log('  - runAllTests() - 运行所有测试');
-console.log('  - testSingleMigration() - 测试单个活动迁移');
-console.log('  - testEffectsListMigration() - 测试 effectsList 迁移');
-console.log('  - testCustomEffectMigration() - 测试自定义效果迁移');
-console.log('  - testNewFormatDetection() - 测试新格式识别');
-console.log('  - testExamples() - 查看示例数据');
-console.log('  - testActorItemsMigration() - 测试 Actor Items 迁移');
-console.log('  - migrateSelectedActor() - 迁移选中 Actor 的所有 Items');
-console.log('  - migrateWorld() - 迁移整个世界（需确认）');
-console.log('');
+  console.log('\n✅ 测试脚本已加载');
+  console.log('📖 运行 await testActivityMigration.runAllTests() 来执行所有测试');
+  console.log('📖 或使用 window.testActivityMigration 访问单个测试函数');
+  console.log('');
+  console.log('可用函数:');
+  console.log('  - runAllTests() - 运行所有测试');
+  console.log('  - testSingleMigration() - 测试单个活动迁移');
+  console.log('  - testEffectsListMigration() - 测试 effectsList 迁移');
+  console.log('  - testCustomEffectMigration() - 测试自定义效果迁移');
+  console.log('  - testNewFormatDetection() - 测试新格式识别');
+  console.log('  - testExamples() - 查看示例数据');
+  console.log('  - testActorItemsMigration() - 测试 Actor Items 迁移');
+  console.log('  - migrateSelectedActor() - 迁移选中 Actor 的所有 Items');
+  console.log('  - migrateWorld() - 迁移整个世界（需确认）');
+  console.log('');
+})();
