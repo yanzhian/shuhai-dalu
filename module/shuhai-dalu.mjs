@@ -1742,6 +1742,13 @@ async function preloadHandlebarsTemplates() {
     "systems/shuhai-dalu/templates/item-card/item-card-sheet.hbs",
     "systems/shuhai-dalu/templates/item-card/condition-editor.hbs",
 
+    // Activity 编辑器 V2 Partials
+    "systems/shuhai-dalu/templates/item-card/partials/trigger-editor.hbs",
+    "systems/shuhai-dalu/templates/item-card/partials/condition-editor.hbs",
+    "systems/shuhai-dalu/templates/item-card/partials/consume-editor.hbs",
+    "systems/shuhai-dalu/templates/item-card/partials/effect-editor.hbs",
+    "systems/shuhai-dalu/templates/item-card/partials/usage-limit-editor.hbs",
+
     // 战斗区域模板
     "systems/shuhai-dalu/templates/combat/combat-area.hbs",
     "systems/shuhai-dalu/templates/combat/counter-area.hbs",
