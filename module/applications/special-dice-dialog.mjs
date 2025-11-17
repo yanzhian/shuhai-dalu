@@ -132,6 +132,9 @@ export default class SpecialDiceDialog extends Application {
       // 取消激活状态
       combatState.activatedDice[diceIndex] = false;
       console.log(`【取消激活】槽位 ${diceIndex} 已取消激活`);
+
+      // ✅ 立即保存激活状态的修改（在触发效果之前）
+      await this.actor.setFlag('shuhai-dalu', 'combatState', combatState);
     } else {
       console.warn(`【警告】骰子索引无效: ${diceIndex}`);
     }
@@ -144,8 +147,7 @@ export default class SpecialDiceDialog extends Application {
     const triggerName = this.triggerType === 'onFlashStrike' ? '闪击☪' : '丢弃✦';
 
     if (triggered) {
-      // 保存战斗状态
-      await this.actor.setFlag('shuhai-dalu', 'combatState', combatState);
+      // activatedDice 状态已经在上面保存过了，这里不需要再次保存
 
       // 发送消息
       ChatMessage.create({
