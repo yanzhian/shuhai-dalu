@@ -85,45 +85,159 @@
         {{/if}}
       </div>
 
-      {{!-- 效果添加 --}}
+      {{!-- 效果列表 --}}
       <div class="form-group">
-        <label>效果添加</label>
+        <label>效果列表</label>
         <div class="dynamic-list effects-list">
           {{#each activity.effectsList as |effect idx|}}
-            <div class="dynamic-row" data-index="{{idx}}">
-              <select name="effects.{{idx}}.buffId" class="effect-select">
-                {{#each ../buffPresets as |buff|}}
-                  <option value="{{buff.id}}" {{#if (eq buff.id effect.buffId)}}selected{{/if}}>{{buff.name}}</option>
-                {{/each}}
-              </select>
-              <input type="text" name="effects.{{idx}}.layers" value="{{effect.layers}}" placeholder="层数(可用骰子/表达式)" />
-              <input type="text" name="effects.{{idx}}.strength" value="{{effect.strength}}" placeholder="强度(可用骰子/表达式)" />
-              <button type="button" class="remove-btn remove-effect-btn" data-index="{{idx}}"><i class="fas fa-times"></i></button>
+            <div class="effect-item" data-index="{{idx}}">
+
+              {{!-- 效果类型选择器 --}}
+              <div class="effect-header">
+                <select name="effects.{{idx}}.type" class="effect-type-select" data-index="{{idx}}">
+                  {{#each ../effectTypesByCategory as |category|}}
+                    <optgroup label="{{category.icon}} {{category.name}}">
+                      {{#each category.effects as |effectDef|}}
+                        <option value="{{effectDef.id}}" {{#if (eq effectDef.id effect.type)}}selected{{/if}}>{{effectDef.name}}</option>
+                      {{/each}}
+                    </optgroup>
+                  {{/each}}
+                </select>
+                <button type="button" class="remove-btn remove-effect-btn" data-index="{{idx}}">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+
+              {{!-- 动态参数字段 --}}
+              <div class="effect-params">
+
+                {{!-- addBuff 效果 --}}
+                {{#if (eq effect.type "addBuff")}}
+                  <div class="param-row">
+                    <label>BUFF:</label>
+                    <select name="effects.{{idx}}.params.buffId">
+                      {{#each ../buffPresets as |buff|}}
+                        <option value="{{buff.id}}" {{#if (eq buff.id effect.params.buffId)}}selected{{/if}}>{{buff.name}}</option>
+                      {{/each}}
+                    </select>
+                  </div>
+                  <div class="param-row">
+                    <label>层数:</label>
+                    <input type="text" name="effects.{{idx}}.params.layers" value="{{effect.params.layers}}" placeholder="1 或 {charge.layers}" />
+                  </div>
+                  <div class="param-row">
+                    <label>强度:</label>
+                    <input type="text" name="effects.{{idx}}.params.strength" value="{{effect.params.strength}}" placeholder="0" />
+                  </div>
+                  <div class="param-row">
+                    <label>目标:</label>
+                    <select name="effects.{{idx}}.params.target">
+                      {{#each ../targetOptions as |opt|}}
+                        <option value="{{opt.value}}" {{#if (eq opt.value effect.params.target)}}selected{{/if}}>{{opt.label}}</option>
+                      {{/each}}
+                    </select>
+                  </div>
+                {{/if}}
+
+                {{!-- consumeBuff 效果 --}}
+                {{#if (eq effect.type "consumeBuff")}}
+                  <div class="param-row">
+                    <label>BUFF:</label>
+                    <select name="effects.{{idx}}.params.buffId">
+                      {{#each ../buffPresets as |buff|}}
+                        <option value="{{buff.id}}" {{#if (eq buff.id effect.params.buffId)}}selected{{/if}}>{{buff.name}}</option>
+                      {{/each}}
+                    </select>
+                  </div>
+                  <div class="param-row">
+                    <label>层数:</label>
+                    <input type="text" name="effects.{{idx}}.params.layers" value="{{effect.params.layers}}" placeholder="1" />
+                  </div>
+                  <div class="param-row">
+                    <label>目标:</label>
+                    <select name="effects.{{idx}}.params.target">
+                      {{#each ../targetOptions as |opt|}}
+                        <option value="{{opt.value}}" {{#if (eq opt.value effect.params.target)}}selected{{/if}}>{{opt.label}}</option>
+                      {{/each}}
+                    </select>
+                  </div>
+                {{/if}}
+
+                {{!-- diceModifier 效果 --}}
+                {{#if (eq effect.type "diceModifier")}}
+                  <div class="param-row">
+                    <label>修正值:</label>
+                    <input type="text" name="effects.{{idx}}.params.modifier" value="{{effect.params.modifier}}" placeholder="+3 或 +{charge.layers}" />
+                  </div>
+                {{/if}}
+
+                {{!-- dealDamage 效果 --}}
+                {{#if (eq effect.type "dealDamage")}}
+                  <div class="param-row">
+                    <label>伤害:</label>
+                    <input type="text" name="effects.{{idx}}.params.amount" value="{{effect.params.amount}}" placeholder="5 或 {strength}" />
+                  </div>
+                  <div class="param-row">
+                    <label>目标:</label>
+                    <select name="effects.{{idx}}.params.target">
+                      {{#each ../targetOptions as |opt|}}
+                        <option value="{{opt.value}}" {{#if (eq opt.value effect.params.target)}}selected{{/if}}>{{opt.label}}</option>
+                      {{/each}}
+                    </select>
+                  </div>
+                  <div class="param-row">
+                    <label>类型:</label>
+                    <select name="effects.{{idx}}.params.type">
+                      {{#each ../damageTypeOptions as |opt|}}
+                        <option value="{{opt.value}}" {{#if (eq opt.value effect.params.type)}}selected{{/if}}>{{opt.label}}</option>
+                      {{/each}}
+                    </select>
+                  </div>
+                {{/if}}
+
+                {{!-- healHealth 效果 --}}
+                {{#if (eq effect.type "healHealth")}}
+                  <div class="param-row">
+                    <label>恢复量:</label>
+                    <input type="text" name="effects.{{idx}}.params.amount" value="{{effect.params.amount}}" placeholder="10 或 1d8" />
+                  </div>
+                  <div class="param-row">
+                    <label>目标:</label>
+                    <select name="effects.{{idx}}.params.target">
+                      {{#each ../targetOptions as |opt|}}
+                        <option value="{{opt.value}}" {{#if (eq opt.value effect.params.target)}}selected{{/if}}>{{opt.label}}</option>
+                      {{/each}}
+                    </select>
+                  </div>
+                {{/if}}
+
+                {{!-- restoreCost / consumeCost 效果 --}}
+                {{#if (or (eq effect.type "restoreCost") (eq effect.type "consumeCost"))}}
+                  <div class="param-row">
+                    <label>数量:</label>
+                    <input type="text" name="effects.{{idx}}.params.amount" value="{{effect.params.amount}}" placeholder="1" />
+                  </div>
+                {{/if}}
+
+                {{!-- 其他效果类型 - 显示通用提示 --}}
+                {{#unless (or (eq effect.type "addBuff") (eq effect.type "consumeBuff") (eq effect.type "diceModifier") (eq effect.type "dealDamage") (eq effect.type "healHealth") (eq effect.type "restoreCost") (eq effect.type "consumeCost"))}}
+                  <div class="param-hint">
+                    <i class="fas fa-info-circle"></i>
+                    此效果类型需要使用高级模式(JSON)进行配置
+                  </div>
+                {{/unless}}
+
+              </div>
             </div>
           {{/each}}
           <button type="button" class="add-btn add-effect-btn"><i class="fas fa-plus"></i> 添加效果</button>
         </div>
       </div>
 
-      {{!-- 自定义效果 --}}
-      <div class="form-group">
-        <label>
-          <input type="checkbox" name="customEffect.enabled" {{#if activity.customEffect.enabled}}checked{{/if}} class="custom-effect-checkbox" />
-          其他效果
-        </label>
-        {{#if activity.customEffect.enabled}}
-          <div class="custom-effect-fields">
-            <input type="text" name="customEffect.name" value="{{activity.customEffect.name}}" placeholder="效果名称" />
-            <input type="text" name="customEffect.layers" value="{{activity.customEffect.layers}}" placeholder="层数(可用骰子/表达式)" />
-            <input type="text" name="customEffect.strength" value="{{activity.customEffect.strength}}" placeholder="强度(可用骰子/表达式)" />
-          </div>
-        {{/if}}
-      </div>
-
       {{!-- 提示信息 --}}
       <div class="info-box">
         <i class="fas fa-info-circle"></i>
-        <span>💡 提示：层数和强度字段支持表达式，如 <code>{literal}{{burn.layers}}{/literal}</code> 或 <code>floor({literal}{{burn.layers}}{/literal}/4)</code>。需要复杂逻辑？切换到 <strong>高级模式</strong>！</span>
+        <span>💡 提示：数值字段支持表达式，如 <code>{literal}{{burn.layers}}{/literal}</code> 或 <code>floor({literal}{{charge.layers}}{/literal}/4)</code>。需要更多效果类型？切换到 <strong>高级模式(JSON)</strong>！</span>
       </div>
 
     </div>
@@ -288,6 +402,85 @@
 
 .json-preview h4 {
   margin-top: 0;
+  color: #EBBD68;
+}
+
+/* 效果项样式 */
+.effect-item {
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.effect-header {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.effect-type-select {
+  flex: 1;
+  padding: 8px 12px;
+  background: #2a2a2a;
+  border: 1px solid #555;
+  border-radius: 4px;
+  color: #f0f0f0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.effect-params {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 12px;
+  border-left: 3px solid #EBBD68;
+}
+
+.param-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.param-row label {
+  min-width: 80px;
+  font-size: 13px;
+  color: #ccc;
+}
+
+.param-row input,
+.param-row select {
+  flex: 1;
+  padding: 6px 10px;
+  background: #0a0a0a;
+  border: 1px solid #555;
+  border-radius: 3px;
+  color: #f0f0f0;
+  font-size: 13px;
+}
+
+.param-row input:focus,
+.param-row select:focus {
+  border-color: #EBBD68;
+  outline: none;
+}
+
+.param-hint {
+  padding: 8px 12px;
+  background: rgba(235, 189, 104, 0.1);
+  border: 1px dashed #EBBD68;
+  border-radius: 4px;
+  color: #EBBD68;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.param-hint i {
   color: #EBBD68;
 }
 </style>

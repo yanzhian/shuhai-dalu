@@ -128,6 +128,36 @@
       "slash": "斩击",
       "pierce": "突刺",
       "blunt": "打击"
+    },
+    "EffectType": {
+      "addBuff": "添加BUFF",
+      "consumeBuff": "消耗BUFF",
+      "clearBuff": "清除BUFF",
+      "triggerBuffEffect": "触发BUFF效果",
+      "diceModifier": "骰数修正",
+      "replaceDice": "替换骰子",
+      "appendAttack": "追加攻击",
+      "restoreCost": "恢复额外Cost",
+      "consumeCost": "消耗额外Cost",
+      "dealDamage": "造成伤害",
+      "healHealth": "恢复生命值",
+      "addToSlot": "添加到栏位",
+      "immunity": "免疫效果",
+      "additionalTarget": "增加额外目标",
+      "reuseDice": "再次使用骰子"
+    },
+    "Target": {
+      "self": "自己",
+      "selected": "选择的目标",
+      "allEnemies": "所有敌人",
+      "allAllies": "所有友军",
+      "all": "所有人"
+    },
+    "DamageType": {
+      "direct": "直接伤害",
+      "slash": "斩击",
+      "pierce": "突刺",
+      "blunt": "打击"
     }
   }
 }

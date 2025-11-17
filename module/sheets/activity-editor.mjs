@@ -5,32 +5,26 @@
 
 import { EFFECT_TYPES, EFFECT_CATEGORIES } from '../helpers/effect-registry.mjs';
 import { ExpressionParser, EXPRESSION_EXAMPLES } from '../helpers/expression-parser.mjs';
+import { getAllBuffs } from '../constants/buff-types.mjs';
 
-// BUFF预设列表
-const BUFF_PRESETS = [
-  // 增益
-  { id: 'strong', name: '强壮', type: 'positive', icon: 'icons/svg/upgrade.svg', defaultLayers: 1, defaultStrength: 0 },
-  { id: 'guard', name: '守护', type: 'positive', icon: 'icons/svg/shield.svg', defaultLayers: 1, defaultStrength: 0 },
-  { id: 'swift', name: '迅捷', type: 'positive', icon: 'icons/svg/wing.svg', defaultLayers: 1, defaultStrength: 0 },
-  { id: 'endure', name: '忍耐', type: 'positive', icon: 'icons/svg/stone-pile.svg', defaultLayers: 1, defaultStrength: 0 },
-  // 减益
-  { id: 'weak', name: '虚弱', type: 'negative', icon: 'icons/svg/downgrade.svg', defaultLayers: 1, defaultStrength: 0 },
-  { id: 'vulnerable', name: '易损', type: 'negative', icon: 'icons/svg/break.svg', defaultLayers: 1, defaultStrength: 0 },
-  { id: 'bound', name: '束缚', type: 'negative', icon: 'icons/svg/net.svg', defaultLayers: 1, defaultStrength: 0 },
-  { id: 'flaw', name: '破绽', type: 'negative', icon: 'icons/svg/hazard.svg', defaultLayers: 1, defaultStrength: 0 },
-  // 效果
-  { id: 'rupture', name: '破裂', type: 'effect', icon: 'icons/svg/explosion.svg', defaultLayers: 1, defaultStrength: 3 },
-  { id: 'bleed', name: '流血', type: 'effect', icon: 'icons/svg/blood.svg', defaultLayers: 1, defaultStrength: 2 },
-  { id: 'corruption_effect', name: '沉沦', type: 'effect', icon: 'icons/svg/shadow.svg', defaultLayers: 1, defaultStrength: 2 },
-  { id: 'burn', name: '燃烧', type: 'effect', icon: 'icons/svg/fire.svg', defaultLayers: 1, defaultStrength: 4 },
-  { id: 'breath', name: '呼吸', type: 'effect', icon: 'icons/svg/breath.svg', defaultLayers: 1, defaultStrength: 5 },
-  { id: 'charge', name: '充能', type: 'effect', icon: 'icons/svg/lightning.svg', defaultLayers: 1, defaultStrength: 0 },
-  { id: 'tremor', name: '震颤', type: 'effect', icon: 'icons/svg/frozen.svg', defaultLayers: 1, defaultStrength: 3 },
-  { id: 'ammo', name: '弹药', type: 'effect', icon: 'icons/svg/sword.svg', defaultLayers: 10, defaultStrength: 0 },
-  { id: 'chant', name: '吟唱', type: 'effect', icon: 'icons/svg/book.svg', defaultLayers: 1, defaultStrength: 0 },
-  { id: 'paralyze', name: '麻痹', type: 'effect', icon: 'icons/svg/paralysis.svg', defaultLayers: 1, defaultStrength: 0 },
-  { id: 'fearSword', name: '惧剑', type: 'effect', icon: 'icons/svg/sword.svg', defaultLayers: 1, defaultStrength: 0 },
-  { id: 'grandMagic', name: '宏伟法术', type: 'effect', icon: 'icons/svg/book.svg', defaultLayers: 1, defaultStrength: 0 }
+// BUFF预设列表（从 buff-types.mjs 动态获取）
+const BUFF_PRESETS = getAllBuffs();
+
+// 目标类型选项
+const TARGET_OPTIONS = [
+  { value: 'self', label: '自己' },
+  { value: 'selected', label: '选择的目标' },
+  { value: 'allEnemies', label: '所有敌人' },
+  { value: 'allAllies', label: '所有友军' },
+  { value: 'all', label: '所有人' }
+];
+
+// 伤害类型选项
+const DAMAGE_TYPE_OPTIONS = [
+  { value: 'direct', label: '直接伤害' },
+  { value: 'slash', label: '斩击' },
+  { value: 'pierce', label: '突刺' },
+  { value: 'blunt', label: '打击' }
 ];
 
 export default class ActivityEditor extends Application {
@@ -134,11 +128,16 @@ export default class ActivityEditor extends Application {
       buffPresets: BUFF_PRESETS,
       effectTypes: EFFECT_TYPES,
       effectCategories: EFFECT_CATEGORIES,
+      targetOptions: TARGET_OPTIONS,
+      damageTypeOptions: DAMAGE_TYPE_OPTIONS,
       expressionExamples: EXPRESSION_EXAMPLES,
       editMode: this.editMode,
       isBasicMode: this.editMode === 'basic',
       isAdvancedMode: this.editMode === 'advanced'
     };
+
+    // 准备效果类型列表（按分类组织）
+    data.effectTypesByCategory = this._prepareEffectTypesByCategory();
 
     // 如果是高级模式，准备JSON字符串
     if (this.editMode === 'advanced') {
@@ -146,6 +145,31 @@ export default class ActivityEditor extends Application {
     }
 
     return data;
+  }
+
+  /**
+   * 按分类准备效果类型列表
+   */
+  _prepareEffectTypesByCategory() {
+    const categorized = [];
+
+    for (const [categoryId, category] of Object.entries(EFFECT_CATEGORIES)) {
+      const effects = category.effects.map(effectId => ({
+        id: effectId,
+        name: EFFECT_TYPES[effectId]?.name || effectId,
+        fields: EFFECT_TYPES[effectId]?.fields || [],
+        defaults: EFFECT_TYPES[effectId]?.defaults || {}
+      }));
+
+      categorized.push({
+        id: categoryId,
+        name: category.name,
+        icon: category.icon,
+        effects
+      });
+    }
+
+    return categorized;
   }
 
   /** @override */
@@ -164,6 +188,7 @@ export default class ActivityEditor extends Application {
       // 效果管理
       html.find('.add-effect-btn').click(this._onAddEffect.bind(this));
       html.find('.remove-effect-btn').click(this._onRemoveEffect.bind(this));
+      html.find('.effect-type-select').change(this._onEffectTypeChange.bind(this));
 
       // checkbox 变化时先保存表单状态再重新渲染
       html.find('.has-consume-checkbox').change(async (e) => {
@@ -276,10 +301,16 @@ export default class ActivityEditor extends Application {
    */
   _onAddEffect(event) {
     event.preventDefault();
+
+    // 默认添加一个 addBuff 效果
     this.activity.effectsList.push({
-      buffId: 'strong',
-      layers: 1,
-      strength: 0
+      type: 'addBuff',
+      params: {
+        buffId: 'strong',
+        layers: '1',
+        strength: '0',
+        target: 'selected'
+      }
     });
     this.render();
   }
@@ -291,6 +322,30 @@ export default class ActivityEditor extends Application {
     event.preventDefault();
     const index = parseInt($(event.currentTarget).data('index'));
     this.activity.effectsList.splice(index, 1);
+    this.render();
+  }
+
+  /**
+   * 效果类型变更
+   */
+  _onEffectTypeChange(event) {
+    event.preventDefault();
+    const index = parseInt($(event.currentTarget).data('index'));
+    const newType = $(event.currentTarget).val();
+
+    // 获取新效果类型的默认参数
+    const effectDef = EFFECT_TYPES[newType];
+    if (!effectDef) {
+      console.warn('【Activity编辑器】未知效果类型:', newType);
+      return;
+    }
+
+    // 更新效果对象
+    this.activity.effectsList[index] = {
+      type: newType,
+      params: { ...effectDef.defaults }
+    };
+
     this.render();
   }
 
@@ -463,9 +518,8 @@ export default class ActivityEditor extends Application {
       // 处理 consumes
       const consumes = formData.consumes ? Object.values(formData.consumes) : [];
 
-      // 处理 effectsList
+      // 处理 effectsList（新格式：支持多种效果类型）
       const effectsList = formData.effects ? Object.values(formData.effects) : [];
-      const effects = this._listToEffects(effectsList);
 
       // 构建 activity 数据
       activityData = {
@@ -477,13 +531,7 @@ export default class ActivityEditor extends Application {
         consumes: consumes,
         target: formData.target || "selected",
         roundTiming: formData.roundTiming || "current",
-        effects: effects,
-        customEffect: {
-          enabled: formData.customEffect?.enabled === true || formData.customEffect?.enabled === 'on',
-          name: formData.customEffect?.name || "",
-          layers: formData.customEffect?.layers || "0",
-          strength: formData.customEffect?.strength || "0"
-        }
+        effectsList: effectsList  // 使用新的效果列表格式
       };
     }
 
