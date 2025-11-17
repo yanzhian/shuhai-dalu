@@ -140,12 +140,14 @@ export default class SpecialDiceDialog extends Application {
     const { triggerItemActivities } = await import('../shuhai-dalu.mjs');
     const triggered = await triggerItemActivities(this.actor, dice, this.triggerType);
 
+    // 获取触发类型名称（在 if-else 之前定义，避免作用域问题）
+    const triggerName = this.triggerType === 'onFlashStrike' ? '闪击☪' : '丢弃✦';
+
     if (triggered) {
       // 保存战斗状态
       await this.actor.setFlag('shuhai-dalu', 'combatState', combatState);
 
       // 发送消息
-      const triggerName = this.triggerType === 'onFlashStrike' ? '闪击☪' : '丢弃✦';
       ChatMessage.create({
         user: game.user.id,
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
