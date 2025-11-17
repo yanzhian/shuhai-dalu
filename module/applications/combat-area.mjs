@@ -543,9 +543,13 @@ export default class CombatAreaApplication extends Application {
     // 检查是否有骰子带有闪击效果
     const flashStrikeDice = drawnDice.filter(({ dice }) => {
       if (!dice.system.activities) return false;
-      return Object.values(dice.system.activities).some(
-        activity => activity.trigger === 'onFlashStrike'
-      );
+      return Object.values(dice.system.activities).some(activity => {
+        // 兼容新旧格式
+        const triggerType = typeof activity.trigger === 'string'
+          ? activity.trigger
+          : activity.trigger?.type;
+        return triggerType === 'onFlashStrike';
+      });
     });
 
     if (flashStrikeDice.length === 0) return;

@@ -46,8 +46,13 @@ export default class SpecialDiceDialog extends Application {
       if (dice.system.activities && Object.keys(dice.system.activities).length > 0) {
         const matchingActivities = Object.values(dice.system.activities).filter(
           activity => {
-            console.log(`  - 检查活动: ${activity.name}, trigger=${activity.trigger}, 期望=${this.triggerType}, 匹配=${activity.trigger === this.triggerType}`);
-            return activity.trigger === this.triggerType;
+            // 兼容新旧格式
+            const triggerType = typeof activity.trigger === 'string'
+              ? activity.trigger
+              : activity.trigger?.type;
+            const matches = triggerType === this.triggerType;
+            console.log(`  - 检查活动: ${activity.name}, trigger=${JSON.stringify(activity.trigger)}, 期望=${this.triggerType}, 匹配=${matches}`);
+            return matches;
           }
         );
 
