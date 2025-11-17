@@ -10,9 +10,9 @@
  */
 
 (async function() {
-  // 动态导入模块
-  const { ActivityExecutor, createContext } = await import('./module/helpers/activity-executor.mjs');
-  const { ACTIVITY_TEMPLATE, EXAMPLE_1, EXAMPLE_2, EXAMPLE_3, EXAMPLE_4, EXAMPLE_5 } = await import('./module/constants/activity-schema.mjs');
+  // 动态导入模块（使用绝对路径）
+  const { ActivityExecutor, createContext } = await import('/systems/shuhai-dalu/module/helpers/activity-executor.mjs');
+  const { ACTIVITY_TEMPLATE, EXAMPLE_1, EXAMPLE_2, EXAMPLE_3, EXAMPLE_4, EXAMPLE_5 } = await import('/systems/shuhai-dalu/module/constants/activity-schema.mjs');
 
   /**
    * 测试1：shouldTrigger() - 触发条件检查
