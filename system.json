@@ -24,7 +24,8 @@
     "styles/item-card-sheet.css",
     "styles/battle-area-hud.css",
     "styles/enemy-battle-area-hud.css",
-    "styles/check-roll.css"
+    "styles/check-roll.css",
+    "styles/activity-editor-v2.css"
   ],
   "documentTypes": {
     "Actor": {

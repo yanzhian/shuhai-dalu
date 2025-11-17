@@ -3,7 +3,7 @@
  * 支持 Activities 系统
  */
 
-import ActivityEditor from './activity-editor.mjs';
+import ActivityEditorV2 from './activity-editor-v2.mjs';
 
 // BUFF预设列表
 const BUFF_PRESETS = [
@@ -452,7 +452,7 @@ export default class ItemCardSheet extends ItemSheet {
    */
   async _onAddActivity(event) {
     event.preventDefault();
-    const editor = new ActivityEditor(this.item);
+    const editor = new ActivityEditorV2(this.item);
     editor.render(true);
   }
 
@@ -469,7 +469,7 @@ export default class ItemCardSheet extends ItemSheet {
       return;
     }
 
-    const editor = new ActivityEditor(this.item, activity);
+    const editor = new ActivityEditorV2(this.item, activity);
     editor.render(true);
   }
 
