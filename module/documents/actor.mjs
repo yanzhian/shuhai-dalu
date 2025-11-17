@@ -625,4 +625,26 @@ export default class ShuhaiActor extends Actor {
 
     return newHP;
   }
+
+  /**
+   * 执行角色的 Activities（统一接口）
+   * @param {string} triggerType - 触发类型（onUse, onAttack, onHit, onDamaged, etc.）
+   * @param {Object} options - 执行选项
+   * @param {Actor} options.target - 目标角色
+   * @param {Item} options.item - 触发的物品（可选，如果只触发特定物品）
+   * @param {Object} options.dice - 骰子数据
+   * @param {string} options.attackCategory - 攻击类别（slash/pierce/blunt）
+   * @returns {Promise<Array>} 执行结果数组
+   */
+  async executeActivities(triggerType, options = {}) {
+    // 导入 activity-service（延迟导入避免循环依赖）
+    const { executeActorActivities } = await import('../services/activity-service.mjs');
+
+    console.log('【Actor】执行 Activities:', this.name, triggerType);
+
+    // 调用 activity-service 的统一接口
+    const results = await executeActorActivities(this, triggerType, options);
+
+    return results;
+  }
 }
