@@ -87,14 +87,24 @@
               </div>
 
               <div class="condition-fields">
-                <div class="form-group">
-                  <label>条件类型</label>
-                  <select name="conditions.{{@index}}.type">
-                    <option value="hasBuff" {{#if (eq this.type 'hasBuff')}}selected{{/if}}>拥有BUFF</option>
-                    <option value="buffLayer" {{#if (eq this.type 'buffLayer')}}selected{{/if}}>BUFF层数</option>
-                    <option value="resourceCount" {{#if (eq this.type 'resourceCount')}}selected{{/if}}>资源数量</option>
-                    <option value="healthPercent" {{#if (eq this.type 'healthPercent')}}selected{{/if}}>生命值%</option>
-                  </select>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>条件类型</label>
+                    <select name="conditions.{{@index}}.type">
+                      <option value="hasBuff" {{#if (eq this.type 'hasBuff')}}selected{{/if}}>拥有BUFF</option>
+                      <option value="buffLayer" {{#if (eq this.type 'buffLayer')}}selected{{/if}}>BUFF层数</option>
+                      <option value="resourceCount" {{#if (eq this.type 'resourceCount')}}selected{{/if}}>资源数量</option>
+                      <option value="healthPercent" {{#if (eq this.type 'healthPercent')}}selected{{/if}}>生命值%</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label>检查目标</label>
+                    <select name="conditions.{{@index}}.target">
+                      <option value="self" {{#if (eq this.target 'self')}}selected{{else}}{{#unless this.target}}selected{{/unless}}{{/if}}>自己</option>
+                      <option value="opponent" {{#if (eq this.target 'opponent')}}selected{{/if}}>对手</option>
+                    </select>
+                  </div>
                 </div>
 
                 {{!-- hasBuff: 只需要 buffId --}}

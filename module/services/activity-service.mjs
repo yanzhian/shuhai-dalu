@@ -125,11 +125,17 @@ function formatEffectResult(effect, result, targetActor) {
   const targetName = targetActor?.name || '自己';
 
   switch (effect.type) {
-    case 'addBuff':
-      return `为${targetName}添加 ${result.layers} 层【${game.i18n.localize(`SHUHAI.Buff.${result.buffId}`) || result.buffId}】`;
+    case 'addBuff': {
+      const buffName = game.i18n.localize(`SHUHAI.Buff.${result.buffId}`);
+      const displayName = buffName.startsWith('SHUHAI.Buff.') ? result.buffId : buffName;
+      return `为${targetName}添加 ${result.layers} 层【${displayName}】`;
+    }
 
-    case 'consumeBuff':
-      return `消耗${targetName}的 ${result.layers} 层【${game.i18n.localize(`SHUHAI.Buff.${result.buffId}`) || result.buffId}】`;
+    case 'consumeBuff': {
+      const buffName = game.i18n.localize(`SHUHAI.Buff.${result.buffId}`);
+      const displayName = buffName.startsWith('SHUHAI.Buff.') ? result.buffId : buffName;
+      return `消耗${targetName}的 ${result.layers} 层【${displayName}】`;
+    }
 
     case 'heal':
       return `为${targetName}恢复 ${result.amount} 点生命值`;

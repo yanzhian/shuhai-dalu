@@ -2,6 +2,7 @@
  * 书海大陆 战斗区域应用 - 完全重新设计
  */
 import { triggerBleedEffect } from "../services/combat-effects.mjs";
+import { triggerItemActivities } from "../services/activity-service.mjs";
 import { BUFF_TYPES } from "../constants/buff-types.mjs";
 
 export default class CombatAreaApplication extends Application {
@@ -1322,39 +1323,27 @@ export default class CombatAreaApplication extends Application {
   }
 
   /**
-   * 触发 Activities
+   * 触发 Activities (使用新的 Activity 系统 v2.0)
    * @param {Item} item - 触发的物品
    * @param {string} triggerType - 触发类型 (onUse, onAttack, onCounter 等)
-   */
-  /**
-   * 触发物品的Activities
-   * @param {Item} item - 物品
-   * @param {string} triggerType - 触发类型
+   * @param {Actor} targetActor - 目标角色（可选）
    * @returns {boolean} 是否有任何activity成功应用了效果
    */
-  async _triggerActivities(item, triggerType) {
-    // 检查物品是否有 activities
-    if (!item.system.activities || Object.keys(item.system.activities).length === 0) {
+  async _triggerActivities(item, triggerType, targetActor = null) {
+    if (!item) {
       return false;
     }
 
-    // 筛选出匹配的 activities
-    const matchingActivities = Object.values(item.system.activities).filter(
-      activity => activity.trigger === triggerType
-    );
+    console.log('【战斗区域】触发 Activities:', {
+      item: item.name,
+      triggerType,
+      target: targetActor?.name
+    });
 
-    if (matchingActivities.length === 0) {
-      return false;
-    }
+    // 使用新的 activity-service
+    const hasTriggered = await triggerItemActivities(this.actor, item, triggerType, targetActor);
 
-    // 执行每个 activity，记录是否有成功的
-    let hasSuccess = false;
-    for (const activity of matchingActivities) {
-      const success = await this._executeActivity(item, activity);
-      if (success) hasSuccess = true;
-    }
-
-    return hasSuccess;
+    return hasTriggered;
   }
 
   /**
