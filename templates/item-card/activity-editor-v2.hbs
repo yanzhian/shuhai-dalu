@@ -335,6 +335,7 @@
                   <label>效果类型</label>
                   <select name="effects.{{@index}}.type" class="effect-type-select" data-index="{{@index}}">
                     <option value="addBuff" {{#if (eq this.type 'addBuff')}}selected{{/if}}>添加BUFF</option>
+                    <option value="customBuff" {{#if (eq this.type 'customBuff')}}selected{{/if}}>添加自定义BUFF</option>
                     <option value="consumeBuff" {{#if (eq this.type 'consumeBuff')}}selected{{/if}}>消耗BUFF</option>
                     <option value="heal" {{#if (eq this.type 'heal')}}selected{{/if}}>恢复生命</option>
                     <option value="dealDamage" {{#if (eq this.type 'dealDamage')}}selected{{/if}}>造成伤害</option>
@@ -360,6 +361,41 @@
                     <div class="form-group">
                       <label>层数</label>
                       <input type="text" name="effects.{{@index}}.layers" value="{{this.layers}}" placeholder="1 或 1d4" />
+                    </div>
+                    <div class="form-group">
+                      <label>强度</label>
+                      <input type="text" name="effects.{{@index}}.strength" value="{{this.strength}}" placeholder="0" />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>目标</label>
+                      <select name="effects.{{@index}}.target">
+                        <option value="self" {{#if (eq this.target 'self')}}selected{{/if}}>自己</option>
+                        <option value="target" {{#if (eq this.target 'target')}}selected{{/if}}>目标</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>回合时机</label>
+                      <select name="effects.{{@index}}.roundTiming">
+                        <option value="current" {{#if (eq this.roundTiming 'current')}}selected{{/if}}>本回合</option>
+                        <option value="next" {{#if (eq this.roundTiming 'next')}}selected{{/if}}>下回合</option>
+                        <option value="both" {{#if (eq this.roundTiming 'both')}}selected{{/if}}>本回合和下回合</option>
+                      </select>
+                    </div>
+                  </div>
+                {{/if}}
+
+                {{!-- customBuff: name, layers, strength, target, roundTiming --}}
+                {{#if (eq this.type 'customBuff')}}
+                  <div class="form-group">
+                    <label>自定义BUFF名称 <small style="color: #888;">(如：夜樱、霜寒)</small></label>
+                    <input type="text" name="effects.{{@index}}.name" value="{{this.name}}" placeholder="输入自定义BUFF名称..." required />
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>层数 <small style="color: #888;">(支持骰子表达式)</small></label>
+                      <input type="text" name="effects.{{@index}}.layers" value="{{this.layers}}" placeholder="1d6+5 或 {charge.layers}" />
                     </div>
                     <div class="form-group">
                       <label>强度</label>
