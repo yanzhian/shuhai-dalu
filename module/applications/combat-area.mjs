@@ -13,8 +13,8 @@ export default class CombatAreaApplication extends Application {
 
     // 从角色Flag加载战斗状态，如果没有则初始化
     this.combatState = this.actor.getFlag('shuhai-dalu', 'combatState') || {
-      // Cost资源（6个，默认全部可用）
-      costResources: [true, true, true, true, true, true],
+      // Cost标记（6个槽位，初始为空）
+      costResources: [false, false, false, false, false, false],
       // EX资源（3个，默认拥有3个）
       exResources: [true, true, true],
       // 战斗骰激活状态（6个）
@@ -29,7 +29,7 @@ export default class CombatAreaApplication extends Application {
 
     // 迁移/修复：确保costResources有6个元素
     if (!this.combatState.costResources || this.combatState.costResources.length !== 6) {
-      this.combatState.costResources = [true, true, true, true, true, true];
+      this.combatState.costResources = [false, false, false, false, false, false];
     }
 
     // 迁移/修复：确保exResources有3个元素
@@ -403,12 +403,12 @@ export default class CombatAreaApplication extends Application {
 
     // 处理每个选中的骰子
     for (const diceIndex of selectedIndices) {
-      // 如果已经激活，消耗Cost
+      // 如果已经激活，获得Cost标记
       if (this.combatState.activatedDice[diceIndex]) {
-        // 找到第一个可用的Cost槽位并消耗
+        // 找到第一个空的Cost槽位并填充
         for (let j = 0; j < 6; j++) {
-          if (this.combatState.costResources[j]) {
-            this.combatState.costResources[j] = false;
+          if (!this.combatState.costResources[j]) {
+            this.combatState.costResources[j] = true;
             extraCost++;
             break;
           }
@@ -483,19 +483,19 @@ export default class CombatAreaApplication extends Application {
     let extraEX = 0;
     const drawnDice = []; // 记录抽到的骰子
 
-    // 如果已经激活，消耗Cost
+    // 如果已经激活，获得Cost标记
     if (this.combatState.activatedDice[diceIndex]) {
-      // 消耗Cost资源
+      // 获得Cost标记
       for (let j = 0; j < 6; j++) {
-        if (this.combatState.costResources[j]) {
-          this.combatState.costResources[j] = false;
+        if (!this.combatState.costResources[j]) {
+          this.combatState.costResources[j] = true;
           extraCost = 1;
           break;
         }
       }
 
-      // 统计当前已消耗的Cost资源总数，检查是否达到3的倍数来添加EX
-      const totalCost = this.combatState.costResources.filter(c => !c).length;
+      // 统计当前已有的Cost标记总数，检查是否达到3的倍数来添加EX
+      const totalCost = this.combatState.costResources.filter(c => c).length;
       if (totalCost > 0 && totalCost % 3 === 0) {
         // 添加1个EX资源
         for (let j = 0; j < 3; j++) {
