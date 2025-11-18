@@ -7,6 +7,7 @@
  */
 import { ActivityExecutor, createContext } from '../helpers/activity-executor.mjs';
 import { migrateActivity, isNewFormat } from '../helpers/activity-migration.mjs';
+import { TRIGGER_LABELS } from '../constants/activity-schema.mjs';
 
 /**
  * 触发物品活动（简化版，兼容旧接口）
@@ -102,19 +103,85 @@ async function sendActivityMessage(sourceActor, targetActor, activity, result) {
     return; // 没有效果，不发送消息
   }
 
+  // 获取触发类型标签
+  const triggerType = typeof activity.trigger === 'string'
+    ? activity.trigger
+    : activity.trigger?.type;
+  const triggerLabel = TRIGGER_LABELS[triggerType] || triggerType;
+
+  // 构建描述信息
+  let descriptionHtml = '';
+  if (activity.description) {
+    descriptionHtml = `
+      <div style="margin: 12px 0; padding: 10px; background: rgba(127, 176, 62, 0.1); border-left: 3px solid #7fb03e; border-radius: 4px;">
+        <div style="font-size: 12px; color: #888; margin-bottom: 4px;">
+          <i class="fas fa-info-circle"></i> 说明：
+        </div>
+        <div style="font-size: 13px; color: #d4d4d4; line-height: 1.6;">
+          ${activity.description}
+        </div>
+      </div>
+    `;
+  }
+
+  // 构建消耗信息
+  let consumeHtml = '';
+  if (activity.consume && activity.consume.mode !== 'none' && activity.consume.resources?.length > 0) {
+    const consumeItems = activity.consume.resources.map(res => {
+      if (res.type === 'buff') {
+        const buffName = game.shuhai?.buffHelpers?.getBuffName?.(res.buffId) || res.buffId;
+        return `${res.layers || 1} 层【${buffName}】`;
+      } else if (res.type === 'resource') {
+        return `${res.count || 1} 个 ${res.resourceType === 'cost' ? 'Cost' : 'EX'}`;
+      }
+      return '';
+    }).filter(Boolean).join('、');
+
+    if (consumeItems) {
+      consumeHtml = `
+        <div style="margin: 12px 0; font-size: 13px; color: #ff9966;">
+          <i class="fas fa-burn"></i> 消耗：${consumeItems}
+        </div>
+      `;
+    }
+  }
+
+  // 构建消息内容
   const content = `
-    <div style="border: 2px solid #4a7c2c; border-radius: 4px; padding: 12px; background: #0F0D1B;">
-      <h3 style="margin: 0 0 8px 0; color: #7fb03e;">【${activity.name} - ${sourceActor.name}】</h3>
-      <ul style="margin: 8px 0; padding-left: 20px; color: #EBBD68;">
-        ${effects.map(e => `<li>${e}</li>`).join('')}
-      </ul>
+    <div style="border: 2px solid #7fb03e; border-radius: 8px; padding: 16px; background: linear-gradient(135deg, #0F0D1B 0%, #1a1825 100%); font-family: 'Noto Sans SC', sans-serif; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+
+      <!-- 标题栏 -->
+      <div style="border-bottom: 2px solid #7fb03e; padding-bottom: 12px; margin-bottom: 12px;">
+        <h3 style="margin: 0; color: #7fb03e; font-size: 18px; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-scroll" style="color: #EBBD68;"></i>
+          ${activity.name}
+        </h3>
+        <div style="margin-top: 6px; font-size: 13px; color: #888; display: flex; gap: 12px;">
+          <span><i class="fas fa-user" style="color: #7fb03e;"></i> ${sourceActor.name}</span>
+          <span><i class="fas fa-bolt" style="color: #EBBD68;"></i> ${triggerLabel}</span>
+        </div>
+      </div>
+
+      ${descriptionHtml}
+      ${consumeHtml}
+
+      <!-- 效果列表 -->
+      <div style="margin: 12px 0;">
+        <div style="font-size: 14px; font-weight: bold; color: #EBBD68; margin-bottom: 8px;">
+          <i class="fas fa-magic"></i> 效果：
+        </div>
+        <ul style="margin: 0; padding-left: 20px; color: #d4d4d4; line-height: 1.8;">
+          ${effects.map(e => `<li style="margin: 4px 0;">${e}</li>`).join('')}
+        </ul>
+      </div>
     </div>
   `;
 
   await ChatMessage.create({
     user: game.user.id,
     speaker: ChatMessage.getSpeaker({ actor: sourceActor }),
-    content
+    content,
+    flavor: `【${activity.name}】触发`
   });
 }
 

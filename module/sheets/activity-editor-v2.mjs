@@ -319,6 +319,7 @@ export default class ActivityEditorV2 extends Application {
 
     // 手动构建 activity 对象（避免展开问题）
     this.activity.name = expanded.name || '';
+    this.activity.description = expanded.description || '';
 
     // 触发时机
     this.activity.trigger = {
