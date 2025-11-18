@@ -68,7 +68,7 @@ export class ExpressionParser {
             if (property === 'extra') {
               return combatState.exResources.filter(r => r).length;
             } else if (property === 'used') {
-              return combatState.costResources.filter(r => r).length;
+              return combatState.costResources.filter(r => !r).length;
             }
           }
           return 0;

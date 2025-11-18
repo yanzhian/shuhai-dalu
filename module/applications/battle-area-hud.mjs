@@ -113,7 +113,7 @@ export default class BattleAreaHUD extends Application {
 
     // 获取战斗状态
     const combatState = actor.getFlag('shuhai-dalu', 'combatState') || {
-      costResources: [false, false, false, false, false, false],
+      costResources: [true, true, true, true, true, true],
       exResources: [true, true, true],
       activatedDice: [false, false, false, false, false, false],
       buffs: [],

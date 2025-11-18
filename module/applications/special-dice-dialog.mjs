@@ -119,8 +119,8 @@ export default class SpecialDiceDialog extends Application {
 
     // 获取战斗状态
     let combatState = this.actor.getFlag('shuhai-dalu', 'combatState') || {
-      costResources: [false, false, false, false, false, false],
-      exResources: [false, false, false],
+      costResources: [true, true, true, true, true, true],
+      exResources: [true, true, true],
       activatedDice: [false, false, false, false, false, false],
       buffs: []
     };
