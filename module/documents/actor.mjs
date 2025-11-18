@@ -492,8 +492,9 @@ export default class ShuhaiActor extends Actor {
    * @param {number} layers - 层数
    * @param {number} strength - 强度（可选）
    * @param {string} roundTiming - 回合时机 (current/next)，默认current
+   * @param {string} customName - 自定义BUFF名称（可选，用于custom类型）
    */
-  async addBuff(buffId, layers = 1, strength = 0, roundTiming = 'current') {
+  async addBuff(buffId, layers = 1, strength = 0, roundTiming = 'current', customName = null) {
     // 动态导入BUFF定义（避免循环依赖）
     const { findBuffById } = await import('../constants/buff-types.mjs');
 
@@ -505,9 +506,12 @@ export default class ShuhaiActor extends Actor {
 
     const combatState = this._getCombatState();
 
-    // 检查是否已存在相同id和roundTiming的BUFF
+    // 对于自定义BUFF，使用 customName 作为唯一标识
+    const buffIdentifier = customName || buffId;
+
+    // 检查是否已存在相同标识和roundTiming的BUFF
     const existingBuffIndex = combatState.buffs.findIndex(
-      b => b.id === buffId && b.roundTiming === roundTiming
+      b => (customName ? b.customName === customName : b.id === buffId) && b.roundTiming === roundTiming
     );
 
     if (existingBuffIndex !== -1) {
@@ -518,16 +522,23 @@ export default class ShuhaiActor extends Actor {
       }
     } else {
       // 如果不存在，添加新BUFF
-      combatState.buffs.push({
+      const newBuff = {
         id: buffDef.id,
-        name: buffDef.name,
+        name: customName || buffDef.name,
         type: buffDef.type,
         description: buffDef.description,
         icon: buffDef.icon,
         layers: layers,
         strength: strength !== 0 ? strength : buffDef.defaultStrength,
         roundTiming: roundTiming
-      });
+      };
+
+      // 如果是自定义BUFF，添加customName字段
+      if (customName) {
+        newBuff.customName = customName;
+      }
+
+      combatState.buffs.push(newBuff);
     }
 
     await this._saveCombatState(combatState);

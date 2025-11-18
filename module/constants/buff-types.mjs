@@ -178,6 +178,15 @@ export const BUFF_TYPES = {
       icon: 'icons/svg/paralysis.svg',
       defaultLayers: 1,
       defaultStrength: 0
+    },
+    {
+      id: 'custom',
+      name: '自定义',
+      type: 'effect',
+      description: '自定义效果，名称和层数由创建者指定。',
+      icon: 'icons/svg/mystery-man.svg',
+      defaultLayers: 1,
+      defaultStrength: 0
     }
   ],
 
