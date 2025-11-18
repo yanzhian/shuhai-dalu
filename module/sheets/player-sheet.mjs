@@ -270,6 +270,10 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
       sortBtn.html('<i class="fas fa-sort-alpha-down"></i>');
       sortBtn.attr('title', '排序：类型排序');
     }
+
+    // 【修复】立即应用当前的排序状态，确保DOM按正确的顺序显示
+    // 这样打开角色卡时就会立即按手动排序的sort值排列物品
+    this._sortInventoryItems();
   }
 
   /**
