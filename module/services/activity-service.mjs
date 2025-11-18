@@ -72,8 +72,8 @@ export async function triggerItemActivitiesWithTarget(sourceActor, item, trigger
         console.log('【Activity服务】活动执行成功:', activity.name, result);
         hasTriggered = true;
 
-        // 发送聊天消息（可选）
-        await sendActivityMessage(sourceActor, targetActor, activity, result);
+        // 发送聊天消息（传入 item 信息）
+        await sendActivityMessage(sourceActor, targetActor, item, activity, result);
       } else {
         console.log('【Activity服务】活动执行失败:', activity.name, result.reason);
       }
@@ -88,7 +88,7 @@ export async function triggerItemActivitiesWithTarget(sourceActor, item, trigger
 /**
  * 发送 Activity 执行结果到聊天
  */
-async function sendActivityMessage(sourceActor, targetActor, activity, result) {
+async function sendActivityMessage(sourceActor, targetActor, item, activity, result) {
   // 构建效果描述
   const effects = [];
   if (result.effectResults) {
@@ -103,22 +103,49 @@ async function sendActivityMessage(sourceActor, targetActor, activity, result) {
     return; // 没有效果，不发送消息
   }
 
-  // 获取触发类型标签
-  const triggerType = typeof activity.trigger === 'string'
-    ? activity.trigger
-    : activity.trigger?.type;
-  const triggerLabel = TRIGGER_LABELS[triggerType] || triggerType;
+  // 获取物品类型和分类标签
+  const itemTypeLabels = {
+    'combatDice': '战斗骰',
+    'shootDice': '射击骰',
+    'defenseDice': '守备骰',
+    'triggerDice': 'EX骰',
+    'passiveDice': '被动骰',
+    'weapon': '武器',
+    'armor': '护甲',
+    'item': '道具',
+    'equipment': '装备'
+  };
 
-  // 构建描述信息
+  const categoryLabels = {
+    'slash': '斩击',
+    'pierce': '突刺',
+    'blunt': '打击',
+    'dodge': '闪避',
+    'counter': '反击',
+    'block': '防御',
+    'tag': '标签',
+    'tool': '道具'
+  };
+
+  const itemType = itemTypeLabels[item.type] || item.type;
+  const itemCategory = item.system?.category ? categoryLabels[item.system.category] || item.system.category : '';
+
+  // 构建类型信息
+  let typeInfo = itemType;
+  if (itemCategory) {
+    typeInfo += ` · ${itemCategory}`;
+  }
+
+  // 构建描述信息（使用物品描述）
   let descriptionHtml = '';
-  if (activity.description) {
+  if (item.system?.description) {
     descriptionHtml = `
       <div style="margin: 12px 0; padding: 10px; background: rgba(127, 176, 62, 0.1); border-left: 3px solid #7fb03e; border-radius: 4px;">
         <div style="font-size: 12px; color: #888; margin-bottom: 4px;">
-          <i class="fas fa-info-circle"></i> 说明：
+          <i class="fas fa-info-circle"></i> 效果：
         </div>
         <div style="font-size: 13px; color: #d4d4d4; line-height: 1.6;">
-          ${activity.description}
+          ${item.system.description}
         </div>
       </div>
     `;
@@ -153,22 +180,22 @@ async function sendActivityMessage(sourceActor, targetActor, activity, result) {
       <!-- 标题栏 -->
       <div style="border-bottom: 2px solid #7fb03e; padding-bottom: 12px; margin-bottom: 12px;">
         <h3 style="margin: 0; color: #7fb03e; font-size: 18px; font-weight: bold; display: flex; align-items: center; gap: 8px;">
-          <i class="fas fa-scroll" style="color: #EBBD68;"></i>
-          ${activity.name}
+          <i class="fas fa-dice-d20" style="color: #EBBD68;"></i>
+          ${item.name}
         </h3>
         <div style="margin-top: 6px; font-size: 13px; color: #888; display: flex; gap: 12px;">
           <span><i class="fas fa-user" style="color: #7fb03e;"></i> ${sourceActor.name}</span>
-          <span><i class="fas fa-bolt" style="color: #EBBD68;"></i> ${triggerLabel}</span>
+          <span><i class="fas fa-tag" style="color: #EBBD68;"></i> ${typeInfo}</span>
         </div>
       </div>
 
       ${descriptionHtml}
       ${consumeHtml}
 
-      <!-- 效果列表 -->
+      <!-- 触发效果列表 -->
       <div style="margin: 12px 0;">
         <div style="font-size: 14px; font-weight: bold; color: #EBBD68; margin-bottom: 8px;">
-          <i class="fas fa-magic"></i> 效果：
+          <i class="fas fa-magic"></i> 触发效果：
         </div>
         <ul style="margin: 0; padding-left: 20px; color: #d4d4d4; line-height: 1.8;">
           ${effects.map(e => `<li style="margin: 4px 0;">${e}</li>`).join('')}
@@ -181,7 +208,7 @@ async function sendActivityMessage(sourceActor, targetActor, activity, result) {
     user: game.user.id,
     speaker: ChatMessage.getSpeaker({ actor: sourceActor }),
     content,
-    flavor: `【${activity.name}】触发`
+    flavor: `【${item.name}】触发`
   });
 }
 
@@ -300,8 +327,8 @@ export async function executeActorActivities(actor, triggerType, options = {}) {
         console.log('【Activity服务】活动执行成功:', activity.name);
         results.push({ item, activity, result });
 
-        // 发送聊天消息
-        await sendActivityMessage(actor, options.target, activity, result);
+        // 发送聊天消息（传入 item 信息）
+        await sendActivityMessage(actor, options.target, item, activity, result);
       } else {
         console.log('【Activity服务】活动执行失败:', activity.name, result.reason);
       }
