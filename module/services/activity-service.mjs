@@ -122,18 +122,21 @@ async function sendActivityMessage(sourceActor, targetActor, activity, result) {
  * 格式化效果结果为可读文本
  */
 function formatEffectResult(effect, result, targetActor) {
+  // 导入 getBuffName 函数
+  const { getBuffName } = game.shuhai?.buffHelpers || {};
+
   const targetName = targetActor?.name || '自己';
 
   switch (effect.type) {
     case 'addBuff': {
-      const buffName = game.i18n.localize(`SHUHAI.Buff.${result.buffId}`);
-      const displayName = buffName.startsWith('SHUHAI.Buff.') ? result.buffId : buffName;
+      // 优先使用 getBuffName 获取中文名称
+      const displayName = getBuffName ? getBuffName(result.buffId) : result.buffId;
       return `为${targetName}添加 ${result.layers} 层【${displayName}】`;
     }
 
     case 'consumeBuff': {
-      const buffName = game.i18n.localize(`SHUHAI.Buff.${result.buffId}`);
-      const displayName = buffName.startsWith('SHUHAI.Buff.') ? result.buffId : buffName;
+      // 优先使用 getBuffName 获取中文名称
+      const displayName = getBuffName ? getBuffName(result.buffId) : result.buffId;
       return `消耗${targetName}的 ${result.layers} 层【${displayName}】`;
     }
 

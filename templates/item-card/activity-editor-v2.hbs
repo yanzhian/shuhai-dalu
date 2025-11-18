@@ -110,16 +110,28 @@
                 {{!-- hasBuff: 只需要 buffId --}}
                 {{#if (eq this.type 'hasBuff')}}
                   <div class="form-group">
-                    <label>BUFF ID</label>
-                    <input type="text" name="conditions.{{@index}}.buffId" value="{{this.buffId}}" placeholder="strong" />
+                    <label>BUFF ID <small style="color: #888;">(可输入中文或英文)</small></label>
+                    <input type="text" name="conditions.{{@index}}.buffId" value="{{this.buffId}}" list="buff-list-{{@index}}" placeholder="强壮 / strong" />
+                    <datalist id="buff-list-{{@index}}">
+                      {{#each ../buffTypes}}
+                        <option value="{{this.id}}">{{this.displayText}}</option>
+                        <option value="{{this.name}}">{{this.displayText}}</option>
+                      {{/each}}
+                    </datalist>
                   </div>
                 {{/if}}
 
                 {{!-- buffLayer: 需要 buffId + operator + value --}}
                 {{#if (eq this.type 'buffLayer')}}
                   <div class="form-group">
-                    <label>BUFF ID</label>
-                    <input type="text" name="conditions.{{@index}}.buffId" value="{{this.buffId}}" placeholder="charge" />
+                    <label>BUFF ID <small style="color: #888;">(可输入中文或英文)</small></label>
+                    <input type="text" name="conditions.{{@index}}.buffId" value="{{this.buffId}}" list="buff-list-layer-{{@index}}" placeholder="充能 / charge" />
+                    <datalist id="buff-list-layer-{{@index}}">
+                      {{#each ../buffTypes}}
+                        <option value="{{this.id}}">{{this.displayText}}</option>
+                        <option value="{{this.name}}">{{this.displayText}}</option>
+                      {{/each}}
+                    </datalist>
                   </div>
                   <div class="form-group inline-group">
                     <label>比较</label>
@@ -217,8 +229,14 @@
 
                     {{#if (eq this.type 'buff')}}
                       <div class="form-group">
-                        <label>BUFF ID</label>
-                        <input type="text" name="consume.resources.{{@index}}.buffId" value="{{this.buffId}}" placeholder="charge" />
+                        <label>BUFF ID <small style="color: #888;">(可输入中文或英文)</small></label>
+                        <input type="text" name="consume.resources.{{@index}}.buffId" value="{{this.buffId}}" list="buff-list-consume-{{@index}}" placeholder="充能 / charge" />
+                        <datalist id="buff-list-consume-{{@index}}">
+                          {{#each ../../buffTypes}}
+                            <option value="{{this.id}}">{{this.displayText}}</option>
+                            <option value="{{this.name}}">{{this.displayText}}</option>
+                          {{/each}}
+                        </datalist>
                       </div>
                       <div class="form-group">
                         <label>层数</label>
@@ -329,8 +347,14 @@
                 {{!-- addBuff: buffId, layers, strength, target, roundTiming --}}
                 {{#if (eq this.type 'addBuff')}}
                   <div class="form-group">
-                    <label>BUFF ID</label>
-                    <input type="text" name="effects.{{@index}}.buffId" value="{{this.buffId}}" placeholder="strong" />
+                    <label>BUFF ID <small style="color: #888;">(可输入中文或英文)</small></label>
+                    <input type="text" name="effects.{{@index}}.buffId" value="{{this.buffId}}" list="buff-list-effect-add-{{@index}}" placeholder="强壮 / strong" />
+                    <datalist id="buff-list-effect-add-{{@index}}">
+                      {{#each ../buffTypes}}
+                        <option value="{{this.id}}">{{this.displayText}}</option>
+                        <option value="{{this.name}}">{{this.displayText}}</option>
+                      {{/each}}
+                    </datalist>
                   </div>
                   <div class="form-row">
                     <div class="form-group">
@@ -364,8 +388,14 @@
                 {{!-- consumeBuff: buffId, layers, target --}}
                 {{#if (eq this.type 'consumeBuff')}}
                   <div class="form-group">
-                    <label>BUFF ID</label>
-                    <input type="text" name="effects.{{@index}}.buffId" value="{{this.buffId}}" placeholder="charge" />
+                    <label>BUFF ID <small style="color: #888;">(可输入中文或英文)</small></label>
+                    <input type="text" name="effects.{{@index}}.buffId" value="{{this.buffId}}" list="buff-list-effect-consume-{{@index}}" placeholder="充能 / charge" />
+                    <datalist id="buff-list-effect-consume-{{@index}}">
+                      {{#each ../buffTypes}}
+                        <option value="{{this.id}}">{{this.displayText}}</option>
+                        <option value="{{this.name}}">{{this.displayText}}</option>
+                      {{/each}}
+                    </datalist>
                   </div>
                   <div class="form-row">
                     <div class="form-group">

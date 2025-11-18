@@ -14,7 +14,7 @@
 
 import { isNewFormat, migrateActivity } from '../helpers/activity-migration.mjs';
 import { createDefaultActivity, TRIGGER_TYPES, TRIGGER_LABELS, TARGET_TYPES, TARGET_LABELS, ROUND_TIMING, ROUND_TIMING_LABELS, CONDITION_TYPES, CONSUME_MODE, EFFECT_TYPES } from '../constants/activity-schema.mjs';
-import { findBuffById, BUFF_TYPES } from '../constants/buff-types.mjs';
+import { findBuffById, getAllBuffs, normalizeBuffId, getBuffName } from '../constants/buff-types.mjs';
 import { ExpressionParser, EXPRESSION_EXAMPLES } from '../helpers/expression-parser.mjs';
 
 export default class ActivityEditorV2 extends Application {
@@ -210,10 +210,14 @@ export default class ActivityEditorV2 extends Application {
    * 准备 BUFF 类型选项
    */
   _prepareBuffTypes() {
-    return Object.values(BUFF_TYPES).map(buff => ({
+    // 获取所有 BUFF 列表
+    const allBuffs = getAllBuffs();
+
+    return allBuffs.map(buff => ({
       id: buff.id,
       name: buff.name,
-      category: buff.category,
+      displayText: `${buff.name} (${buff.id})`,  // 显示文本：中文名 (英文ID)
+      type: buff.type,
       icon: buff.icon
     }));
   }
@@ -323,21 +327,36 @@ export default class ActivityEditorV2 extends Application {
       category: expanded.trigger?.category || null
     };
 
-    // 条件（暂时简化）
+    // 条件（转换中文 BUFF 名到 ID）
     if (expanded.conditions) {
-      this.activity.conditions = Object.values(expanded.conditions);
+      this.activity.conditions = Object.values(expanded.conditions).map(cond => {
+        if (cond.buffId) {
+          cond.buffId = normalizeBuffId(cond.buffId);
+        }
+        return cond;
+      });
     }
 
-    // 消耗
+    // 消耗（转换中文 BUFF 名到 ID）
     this.activity.consume = {
       mode: expanded.consume?.mode || 'none',
-      resources: expanded.consume?.resources ? Object.values(expanded.consume.resources) : [],
+      resources: expanded.consume?.resources ? Object.values(expanded.consume.resources).map(res => {
+        if (res.buffId) {
+          res.buffId = normalizeBuffId(res.buffId);
+        }
+        return res;
+      }) : [],
       options: expanded.consume?.options ? Object.values(expanded.consume.options) : []
     };
 
-    // 效果
+    // 效果（转换中文 BUFF 名到 ID）
     if (expanded.effects) {
-      this.activity.effects = Object.values(expanded.effects);
+      this.activity.effects = Object.values(expanded.effects).map(eff => {
+        if (eff.buffId) {
+          eff.buffId = normalizeBuffId(eff.buffId);
+        }
+        return eff;
+      });
     }
 
     // 次数限制

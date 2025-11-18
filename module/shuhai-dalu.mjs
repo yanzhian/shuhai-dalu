@@ -20,8 +20,8 @@ import ShuhaiPlayerSheet from "./sheets/player-sheet.mjs";
 import ShuhaiItemSheet from "./sheets/item-sheet.mjs";
 import ItemCardSheet from "./sheets/item-card-sheet.mjs";
 
-// 导入常量
-import { BUFF_TYPES } from "./constants/buff-types.mjs";
+// 导入常量和 BUFF 辅助函数
+import { BUFF_TYPES, getBuffName, normalizeBuffId, getAllBuffs } from "./constants/buff-types.mjs";
 
 // 导入服务模块
 import {
@@ -65,7 +65,13 @@ Hooks.once('init', async function() {
     rollSkillCheck,
     rollCorruptionCheck,
     equipItem,
-    unequipItem
+    unequipItem,
+    // BUFF 辅助函数
+    buffHelpers: {
+      getBuffName,
+      normalizeBuffId,
+      getAllBuffs
+    }
   };
 
   // 配置文档类
