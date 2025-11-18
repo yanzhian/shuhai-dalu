@@ -344,3 +344,33 @@ export function getAllBuffs() {
 export function findBuffById(buffId) {
   return getAllBuffs().find(b => b.id === buffId);
 }
+
+/**
+ * 根据中文名称查找BUFF ID
+ * @param {string} nameOrId - BUFF中文名称或ID
+ * @returns {string} BUFF ID，如果找不到则返回原值
+ */
+export function normalizeBuffId(nameOrId) {
+  if (!nameOrId) return nameOrId;
+
+  // 如果已经是ID（英文），直接返回
+  const buff = getAllBuffs().find(b => b.id === nameOrId);
+  if (buff) return nameOrId;
+
+  // 查找中文名称
+  const buffByName = getAllBuffs().find(b => b.name === nameOrId);
+  if (buffByName) return buffByName.id;
+
+  // 找不到，返回原值
+  return nameOrId;
+}
+
+/**
+ * 根据BUFF ID获取中文名称
+ * @param {string} buffId - BUFF ID
+ * @returns {string} BUFF中文名称，如果找不到则返回ID本身
+ */
+export function getBuffName(buffId) {
+  const buff = findBuffById(buffId);
+  return buff ? buff.name : buffId;
+}

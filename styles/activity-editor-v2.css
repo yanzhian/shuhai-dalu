@@ -1,0 +1,358 @@
+/**
+ * Activity 编辑器 V2 样式
+ */
+
+.activity-editor-v2 {
+  font-family: var(--font-primary);
+  font-size: 14px;
+}
+
+/* 模式切换标签 */
+.activity-editor-v2 .mode-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #ddd;
+}
+
+.activity-editor-v2 .tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  color: #666;
+}
+
+.activity-editor-v2 .tab-btn:hover {
+  color: #333;
+  background: #f5f5f5;
+}
+
+.activity-editor-v2 .tab-btn.active {
+  color: #4A90E2;
+  border-bottom-color: #4A90E2;
+}
+
+/* 迁移提示 */
+.activity-editor-v2 .migration-notice {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 15px;
+  color: #856404;
+}
+
+.activity-editor-v2 .migration-notice i {
+  margin-right: 8px;
+}
+
+/* 基础编辑器 */
+.activity-editor-v2 .basic-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 表单区块 */
+.activity-editor-v2 .form-section {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 15px;
+}
+
+.activity-editor-v2 .form-section h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.activity-editor-v2 .form-section h3 i {
+  font-size: 18px;
+}
+
+.activity-editor-v2 .form-section h4 {
+  margin: 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 表单组 */
+.activity-editor-v2 .form-group {
+  margin-bottom: 12px;
+}
+
+.activity-editor-v2 .form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  font-size: 13px;
+  color: #333;
+}
+
+.activity-editor-v2 .form-group input[type="text"],
+.activity-editor-v2 .form-group input[type="number"],
+.activity-editor-v2 .form-group select,
+.activity-editor-v2 .form-group textarea {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.activity-editor-v2 .form-group input[type="text"]:focus,
+.activity-editor-v2 .form-group input[type="number"]:focus,
+.activity-editor-v2 .form-group select:focus,
+.activity-editor-v2 .form-group textarea:focus {
+  outline: none;
+  border-color: #4A90E2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+}
+
+.activity-editor-v2 .form-group.inline-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.activity-editor-v2 .form-group input.narrow,
+.activity-editor-v2 .form-group select.narrow {
+  width: 80px;
+}
+
+.activity-editor-v2 .form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.activity-editor-v2 .form-row > .form-group {
+  flex: 1;
+}
+
+.activity-editor-v2 .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.activity-editor-v2 .checkbox-label input[type="checkbox"] {
+  margin: 0;
+}
+
+.activity-editor-v2 .help-text {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #777;
+}
+
+/* 图标按钮 */
+.activity-editor-v2 .icon-btn {
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: #666;
+  transition: color 0.2s;
+  font-size: 14px;
+}
+
+.activity-editor-v2 .icon-btn:hover {
+  color: #333;
+}
+
+.activity-editor-v2 .add-condition-btn,
+.activity-editor-v2 .add-effect-btn,
+.activity-editor-v2 .add-consume-resource-btn,
+.activity-editor-v2 .add-consume-option-btn {
+  color: #7ED321;
+}
+
+.activity-editor-v2 .remove-condition-btn,
+.activity-editor-v2 .remove-effect-btn,
+.activity-editor-v2 .remove-consume-resource-btn,
+.activity-editor-v2 .remove-consume-option-btn {
+  color: #D0021B;
+}
+
+/* 条件/效果/消耗项 */
+.activity-editor-v2 .condition-item,
+.activity-editor-v2 .effect-item,
+.activity-editor-v2 .consume-resource-item,
+.activity-editor-v2 .consume-option-item {
+  background: #f8f9fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.activity-editor-v2 .condition-header,
+.activity-editor-v2 .effect-header,
+.activity-editor-v2 .option-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.activity-editor-v2 .condition-index,
+.activity-editor-v2 .effect-index {
+  font-weight: 600;
+  color: #333;
+}
+
+.activity-editor-v2 .empty-state {
+  text-align: center;
+  padding: 30px;
+  color: #999;
+}
+
+.activity-editor-v2 .empty-state.small {
+  padding: 15px;
+}
+
+.activity-editor-v2 .empty-state i {
+  font-size: 40px;
+  margin-bottom: 10px;
+  opacity: 0.3;
+}
+
+.activity-editor-v2 .empty-state p {
+  margin: 5px 0;
+  font-size: 13px;
+}
+
+/* 表达式帮助 */
+.activity-editor-v2 .expression-help {
+  background: #e3f2fd;
+  border-left: 4px solid #2196F3;
+  padding: 10px;
+  margin-top: 15px;
+  font-size: 12px;
+}
+
+.activity-editor-v2 .expression-help strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.activity-editor-v2 .expression-help ul {
+  margin: 5px 0;
+  padding-left: 20px;
+}
+
+.activity-editor-v2 .expression-help code {
+  background: #fff;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+}
+
+/* JSON 编辑器 */
+.activity-editor-v2 .json-editor-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.activity-editor-v2 .json-toolbar {
+  display: flex;
+  gap: 10px;
+}
+
+.activity-editor-v2 .json-toolbar button {
+  padding: 8px 16px;
+  background: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.activity-editor-v2 .json-toolbar button:hover {
+  background: #e1e1e1;
+}
+
+.activity-editor-v2 .json-editor {
+  width: 100%;
+  min-height: 400px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #f8f9fa;
+  resize: vertical;
+}
+
+.activity-editor-v2 .json-preview {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 12px;
+  min-height: 100px;
+}
+
+/* 操作按钮 */
+.activity-editor-v2 .form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 15px;
+  border-top: 1px solid #ddd;
+}
+
+.activity-editor-v2 .save-btn,
+.activity-editor-v2 .cancel-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.activity-editor-v2 .save-btn {
+  background: #7ED321;
+  color: white;
+}
+
+.activity-editor-v2 .save-btn:hover {
+  background: #6BC116;
+}
+
+.activity-editor-v2 .cancel-btn {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.activity-editor-v2 .cancel-btn:hover {
+  background: #e1e1e1;
+  color: #333;
+}
+
+/* 响应式设计 */
+@media (max-width: 600px) {
+  .activity-editor-v2 .form-row {
+    flex-direction: column;
+  }
+}

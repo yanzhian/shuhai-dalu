@@ -1,0 +1,587 @@
+<div class="activity-editor-v2">
+  {{!-- 模式切换标签 --}}
+  <div class="mode-tabs">
+    <button type="button" class="tab-btn {{#if isBasicMode}}active{{/if}}" data-mode="basic">
+      <i class="fas fa-edit"></i> 基础编辑器
+    </button>
+    <button type="button" class="tab-btn {{#if isAdvancedMode}}active{{/if}}" data-mode="advanced">
+      <i class="fas fa-code"></i> 高级 JSON
+    </button>
+  </div>
+
+  {{#if needsMigration}}
+    <div class="migration-notice">
+      <i class="fas fa-info-circle"></i>
+      已自动从旧格式迁移，保存后将使用新格式
+    </div>
+  {{/if}}
+
+  {{#if isBasicMode}}
+    {{!-- 基础编辑器 --}}
+    <form class="basic-editor">
+      {{!-- 基础信息 --}}
+      <div class="form-section">
+        <h3><i class="fas fa-tag"></i> 基础信息</h3>
+        <div class="form-group">
+          <label>活动名称</label>
+          <input type="text" name="name" value="{{activity.name}}" placeholder="输入活动名称..." required />
+        </div>
+        <div class="form-group">
+          <label>效果描述 <small style="color: #888;">(可选，将显示在聊天消息中)</small></label>
+          <textarea name="description" rows="2" placeholder="描述此活动的效果和用途..." style="resize: vertical; min-height: 50px;">{{activity.description}}</textarea>
+        </div>
+      </div>
+
+      {{!-- 触发时机 --}}
+      <div class="form-section trigger-editor">
+        <h3><i class="fas fa-bolt" style="color: #4A90E2;"></i> 触发时机</h3>
+
+        <div class="form-group">
+          <label>触发类型</label>
+          <select name="trigger.type">
+            {{#each triggerTypes}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>
+                {{this.label}}
+              </option>
+            {{/each}}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" name="trigger.passive" {{#if activity.trigger.passive}}checked{{/if}} />
+            被动触发
+          </label>
+          <span class="help-text">勾选后将在满足条件时自动触发</span>
+        </div>
+
+        {{#if activity.trigger.passive}}
+          <div class="form-group">
+            <label>分类限制</label>
+            <select name="trigger.category">
+              <option value="" {{#unless activity.trigger.category}}selected{{/unless}}>无限制</option>
+              <option value="slash" {{#if (eq activity.trigger.category 'slash')}}selected{{/if}}>斩击</option>
+              <option value="pierce" {{#if (eq activity.trigger.category 'pierce')}}selected{{/if}}>突刺</option>
+              <option value="blunt" {{#if (eq activity.trigger.category 'blunt')}}selected{{/if}}>打击</option>
+            </select>
+            <span class="help-text">被动触发只对指定攻击类型生效</span>
+          </div>
+        {{/if}}
+      </div>
+
+      {{!-- 条件 --}}
+      <div class="form-section condition-editor">
+        <h3 style="color: #F5A623;">
+          <i class="fas fa-filter"></i> 前置条件
+          <button type="button" class="add-condition-btn icon-btn" title="添加条件">
+            <i class="fas fa-plus"></i>
+          </button>
+        </h3>
+
+        <div class="help-text">只有满足所有条件时，Activity 才会生效</div>
+
+        {{#if activity.conditions}}
+          {{#each activity.conditions}}
+            <div class="condition-item">
+              <div class="condition-header">
+                <span class="condition-index">条件 {{add @index 1}}</span>
+                <button type="button" class="remove-condition-btn icon-btn" data-index="{{@index}}" title="删除">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+
+              <div class="condition-fields">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>条件类型</label>
+                    <select name="conditions.{{@index}}.type">
+                      <option value="hasBuff" {{#if (eq this.type 'hasBuff')}}selected{{/if}}>拥有BUFF</option>
+                      <option value="buffLayer" {{#if (eq this.type 'buffLayer')}}selected{{/if}}>BUFF层数</option>
+                      <option value="resourceCount" {{#if (eq this.type 'resourceCount')}}selected{{/if}}>资源数量</option>
+                      <option value="healthPercent" {{#if (eq this.type 'healthPercent')}}selected{{/if}}>生命值%</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label>检查目标</label>
+                    <select name="conditions.{{@index}}.target">
+                      <option value="self" {{#if (eq this.target 'self')}}selected{{else}}{{#unless this.target}}selected{{/unless}}{{/if}}>自己</option>
+                      <option value="opponent" {{#if (eq this.target 'opponent')}}selected{{/if}}>对手</option>
+                    </select>
+                  </div>
+                </div>
+
+                {{!-- hasBuff: 只需要 buffId --}}
+                {{#if (eq this.type 'hasBuff')}}
+                  <div class="form-group">
+                    <label>BUFF ID <small style="color: #888;">(可输入中文或英文)</small></label>
+                    <input type="text" name="conditions.{{@index}}.buffId" value="{{this.buffId}}" list="buff-list-{{@index}}" placeholder="强壮 / strong" />
+                    <datalist id="buff-list-{{@index}}">
+                      {{#each ../buffTypes}}
+                        <option value="{{this.id}}">{{this.displayText}}</option>
+                        <option value="{{this.name}}">{{this.displayText}}</option>
+                      {{/each}}
+                    </datalist>
+                  </div>
+                {{/if}}
+
+                {{!-- buffLayer: 需要 buffId + operator + value --}}
+                {{#if (eq this.type 'buffLayer')}}
+                  <div class="form-group">
+                    <label>BUFF ID <small style="color: #888;">(可输入中文或英文)</small></label>
+                    <input type="text" name="conditions.{{@index}}.buffId" value="{{this.buffId}}" list="buff-list-layer-{{@index}}" placeholder="充能 / charge" />
+                    <datalist id="buff-list-layer-{{@index}}">
+                      {{#each ../buffTypes}}
+                        <option value="{{this.id}}">{{this.displayText}}</option>
+                        <option value="{{this.name}}">{{this.displayText}}</option>
+                      {{/each}}
+                    </datalist>
+                  </div>
+                  <div class="form-group inline-group">
+                    <label>比较</label>
+                    <select name="conditions.{{@index}}.operator" class="narrow">
+                      <option value=">=" {{#if (eq this.operator '>=')}}selected{{/if}}>>=</option>
+                      <option value=">" {{#if (eq this.operator '>')}}selected{{/if}}>&gt;</option>
+                      <option value="<=" {{#if (eq this.operator '<=')}}selected{{/if}}><=</option>
+                      <option value="<" {{#if (eq this.operator '<')}}selected{{/if}}>&lt;</option>
+                      <option value="==" {{#if (eq this.operator '==')}}selected{{/if}}>==</option>
+                    </select>
+                    <input type="number" name="conditions.{{@index}}.value" value="{{this.value}}" class="narrow" />
+                  </div>
+                {{/if}}
+
+                {{!-- resourceCount: 需要 resourceType + operator + value --}}
+                {{#if (eq this.type 'resourceCount')}}
+                  <div class="form-group">
+                    <label>资源类型</label>
+                    <select name="conditions.{{@index}}.resourceType">
+                      <option value="cost" {{#if (eq this.resourceType 'cost')}}selected{{/if}}>Cost</option>
+                      <option value="ex" {{#if (eq this.resourceType 'ex')}}selected{{/if}}>EX</option>
+                    </select>
+                  </div>
+                  <div class="form-group inline-group">
+                    <label>比较</label>
+                    <select name="conditions.{{@index}}.operator" class="narrow">
+                      <option value=">=" {{#if (eq this.operator '>=')}}selected{{/if}}>>=</option>
+                      <option value=">" {{#if (eq this.operator '>')}}selected{{/if}}>&gt;</option>
+                    </select>
+                    <input type="number" name="conditions.{{@index}}.value" value="{{this.value}}" class="narrow" />
+                  </div>
+                {{/if}}
+
+                {{!-- healthPercent: operator + value --}}
+                {{#if (eq this.type 'healthPercent')}}
+                  <div class="form-group inline-group">
+                    <label>生命值%</label>
+                    <select name="conditions.{{@index}}.operator" class="narrow">
+                      <option value=">=" {{#if (eq this.operator '>=')}}selected{{/if}}>>=</option>
+                      <option value=">" {{#if (eq this.operator '>')}}selected{{/if}}>&gt;</option>
+                      <option value="<=" {{#if (eq this.operator '<=')}}selected{{/if}}><=</option>
+                      <option value="<" {{#if (eq this.operator '<')}}selected{{/if}}>&lt;</option>
+                    </select>
+                    <input type="number" name="conditions.{{@index}}.value" value="{{this.value}}" class="narrow" min="0" max="100" />
+                    <span>%</span>
+                  </div>
+                {{/if}}
+              </div>
+            </div>
+          {{/each}}
+        {{else}}
+          <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>暂无条件，点击右上角 + 添加</p>
+          </div>
+        {{/if}}
+      </div>
+
+      {{!-- 消耗 --}}
+      <div class="form-section consume-editor">
+        <h3 style="color: #D0021B;">
+          <i class="fas fa-battery-half"></i> 消耗
+        </h3>
+
+        <div class="form-group">
+          <label>消耗模式</label>
+          <select name="consume.mode">
+            {{#each consumeModes}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+
+        {{!-- 强制消耗模式 --}}
+        {{#if (eq activity.consume.mode 'mandatory')}}
+          <div class="mandatory-consume">
+            <h4>
+              强制消耗资源
+              <button type="button" class="add-consume-resource-btn icon-btn" title="添加资源">
+                <i class="fas fa-plus"></i>
+              </button>
+            </h4>
+
+            {{#if activity.consume.resources}}
+              {{#each activity.consume.resources}}
+                <div class="consume-resource-item">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>类型</label>
+                      <select name="consume.resources.{{@index}}.type">
+                        <option value="buff" {{#if (eq this.type 'buff')}}selected{{/if}}>BUFF</option>
+                        <option value="resource" {{#if (eq this.type 'resource')}}selected{{/if}}>资源</option>
+                      </select>
+                    </div>
+
+                    {{#if (eq this.type 'buff')}}
+                      <div class="form-group">
+                        <label>BUFF ID <small style="color: #888;">(可输入中文或英文)</small></label>
+                        <input type="text" name="consume.resources.{{@index}}.buffId" value="{{this.buffId}}" list="buff-list-consume-{{@index}}" placeholder="充能 / charge" />
+                        <datalist id="buff-list-consume-{{@index}}">
+                          {{#each ../../buffTypes}}
+                            <option value="{{this.id}}">{{this.displayText}}</option>
+                            <option value="{{this.name}}">{{this.displayText}}</option>
+                          {{/each}}
+                        </datalist>
+                      </div>
+                      <div class="form-group">
+                        <label>层数</label>
+                        <input type="number" name="consume.resources.{{@index}}.layers" value="{{this.layers}}" placeholder="1" />
+                      </div>
+                    {{/if}}
+
+                    {{#if (eq this.type 'resource')}}
+                      <div class="form-group">
+                        <label>资源类型</label>
+                        <select name="consume.resources.{{@index}}.resourceType">
+                          <option value="cost" {{#if (eq this.resourceType 'cost')}}selected{{/if}}>Cost</option>
+                          <option value="ex" {{#if (eq this.resourceType 'ex')}}selected{{/if}}>EX</option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label>数量</label>
+                        <input type="number" name="consume.resources.{{@index}}.count" value="{{this.count}}" placeholder="1" />
+                      </div>
+                    {{/if}}
+
+                    <button type="button" class="remove-consume-resource-btn icon-btn" data-index="{{@index}}" title="删除">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+              {{/each}}
+            {{else}}
+              <div class="empty-state small">
+                <p>点击 + 添加消耗资源</p>
+              </div>
+            {{/if}}
+          </div>
+        {{/if}}
+
+        {{!-- 可选消耗模式 --}}
+        {{#if (eq activity.consume.mode 'optional')}}
+          <div class="optional-consume">
+            <h4>
+              可选消耗（2-3选项）
+              <button type="button" class="add-consume-option-btn icon-btn" title="添加选项">
+                <i class="fas fa-plus"></i>
+              </button>
+            </h4>
+
+            <div class="help-text">玩家可以选择其中一个选项进行消耗</div>
+
+            {{#if activity.consume.options}}
+              {{#each activity.consume.options}}
+                <div class="consume-option-item">
+                  <div class="option-header">
+                    <span>选项 {{add @index 1}}</span>
+                    <button type="button" class="remove-consume-option-btn icon-btn" data-index="{{@index}}" title="删除">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                  <div class="option-summary">
+                    {{!-- 简化显示，详细编辑需要通过对话框 --}}
+                    <span class="badge">{{this.length}} 个资源</span>
+                    <button type="button" class="edit-consume-option-btn" data-index="{{@index}}">
+                      <i class="fas fa-edit"></i> 编辑选项
+                    </button>
+                  </div>
+                </div>
+              {{/each}}
+            {{else}}
+              <div class="empty-state small">
+                <p>点击 + 添加消耗选项</p>
+              </div>
+            {{/if}}
+          </div>
+        {{/if}}
+      </div>
+
+      {{!-- 效果 --}}
+      <div class="form-section effect-editor">
+        <h3 style="color: #7ED321;">
+          <i class="fas fa-magic"></i> 效果
+          <button type="button" class="add-effect-btn icon-btn" title="添加效果">
+            <i class="fas fa-plus"></i>
+          </button>
+        </h3>
+
+        {{#if activity.effects}}
+          {{#each activity.effects}}
+            <div class="effect-item">
+              <div class="effect-header">
+                <span class="effect-index">效果 {{add @index 1}}</span>
+                <button type="button" class="remove-effect-btn icon-btn" data-index="{{@index}}" title="删除">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+
+              <div class="effect-fields">
+                <div class="form-group">
+                  <label>效果类型</label>
+                  <select name="effects.{{@index}}.type" class="effect-type-select" data-index="{{@index}}">
+                    <option value="addBuff" {{#if (eq this.type 'addBuff')}}selected{{/if}}>添加BUFF</option>
+                    <option value="consumeBuff" {{#if (eq this.type 'consumeBuff')}}selected{{/if}}>消耗BUFF</option>
+                    <option value="heal" {{#if (eq this.type 'heal')}}selected{{/if}}>恢复生命</option>
+                    <option value="dealDamage" {{#if (eq this.type 'dealDamage')}}selected{{/if}}>造成伤害</option>
+                    <option value="modifyDice" {{#if (eq this.type 'modifyDice')}}selected{{/if}}>修正骰子</option>
+                    <option value="restoreResource" {{#if (eq this.type 'restoreResource')}}selected{{/if}}>恢复资源</option>
+                    <option value="deductResource" {{#if (eq this.type 'deductResource')}}selected{{/if}}>扣除资源</option>
+                  </select>
+                </div>
+
+                {{!-- addBuff: buffId, layers, strength, target, roundTiming --}}
+                {{#if (eq this.type 'addBuff')}}
+                  <div class="form-group">
+                    <label>BUFF ID <small style="color: #888;">(可输入中文或英文)</small></label>
+                    <input type="text" name="effects.{{@index}}.buffId" value="{{this.buffId}}" list="buff-list-effect-add-{{@index}}" placeholder="强壮 / strong" />
+                    <datalist id="buff-list-effect-add-{{@index}}">
+                      {{#each ../buffTypes}}
+                        <option value="{{this.id}}">{{this.displayText}}</option>
+                        <option value="{{this.name}}">{{this.displayText}}</option>
+                      {{/each}}
+                    </datalist>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>层数</label>
+                      <input type="text" name="effects.{{@index}}.layers" value="{{this.layers}}" placeholder="1 或 1d4" />
+                    </div>
+                    <div class="form-group">
+                      <label>强度</label>
+                      <input type="text" name="effects.{{@index}}.strength" value="{{this.strength}}" placeholder="0" />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>目标</label>
+                      <select name="effects.{{@index}}.target">
+                        <option value="self" {{#if (eq this.target 'self')}}selected{{/if}}>自己</option>
+                        <option value="target" {{#if (eq this.target 'target')}}selected{{/if}}>目标</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>回合时机</label>
+                      <select name="effects.{{@index}}.roundTiming">
+                        <option value="current" {{#if (eq this.roundTiming 'current')}}selected{{/if}}>本回合</option>
+                        <option value="next" {{#if (eq this.roundTiming 'next')}}selected{{/if}}>下回合</option>
+                        <option value="both" {{#if (eq this.roundTiming 'both')}}selected{{/if}}>本回合和下回合</option>
+                      </select>
+                    </div>
+                  </div>
+                {{/if}}
+
+                {{!-- consumeBuff: buffId, layers, target --}}
+                {{#if (eq this.type 'consumeBuff')}}
+                  <div class="form-group">
+                    <label>BUFF ID <small style="color: #888;">(可输入中文或英文)</small></label>
+                    <input type="text" name="effects.{{@index}}.buffId" value="{{this.buffId}}" list="buff-list-effect-consume-{{@index}}" placeholder="充能 / charge" />
+                    <datalist id="buff-list-effect-consume-{{@index}}">
+                      {{#each ../buffTypes}}
+                        <option value="{{this.id}}">{{this.displayText}}</option>
+                        <option value="{{this.name}}">{{this.displayText}}</option>
+                      {{/each}}
+                    </datalist>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>层数</label>
+                      <input type="text" name="effects.{{@index}}.layers" value="{{this.layers}}" placeholder="1" />
+                    </div>
+                    <div class="form-group">
+                      <label>目标</label>
+                      <select name="effects.{{@index}}.target">
+                        <option value="self" {{#if (eq this.target 'self')}}selected{{/if}}>自己</option>
+                        <option value="target" {{#if (eq this.target 'target')}}selected{{/if}}>目标</option>
+                      </select>
+                    </div>
+                  </div>
+                {{/if}}
+
+                {{!-- heal: formula, target --}}
+                {{#if (eq this.type 'heal')}}
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>恢复公式</label>
+                      <input type="text" name="effects.{{@index}}.formula" value="{{this.formula}}" placeholder="1d6 或 {burn.layers}" />
+                    </div>
+                    <div class="form-group">
+                      <label>目标</label>
+                      <select name="effects.{{@index}}.target">
+                        <option value="self" {{#if (eq this.target 'self')}}selected{{/if}}>自己</option>
+                        <option value="target" {{#if (eq this.target 'target')}}selected{{/if}}>目标</option>
+                      </select>
+                    </div>
+                  </div>
+                {{/if}}
+
+                {{!-- dealDamage: formula, target --}}
+                {{#if (eq this.type 'dealDamage')}}
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>伤害公式</label>
+                      <input type="text" name="effects.{{@index}}.formula" value="{{this.formula}}" placeholder="2d6 或 {charge.layers}" />
+                    </div>
+                    <div class="form-group">
+                      <label>目标</label>
+                      <select name="effects.{{@index}}.target">
+                        <option value="self" {{#if (eq this.target 'self')}}selected{{/if}}>自己</option>
+                        <option value="target" {{#if (eq this.target 'target')}}selected{{/if}}>目标</option>
+                      </select>
+                    </div>
+                  </div>
+                {{/if}}
+
+                {{!-- modifyDice: modifier --}}
+                {{#if (eq this.type 'modifyDice')}}
+                  <div class="form-group">
+                    <label>修正值</label>
+                    <input type="text" name="effects.{{@index}}.modifier" value="{{this.modifier}}" placeholder="+2 或 {charge.layers}" />
+                  </div>
+                {{/if}}
+
+                {{!-- restoreResource: resourceType, count, target --}}
+                {{#if (eq this.type 'restoreResource')}}
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>资源类型</label>
+                      <select name="effects.{{@index}}.resourceType">
+                        <option value="cost" {{#if (eq this.resourceType 'cost')}}selected{{/if}}>Cost</option>
+                        <option value="ex" {{#if (eq this.resourceType 'ex')}}selected{{/if}}>EX</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>数量</label>
+                      <input type="number" name="effects.{{@index}}.count" value="{{this.count}}" placeholder="1" />
+                    </div>
+                    <div class="form-group">
+                      <label>目标</label>
+                      <select name="effects.{{@index}}.target">
+                        <option value="self" {{#if (eq this.target 'self')}}selected{{/if}}>自己</option>
+                        <option value="target" {{#if (eq this.target 'target')}}selected{{/if}}>目标</option>
+                      </select>
+                    </div>
+                  </div>
+                {{/if}}
+
+                {{!-- deductResource: resourceType, count, target --}}
+                {{#if (eq this.type 'deductResource')}}
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>资源类型</label>
+                      <select name="effects.{{@index}}.resourceType">
+                        <option value="cost" {{#if (eq this.resourceType 'cost')}}selected{{/if}}>Cost</option>
+                        <option value="ex" {{#if (eq this.resourceType 'ex')}}selected{{/if}}>EX</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>数量</label>
+                      <input type="number" name="effects.{{@index}}.count" value="{{this.count}}" placeholder="1" />
+                    </div>
+                    <div class="form-group">
+                      <label>目标</label>
+                      <select name="effects.{{@index}}.target">
+                        <option value="self" {{#if (eq this.target 'self')}}selected{{/if}}>自己</option>
+                        <option value="target" {{#if (eq this.target 'target')}}selected{{/if}}>目标</option>
+                      </select>
+                    </div>
+                  </div>
+                {{/if}}
+              </div>
+            </div>
+          {{/each}}
+        {{else}}
+          <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>暂无效果，点击右上角 + 添加</p>
+          </div>
+        {{/if}}
+
+        <div class="expression-help">
+          <strong>表达式示例:</strong>
+          <ul>
+            <li><code>1d4+3</code> - 骰子公式</li>
+            <li><code>{burn.layers}</code> - BUFF层数</li>
+            <li><code>floor({charge.layers}/2)</code> - 函数表达式</li>
+          </ul>
+        </div>
+      </div>
+
+      {{!-- 次数限制 --}}
+      <div class="form-section usage-limit-editor">
+        <h3 style="color: #9013FE;">
+          <i class="fas fa-hourglass-half"></i> 次数限制（可选）
+        </h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>每回合次数</label>
+            <input type="number" name="usageLimit.perRound" value="{{activity.usageLimit.perRound}}" placeholder="不限制" min="0" />
+            <span class="help-text">0 或留空表示不限制</span>
+          </div>
+
+          <div class="form-group">
+            <label>每战斗次数</label>
+            <input type="number" name="usageLimit.perCombat" value="{{activity.usageLimit.perCombat}}" placeholder="不限制" min="0" />
+            <span class="help-text">0 或留空表示不限制</span>
+          </div>
+        </div>
+      </div>
+
+      {{!-- 操作按钮 --}}
+      <div class="form-actions">
+        <button type="submit" class="save-btn">
+          <i class="fas fa-save"></i> 保存
+        </button>
+        <button type="button" class="cancel-btn">
+          <i class="fas fa-times"></i> 取消
+        </button>
+      </div>
+    </form>
+  {{/if}}
+
+  {{#if isAdvancedMode}}
+    {{!-- JSON 编辑器 --}}
+    <div class="json-editor-container">
+      <div class="json-toolbar">
+        <button type="button" class="validate-json-btn">
+          <i class="fas fa-check-circle"></i> 验证
+        </button>
+        <button type="button" class="format-json-btn">
+          <i class="fas fa-align-left"></i> 格式化
+        </button>
+      </div>
+
+      <textarea class="json-editor" spellcheck="false">{{activityJSON}}</textarea>
+
+      <div class="json-preview"></div>
+
+      <div class="form-actions">
+        <button type="button" class="save-btn">
+          <i class="fas fa-save"></i> 保存
+        </button>
+        <button type="button" class="cancel-btn">
+          <i class="fas fa-times"></i> 取消
+        </button>
+      </div>
+    </div>
+  {{/if}}
+</div>

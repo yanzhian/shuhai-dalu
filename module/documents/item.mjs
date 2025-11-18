@@ -1,8 +1,10 @@
 /**
  * 书海大陆 Item 文档和数据模型 - 完整版
  */
+import { migrateActivity, isNewFormat, migrateConditionsToActivities } from '../helpers/activity-migration.mjs';
+
 export default class ShuhaiItem extends Item {
-  
+
   /** @override */
   prepareData() {
     super.prepareData();
@@ -13,8 +15,11 @@ export default class ShuhaiItem extends Item {
     const itemData = this;
     const systemData = itemData.system;
 
-    // 迁移旧的 conditions 到新的 activities
+    // 迁移旧的 conditions 到新的 activities（异步执行，不阻塞）
     this._migrateConditionsToActivities(systemData);
+
+    // 迁移旧格式的 activities 到新格式
+    this._migrateActivitiesToNewFormat(systemData);
 
     // 验证数据
     this._validateItemData(itemData);
@@ -22,6 +27,7 @@ export default class ShuhaiItem extends Item {
 
   /**
    * 迁移旧的 conditions 数组到新的 activities 对象
+   * 使用统一的迁移工具
    */
   async _migrateConditionsToActivities(systemData) {
     // 如果已经有 activities 或没有 conditions，跳过迁移
@@ -34,39 +40,56 @@ export default class ShuhaiItem extends Item {
       return;
     }
 
-    console.log('【数据迁移】发现旧的 conditions，开始迁移到 activities');
+    console.log('【Item迁移】发现旧的 conditions，开始迁移到 activities');
 
-    const activities = {};
+    // 使用统一的迁移工具
+    const activities = migrateConditionsToActivities(systemData.conditions);
 
-    for (let i = 0; i < systemData.conditions.length; i++) {
-      const condition = systemData.conditions[i];
-      const activityId = foundry.utils.randomID();
-
-      // 转换旧的 condition 到新的 activity 格式
-      activities[activityId] = {
-        _id: activityId,
-        name: `条件${i + 1}`,  // 默认名称
-        trigger: condition.trigger || 'onUse',
-        hasConsume: condition.hasConsume || false,
-        consumes: condition.consumes || [],
-        target: condition.target || 'selected',
-        effects: condition.effects || {},
-        customEffect: condition.customEffect || {
-          enabled: false,
-          name: '',
-          layers: 0,
-          strength: 0
-        }
-      };
-    }
-
-    console.log('【数据迁移】迁移完成，共迁移', Object.keys(activities).length, '个条件');
+    console.log('【Item迁移】迁移完成，共迁移', Object.keys(activities).length, '个条件');
 
     // 异步更新 item
     this.update({
       'system.activities': activities,
       'system.conditions': []  // 清空旧的 conditions
     });
+  }
+
+  /**
+   * 迁移旧格式的 activities 到新的统一格式
+   */
+  async _migrateActivitiesToNewFormat(systemData) {
+    if (!systemData.activities || Object.keys(systemData.activities).length === 0) {
+      return;
+    }
+
+    // 检查是否需要迁移
+    const firstActivity = Object.values(systemData.activities)[0];
+    if (isNewFormat(firstActivity)) {
+      return; // 已经是新格式
+    }
+
+    console.log('【Item迁移】发现旧格式的 activities，开始迁移到新格式');
+
+    const newActivities = {};
+    let migrationCount = 0;
+
+    for (const [id, activity] of Object.entries(systemData.activities)) {
+      if (isNewFormat(activity)) {
+        newActivities[id] = activity;
+      } else {
+        newActivities[id] = migrateActivity(activity);
+        migrationCount++;
+      }
+    }
+
+    if (migrationCount > 0) {
+      console.log('【Item迁移】迁移完成，共迁移', migrationCount, '个 activities');
+
+      // 异步更新 item
+      this.update({
+        'system.activities': newActivities
+      });
+    }
   }
 
   /**

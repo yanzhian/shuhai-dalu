@@ -1,0 +1,19 @@
+<div class="form-section usage-limit-editor">
+  <h3 style="color: #9013FE;">
+    <i class="fas fa-hourglass-half"></i> 次数限制（可选）
+  </h3>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label>每回合次数</label>
+      <input type="number" name="usageLimit.perRound" value="{{activity.usageLimit.perRound}}" placeholder="不限制" min="0" />
+      <span class="help-text">0 或留空表示不限制</span>
+    </div>
+
+    <div class="form-group">
+      <label>每战斗次数</label>
+      <input type="number" name="usageLimit.perCombat" value="{{activity.usageLimit.perCombat}}" placeholder="不限制" min="0" />
+      <span class="help-text">0 或留空表示不限制</span>
+    </div>
+  </div>
+</div>

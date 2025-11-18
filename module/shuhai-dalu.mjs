@@ -20,8 +20,8 @@ import ShuhaiPlayerSheet from "./sheets/player-sheet.mjs";
 import ShuhaiItemSheet from "./sheets/item-sheet.mjs";
 import ItemCardSheet from "./sheets/item-card-sheet.mjs";
 
-// 导入常量
-import { BUFF_TYPES } from "./constants/buff-types.mjs";
+// 导入常量和 BUFF 辅助函数
+import { BUFF_TYPES, getBuffName, normalizeBuffId, getAllBuffs } from "./constants/buff-types.mjs";
 
 // 导入服务模块
 import {
@@ -65,7 +65,13 @@ Hooks.once('init', async function() {
     rollSkillCheck,
     rollCorruptionCheck,
     equipItem,
-    unequipItem
+    unequipItem,
+    // BUFF 辅助函数
+    buffHelpers: {
+      getBuffName,
+      normalizeBuffId,
+      getAllBuffs
+    }
   };
 
   // 配置文档类
@@ -171,9 +177,12 @@ Hooks.once('init', async function() {
   });
   
   console.log('书海大陆 | 表单已注册');
-  
+
   // 预加载 Handlebars 模板
-  return preloadHandlebarsTemplates();
+  await preloadHandlebarsTemplates();
+
+  // 手动注册 Activity 编辑器 V2 的 partials
+  await registerActivityEditorPartials();
 });
 
 /* -------------------------------------------- */
@@ -1742,6 +1751,13 @@ async function preloadHandlebarsTemplates() {
     "systems/shuhai-dalu/templates/item-card/item-card-sheet.hbs",
     "systems/shuhai-dalu/templates/item-card/condition-editor.hbs",
 
+    // Activity 编辑器 V2 Partials
+    "systems/shuhai-dalu/templates/item-card/partials/trigger-editor.hbs",
+    "systems/shuhai-dalu/templates/item-card/partials/condition-editor.hbs",
+    "systems/shuhai-dalu/templates/item-card/partials/consume-editor.hbs",
+    "systems/shuhai-dalu/templates/item-card/partials/effect-editor.hbs",
+    "systems/shuhai-dalu/templates/item-card/partials/usage-limit-editor.hbs",
+
     // 战斗区域模板
     "systems/shuhai-dalu/templates/combat/combat-area.hbs",
     "systems/shuhai-dalu/templates/combat/counter-area.hbs",
@@ -1770,6 +1786,32 @@ async function preloadHandlebarsTemplates() {
     "systems/shuhai-dalu/templates/hud/battle-area-hud.hbs"
   ]);
 }
+
+/**
+ * 手动注册 Activity 编辑器 V2 的 partials
+ * 确保它们在使用前已经注册
+ */
+async function registerActivityEditorPartials() {
+  const partials = [
+    { name: 'item-card/partials/trigger-editor', path: 'systems/shuhai-dalu/templates/item-card/partials/trigger-editor.hbs' },
+    { name: 'item-card/partials/condition-editor', path: 'systems/shuhai-dalu/templates/item-card/partials/condition-editor.hbs' },
+    { name: 'item-card/partials/consume-editor', path: 'systems/shuhai-dalu/templates/item-card/partials/consume-editor.hbs' },
+    { name: 'item-card/partials/effect-editor', path: 'systems/shuhai-dalu/templates/item-card/partials/effect-editor.hbs' },
+    { name: 'item-card/partials/usage-limit-editor', path: 'systems/shuhai-dalu/templates/item-card/partials/usage-limit-editor.hbs' }
+  ];
+
+  for (const partial of partials) {
+    try {
+      const response = await fetch(partial.path);
+      const template = await response.text();
+      Handlebars.registerPartial(partial.name, template);
+      console.log(`【系统初始化】已注册 partial: ${partial.name}`);
+    } catch (error) {
+      console.error(`【系统初始化】注册 partial 失败: ${partial.name}`, error);
+    }
+  }
+}
+
 
 /* -------------------------------------------- */
 /*  工具函数                                      */
