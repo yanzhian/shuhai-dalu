@@ -669,15 +669,15 @@ export class ActivityExecutor {
     let restored = 0;
     if (effect.resourceType === 'cost') {
       for (let i = 0; i < combatState.costResources.length && restored < count; i++) {
-        if (combatState.costResources[i]) {
-          combatState.costResources[i] = false;
+        if (!combatState.costResources[i]) {
+          combatState.costResources[i] = true;
           restored++;
         }
       }
     } else if (effect.resourceType === 'ex') {
       for (let i = 0; i < combatState.exResources.length && restored < count; i++) {
-        if (combatState.exResources[i]) {
-          combatState.exResources[i] = false;
+        if (!combatState.exResources[i]) {
+          combatState.exResources[i] = true;
           restored++;
         }
       }
@@ -709,15 +709,15 @@ export class ActivityExecutor {
     let deducted = 0;
     if (effect.resourceType === 'cost') {
       for (let i = 0; i < combatState.costResources.length && deducted < count; i++) {
-        if (!combatState.costResources[i]) {
-          combatState.costResources[i] = true;
+        if (combatState.costResources[i]) {
+          combatState.costResources[i] = false;
           deducted++;
         }
       }
     } else if (effect.resourceType === 'ex') {
       for (let i = 0; i < combatState.exResources.length && deducted < count; i++) {
-        if (!combatState.exResources[i]) {
-          combatState.exResources[i] = true;
+        if (combatState.exResources[i]) {
+          combatState.exResources[i] = false;
           deducted++;
         }
       }

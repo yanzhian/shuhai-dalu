@@ -203,6 +203,39 @@ Hooks.once('ready', async function() {
 
   // 显示欢迎消息
   ui.notifications.info("书海大陆系统已加载！");
+
+  // 添加全局错误处理器，捕获 ChatMessage 删除错误
+  window.addEventListener('error', (event) => {
+    if (event.error?.message?.includes('ChatMessage') && event.error?.message?.includes('does not exist')) {
+      console.warn('【系统】已捕获并忽略 ChatMessage 删除错误:', event.error.message);
+      event.preventDefault(); // 阻止错误冒泡到控制台
+      return true;
+    }
+  });
+
+  window.addEventListener('unhandledrejection', (event) => {
+    if (event.reason?.message?.includes('ChatMessage') && event.reason?.message?.includes('does not exist')) {
+      console.warn('【系统】已捕获并忽略 ChatMessage Promise 拒绝:', event.reason.message);
+      event.preventDefault(); // 阻止错误冒泡
+      return true;
+    }
+  });
+});
+
+/* -------------------------------------------- */
+/*  聊天消息安全处理                               */
+/* -------------------------------------------- */
+
+/**
+ * 拦截聊天消息删除操作，防止删除不存在的消息导致错误
+ */
+Hooks.on('preDeleteChatMessage', (message, options, userId) => {
+  // 验证消息是否真的存在
+  if (!game.messages.get(message.id)) {
+    console.warn(`【警告】尝试删除不存在的聊天消息: ${message.id}`);
+    return false; // 阻止删除操作
+  }
+  return true; // 允许删除
 });
 
 /* -------------------------------------------- */

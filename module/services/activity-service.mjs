@@ -136,16 +136,16 @@ async function sendActivityMessage(sourceActor, targetActor, item, activity, res
     typeInfo += ` · ${itemCategory}`;
   }
 
-  // 构建描述信息（使用物品描述）
+  // 构建描述信息（使用物品效果描述）
   let descriptionHtml = '';
-  if (item.system?.description) {
+  if (item.system?.effect) {
     descriptionHtml = `
       <div style="margin: 12px 0; padding: 10px; background: rgba(127, 176, 62, 0.1); border-left: 3px solid #7fb03e; border-radius: 4px;">
         <div style="font-size: 12px; color: #888; margin-bottom: 4px;">
           <i class="fas fa-info-circle"></i> 效果：
         </div>
         <div style="font-size: 13px; color: #d4d4d4; line-height: 1.6;">
-          ${item.system.description}
+          ${item.system.effect}
         </div>
       </div>
     `;

@@ -15,7 +15,7 @@ export default class CounterAreaApplication extends Application {
     // 从combat-area同步战斗状态
     this.combatState = this.actor.getFlag('shuhai-dalu', 'combatState') || {
       costResources: [false, false, false, false, false, false],
-      exResources: [false, false, false],
+      exResources: [true, true, true],
       activatedDice: [false, false, false, false, false, false],
       buffs: []
     };
