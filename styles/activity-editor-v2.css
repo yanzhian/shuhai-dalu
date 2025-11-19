@@ -169,6 +169,7 @@
   color: #666;
   transition: color 0.2s;
   font-size: 14px;
+  max-width: 20px;
 }
 
 .activity-editor-v2 .icon-btn:hover {
