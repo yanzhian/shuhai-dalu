@@ -204,6 +204,32 @@ Hooks.once('ready', async function() {
   // 显示欢迎消息
   ui.notifications.info("书海大陆系统已加载！");
 
+  // 拦截 UI 通知系统，过滤 ChatMessage 不存在的错误
+  const originalNotifyError = ui.notifications.error;
+  const originalNotifyWarn = ui.notifications.warn;
+
+  ui.notifications.error = function(message, options) {
+    // 检查是否是 ChatMessage 相关的错误
+    if (typeof message === 'string' && message.includes('ChatMessage') && message.includes('does not exist')) {
+      // 静默忽略这类错误，不显示通知
+      console.log('【系统】已拦截 ChatMessage UI 错误通知:', message);
+      return;
+    }
+    // 其他错误正常显示
+    return originalNotifyError.call(this, message, options);
+  };
+
+  ui.notifications.warn = function(message, options) {
+    // 检查是否是 ChatMessage 相关的警告
+    if (typeof message === 'string' && message.includes('ChatMessage') && message.includes('does not exist')) {
+      // 静默忽略这类警告，不显示通知
+      console.log('【系统】已拦截 ChatMessage UI 警告通知:', message);
+      return;
+    }
+    // 其他警告正常显示
+    return originalNotifyWarn.call(this, message, options);
+  };
+
   // 拦截控制台错误输出，过滤 ChatMessage 不存在的错误
   const originalConsoleError = console.error;
   const originalConsoleWarn = console.warn;
