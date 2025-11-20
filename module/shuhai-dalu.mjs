@@ -462,9 +462,8 @@ Hooks.on('renderChatMessage', (message, html, data) => {
     event.preventDefault();
     const button = event.currentTarget;
 
-    // 从聊天消息的flags中获取完整的发起数据
-    const messageId = $(button).closest('.message').data('messageId');
-    const chatMessage = game.messages.get(messageId);
+    // 直接使用 Hook 参数中的 message 对象，无需从 DOM 重新获取
+    const chatMessage = message;
 
     if (!chatMessage || !chatMessage.flags['shuhai-dalu']?.initiateData) {
       ui.notifications.error("无法获取发起数据");
@@ -917,9 +916,8 @@ Hooks.on('renderChatMessage', (message, html, data) => {
       return;
     }
 
-    // 从聊天消息的flags中获取完整的发起数据
-    const messageId = $(button).closest('.message').data('messageId');
-    const chatMessage = game.messages.get(messageId);
+    // 直接使用 Hook 参数中的 message 对象，无需从 DOM 重新获取
+    const chatMessage = message;
 
     if (!chatMessage || !chatMessage.flags['shuhai-dalu']?.initiateData) {
       ui.notifications.error("无法获取发起数据");
