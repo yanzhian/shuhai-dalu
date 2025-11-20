@@ -204,18 +204,42 @@ Hooks.once('ready', async function() {
   // 显示欢迎消息
   ui.notifications.info("书海大陆系统已加载！");
 
+  // 拦截控制台错误输出，过滤 ChatMessage 不存在的错误
+  const originalConsoleError = console.error;
+  const originalConsoleWarn = console.warn;
+
+  console.error = function(...args) {
+    // 检查是否是 ChatMessage 相关的错误
+    const errorMessage = args.join(' ');
+    if (errorMessage.includes('ChatMessage') && errorMessage.includes('does not exist')) {
+      // 静默忽略这类错误，不输出到控制台
+      return;
+    }
+    // 其他错误正常输出
+    originalConsoleError.apply(console, args);
+  };
+
+  console.warn = function(...args) {
+    // 检查是否是 ChatMessage 相关的警告
+    const warnMessage = args.join(' ');
+    if (warnMessage.includes('ChatMessage') && warnMessage.includes('does not exist')) {
+      // 静默忽略这类警告，不输出到控制台
+      return;
+    }
+    // 其他警告正常输出
+    originalConsoleWarn.apply(console, args);
+  };
+
   // 添加全局错误处理器，捕获 ChatMessage 删除错误
   window.addEventListener('error', (event) => {
     if (event.error?.message?.includes('ChatMessage') && event.error?.message?.includes('does not exist')) {
-      console.warn('【系统】已捕获并忽略 ChatMessage 删除错误:', event.error.message);
-      event.preventDefault(); // 阻止错误冒泡到控制台
+      event.preventDefault(); // 阻止错误冒泡
       return true;
     }
   });
 
   window.addEventListener('unhandledrejection', (event) => {
     if (event.reason?.message?.includes('ChatMessage') && event.reason?.message?.includes('does not exist')) {
-      console.warn('【系统】已捕获并忽略 ChatMessage Promise 拒绝:', event.reason.message);
       event.preventDefault(); // 阻止错误冒泡
       return true;
     }
