@@ -289,6 +289,142 @@ Hooks.on('preDeleteChatMessage', (message, options, userId) => {
 });
 
 /* -------------------------------------------- */
+/*  快捷栏拖放物品使用                             */
+/* -------------------------------------------- */
+
+/**
+ * 拦截物品拖到快捷栏时创建的宏
+ * 使其点击时【使用】物品而不是【显示】物品
+ */
+Hooks.on('hotbarDrop', async (bar, data, slot) => {
+  // 只处理 Item 类型
+  if (data.type !== "Item") return;
+
+  // 获取物品
+  const item = await fromUuid(data.uuid);
+  if (!item) return;
+
+  // 创建使用物品的宏
+  const command = `// 使用物品: ${item.name}
+const item = await fromUuid("${data.uuid}");
+if (!item) {
+  ui.notifications.error("找不到物品: ${item.name}");
+  return;
+}
+
+// 获取物品的角色
+const actor = item.actor;
+if (!actor) {
+  ui.notifications.warn("该物品没有关联角色，无法使用");
+  return;
+}
+
+// 根据物品类型执行不同操作
+const { triggerItemActivities } = await import("systems/shuhai-dalu/module/services/activity-service.mjs");
+
+switch (item.type) {
+  case 'triggerDice':
+    // 触发骰：消耗 EX 资源
+    {
+      let combatState = actor.getFlag('shuhai-dalu', 'combatState');
+      if (!combatState) {
+        combatState = {
+          exResources: [false, false, false],
+          costResources: [false, false, false, false, false, false],
+          activatedDice: [false, false, false, false, false, false],
+          buffs: []
+        };
+      }
+
+      // 检查是否有可用的 EX 资源
+      const availableExIndex = combatState.exResources.findIndex(ex => !ex);
+      if (availableExIndex === -1) {
+        ui.notifications.warn("没有可用的 EX 资源！");
+        return;
+      }
+
+      // 消耗 EX 资源
+      combatState.exResources[availableExIndex] = true;
+      await actor.setFlag('shuhai-dalu', 'combatState', combatState);
+
+      // 发送消息
+      await ChatMessage.create({
+        user: game.user.id,
+        speaker: ChatMessage.getSpeaker({ actor }),
+        content: \\\`
+          <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px; background: #0F0D1B; color: #EBBD68; font-family: 'Noto Sans SC', sans-serif;">
+            <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用触发骰: \\\${item.name}</h3>
+            <div style="color: #888; margin-bottom: 8px;">消耗: <span style="color: #c14545; font-weight: bold;">1 EX资源</span></div>
+            \\\${item.system.category ? \\\`<div style="color: #888; margin-bottom: 8px;">分类: \\\${item.system.category}</div>\\\` : ''}
+            <div style="color: #EBBD68;">\\\${item.system.effect || '无特殊效果'}</div>
+          </div>
+        \\\`
+      });
+
+      // 触发【使用时】Activities
+      await triggerItemActivities(actor, item, 'onUse');
+      ui.notifications.info(\`使用了 \${item.name}，消耗了1个EX资源！\`);
+    }
+    break;
+
+  case 'weapon':
+  case 'armor':
+  case 'equipment':
+  case 'item':
+  case 'passiveDice':
+    // 装备类物品：使用并触发 Activities
+    {
+      await ChatMessage.create({
+        user: game.user.id,
+        speaker: ChatMessage.getSpeaker({ actor }),
+        content: \\\`
+          <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px; background: #0F0D1B; color: #EBBD68; font-family: 'Noto Sans SC', sans-serif;">
+            <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用物品: \\\${item.name}</h3>
+            \\\${item.system.cost ? \\\`<div style="color: #888; margin-bottom: 8px;">费用: \\\${item.system.cost}</div>\\\` : ''}
+            \\\${item.system.category ? \\\`<div style="color: #888; margin-bottom: 8px;">分类: \\\${item.system.category}</div>\\\` : ''}
+            <div style="color: #EBBD68;">\\\${item.system.effect || '无特殊效果'}</div>
+          </div>
+        \\\`
+      });
+
+      // 触发【使用时】Activities
+      await triggerItemActivities(actor, item, 'onUse');
+      ui.notifications.info(\`使用了 \${item.name}！\`);
+    }
+    break;
+
+  case 'combatDice':
+  case 'shootDice':
+    ui.notifications.warn("战斗骰需要在战斗区域或角色卡中使用");
+    break;
+
+  case 'defenseDice':
+    ui.notifications.warn("守备骰只能在对抗时使用");
+    break;
+
+  default:
+    ui.notifications.warn(\`未知的物品类型: \${item.type}\`);
+    break;
+}`;
+
+  // 创建或更新宏
+  let macro = game.macros.find(m => (m.name === item.name) && (m.command === command));
+  if (!macro) {
+    macro = await Macro.create({
+      name: item.name,
+      type: "script",
+      img: item.img,
+      command: command,
+      flags: { "shuhai-dalu.itemMacro": true }
+    });
+  }
+
+  // 将宏分配到快捷栏
+  game.user.assignHotbarMacro(macro, slot);
+  return false; // 阻止默认行为
+});
+
+/* -------------------------------------------- */
 /*  Token双击打开角色卡                           */
 /* -------------------------------------------- */
 

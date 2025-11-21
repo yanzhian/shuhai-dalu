@@ -872,8 +872,9 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
     await ChatMessage.create(chatData);
 
-    // 触发【使用时】Activities
-    await this._triggerActivities(item, 'onUse');
+    // 使用统一的 Activity Service 触发【使用时】Activities
+    const { triggerItemActivities } = await import('../services/activity-service.mjs');
+    await triggerItemActivities(this.actor, item, 'onUse');
 
     ui.notifications.info(`使用了 ${item.name}，消耗了1个EX资源！`);
 
@@ -901,8 +902,9 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
     await ChatMessage.create(chatData);
 
-    // 触发【使用时】Activities（如果物品支持）
-    await this._triggerActivities(item, 'onUse');
+    // 使用统一的 Activity Service 触发【使用时】Activities
+    const { triggerItemActivities } = await import('../services/activity-service.mjs');
+    await triggerItemActivities(this.actor, item, 'onUse');
 
     ui.notifications.info(`使用了 ${item.name}！`);
   }
