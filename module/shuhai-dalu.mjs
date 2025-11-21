@@ -304,7 +304,7 @@ Hooks.on('hotbarDrop', async (bar, data, slot) => {
   const item = await fromUuid(data.uuid);
   if (!item) return;
 
-  // 创建使用物品的宏
+  // 创建使用物品的宏 - 使用字符串拼接避免模板字符串嵌套问题
   const command = `// 使用物品: ${item.name}
 const item = await fromUuid("${data.uuid}");
 if (!item) {
@@ -348,22 +348,22 @@ switch (item.type) {
       await actor.setFlag('shuhai-dalu', 'combatState', combatState);
 
       // 发送消息
+      const content = '<div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px; background: #0F0D1B; color: #EBBD68; font-family: \\'Noto Sans SC\\', sans-serif;">' +
+        '<h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用触发骰: ' + item.name + '</h3>' +
+        '<div style="color: #888; margin-bottom: 8px;">消耗: <span style="color: #c14545; font-weight: bold;">1 EX资源</span></div>' +
+        (item.system.category ? '<div style="color: #888; margin-bottom: 8px;">分类: ' + item.system.category + '</div>' : '') +
+        '<div style="color: #EBBD68;">' + (item.system.effect || '无特殊效果') + '</div>' +
+        '</div>';
+
       await ChatMessage.create({
         user: game.user.id,
         speaker: ChatMessage.getSpeaker({ actor }),
-        content: \\\`
-          <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px; background: #0F0D1B; color: #EBBD68; font-family: 'Noto Sans SC', sans-serif;">
-            <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用触发骰: \\\${item.name}</h3>
-            <div style="color: #888; margin-bottom: 8px;">消耗: <span style="color: #c14545; font-weight: bold;">1 EX资源</span></div>
-            \\\${item.system.category ? \\\`<div style="color: #888; margin-bottom: 8px;">分类: \\\${item.system.category}</div>\\\` : ''}
-            <div style="color: #EBBD68;">\\\${item.system.effect || '无特殊效果'}</div>
-          </div>
-        \\\`
+        content: content
       });
 
       // 触发【使用时】Activities
       await triggerItemActivities(actor, item, 'onUse');
-      ui.notifications.info(\`使用了 \${item.name}，消耗了1个EX资源！\`);
+      ui.notifications.info('使用了 ' + item.name + '，消耗了1个EX资源！');
     }
     break;
 
@@ -374,22 +374,22 @@ switch (item.type) {
   case 'passiveDice':
     // 装备类物品：使用并触发 Activities
     {
+      const content = '<div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px; background: #0F0D1B; color: #EBBD68; font-family: \\'Noto Sans SC\\', sans-serif;">' +
+        '<h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用物品: ' + item.name + '</h3>' +
+        (item.system.cost ? '<div style="color: #888; margin-bottom: 8px;">费用: ' + item.system.cost + '</div>' : '') +
+        (item.system.category ? '<div style="color: #888; margin-bottom: 8px;">分类: ' + item.system.category + '</div>' : '') +
+        '<div style="color: #EBBD68;">' + (item.system.effect || '无特殊效果') + '</div>' +
+        '</div>';
+
       await ChatMessage.create({
         user: game.user.id,
         speaker: ChatMessage.getSpeaker({ actor }),
-        content: \\\`
-          <div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px; background: #0F0D1B; color: #EBBD68; font-family: 'Noto Sans SC', sans-serif;">
-            <h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用物品: \\\${item.name}</h3>
-            \\\${item.system.cost ? \\\`<div style="color: #888; margin-bottom: 8px;">费用: \\\${item.system.cost}</div>\\\` : ''}
-            \\\${item.system.category ? \\\`<div style="color: #888; margin-bottom: 8px;">分类: \\\${item.system.category}</div>\\\` : ''}
-            <div style="color: #EBBD68;">\\\${item.system.effect || '无特殊效果'}</div>
-          </div>
-        \\\`
+        content: content
       });
 
       // 触发【使用时】Activities
       await triggerItemActivities(actor, item, 'onUse');
-      ui.notifications.info(\`使用了 \${item.name}！\`);
+      ui.notifications.info('使用了 ' + item.name + '！');
     }
     break;
 
@@ -403,7 +403,7 @@ switch (item.type) {
     break;
 
   default:
-    ui.notifications.warn(\`未知的物品类型: \${item.type}\`);
+    ui.notifications.warn('未知的物品类型: ' + item.type);
     break;
 }`;
 
