@@ -280,17 +280,17 @@ export default class ShuhaiItem extends Item {
 
     // 费用消耗功能已移除（属于战斗区域功能）
 
-    // 创建聊天消息
-    const messageData = {
-      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      flavor: `触发 ${this.name}`,
-      content: await renderTemplate("systems/shuhai-dalu/templates/chat/trigger-use.hbs", result)
-    };
+    // 注释：不再创建基础聊天消息，只触发 Activity（Activity 会创建详细的效果消息）
+    // const messageData = {
+    //   speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+    //   flavor: `触发 ${this.name}`,
+    //   content: await renderTemplate("systems/shuhai-dalu/templates/chat/trigger-use.hbs", result)
+    // };
+    // await ChatMessage.create(messageData);
 
-    await ChatMessage.create(messageData);
     console.log('【触发骰】使用:', this.name);
 
-    // 触发 Activity
+    // 触发 Activity（会创建详细的效果消息）
     const { triggerItemActivities } = await import('../services/activity-service.mjs');
     await triggerItemActivities(this.actor, this, 'onUse');
 
@@ -321,17 +321,17 @@ export default class ShuhaiItem extends Item {
       effect: this.system.effect
     };
 
-    // 创建聊天消息
-    const messageData = {
-      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      flavor: `使用 ${this.name}`,
-      content: await renderTemplate("systems/shuhai-dalu/templates/chat/item-use.hbs", result)
-    };
+    // 注释：不再创建基础聊天消息，只触发 Activity（Activity 会创建详细的效果消息）
+    // const messageData = {
+    //   speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+    //   flavor: `使用 ${this.name}`,
+    //   content: await renderTemplate("systems/shuhai-dalu/templates/chat/item-use.hbs", result)
+    // };
+    // await ChatMessage.create(messageData);
 
-    await ChatMessage.create(messageData);
     console.log('【物品使用】:', this.name);
 
-    // 触发 Activity
+    // 触发 Activity（会创建详细的效果消息）
     const { triggerItemActivities } = await import('../services/activity-service.mjs');
     await triggerItemActivities(this.actor, this, 'onUse');
 
