@@ -45,7 +45,7 @@
 
     {{!-- 属性行（上下两行布局） --}}
     <div class="item-card-properties-section">
-      {{!-- 上行：骰数、费用、星光 --}}
+      {{!-- 上行：骰数、费用、星光、数量 --}}
       <div class="item-card-properties-row">
         <div class="item-card-prop-item">
           <i class="fas fa-dice-d6"></i>
@@ -59,6 +59,11 @@
         <div class="item-card-prop-item">
           <i class="fas fa-star"></i>
           <input name="system.starlightCost" type="number" value="{{system.starlightCost}}" placeholder="5" {{#if isLocked}}disabled{{/if}} />
+        </div>
+        <div class="item-card-prop-item">
+          <i class="fas fa-cubes"></i>
+          <span class="prop-label">数量 :</span>
+          <input name="system.quantity" type="number" value="{{system.quantity}}" placeholder="1" min="0" {{#if isLocked}}disabled{{/if}} />
         </div>
       </div>
 

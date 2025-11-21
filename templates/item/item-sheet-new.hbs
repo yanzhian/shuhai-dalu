@@ -79,7 +79,7 @@
   {{!-- 属性信息区域 --}}
   <div class="properties-section">
 
-    {{!-- 骰数、费用、星光 --}}
+    {{!-- 骰数、费用、星光、数量 --}}
     <div class="properties-row">
       {{#if showDiceFormula}}
       <div class="property-item">
@@ -108,6 +108,17 @@
         <input type="number" name="system.starlightCost" value="{{system.starlightCost}}" min="0" class="property-input"/>
         {{else}}
         <span class="property-value">{{system.starlightCost}}</span>
+        {{/unless}}
+      </div>
+      {{/if}}
+
+      {{#if showQuantity}}
+      <div class="property-item">
+        <i class="fas fa-cubes"></i>
+        {{#unless isLocked}}
+        <input type="number" name="system.quantity" value="{{system.quantity}}" min="0" placeholder="1" class="property-input"/>
+        {{else}}
+        <span class="property-value">数量: {{system.quantity}}</span>
         {{/unless}}
       </div>
       {{/if}}
