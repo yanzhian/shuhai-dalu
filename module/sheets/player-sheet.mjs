@@ -247,10 +247,10 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
     html.find('.item-favorite-btn').click(this._onItemFavorite.bind(this));
 
     // === 物品图标交互 ===
-    // 单击图标包装器：编辑物品
-    html.find('.item-icon-wrapper').click(this._onItemIconClick.bind(this));
-    // 双击图标包装器：编辑效果描述
-    html.find('.item-icon-wrapper').dblclick(this._onItemIconDblClick.bind(this));
+    // 注释：已禁用图标点击事件，避免与使用/编辑按钮冲突
+    // 如果需要图标点击功能，请使用专门的使用按钮和编辑按钮
+    // html.find('.item-icon-wrapper').click(this._onItemIconClick.bind(this));
+    // html.find('.item-icon-wrapper').dblclick(this._onItemIconDblClick.bind(this));
 
     // === 搜索和过滤 ===
     html.find('.item-search').on('input', this._onSearchItems.bind(this));
@@ -872,8 +872,9 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
     await ChatMessage.create(chatData);
 
-    // 触发【使用时】Activities
-    await this._triggerActivities(item, 'onUse');
+    // 使用统一的 Activity Service 触发【使用时】Activities
+    const { triggerItemActivities } = await import('../services/activity-service.mjs');
+    await triggerItemActivities(this.actor, item, 'onUse');
 
     ui.notifications.info(`使用了 ${item.name}，消耗了1个EX资源！`);
 
@@ -901,8 +902,9 @@ export default class ShuhaiPlayerSheet extends ActorSheet {
 
     await ChatMessage.create(chatData);
 
-    // 触发【使用时】Activities（如果物品支持）
-    await this._triggerActivities(item, 'onUse');
+    // 使用统一的 Activity Service 触发【使用时】Activities
+    const { triggerItemActivities } = await import('../services/activity-service.mjs');
+    await triggerItemActivities(this.actor, item, 'onUse');
 
     ui.notifications.info(`使用了 ${item.name}！`);
   }

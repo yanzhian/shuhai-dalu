@@ -204,18 +204,68 @@ Hooks.once('ready', async function() {
   // 显示欢迎消息
   ui.notifications.info("书海大陆系统已加载！");
 
+  // 拦截 UI 通知系统，过滤 ChatMessage 不存在的错误
+  const originalNotifyError = ui.notifications.error;
+  const originalNotifyWarn = ui.notifications.warn;
+
+  ui.notifications.error = function(message, options) {
+    // 检查是否是 ChatMessage 相关的错误
+    if (typeof message === 'string' && message.includes('ChatMessage') && message.includes('does not exist')) {
+      // 静默忽略这类错误，不显示通知
+      console.log('【系统】已拦截 ChatMessage UI 错误通知:', message);
+      return;
+    }
+    // 其他错误正常显示
+    return originalNotifyError.call(this, message, options);
+  };
+
+  ui.notifications.warn = function(message, options) {
+    // 检查是否是 ChatMessage 相关的警告
+    if (typeof message === 'string' && message.includes('ChatMessage') && message.includes('does not exist')) {
+      // 静默忽略这类警告，不显示通知
+      console.log('【系统】已拦截 ChatMessage UI 警告通知:', message);
+      return;
+    }
+    // 其他警告正常显示
+    return originalNotifyWarn.call(this, message, options);
+  };
+
+  // 拦截控制台错误输出，过滤 ChatMessage 不存在的错误
+  const originalConsoleError = console.error;
+  const originalConsoleWarn = console.warn;
+
+  console.error = function(...args) {
+    // 检查是否是 ChatMessage 相关的错误
+    const errorMessage = args.join(' ');
+    if (errorMessage.includes('ChatMessage') && errorMessage.includes('does not exist')) {
+      // 静默忽略这类错误，不输出到控制台
+      return;
+    }
+    // 其他错误正常输出
+    originalConsoleError.apply(console, args);
+  };
+
+  console.warn = function(...args) {
+    // 检查是否是 ChatMessage 相关的警告
+    const warnMessage = args.join(' ');
+    if (warnMessage.includes('ChatMessage') && warnMessage.includes('does not exist')) {
+      // 静默忽略这类警告，不输出到控制台
+      return;
+    }
+    // 其他警告正常输出
+    originalConsoleWarn.apply(console, args);
+  };
+
   // 添加全局错误处理器，捕获 ChatMessage 删除错误
   window.addEventListener('error', (event) => {
     if (event.error?.message?.includes('ChatMessage') && event.error?.message?.includes('does not exist')) {
-      console.warn('【系统】已捕获并忽略 ChatMessage 删除错误:', event.error.message);
-      event.preventDefault(); // 阻止错误冒泡到控制台
+      event.preventDefault(); // 阻止错误冒泡
       return true;
     }
   });
 
   window.addEventListener('unhandledrejection', (event) => {
     if (event.reason?.message?.includes('ChatMessage') && event.reason?.message?.includes('does not exist')) {
-      console.warn('【系统】已捕获并忽略 ChatMessage Promise 拒绝:', event.reason.message);
       event.preventDefault(); // 阻止错误冒泡
       return true;
     }
@@ -236,6 +286,142 @@ Hooks.on('preDeleteChatMessage', (message, options, userId) => {
     return false; // 阻止删除操作
   }
   return true; // 允许删除
+});
+
+/* -------------------------------------------- */
+/*  快捷栏拖放物品使用                             */
+/* -------------------------------------------- */
+
+/**
+ * 拦截物品拖到快捷栏时创建的宏
+ * 使其点击时【使用】物品而不是【显示】物品
+ */
+Hooks.on('hotbarDrop', async (bar, data, slot) => {
+  // 只处理 Item 类型
+  if (data.type !== "Item") return;
+
+  // 获取物品
+  const item = await fromUuid(data.uuid);
+  if (!item) return;
+
+  // 创建使用物品的宏 - 使用字符串拼接避免模板字符串嵌套问题
+  const command = `// 使用物品: ${item.name}
+const item = await fromUuid("${data.uuid}");
+if (!item) {
+  ui.notifications.error("找不到物品: ${item.name}");
+  return;
+}
+
+// 获取物品的角色
+const actor = item.actor;
+if (!actor) {
+  ui.notifications.warn("该物品没有关联角色，无法使用");
+  return;
+}
+
+// 根据物品类型执行不同操作
+const { triggerItemActivities } = await import("systems/shuhai-dalu/module/services/activity-service.mjs");
+
+switch (item.type) {
+  case 'triggerDice':
+    // 触发骰：消耗 EX 资源
+    {
+      let combatState = actor.getFlag('shuhai-dalu', 'combatState');
+      if (!combatState) {
+        combatState = {
+          exResources: [false, false, false],
+          costResources: [false, false, false, false, false, false],
+          activatedDice: [false, false, false, false, false, false],
+          buffs: []
+        };
+      }
+
+      // 检查是否有可用的 EX 资源
+      const availableExIndex = combatState.exResources.findIndex(ex => !ex);
+      if (availableExIndex === -1) {
+        ui.notifications.warn("没有可用的 EX 资源！");
+        return;
+      }
+
+      // 消耗 EX 资源
+      combatState.exResources[availableExIndex] = true;
+      await actor.setFlag('shuhai-dalu', 'combatState', combatState);
+
+      // 发送消息
+      const content = '<div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px; background: #0F0D1B; color: #EBBD68; font-family: \\'Noto Sans SC\\', sans-serif;">' +
+        '<h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用触发骰: ' + item.name + '</h3>' +
+        '<div style="color: #888; margin-bottom: 8px;">消耗: <span style="color: #c14545; font-weight: bold;">1 EX资源</span></div>' +
+        (item.system.category ? '<div style="color: #888; margin-bottom: 8px;">分类: ' + item.system.category + '</div>' : '') +
+        '<div style="color: #EBBD68;">' + (item.system.effect || '无特殊效果') + '</div>' +
+        '</div>';
+
+      await ChatMessage.create({
+        user: game.user.id,
+        speaker: ChatMessage.getSpeaker({ actor }),
+        content: content
+      });
+
+      // 触发【使用时】Activities
+      await triggerItemActivities(actor, item, 'onUse');
+      ui.notifications.info('使用了 ' + item.name + '，消耗了1个EX资源！');
+    }
+    break;
+
+  case 'weapon':
+  case 'armor':
+  case 'equipment':
+  case 'item':
+  case 'passiveDice':
+    // 装备类物品：使用并触发 Activities
+    {
+      const content = '<div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px; background: #0F0D1B; color: #EBBD68; font-family: \\'Noto Sans SC\\', sans-serif;">' +
+        '<h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用物品: ' + item.name + '</h3>' +
+        (item.system.cost ? '<div style="color: #888; margin-bottom: 8px;">费用: ' + item.system.cost + '</div>' : '') +
+        (item.system.category ? '<div style="color: #888; margin-bottom: 8px;">分类: ' + item.system.category + '</div>' : '') +
+        '<div style="color: #EBBD68;">' + (item.system.effect || '无特殊效果') + '</div>' +
+        '</div>';
+
+      await ChatMessage.create({
+        user: game.user.id,
+        speaker: ChatMessage.getSpeaker({ actor }),
+        content: content
+      });
+
+      // 触发【使用时】Activities
+      await triggerItemActivities(actor, item, 'onUse');
+      ui.notifications.info('使用了 ' + item.name + '！');
+    }
+    break;
+
+  case 'combatDice':
+  case 'shootDice':
+    ui.notifications.warn("战斗骰需要在战斗区域或角色卡中使用");
+    break;
+
+  case 'defenseDice':
+    ui.notifications.warn("守备骰只能在对抗时使用");
+    break;
+
+  default:
+    ui.notifications.warn('未知的物品类型: ' + item.type);
+    break;
+}`;
+
+  // 创建或更新宏
+  let macro = game.macros.find(m => (m.name === item.name) && (m.command === command));
+  if (!macro) {
+    macro = await Macro.create({
+      name: item.name,
+      type: "script",
+      img: item.img,
+      command: command,
+      flags: { "shuhai-dalu.itemMacro": true }
+    });
+  }
+
+  // 将宏分配到快捷栏
+  game.user.assignHotbarMacro(macro, slot);
+  return false; // 阻止默认行为
 });
 
 /* -------------------------------------------- */

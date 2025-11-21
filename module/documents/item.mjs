@@ -264,6 +264,11 @@ export default class ShuhaiItem extends Item {
    * 使用触发骰
    */
   async _useTriggerDice() {
+    if (!this.actor) {
+      ui.notifications.warn("此物品未装备到角色上");
+      return;
+    }
+
     const result = {
       actor: this.actor.name,
       item: this.name,
@@ -275,14 +280,20 @@ export default class ShuhaiItem extends Item {
 
     // 费用消耗功能已移除（属于战斗区域功能）
 
-    // 创建聊天消息
-    const messageData = {
-      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      flavor: `触发 ${this.name}`,
-      content: await renderTemplate("systems/shuhai-dalu/templates/chat/trigger-use.hbs", result)
-    };
+    // 注释：不再创建基础聊天消息，只触发 Activity（Activity 会创建详细的效果消息）
+    // const messageData = {
+    //   speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+    //   flavor: `触发 ${this.name}`,
+    //   content: await renderTemplate("systems/shuhai-dalu/templates/chat/trigger-use.hbs", result)
+    // };
+    // await ChatMessage.create(messageData);
 
-    ChatMessage.create(messageData);
+    console.log('【触发骰】使用:', this.name);
+
+    // 触发 Activity（会创建详细的效果消息）
+    const { triggerItemActivities } = await import('../services/activity-service.mjs');
+    await triggerItemActivities(this.actor, this, 'onUse');
+
     return result;
   }
 
@@ -290,9 +301,18 @@ export default class ShuhaiItem extends Item {
    * 使用物品
    */
   async _useItem() {
+    if (!this.actor) {
+      ui.notifications.warn("此物品未装备到角色上");
+      return;
+    }
+
     // 减少数量
     if (this.system.quantity > 0) {
       await this.update({ 'system.quantity': this.system.quantity - 1 });
+      console.log('【物品使用】数量减少:', this.name, '剩余:', this.system.quantity - 1);
+    } else {
+      ui.notifications.warn(`${this.name} 数量不足`);
+      return;
     }
 
     const result = {
@@ -301,14 +321,20 @@ export default class ShuhaiItem extends Item {
       effect: this.system.effect
     };
 
-    // 创建聊天消息
-    const messageData = {
-      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      flavor: `使用 ${this.name}`,
-      content: await renderTemplate("systems/shuhai-dalu/templates/chat/item-use.hbs", result)
-    };
+    // 注释：不再创建基础聊天消息，只触发 Activity（Activity 会创建详细的效果消息）
+    // const messageData = {
+    //   speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+    //   flavor: `使用 ${this.name}`,
+    //   content: await renderTemplate("systems/shuhai-dalu/templates/chat/item-use.hbs", result)
+    // };
+    // await ChatMessage.create(messageData);
 
-    ChatMessage.create(messageData);
+    console.log('【物品使用】:', this.name);
+
+    // 触发 Activity（会创建详细的效果消息）
+    const { triggerItemActivities } = await import('../services/activity-service.mjs');
+    await triggerItemActivities(this.actor, this, 'onUse');
+
     return result;
   }
 
@@ -360,15 +386,21 @@ export default class ShuhaiItem extends Item {
    * 显示物品卡片
    */
   async displayCard() {
-    const messageData = {
-      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      content: await renderTemplate("systems/shuhai-dalu/templates/chat/item-card.hbs", {
-        item: this,
-        system: this.system
-      })
-    };
+    try {
+      const messageData = {
+        speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+        content: await renderTemplate("systems/shuhai-dalu/templates/chat/item-card.hbs", {
+          item: this,
+          system: this.system
+        })
+      };
 
-    ChatMessage.create(messageData);
+      await ChatMessage.create(messageData);
+      console.log('【物品卡片】发送到聊天:', this.name);
+    } catch (error) {
+      console.error('【物品卡片】发送失败:', error);
+      ui.notifications.error(`发送物品卡片失败: ${error.message}`);
+    }
   }
 
   /**

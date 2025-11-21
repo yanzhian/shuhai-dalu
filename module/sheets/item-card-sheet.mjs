@@ -504,8 +504,8 @@ export default class ItemCardSheet extends ItemSheet {
   async _onItemUse(event) {
     event.preventDefault();
 
-    ui.notifications.info(`使用 ${this.item.name}`);
-    await this.item.displayCard();
+    // 统一调用 item.use() 方法，它会处理不同类型的物品并触发 Activity
+    await this.item.use();
   }
 
   /**

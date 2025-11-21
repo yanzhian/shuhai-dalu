@@ -253,7 +253,7 @@
 }
 
 .shuhai-dalu.item-card .item-card-prop-item input {
-  width: 100px;
+  /* width: 100px; */
   padding: 4px 8px;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid #EBBD68;

@@ -61,7 +61,7 @@ export default class ShuhaiItemSheet extends ItemSheet {
 
     // 是否显示特定字段
     context.showDiceFormula = ['combatDice', 'shootDice', 'defenseDice', 'triggerDice', 'passiveDice'].includes(itemType);
-    context.showQuantity = !['passiveDice'].includes(itemType);
+    context.showQuantity = true;  // 所有物品类型都显示数量字段
     context.showStarlightCost = ['combatDice', 'shootDice', 'defenseDice', 'triggerDice', 'passiveDice', 'weapon', 'armor', 'equipment'].includes(itemType);
     context.showArmorProperties = itemType === 'armor';
   }
@@ -113,13 +113,8 @@ export default class ShuhaiItemSheet extends ItemSheet {
   async _onItemUse(event) {
     event.preventDefault();
 
-    if (this.item.type === 'combatDice' || this.item.type === 'shootDice' || this.item.type === 'defenseDice') {
-      // 使用骰子
-      await this.item.use();
-    } else {
-      ui.notifications.info(`使用 ${this.item.name}`);
-      await this.item.displayCard();
-    }
+    // 统一调用 item.use() 方法，它会处理不同类型的物品并触发 Activity
+    await this.item.use();
   }
 
   /**
