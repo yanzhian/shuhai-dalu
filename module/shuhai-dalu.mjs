@@ -298,11 +298,11 @@ Hooks.on('preDeleteChatMessage', (message, options, userId) => {
  */
 Hooks.on('hotbarDrop', async (bar, data, slot) => {
   // 只处理 Item 类型
-  if (data.type !== "Item") return;
+  if (data.type !== "Item") return true; // 返回 true 允许默认处理
 
   // 获取物品
   const item = await fromUuid(data.uuid);
-  if (!item) return;
+  if (!item) return true; // 返回 true 允许默认处理
 
   // 创建使用物品的宏 - 使用字符串拼接避免模板字符串嵌套问题
   const command = `// 使用物品: ${item.name}
@@ -408,20 +408,34 @@ switch (item.type) {
 }`;
 
   // 创建或更新宏
-  let macro = game.macros.find(m => (m.name === item.name) && (m.command === command));
+  let macro = game.macros.find(m => {
+    // 查找具有相同 UUID 标记的宏
+    return m.getFlag("shuhai-dalu", "itemUuid") === data.uuid;
+  });
+
   if (!macro) {
     macro = await Macro.create({
       name: item.name,
       type: "script",
       img: item.img,
       command: command,
-      flags: { "shuhai-dalu.itemMacro": true }
+      flags: {
+        "shuhai-dalu.itemMacro": true,
+        "shuhai-dalu.itemUuid": data.uuid
+      }
+    });
+  } else {
+    // 更新现有宏
+    await macro.update({
+      name: item.name,
+      img: item.img,
+      command: command
     });
   }
 
   // 将宏分配到快捷栏
   game.user.assignHotbarMacro(macro, slot);
-  return false; // 阻止默认行为
+  return false; // 阻止默认行为（显示物品）
 });
 
 /* -------------------------------------------- */
