@@ -300,9 +300,15 @@ Hooks.on('hotbarDrop', async (bar, data, slot) => {
   // 只处理 Item 类型
   if (data.type !== "Item") return true; // 返回 true 允许默认处理
 
+  // 立即清除该槽位，阻止 FVTT 创建默认的显示物品宏
+  await game.user.assignHotbarMacro(null, slot);
+
   // 获取物品
   const item = await fromUuid(data.uuid);
-  if (!item) return true; // 返回 true 允许默认处理
+  if (!item) {
+    ui.notifications.error("找不到物品");
+    return false; // 已清除槽位，返回 false 阻止默认处理
+  }
 
   // 创建使用物品的宏 - 使用字符串拼接避免模板字符串嵌套问题
   const command = `// 使用物品: ${item.name}
@@ -434,7 +440,11 @@ switch (item.type) {
   }
 
   // 将宏分配到快捷栏
-  game.user.assignHotbarMacro(macro, slot);
+  await game.user.assignHotbarMacro(macro, slot);
+
+  console.log('【快捷栏】已创建使用宏:', item.name);
+  ui.notifications.info(`已将 ${item.name} 添加到快捷栏`);
+
   return false; // 阻止默认行为（显示物品）
 });
 
