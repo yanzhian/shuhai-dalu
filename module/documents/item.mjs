@@ -306,13 +306,16 @@ export default class ShuhaiItem extends Item {
       return;
     }
 
-    // 减少数量
-    if (this.system.quantity > 0) {
-      await this.update({ 'system.quantity': this.system.quantity - 1 });
-      console.log('【物品使用】数量减少:', this.name, '剩余:', this.system.quantity - 1);
-    } else {
-      ui.notifications.warn(`${this.name} 数量不足`);
-      return;
+    // 只有类型为 'item' 的物品才减少数量
+    // 其他类型（weapon, armor, equipment, passiveDice）不减少数量
+    if (this.type === 'item') {
+      if (this.system.quantity > 0) {
+        await this.update({ 'system.quantity': this.system.quantity - 1 });
+        console.log('【物品使用】数量减少:', this.name, '剩余:', this.system.quantity - 1);
+      } else {
+        ui.notifications.warn(`${this.name} 数量不足`);
+        return;
+      }
     }
 
     const result = {
@@ -329,7 +332,7 @@ export default class ShuhaiItem extends Item {
     // };
     // await ChatMessage.create(messageData);
 
-    console.log('【物品使用】:', this.name);
+    console.log('【物品使用】:', this.name, '类型:', this.type);
 
     // 触发 Activity（会创建详细的效果消息）
     const { triggerItemActivities } = await import('../services/activity-service.mjs');
