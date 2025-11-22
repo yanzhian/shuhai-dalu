@@ -310,7 +310,7 @@ Hooks.on('hotbarDrop', async (bar, data, slot) => {
     return false; // 已清除槽位，返回 false 阻止默认处理
   }
 
-  // 创建使用物品的宏 - 使用字符串拼接避免模板字符串嵌套问题
+  // 创建使用物品的宏 - 简化版，直接调用 item.use()
   const command = `// 使用物品: ${item.name}
 const item = await fromUuid("${data.uuid}");
 if (!item) {
@@ -325,92 +325,12 @@ if (!actor) {
   return;
 }
 
-// 根据物品类型执行不同操作
-const { triggerItemActivities } = await import("systems/shuhai-dalu/module/services/activity-service.mjs");
-
-switch (item.type) {
-  case 'triggerDice':
-    // 触发骰：消耗 EX 资源
-    {
-      let combatState = actor.getFlag('shuhai-dalu', 'combatState');
-      if (!combatState) {
-        combatState = {
-          exResources: [false, false, false],
-          costResources: [false, false, false, false, false, false],
-          activatedDice: [false, false, false, false, false, false],
-          buffs: []
-        };
-      }
-
-      // 检查是否有可用的 EX 资源
-      const availableExIndex = combatState.exResources.findIndex(ex => !ex);
-      if (availableExIndex === -1) {
-        ui.notifications.warn("没有可用的 EX 资源！");
-        return;
-      }
-
-      // 消耗 EX 资源
-      combatState.exResources[availableExIndex] = true;
-      await actor.setFlag('shuhai-dalu', 'combatState', combatState);
-
-      // 发送消息
-      const content = '<div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px; background: #0F0D1B; color: #EBBD68; font-family: \\'Noto Sans SC\\', sans-serif;">' +
-        '<h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用触发骰: ' + item.name + '</h3>' +
-        '<div style="color: #888; margin-bottom: 8px;">消耗: <span style="color: #c14545; font-weight: bold;">1 EX资源</span></div>' +
-        (item.system.category ? '<div style="color: #888; margin-bottom: 8px;">分类: ' + item.system.category + '</div>' : '') +
-        '<div style="color: #EBBD68;">' + (item.system.effect || '无特殊效果') + '</div>' +
-        '</div>';
-
-      await ChatMessage.create({
-        user: game.user.id,
-        speaker: ChatMessage.getSpeaker({ actor }),
-        content: content
-      });
-
-      // 触发【使用时】Activities
-      await triggerItemActivities(actor, item, 'onUse');
-      ui.notifications.info('使用了 ' + item.name + '，消耗了1个EX资源！');
-    }
-    break;
-
-  case 'weapon':
-  case 'armor':
-  case 'equipment':
-  case 'item':
-  case 'passiveDice':
-    // 装备类物品：使用并触发 Activities
-    {
-      const content = '<div style="border: 2px solid #E1AA43; border-radius: 4px; padding: 12px; background: #0F0D1B; color: #EBBD68; font-family: \\'Noto Sans SC\\', sans-serif;">' +
-        '<h3 style="margin: 0 0 8px 0; color: #E1AA43;">使用物品: ' + item.name + '</h3>' +
-        (item.system.cost ? '<div style="color: #888; margin-bottom: 8px;">费用: ' + item.system.cost + '</div>' : '') +
-        (item.system.category ? '<div style="color: #888; margin-bottom: 8px;">分类: ' + item.system.category + '</div>' : '') +
-        '<div style="color: #EBBD68;">' + (item.system.effect || '无特殊效果') + '</div>' +
-        '</div>';
-
-      await ChatMessage.create({
-        user: game.user.id,
-        speaker: ChatMessage.getSpeaker({ actor }),
-        content: content
-      });
-
-      // 触发【使用时】Activities
-      await triggerItemActivities(actor, item, 'onUse');
-      ui.notifications.info('使用了 ' + item.name + '！');
-    }
-    break;
-
-  case 'combatDice':
-  case 'shootDice':
-    ui.notifications.warn("战斗骰需要在战斗区域或角色卡中使用");
-    break;
-
-  case 'defenseDice':
-    ui.notifications.warn("守备骰只能在对抗时使用");
-    break;
-
-  default:
-    ui.notifications.warn('未知的物品类型: ' + item.type);
-    break;
+// 直接调用 item.use() 方法，它会处理所有逻辑并触发 Activity
+try {
+  await item.use();
+} catch (error) {
+  console.error('使用物品失败:', error);
+  ui.notifications.error('使用物品失败: ' + error.message);
 }`;
 
   // 创建或更新宏
