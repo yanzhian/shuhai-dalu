@@ -310,7 +310,7 @@ Hooks.on('hotbarDrop', async (bar, data, slot) => {
     return false; // 已清除槽位，返回 false 阻止默认处理
   }
 
-  // 创建使用物品的宏 - 简化版，直接调用 item.use()
+  // 创建使用物品的宏
   const command = `// 使用物品: ${item.name}
 const item = await fromUuid("${data.uuid}");
 if (!item) {
@@ -325,12 +325,54 @@ if (!actor) {
   return;
 }
 
-// 直接调用 item.use() 方法，它会处理所有逻辑并触发 Activity
-try {
-  await item.use();
-} catch (error) {
-  console.error('使用物品失败:', error);
-  ui.notifications.error('使用物品失败: ' + error.message);
+// 特殊处理：攻击骰和射击骰发起对抗
+if (item.type === 'combatDice' || item.type === 'shootDice') {
+  // 获取选择的目标（如果有）
+  const targets = Array.from(game.user.targets);
+  const targetActor = targets.length > 0 ? targets[0].actor : null;
+
+  // 创建发起对抗数据
+  const initiateData = {
+    initiatorId: actor.id,
+    initiatorName: actor.name,
+    diceId: item.id,
+    diceName: item.name,
+    diceFormula: item.system.diceFormula,
+    diceImg: item.img,
+    diceCost: item.system.cost || 0,
+    diceType: item.type,
+    diceCategory: item.system.category || '',
+    diceEffect: item.system.effect || '无特殊效果',
+    diceRoll: null, // 不提前投骰
+    buffBonus: 0,
+    adjustment: 0,
+    targetId: targetActor ? targetActor.id : null,
+    targetName: targetActor ? targetActor.name : null
+  };
+
+  // 创建发起对抗聊天卡片
+  const chatData = {
+    user: game.user.id,
+    speaker: ChatMessage.getSpeaker({ actor }),
+    content: await renderTemplate("systems/shuhai-dalu/templates/chat/combat-dice-initiate.hbs", initiateData),
+    sound: CONFIG.sounds.dice,
+    flags: {
+      'shuhai-dalu': {
+        initiateData: initiateData
+      }
+    }
+  };
+
+  await ChatMessage.create(chatData);
+  ui.notifications.info('已发起对抗: ' + item.name);
+} else {
+  // 其他类型直接调用 item.use()
+  try {
+    await item.use();
+  } catch (error) {
+    console.error('使用物品失败:', error);
+    ui.notifications.error('使用物品失败: ' + error.message);
+  }
 }`;
 
   // 创建或更新宏
