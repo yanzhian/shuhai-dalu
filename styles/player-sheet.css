@@ -859,7 +859,7 @@ input.attr-value {
 
 .inventory-header {
   display: grid;
-  grid-template-columns: 48px 1fr 80px 80px 80px 60px 60px 60px 120px;
+  grid-template-columns: 80px 1fr 70px 80px 80px 60px 60px 60px 150px;
   gap: 4px;
   padding: 8px;
   background: rgba(235, 189, 104, 0.2);
@@ -878,7 +878,7 @@ input.attr-value {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 8px;
+  /* padding: 8px; */
 }
 
 .inventory-row {
